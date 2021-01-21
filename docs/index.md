@@ -28,7 +28,7 @@ An GCP connection is scoped to a single gcp project, with a single set of creden
 
 ### Configure Environment Variables
 
-This topic explains how to authenticate an application as a service account. To use Steampipe, you need to create an ervice account in GCP with the appropriate permissions.
+This topic explains how to authenticate an application as a service account. To use Steampipe, you need to create an service account in GCP with the appropriate permissions.
 
 1. In the Cloud Console, go to the Create [service account key page](https://console.cloud.google.com/apis/credentials/serviceaccountkey).
 2. From the Service account list, select New service account.
