@@ -7,7 +7,7 @@
     <img src="https://steampipe.io/images/steampipe_logo_wordmark_padding.svg" height="28">
   </a>
   <a aria-label="Plugin version" href="https://hub.steampipe.io/plugins/turbot/gcp">
-    <img alt="" src="https://img.shields.io/static/v1?label=turbot/gcp&message=v0.1.0&style=for-the-badge&labelColor=777777&color=F3F1F0">
+    <img alt="" src="https://img.shields.io/static/v1?label=turbot/gcp&message=v0.0.3&style=for-the-badge&labelColor=777777&color=F3F1F0">
   </a>
   &nbsp;
   <a aria-label="License" href="LICENSE">
@@ -45,8 +45,8 @@ steampipe plugin install gcp
 
 The Steampipe community can be found on [GitHub Discussions](https://github.com/turbot/steampipe/discussions), where you can ask questions, voice ideas, and share your projects.
 
-Our [Code of Conduct](https://github.com/turbot/steampipe/CODE_OF_CONDUCT.md) applies to all Steampipe community channels.
+Our [Code of Conduct](https://github.com/turbot/steampipe/blob/main/CODE_OF_CONDUCT.md) applies to all Steampipe community channels.
 
 ### Contributing
 
-Please see [CONTRIBUTING.md](https://github.com/turbot/steampipe/CONTRIBUTING.md).
+Please see [CONTRIBUTING.md](https://github.com/turbot/steampipe/blob/main/CODE_OF_CONDUCT.md).
