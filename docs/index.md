@@ -1,5 +1,5 @@
 ---
-org: Turbot
+organization: Turbot
 category: ["public cloud"]
 icon_url: "/images/plugins/turbot/google.svg"
 brand_color: "#e7483a"
