@@ -177,8 +177,10 @@ github.com/tkrajina/go-reflector v0.5.4 h1:dS9aJEa/eYNQU/fwsb5CSiATOxcNyA/gG/A7a
 github.com/tkrajina/go-reflector v0.5.4/go.mod h1:9PyLgEOzc78ey/JmQQHbW8cQJ1oucLlNQsg8yFvkVk8=
 github.com/turbot/go-kit v0.0.0-20210119154454-db924443f736 h1:j/cfIwIBSX4Z23k50mgu7eLOGVcPi62ebV1Wm98OCyU=
 github.com/turbot/go-kit v0.0.0-20210119154454-db924443f736/go.mod h1:hO/mY90fJXLWAJnAoDkYMvi3LVZ/r+z1tiz3E1uPSNA=
-github.com/turbot/steampipe-plugin-sdk v0.0.0-20210120214727-bb3e0ba7e84f h1:8mMhKZxxHu0l6l7pdxZpa7ekt1RpDPW1GB9+to6zyYw=
-github.com/turbot/steampipe-plugin-sdk v0.0.0-20210120214727-bb3e0ba7e84f/go.mod h1:jhmUevBAJQhpxCtwP+pnpYI13/ODrZb7eCI8MKd8jZA=
+github.com/turbot/go-kit v0.1.0 h1:XioAB9/2rN5dbL7honmvhqyF4Wxh/k2VhL5rqyMhFx8=
+github.com/turbot/go-kit v0.1.0/go.mod h1:hO/mY90fJXLWAJnAoDkYMvi3LVZ/r+z1tiz3E1uPSNA=
+github.com/turbot/steampipe-plugin-sdk v0.1.0 h1:M84UVDXVBAyK9MTJaydpMVROVOavNqaFfhC+mrfnUTo=
+github.com/turbot/steampipe-plugin-sdk v0.1.0/go.mod h1:jhmUevBAJQhpxCtwP+pnpYI13/ODrZb7eCI8MKd8jZA=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
