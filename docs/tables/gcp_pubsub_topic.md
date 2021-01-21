@@ -1,4 +1,4 @@
-# Table:  gcp_pubsub_topic
+# Table: gcp_pubsub_topic
 
 Pub/Sub is an asynchronous messaging service that decouples services that produce events from services that process events.
 
