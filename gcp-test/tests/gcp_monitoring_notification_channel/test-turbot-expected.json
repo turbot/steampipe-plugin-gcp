@@ -1,0 +1,11 @@
+[
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "tags": {
+      "email_address": "test_table@blahblah.com"
+    },
+    "title": "{{ resourceName }}"
+  }
+]

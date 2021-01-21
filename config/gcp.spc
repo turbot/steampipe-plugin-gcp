@@ -1,0 +1,6 @@
+connection "gcp" {
+  plugin    = "gcp"                 
+}
+
+
+    

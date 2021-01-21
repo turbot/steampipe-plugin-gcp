@@ -1,0 +1,27 @@
+[
+  {
+    "description": "Test metric to verify table",
+    "filter": "resource.type=gae_app AND severity>=ERROR",
+    "label_extractors": {
+      "mass": "EXTRACT(jsonPayload.request)",
+      "sku": "EXTRACT(jsonPayload.id)"
+    },
+    "metric_descriptor_display_name": "{{resourceName}}",
+    "metric_descriptor_labels": [
+      {
+        "description": "Identifying number for item",
+        "key": "sku",
+        "valueType": "INT64"
+      },
+      {
+        "description": "amount of matter",
+        "key": "mass"
+      }
+    ],
+    "metric_descriptor_metric_kind": "DELTA",
+    "metric_descriptor_unit": "1",
+    "metric_descriptor_value_type": "DISTRIBUTION",
+    "name": "{{resourceName}}",
+    "value_extractor": "EXTRACT(jsonPayload.request)"
+  }
+]

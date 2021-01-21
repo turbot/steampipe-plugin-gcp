@@ -1,0 +1,8 @@
+[
+  {
+    "description": "Test exclusion to verify the table",
+    "disabled": false,
+    "filter": "resource.type = gce_instance AND severity \u003c= DEBUG",
+    "name": "{{resourceName}}"
+  }
+]

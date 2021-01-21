@@ -1,0 +1,6 @@
+[
+  {
+    "destination": "pubsub.googleapis.com/projects/{{ output.project_id.value }}/topics/{{resourceName}}",
+    "name": "{{resourceName}}"
+  }
+]

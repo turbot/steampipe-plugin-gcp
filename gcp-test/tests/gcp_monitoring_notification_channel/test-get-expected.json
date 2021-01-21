@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Test notification channel to verify th table",
+    "display_name": "{{ resourceName }}",
+    "enabled": true,
+    "name": "{{ output.resource_id.value.split('/').pop() }}",
+    "type": "email"
+  }
+]

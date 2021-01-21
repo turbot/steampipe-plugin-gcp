@@ -1,0 +1,6 @@
+[
+  {
+    "key_type": "USER_MANAGED",
+    "name": "{{ output.resource_id.value }}"
+  }
+]

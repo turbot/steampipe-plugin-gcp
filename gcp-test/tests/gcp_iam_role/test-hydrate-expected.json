@@ -1,0 +1,15 @@
+[
+  {
+    "deleted": false,
+    "description": "Test role to verify Google IAM Role table",
+    "included_permissions": [
+      "iam.roles.create",
+      "iam.roles.delete",
+      "iam.roles.list"
+    ],
+    "name": "{{ output.resource_id.value }}",
+    "role_id": "{{resourceName}}",
+    "stage": "GA",
+    "title": "{{resourceName}}"
+  }
+]

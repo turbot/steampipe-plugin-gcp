@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test exclusion to verify the table",
+    "name": "{{resourceName}}"
+  }
+]
