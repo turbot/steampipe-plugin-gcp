@@ -24,7 +24,7 @@ select
   name,
   role_id
 from
-  gcp_iam_role
+  gcp_iam_role;
 ```
 
 Learn about [Steampipe](https://steampipe.io/).
