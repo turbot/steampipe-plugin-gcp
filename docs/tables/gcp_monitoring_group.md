@@ -16,7 +16,7 @@ from
 ```
 
 
-### List of monitoring groups which are cluster
+### List of cluster monitoring groups
 
 ```sql
 select
