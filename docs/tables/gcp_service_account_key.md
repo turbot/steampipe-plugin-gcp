@@ -1,4 +1,4 @@
-# Table:  gcp_service_account_key
+# Table: gcp_service_account_key
 
 Service Account Keys are public/private RSA key pairs which are used to authenticate to Google Cloud APIs.
 
