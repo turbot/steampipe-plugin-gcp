@@ -3,13 +3,13 @@
 #
 # To configure this workflow:
 #
-# 1. Set up secrets in your workspace:   
+# 1. Set up secrets in your workspace:
 #   - STEAMPIPE_REGISTRY_SA_KEY with the Base64 encoded JSON service account key (https://github.com/GoogleCloudPlatform/github-actions/tree/docs/service-account-key/setup-gcloud#inputs).
-#   - CODY_MODS_GH_PAT the token for the turbot-mods github user.  This is required to pull dependencies from turbot private repos.  
+#   - CODY_MODS_GH_PAT the token for the turbot-mods github user.  This is required to pull dependencies from turbot private repos.
 #         Once the repos are public, this can be removed
 # 2. Change the values for the environment variables (below).
 
-name: Build and Deploy OCI Image 
+name: Build and Deploy OCI Image
 
 on:
   push:
@@ -23,8 +23,8 @@ env:
   PLUGIN_REPO: us-docker.pkg.dev/steampipe/plugins
   CONFIG_SCHEMA_VERSION: "2020-11-18"
 jobs:
-  build: 
-    name: Build 
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
 
@@ -68,10 +68,10 @@ jobs:
           echo "Version already exists: $VERSION"
           exit 1
         fi
-        
+
     - name: Hook private repo
-      run: git config --global url."https://turbot-mods:${{ secrets.TURBOT_MODS_GH_PAT }}@github.com".insteadOf "https://github.com"
-      
+      run: git config --global url."https://turbot-mods:${{ secrets.GH_ACCESS_TOKEN }}@github.com".insteadOf "https://github.com"
+
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
       with:
@@ -113,9 +113,9 @@ jobs:
   #     matrix:
   #       os: [ubuntu-latest, macos-latest, windows-latest]
   #   steps:
- 
 
-    
+
+
   # test-darwin-amd64:
   #   name: Test MacOS (AMD64)
   #   runs-on: macos-latest
@@ -136,7 +136,7 @@ jobs:
   publish-deploy:
     name: Publish and Deploy
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - build
       # - test-darwin-amd64
       # - test-linux-amd64
@@ -151,7 +151,7 @@ jobs:
       with:
         service_account_key: ${{ secrets.STEAMPIPE_REGISTRY_SA_KEY }}
         project_id: ${{ env.PROJECT_ID }}
-        
+
     - run: gcloud config list
 
     - run: gcloud components install beta
@@ -160,19 +160,19 @@ jobs:
     # helper for authentication
     - run: |-
         gcloud beta auth configure-docker us-docker.pkg.dev
-      
+
     - run: oras version   # oras is pre-installed on the image...
 
     - name: Download steampipe-gcp_linux_amd64
       uses: actions/download-artifact@v2
       with:
         name: steampipe-gcp_linux_amd64
-        
+
     - name: Download steampipe-gcp_linux_arm64
       uses: actions/download-artifact@v2
       with:
         name: steampipe-gcp_linux_arm64
-        
+
     - name: Download steampipe-gcp_darwin_amd64
       uses: actions/download-artifact@v2
       with:
@@ -204,21 +204,21 @@ jobs:
                   --arg repo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
                   --arg commit "$GITHUB_SHA" \
                   --arg vendor "Turbot HQ, Inc." \
-                '{ 
-                  "$manifest": { 
-                      "org.opencontainers.image.title": $title, 
+                '{
+                  "$manifest": {
+                      "org.opencontainers.image.title": $title,
                       "org.opencontainers.image.description": $desc,
-                      "org.opencontainers.image.version": $version, 
+                      "org.opencontainers.image.version": $version,
                       "org.opencontainers.image.created": $timestamp,
-                      "org.opencontainers.image.source": $repo, 
-                      "org.opencontainers.image.revision": $commit, 
+                      "org.opencontainers.image.source": $repo,
+                      "org.opencontainers.image.revision": $commit,
                       "org.opencontainers.image.vendor":  $vendor
                   }
                 }' )
 
           echo $JSON_STRING > annotations.json
 
-    - run: cat annotations.json 
+    - run: cat annotations.json
 
     - run: cat README.md
 
@@ -232,12 +232,12 @@ jobs:
           steampipe-plugin-gcp_linux_amd64.gz:application/vnd.turbot.steampipe.plugin.linux-amd64.layer.v1+gzip \
           steampipe-plugin-gcp_linux_arm64.gz:application/vnd.turbot.steampipe.plugin.linux-arm64.layer.v1+gzip \
           docs:application/vnd.turbot.steampipe.plugin.docs.layer.v1+tar \
-          config:application/vnd.turbot.steampipe.plugin.spc.layer.v1+tar 
+          config:application/vnd.turbot.steampipe.plugin.spc.layer.v1+tar
 
   tag-versions:
     name: Set Version tags
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - publish-deploy
 
     steps:
@@ -286,7 +286,7 @@ jobs:
         fi
 
     - name: Set version tags
-      uses: ./.github/actions/semver-tags 
+      uses: ./.github/actions/semver-tags
       id: semver
       with:
         image-to-tag: "${{ env.PLUGIN_REPO }}/${{ env.ORG }}/${{ env.PLUGIN_NAME }}:${{ github.run_id  }}"
