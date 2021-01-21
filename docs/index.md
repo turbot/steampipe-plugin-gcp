@@ -1,7 +1,7 @@
 ---
 organization: Turbot
 category: ["public cloud"]
-icon_url: "/images/plugins/turbot/google.svg"
+icon_url: "/images/plugins/turbot/gcp.svg"
 brand_color: "#e7483a"
 display_name: "GCP"
 name: "gcp"
