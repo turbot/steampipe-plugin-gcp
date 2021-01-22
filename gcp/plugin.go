@@ -24,6 +24,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 		},
 		TableMap: map[string]*plugin.Table{
+			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
 			"gcp_logging_exclusion":               tableGcpLoggingExclusion(ctx),
