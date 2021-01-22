@@ -17,9 +17,8 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 		Name:        "gcp_pubsub_topic",
 		Description: "GCP Pub/Sub Topic",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getPubSubTopic,
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getPubSubTopic,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubTopics,
