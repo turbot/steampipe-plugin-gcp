@@ -21,7 +21,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name:             pluginName,
 		DefaultTransform: transform.FromCamel(),
 		DefaultGetConfig: &plugin.GetConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),

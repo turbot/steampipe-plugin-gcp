@@ -16,9 +16,8 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 		Name:        "gcp_pubsub_subscription",
 		Description: "GCP Pub/Sub Subscription",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getPubSubSubscription,
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getPubSubSubscription,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubSubscription,

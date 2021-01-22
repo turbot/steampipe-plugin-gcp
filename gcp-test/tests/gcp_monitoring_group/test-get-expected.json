@@ -1,0 +1,10 @@
+[
+  {
+    "display_name": "{{resourceName}}",
+    "filter": "resource.metadata.region=\"europe-west2\"",
+    "is_cluster": false,
+    "name": "{{ output.resource_id.value.split('/').pop() }}",
+    "parent_name": "{{ output.parent_resource_id.value }}",
+    "project": "{{ output.project_id.value }}"
+   }
+]

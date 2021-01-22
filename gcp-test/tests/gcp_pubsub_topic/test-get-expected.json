@@ -1,0 +1,6 @@
+[
+  {
+    "name": "{{resourceName}}",
+    "project": "{{ output.project_id.value }}"
+  }
+]

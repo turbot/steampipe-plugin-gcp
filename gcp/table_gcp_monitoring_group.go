@@ -16,8 +16,9 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 		Name:        "gcp_monitoring_group",
 		Description: "GCP Monitoring Group",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getMonitoringGroup,
+			KeyColumns:        plugin.SingleColumn("name"),
+			Hydrate:           getMonitoringGroup,
+			ShouldIgnoreError: isNotFoundError([]string{"400"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringGroup,
