@@ -15,14 +15,12 @@ from
 ```
 
 
-### List of logging sink that do excludes logs
+### List the destination path for each sink
 
 ```sql
 select
   name,
-  exclusions
+  destination
 from
-  gcp_logging_sink
-where
-  exclusions is not null;
+  gcp_logging_sink;
 ```

@@ -1,4 +1,4 @@
-# Table:  gcp_service_account
+# Table: gcp_service_account
 
 A service account is a special type of Google account intended to represent a non-human user that needs to authenticate and be authorized to access data in Google APIs
 
