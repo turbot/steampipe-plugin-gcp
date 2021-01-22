@@ -8,6 +8,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+
 	"google.golang.org/api/pubsub/v1"
 )
 
@@ -16,8 +17,9 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 		Name:        "gcp_pubsub_topic",
 		Description: "GCP Pub/Sub Topic",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getPubSubTopic,
+			KeyColumns:        plugin.SingleColumn("name"),
+			Hydrate:           getPubSubTopic,
+			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubTopics,
@@ -113,6 +115,11 @@ func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
+	// Return nil, if the response contains empty data
+	if len(req.Name) < 1 {
+		return nil, nil
+	}
+
 	return req, nil
 }
 
@@ -126,6 +133,11 @@ func getPubSubTopicIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	req, err := service.Projects.Topics.GetIamPolicy(topic.Name).Do()
 	if err != nil {
+		// Return nil, if the resource not present
+		result := isNotFoundError([]string{"404"})
+		if result != nil {
+			return nil, nil
+		}
 		return nil, err
 	}
 
