@@ -4,12 +4,13 @@ An IAM role is an IAM entity that defines a set of permissions for making AWS se
 
 ## Examples
 
-### Iam role basic info
+### IAM role basic info
 
 ```sql
 select
   name,
   role_id,
+  deleted,
   description,
   title
 from
@@ -22,6 +23,7 @@ from
 ```sql
 select
   name,
+  description,
   stage
 from
   gcp_iam_role

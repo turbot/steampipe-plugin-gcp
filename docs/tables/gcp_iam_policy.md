@@ -4,14 +4,29 @@ An Identity and Access Management (IAM) policy, which specifies access controls 
 
 ## Examples
 
-### List of project members and there roles
+### List of project members with their roles
 
 ```sql
 select
-title,
-  p -> 'members' as member,
-  split_part(p ->> 'role', '/', 4) as role
+  entity,
+  p ->> 'role' as role
 from
   gcp_iam_policy,
-  jsonb_array_elements(bindings) as p;
+  jsonb_array_elements(bindings) as p,
+  jsonb_array_elements_text(p -> 'members') as entity;
+```
+
+
+### List of members with owner roles
+
+```sql
+select
+  entity,
+  p ->> 'role' as role
+from
+  gcp_iam_policy,
+  jsonb_array_elements(bindings) as p,
+  jsonb_array_elements_text(p -> 'members') as entity
+where
+  split_part(p ->> 'role', '/', 2) = 'owner';
 ```
