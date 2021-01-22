@@ -1,0 +1,7 @@
+[
+  {
+    "ack_deadline_seconds": 20,
+    "name": "{{resourceName}}",
+    "topic": "{{ output.topic_id.value }}"
+  }
+]
