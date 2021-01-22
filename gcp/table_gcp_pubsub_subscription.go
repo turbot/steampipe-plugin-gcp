@@ -16,8 +16,9 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 		Name:        "gcp_pubsub_subscription",
 		Description: "GCP Pub/Sub Subscription",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getPubSubSubscription,
+			KeyColumns:        plugin.SingleColumn("name"),
+			Hydrate:           getPubSubSubscription,
+			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubSubscription,
@@ -188,6 +189,12 @@ func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	if err != nil {
 		return nil, err
 	}
+
+	// Return nil, if the response contains empty data
+	if len(req.Name) < 1 {
+		return nil, nil
+	}
+
 	return req, nil
 }
 
