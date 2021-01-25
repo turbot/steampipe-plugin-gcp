@@ -175,12 +175,11 @@ func globalAddressSelfLinkToTurbotData(_ context.Context, d *transform.Transform
 	globalAddress := d.HydrateItem.(*compute.Address)
 	param := d.Param.(string)
 
-	// get the resource title
-	splittedTitle := strings.Split(globalAddress.SelfLink, "/")
+	splittedData := strings.Split(globalAddress.SelfLink, "/")
 
 	turbotData := map[string]interface{}{
-		"Project": splittedTitle[6],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedTitle[6] + "/global/addresses/" + globalAddress.Name},
+		"Project": splittedData[6],
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedData[6] + "/global/addresses/" + globalAddress.Name},
 	}
 
 	return turbotData[param], nil
