@@ -1,0 +1,10 @@
+[
+  {
+    "address_type": "EXTERNAL",
+    "description": "Test global address to validate integration test.",
+    "kind": "compute#address",
+    "name": "{{resourceName}}",
+    "network_tier": "PREMIUM",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
