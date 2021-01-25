@@ -59,7 +59,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 			{
 				Name:        "creation_timestamp",
 				Description: "The creation timestamp of the resource.",
-				Type:        proto.ColumnType_DATETIME,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "kind",
