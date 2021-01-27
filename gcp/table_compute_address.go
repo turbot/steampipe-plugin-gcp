@@ -119,16 +119,16 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Akas"),
 			},
 			{
-				Name:        "project",
-				Description: "The Google Project in which the resource is located",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Project"),
-			},
-			{
 				Name:        "region",
 				Description: "The Google Region, the resource is located at",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Region"),
+			},
+			{
+				Name:        "project",
+				Description: "The Google Project in which the resource is located",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
