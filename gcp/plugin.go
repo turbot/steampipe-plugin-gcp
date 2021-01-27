@@ -25,6 +25,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
+			"gcp_compute_address":                 tableGcpComputeAddress(ctx),
 			"gcp_compute_global_address":          tableGcpComputeGlobalAddress(ctx),
 			"gcp_compute_global_forwarding_rule":  tableGcpComputeGlobalForwardingRule(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
