@@ -1,0 +1,14 @@
+[
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "id": "{{ resourceName }}",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}",
+    "tags": {
+      "name": "test"
+    },
+    "title": "{{ resourceName }}"
+  }
+]
