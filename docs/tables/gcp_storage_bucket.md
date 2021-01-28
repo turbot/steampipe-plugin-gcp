@@ -1,6 +1,6 @@
 # Table: gcp_storage_bucket
 
-Storage buckets are the basic containers that hold data. Everything that store in cloud Storage must be contained in a bucket.
+Storage buckets are the basic containers that hold data. Everything that you store in cloud Storage must be contained in a bucket.
 
 ## Examples
 
@@ -18,7 +18,7 @@ where
 ```
 
 
-### List of members and their iam roles associated with the bucket
+### List of members and their associated iam roles for the bucket
 
 ```sql
 select
