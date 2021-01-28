@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -106,23 +105,27 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 				Description: "A list of URLs of the resources that are using this address.",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(globalAddressSelfLinkToTurbotData, "Akas"),
 			},
+
+			// standard gcp columns
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(globalAddressSelfLinkToTurbotData, "Project"),
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}
@@ -136,7 +139,7 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.GlobalAddresses.List(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
 		for _, globalAddress := range page.Items {
@@ -159,7 +162,7 @@ func getComputeGlobalAddress(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/addresses/" into uint64

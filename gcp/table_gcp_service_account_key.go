@@ -26,7 +26,7 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			ParentHydrate: listGcpServiceAccounts,
 			Hydrate:       listGcpServiceAccountKeys,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
@@ -79,20 +79,28 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 
-			// Standard columns for all tables
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(getGcpServiceAccountKeyTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(getGcpServiceAccountKeyTurbotData, "Akas"),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 

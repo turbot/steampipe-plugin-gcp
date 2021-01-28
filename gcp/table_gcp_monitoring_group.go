@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -50,23 +49,27 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 				Description: "The name of the group's parent, if it has one.",
 				Type:        proto.ColumnType_STRING,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(groupInfoToTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(groupInfoToTurbotData, "Akas"),
 			},
+
+			// standard gcp columns
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(groupInfoToTurbotData, "Project"),
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}
@@ -75,7 +78,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := monitoring.NewService(ctx)
 	if err != nil {
@@ -99,7 +102,7 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := monitoring.NewService(ctx)

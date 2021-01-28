@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,7 +24,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpMonitoringNotificationChannels,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The full REST resource name for this channel.",
@@ -63,26 +62,34 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard columns
+			// standard steampipe columns
 			{
 				Name:        "tags",
-				Description: "A map of tags attached to the resource.",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Akas"),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 
@@ -94,7 +101,7 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.NotificationChannels.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -117,7 +124,7 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	logger := plugin.Logger(ctx)
 	logger.Trace("getGcpMonitoringNotificationChannel")
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := monitoring.NewService(ctx)

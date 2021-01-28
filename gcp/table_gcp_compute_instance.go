@@ -317,7 +317,7 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	return instance, nil
+	return &instance, nil
 }
 
 //// TRANSFORM FUNCTIONS

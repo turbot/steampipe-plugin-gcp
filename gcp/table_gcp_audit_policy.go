@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -31,9 +30,11 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Description: "The configuration for logging of each type of permission",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(serviceNameToAkas),
 			},
@@ -49,7 +50,7 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
 		return nil, err
@@ -66,7 +67,7 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 func serviceNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	auditConfig := d.HydrateItem.(*cloudresourcemanager.AuditConfig)
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/services/" + auditConfig.Service}
 

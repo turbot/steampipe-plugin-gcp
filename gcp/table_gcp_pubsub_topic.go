@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -50,25 +49,29 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tags",
-				Description: "A map of tags for the resource.",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(topicNameToTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(topicNameToTurbotData, "Akas"),
 			},
+
+			// standard gcp columns
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(topicNameToTurbotData, "Project"),
 			},
@@ -84,7 +87,7 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.Topics.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListTopicsResponse) error {
 		for _, topic := range page.Topics {
@@ -107,7 +110,7 @@ func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	req, err := service.Projects.Topics.Get("projects/" + project + "/topics/" + name).Do()
 	if err != nil {

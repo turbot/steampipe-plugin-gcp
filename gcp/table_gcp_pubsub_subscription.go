@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -121,30 +120,32 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromValue(),
 			},
 
-			// standard columns
+			// standard steampipe columns
 			{
 				Name:        "tags",
-				Description: "A map of tags for the resource.",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(subscriptionNameToTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(subscriptionNameToTurbotData, "Akas"),
 			},
+
+			// standard gcp columns
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(subscriptionNameToTurbotData, "Project"),
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}
@@ -153,7 +154,7 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {
@@ -177,7 +178,7 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {

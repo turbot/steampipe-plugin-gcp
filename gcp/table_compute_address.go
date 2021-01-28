@@ -2,9 +2,8 @@ package gcp
 
 import (
 	"context"
-	"os"
-	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -106,29 +105,33 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Description: "A list of URLs of the resources that are using this address.",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Akas"),
+				Transform:   transform.From(addressAka),
 			},
+
+			// standard gcp columns
 			{
-				Name:        "region",
-				Description: "The Google Region, the resource is located at",
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Region"),
+				Transform:   transform.FromField("Region").Transform(lastPathElement),
 			},
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Project"),
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}
@@ -137,24 +140,26 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("listComputeAddresses")
 	service, err := compute.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
-	region := os.Getenv("GCP_REGION")
-	resp := service.Addresses.List(project, region)
-	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
-		for _, address := range page.Items {
-			d.StreamListItem(ctx, address)
+	project := activeProject()
+	resp := service.Addresses.AggregatedList(project)
+	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
+		for _, item := range page.Items {
+			for _, address := range item.Addresses {
+				d.StreamListItem(ctx, address)
+			}
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -165,37 +170,35 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
+	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
-	region := os.Getenv("GCP_REGION")
+	project := activeProject()
 
-	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
-	// trying to unmarshal "projects/project/addresses/" into uint64
-	if len(name) < 1 {
-		return nil, nil
-	}
-
-	req, err := service.Addresses.Get(project, region, name).Do()
-	if err != nil {
+	resp := service.Addresses.AggregatedList(project).Filter("name=" + name)
+	if err := resp.Pages(
+		ctx,
+		func(page *compute.AddressAggregatedList) error {
+			for _, item := range page.Items {
+				for _, i := range item.Addresses {
+					address = *i
+				}
+			}
+			return nil
+		},
+	); err != nil {
 		return nil, err
 	}
 
-	return req, nil
+	return &address, nil
 }
 
 //// TRANSFORM FUNCTIONS
 
-func addressSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func addressAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	address := d.HydrateItem.(*compute.Address)
-	param := d.Param.(string)
+	regionName := getLastPathElement(types.SafeString(address.Region))
 
-	splittedData := strings.Split(address.SelfLink, "/")
+	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/addresses/" + address.Name}
 
-	turbotData := map[string]interface{}{
-		"Project": splittedData[6],
-		"Region":  splittedData[8],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedData[6] + "/regions/" + splittedData[8] + "/addresses/" + address.Name},
-	}
-
-	return turbotData[param], nil
+	return akas, nil
 }

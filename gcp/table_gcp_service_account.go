@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -25,7 +24,7 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpServiceAccounts,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The resource name of the service account",
@@ -58,20 +57,30 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 				Hydrate:     getServiceAccountIamPolicy,
 				Transform:   transform.FromValue(),
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Default:     transform.FromField("Name"),
 				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(serviceAccountNameToAkas),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 
@@ -83,7 +92,7 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.ServiceAccounts.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
