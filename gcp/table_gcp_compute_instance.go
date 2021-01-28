@@ -225,35 +225,35 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			// standard steampipe columns
 			{
 				Name:        "title",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
-				Description: ColumnDescriptionTitle,
 			},
 			{
 				Name:        "tags",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
-				Description: ColumnDescriptionTags,
 			},
 			{
 				Name:        "akas",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(instanceAka),
-				Description: ColumnDescriptionAkas,
 			},
 
 			// standard gcp columns
 			{
-				Name:        "project",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
-				Description: ColumnDescriptionProject,
-			},
-			{
 				Name:        "location",
+				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
-				Description: ColumnDescriptionLocation,
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}
