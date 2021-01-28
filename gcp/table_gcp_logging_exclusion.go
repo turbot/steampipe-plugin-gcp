@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -82,7 +81,7 @@ func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugi
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.Exclusions.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -110,7 +109,7 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Exclusions.Get("projects/" + project + "/exclusions/" + name).Do()
@@ -126,7 +125,7 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 func exclusionNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	exclusion := d.HydrateItem.(*logging.LogExclusion)
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/exclusions/" + exclusion.Name}

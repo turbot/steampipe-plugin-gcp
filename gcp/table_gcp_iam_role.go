@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/go-kit/types"
@@ -122,7 +121,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// TODO :: Need to fetch the details from env
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	// List all the project roles
 	customRoles := service.Projects.Roles.List("projects/" + project)

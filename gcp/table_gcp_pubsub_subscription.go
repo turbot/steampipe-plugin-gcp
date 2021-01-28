@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -153,7 +152,7 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {
@@ -177,7 +176,7 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {

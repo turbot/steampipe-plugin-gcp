@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -79,7 +78,7 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {
@@ -103,7 +102,7 @@ func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func getPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	service, err := pubsub.NewService(ctx)
 	if err != nil {
 		return nil, err

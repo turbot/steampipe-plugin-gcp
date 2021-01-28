@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -75,7 +74,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := monitoring.NewService(ctx)
 	if err != nil {
@@ -99,7 +98,7 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := monitoring.NewService(ctx)

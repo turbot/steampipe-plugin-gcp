@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -178,7 +177,7 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.GlobalForwardingRules.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleList) error {
 		for _, globalForwardingRule := range page.Items {
@@ -201,7 +200,7 @@ func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h 
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	req, err := service.GlobalForwardingRules.Get(project, name).Do()
 	if err != nil {

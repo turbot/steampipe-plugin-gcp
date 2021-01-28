@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -164,7 +163,7 @@ func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.Metrics.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -192,7 +191,7 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Metrics.Get("projects/" + project + "/metrics/" + name).Do()
@@ -208,7 +207,7 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 func metricNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	metric := d.HydrateItem.(*logging.LogMetric)
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/metrics/" + metric.Name}

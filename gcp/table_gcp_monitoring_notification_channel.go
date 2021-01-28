@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -94,7 +93,7 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.NotificationChannels.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -117,7 +116,7 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	logger := plugin.Logger(ctx)
 	logger.Trace("getGcpMonitoringNotificationChannel")
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := monitoring.NewService(ctx)

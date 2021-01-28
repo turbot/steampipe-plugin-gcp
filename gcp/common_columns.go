@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -56,7 +55,7 @@ func getCommonColumns(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		commonColumnData = cachedData.(*gcpCommonColumnData)
 	} else {
 		commonColumnData = &gcpCommonColumnData{
-			Project: os.Getenv("GCP_PROJECT"),
+			Project: activeProject(),
 			// Location: GetDefaultLocation(),
 		}
 

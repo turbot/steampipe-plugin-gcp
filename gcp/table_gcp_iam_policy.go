@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -57,7 +56,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
 
 	service, err := cloudresourcemanager.NewService(ctx)

@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -83,7 +82,7 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.Projects.ServiceAccounts.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,

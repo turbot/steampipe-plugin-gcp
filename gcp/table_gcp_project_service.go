@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -74,7 +73,7 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// TODO :: Need to fetch the details from env
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	result := service.Services.List("projects/" + project)
 	if err := result.Pages(
@@ -103,7 +102,7 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// TODO :: Need to fetch the details from env
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	op, err := service.Services.Get("projects/" + project + "/services/" + serviceData.Name).Do()
 	if err != nil {

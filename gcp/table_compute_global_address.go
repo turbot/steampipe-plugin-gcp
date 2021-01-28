@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -136,7 +135,7 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 	resp := service.GlobalAddresses.List(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
 		for _, globalAddress := range page.Items {
@@ -159,7 +158,7 @@ func getComputeGlobalAddress(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/addresses/" into uint64
