@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,7 +22,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpStorageBuckets,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the bucket.",
@@ -43,11 +42,6 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "time_created",
 				Description: "The creation time of the bucket in RFC 3339 format.",
 				Type:        proto.ColumnType_TIMESTAMP,
-			},
-			{
-				Name:        "location",
-				Description: "The location of the bucket. Object data for objects in the bucket resides in physical storage within this region.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "location_type",
@@ -102,6 +96,11 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 				Default:     false,
 				Transform:   transform.FromField("IamConfiguration.UniformBucketLevelAccess.Enabled"),
+			},
+			{
+				Name:        "labels",
+				Description: "Labels that apply to this bucket.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "log_bucket",
@@ -204,33 +203,46 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// common resource columns
+			// standard steampipe columns
 			{
 				Name:        "tags",
-				Description: "A map of tags for the resource.",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(bucketDataToAkas),
+				Transform:   transform.From(bucketAka),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 
 //// LIST FUNCTION
 
 func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	service, err := storage.NewService(ctx)
 	if err != nil {
@@ -251,7 +263,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 }
 
 func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// project := os.Getenv("GCP_PROJECT")
+	// project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := storage.NewService(ctx)
@@ -342,9 +354,9 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 
 //// TRANSFORM FUNCTIONS
 
-func bucketDataToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func bucketAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	bucket := d.HydrateItem.(*storage.Bucket)
-	project := os.Getenv("GCP_PROJECT")
+	project := activeProject()
 
 	akas := []string{"gcp://storage.googleapis.com/projects/" + project + "/buckets/" + bucket.Name}
 	return akas, nil
