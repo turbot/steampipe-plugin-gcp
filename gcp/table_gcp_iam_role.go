@@ -26,7 +26,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listIamRoles,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
@@ -98,7 +98,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromConstant(activeProject()),
 			},
-		}),
+		},
 	}
 }
 
