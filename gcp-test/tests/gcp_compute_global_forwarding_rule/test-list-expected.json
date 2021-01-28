@@ -1,0 +1,7 @@
+[
+  {
+    "description": "Test Global Forwarding Rule to validate integration test.",
+    "kind": "compute#forwardingRule",
+    "name": "{{resourceName}}"
+  }
+]
