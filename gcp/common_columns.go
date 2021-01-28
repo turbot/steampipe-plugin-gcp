@@ -17,7 +17,7 @@ var commonGCPRegionalColumns = []*plugin.Column{
 	},
 	{
 		Name:        "project",
-		Description: "The Google Project in which the resource is located",
+		Description: ColumnDescriptionProject,
 		Type:        proto.ColumnType_STRING,
 		Hydrate:     getCommonColumns,
 	},
@@ -26,7 +26,7 @@ var commonGCPRegionalColumns = []*plugin.Column{
 var commonGCPColumns = []*plugin.Column{
 	{
 		Name:        "project",
-		Description: "The Google Project in which the resource is located",
+		Description: ColumnDescriptionProject,
 		Type:        proto.ColumnType_STRING,
 		Hydrate:     getCommonColumns,
 	},

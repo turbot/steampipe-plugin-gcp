@@ -24,7 +24,7 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingSinks,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The client-assigned sink identifier, unique within the project",
@@ -77,20 +77,28 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard columns
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(sinkNameToAkas),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 

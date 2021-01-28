@@ -6,6 +6,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -19,7 +20,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpIamPolicies,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "version",
 				Description: "Version specifies the format of the policy. Valid values are `0`, `1`, and `3`.",
@@ -36,20 +37,28 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard columns
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getGcpIamPolicyTurbotData,
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getGcpIamPolicyTurbotData,
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 

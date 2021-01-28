@@ -77,18 +77,26 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Role.IncludedPermissions"),
 			},
 
-			// Standard columns for all tables
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Role.Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(gcpIAMRoleTurbotData, "Akas"),
+			},
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		}),
 	}

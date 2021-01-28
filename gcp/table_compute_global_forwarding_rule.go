@@ -147,23 +147,27 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Description: "A list of ports can be configured.",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(globalForwardingRuleSelfLinkToTurbotData, "Akas"),
 			},
+
+			// standard gcp columns
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(globalForwardingRuleSelfLinkToTurbotData, "Project"),
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}

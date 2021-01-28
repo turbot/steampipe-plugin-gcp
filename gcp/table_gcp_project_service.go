@@ -26,7 +26,7 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpProjectServices,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The resource name of the consumer and service",
@@ -43,13 +43,23 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 				Description: "The resource name of the consumer",
 				Type:        proto.ColumnType_STRING,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(serviceNameToTurbotData, "Akas"),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
+			},
+		},
 	}
 }
 

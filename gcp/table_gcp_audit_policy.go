@@ -30,9 +30,11 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Description: "The configuration for logging of each type of permission",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(serviceNameToAkas),
 			},
