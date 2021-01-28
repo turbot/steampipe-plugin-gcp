@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/iam/v1"
@@ -187,12 +188,11 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 func gcpIAMRoleTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("googleIAMRoleTurbotData")
 	roleData := d.HydrateItem.(*roleInfo)
-
-	splitName := strings.Split(roleData.Role.Name, "/")
 	akas := []string{"gcp://iam.googleapis.com/" + roleData.Role.Name}
 
 	if d.Param.(string) == "RoleID" {
-		return splitName[len(splitName)-1], nil
+		return getLastPathElement(types.SafeString(roleData.Role.Name)), nil
 	}
+
 	return akas, nil
 }
