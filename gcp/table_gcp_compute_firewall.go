@@ -21,7 +21,7 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeFirewall,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeFirewalles,
+			Hydrate: listComputeFirewalls,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -160,8 +160,8 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeFirewalles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listComputeFirewalles")
+func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("listComputeFirewalls")
 	service, err := compute.NewService(ctx)
 	if err != nil {
 		return nil, err
