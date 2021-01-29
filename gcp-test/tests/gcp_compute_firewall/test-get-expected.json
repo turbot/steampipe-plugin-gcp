@@ -1,0 +1,30 @@
+[
+  {
+    "action": "Allow",
+    "allowed": [
+      {
+        "IPProtocol": "icmp"
+      },
+      {
+        "IPProtocol":"tcp",
+        "ports":[
+          "80", 
+          "8080", 
+          "1000-2000"
+        ]
+      }
+    ],
+    "description": "Test firewall rule to verify the table.",
+    "direction": "INGRESS",
+    "disabled": false,
+    "kind": "compute#firewall",
+    "log_config_enable": false,
+    "name": "{{ resourceName }}",
+    "network": "{{ output.network.value }}",
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}",
+    "source_tags": [
+      "web"
+    ]
+  }
+]
