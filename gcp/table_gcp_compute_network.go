@@ -66,6 +66,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 				Name:        "mtu",
 				Description: "Maximum Transmission Unit in bytes. The minimum value for this field is 1460 and the maximum value is 1500 bytes.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.From(networkMtu),
 			},
 			{
 				Name:        "self_link",
@@ -127,6 +128,7 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	resp := service.Networks.List(project)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
 		for _, network := range page.Items {
+			plugin.Logger(ctx).Trace("getComputeNetwork   ~~~~~~~~~~~~~~~", " DATA", network.Mtu)
 			d.StreamListItem(ctx, network)
 		}
 		return nil
@@ -167,4 +169,14 @@ func networkAka(_ context.Context, d *transform.TransformData) (interface{}, err
 	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/networks/" + network.Name}
 
 	return akas, nil
+}
+
+func networkMtu(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	network := d.HydrateItem.(*compute.Network)
+
+	if network.Mtu == 0 {
+		return 1460, nil
+	}
+
+	return network.Mtu, nil
 }
