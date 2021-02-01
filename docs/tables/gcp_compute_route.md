@@ -17,7 +17,7 @@ from
 ```
 
 
-### List of routes which are not applies to default network
+### List of routes that are not applied to default network
 
 ```sql
 select
