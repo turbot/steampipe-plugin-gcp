@@ -1,0 +1,10 @@
+[
+  {
+    "advertise_mode": "CUSTOM",
+    "asn": 64514,
+    "description": "Test router to verify the table.",
+    "kind": "compute#router",
+    "name": "{{resourceName}}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
