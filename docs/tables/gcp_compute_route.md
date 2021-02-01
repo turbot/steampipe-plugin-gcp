@@ -17,7 +17,21 @@ from
 ```
 
 
-### List all system-generated default routes
+### List of routes which are not applies to default network
+
+```sql
+select
+  name,
+  id,
+  split_part(network, '/', '10') as network
+from
+  gcp_compute_route
+where
+  split_part(network, '/', '10') <> 'default';
+```
+
+
+### List of system-generated default routes
 
 ```sql
 select
@@ -27,5 +41,7 @@ select
   next_hop_gateway
 from
   gcp_compute_route
-where priority = 1000 and dest_range = '0.0.0.0/0';
+where
+  priority = 1000
+  and dest_range = '0.0.0.0/0';
 ```
