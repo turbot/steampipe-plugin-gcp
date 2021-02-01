@@ -2,7 +2,7 @@
 
 VPC firewall rules allows or denies connections to or from your virtual machine (VM) instances based on a specified configuration. Enabled VPC firewall rules are always enforced, protecting instances regardless of their configuration and operating system, even if they have not started up.
 
-### Firewall rule basic info
+### Firewall rules basic info
 
 ```sql
 select
@@ -15,7 +15,23 @@ from
 ```
 
 
-### List of all disabled rules
+### List of rules which are applied to TCP protocol
+
+```sql
+select
+  name,
+  id,
+  p ->> 'IPProtocol' as ip_protocol,
+  p ->> 'ports' as ports
+from
+  gcp_compute_firewall,
+  jsonb_array_elements(allowed) as p
+where
+  p ->> 'IPProtocol' = 'tcp';
+```
+
+
+### List of disabled rules
 
 ```sql
 select
@@ -26,7 +42,7 @@ select
 from
   gcp_compute_firewall
 where
-  disabled = true;
+  disabled
 ```
 
 
