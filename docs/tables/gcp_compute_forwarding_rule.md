@@ -10,7 +10,7 @@ select
   id,
   self_link,
   backend_service,
-  load_balancing_scheme,
+  load_balancing_scheme
 from
   gcp_compute_forwarding_rule;
 ```
