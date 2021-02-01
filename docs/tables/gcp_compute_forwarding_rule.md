@@ -10,19 +10,36 @@ select
   id,
   self_link,
   backend_service,
+  ip_address,
   load_balancing_scheme
 from
   gcp_compute_forwarding_rule;
 ```
 
 
-### Get the labels attached with forwarding rule
+### List of forwarding rules which are globally accessible
 
 ```sql
 select
   name,
   id,
-  labels
+  allow_global_access
 from
-  gcp_compute_forwarding_rule;
+  gcp_compute_forwarding_rule
+where
+  not allow_global_access;
+```
+
+
+### List of EXTERNAL forwarding rules
+
+```sql
+select
+  name,
+  id,
+  load_balancing_scheme
+from
+  gcp_compute_forwarding_rule
+where
+  load_balancing_scheme = 'EXTERNAL';
 ```
