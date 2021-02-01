@@ -1,0 +1,10 @@
+[
+  {
+    "action": "Allow",
+    "description": "Test firewall rule to verify the table.",
+    "direction": "INGRESS",
+    "kind": "compute#firewall",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
