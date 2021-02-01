@@ -15,24 +15,28 @@ from
 ```
 
 
-### Get the source disk information
+### List of compute images which are not encrypted
 
 ```sql
 select
   name,
-  source_disk,
-  source_disk_id
+  id,
+  image_encryption_key
 from
-  gcp_compute_image;
+  gcp_compute_image
+where
+  image_encryption_key is null;
 ```
 
 
-### List images with policies
+### List of compute images which do not have owner tag key
 
 ```sql
 select
   name,
-  iam_policy
+  id
 from
-  gcp_compute_image;
+  gcp_compute_image
+where
+  tags -> 'owner' is null;
 ```
