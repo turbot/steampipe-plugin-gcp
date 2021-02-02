@@ -128,7 +128,6 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	resp := service.Networks.List(project)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
 		for _, network := range page.Items {
-			plugin.Logger(ctx).Trace("getComputeNetwork   ~~~~~~~~~~~~~~~", " DATA", network.Mtu)
 			d.StreamListItem(ctx, network)
 		}
 		return nil
