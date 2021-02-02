@@ -259,7 +259,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 	}
 }
 
-//// HYDRATE FUNCTIONS
+//// LIST FUNCTION
 
 func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
@@ -288,6 +288,8 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	return nil, nil
 }
+
+//// HYDRATE FUNCTIONS
 
 func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
