@@ -1,0 +1,7 @@
+[
+  {
+    "description": "Test forwarding rule to verify the table.",
+    "kind": "compute#forwardingRule",
+    "name": "{{ resourceName }}"
+  }
+]

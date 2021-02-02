@@ -1,0 +1,12 @@
+[
+  {
+    "all_ports": false,
+    "allow_global_access": false,
+    "description": "Test forwarding rule to verify the table.",
+    "ip_protocol": "TCP",
+    "kind": "compute#forwardingRule",
+    "name": "{{ resourceName }}",
+    "region": "https://www.googleapis.com/compute/beta/projects/pikachu-aaa/regions/us-east1",
+    "self_link": "https://www.googleapis.com/compute/beta/projects/pikachu-aaa/regions/us-east1/forwardingRules/{{ resourceName }}"
+  }
+]
