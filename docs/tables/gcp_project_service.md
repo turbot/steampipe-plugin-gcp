@@ -16,7 +16,7 @@ from
 
 ```sql
 select
-  split_part(name, '/', 4) as name,
+  name,
   state
 from
   gcp_project_service
