@@ -9,8 +9,8 @@ Cloud Router is a fully distributed and managed Google Cloud service that progra
 ```sql
 select
   name,
-  asn,
-  advertise_mode
+  bgp_asn,
+  bgp_advertise_mode
 from
   gcp_compute_router;
 ```
@@ -36,10 +36,10 @@ from
 ```sql
 select
   name,
-  asn,
-  advertise_mode,
-  advertised_ip_ranges
+  bgp_asn,
+  bgp_advertise_mode,
+  bgp_advertised_ip_ranges
 from
   gcp_compute_router
-where advertise_mode = 'CUSTOM';
+where bgp_advertise_mode = 'CUSTOM';
 ```
