@@ -88,7 +88,6 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 				Name:        "bgp_peers",
 				Description: "BGP information that must be configured into the routing stack to establish BGP peering. This information must specify the peer ASN and either the interface name, IP address, or peer IP address.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Bgp.AdvertisedIpRanges"),
 			},
 			{
 				Name:        "interfaces",
