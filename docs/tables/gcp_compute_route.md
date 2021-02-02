@@ -23,11 +23,11 @@ from
 select
   name,
   id,
-  split_part(network, '/', '10') as network
+  network_name as network
 from
   gcp_compute_route
 where
-  split_part(network, '/', '10') <> 'default';
+  network_name <> 'default';
 ```
 
 

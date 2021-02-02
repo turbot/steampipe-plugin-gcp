@@ -64,6 +64,13 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 				Description: "Fully-qualified URL of the network that this route applies to.",
 				Type:        proto.ColumnType_STRING,
 			},
+			// network_name is a simpler view of the network, without the full path
+			{
+				Name:        "network_name",
+				Description: "The name of the network that this route applies to.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Network").Transform(lastPathElement),
+			},
 			{
 				Name:        "next_hop_gateway",
 				Description: "The URL to a gateway that should handle matching packets.",
