@@ -1,0 +1,19 @@
+[
+  {
+    "all_ports": false,
+    "allow_global_access": false,
+    "backend_service": "https://www.googleapis.com/compute/beta/projects/pikachu-aaa/regions/us-east1/backendServices/{{ resourceName }}",
+    "description": "Test forwarding rule to verify the table.",
+    "ip_protocol": "TCP",
+    "kind": "compute#forwardingRule",
+    "labels": {
+      "name": "{{ resourceName }}"
+    },
+    "load_balancing_scheme": "EXTERNAL",
+    "location": "us-east1",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "region": "https://www.googleapis.com/compute/beta/projects/pikachu-aaa/regions/us-east1",
+    "self_link": "https://www.googleapis.com/compute/beta/projects/pikachu-aaa/regions/us-east1/forwardingRules/{{ resourceName }}"
+  }
+]
