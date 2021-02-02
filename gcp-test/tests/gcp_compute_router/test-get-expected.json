@@ -1,0 +1,24 @@
+[
+  {
+    "bgp_advertise_mode": "CUSTOM",
+    "bgp_advertised_groups": [
+      "ALL_SUBNETS"
+    ],
+    "bgp_advertised_ip_ranges": [
+      {
+        "range": "1.2.3.4"
+      },
+      {
+        "range": "6.7.0.0/16"
+      }
+    ],
+    "bgp_asn": 64514,
+    "description": "Test router to verify the table.",
+    "kind": "compute#router",
+    "location": "us-east1",
+    "name": "{{ resourceName }}",
+    "network": "{{ output.network.value }}",
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
