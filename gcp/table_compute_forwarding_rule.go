@@ -175,7 +175,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(forwardingRuleSelfLinkToTurbotData, "Akas"),
+				Transform:   transform.From(forwardingRuleAka),
 			},
 
 			// standard gcp columns
@@ -256,7 +256,7 @@ func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugi
 
 //// TRANSFORM FUNCTIONS
 
-func forwardingRuleSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func forwardingRuleAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	forwardingRule := d.HydrateItem.(*compute.ForwardingRule)
 	regionName := getLastPathElement(types.SafeString(forwardingRule.Region))
 
