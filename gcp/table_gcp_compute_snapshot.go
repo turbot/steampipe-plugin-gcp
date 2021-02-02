@@ -197,6 +197,12 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
+
+	// Name can't be empty
+	if len(name) < 1 {
+		return nil, nil
+	}
+
 	resp, err := service.Snapshots.Get(project, name).Do()
 	if err != nil {
 		return err, nil
