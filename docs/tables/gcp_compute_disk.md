@@ -1,4 +1,4 @@
-# Table:  gcp_compute_instance
+# Table: gcp_compute_instance
 
 Compute Engine manages the physical disks and the data distribution to ensure redundancy and optimal performance. Persistent disks are located independently from virtual machine (VM) instances, so it can detach or move persistent disks to keep data even after deletion of instances.
 
@@ -17,7 +17,6 @@ from
   gcp_compute_disk;
 ```
 
-
 ### List of unencrypted disk
 
 ```sql
@@ -32,8 +31,8 @@ where
   disk_encryption_kms_key is null;
 ```
 
+### List of disks that are not in use
 
-### List of disks which are not in use
 ```sql
 select
   name,
@@ -45,6 +44,17 @@ where
   users is null;
 ```
 
+### List of disks that are Regional
+
+```sql
+select
+  name,
+  region_name
+from
+  gcp_compute_disk
+where
+  location_type = 'REGIONAL';
+```
 
 ### Disk count in each availability zone
 

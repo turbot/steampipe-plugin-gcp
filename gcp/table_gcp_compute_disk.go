@@ -70,28 +70,22 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Description: "Type of the resource. Always compute#disk for disks.",
 				Type:        proto.ColumnType_STRING,
 			},
-			// TODO https://github.com/turbot/steampipe/issues/126
-			// {
-			// 	Name:        "last_attach_timestamp",
-			// 	Description: "Last attach timestamp",
-			// 	Type:        proto.ColumnType_TIMESTAMP,
-			// 	// Type: proto.ColumnType_STRING,
-			// },
-			// {
-			// 	Name:        "last_detach_timestamp",
-			// 	Description: "Last detach timestamp",
-			// 	Type:        proto.ColumnType_TIMESTAMP,
-			// 	// Type: proto.ColumnType_STRING,
-			// },
+			{
+				Name:        "last_attach_timestamp",
+				Description: "Timestamp when the disk was last attached.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromGo().NullIfZero(),
+			},
+			{
+				Name:        "last_detach_timestamp",
+				Description: "Timestamp when the disk was last detached.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromGo().NullIfZero(),
+			},
 			{
 				Name:        "physical_block_size_bytes",
 				Description: "Physical block size of the persistent disk, in bytes. If not present in a request, a default value is used.",
 				Type:        proto.ColumnType_INT,
-			},
-			{
-				Name:        "region",
-				Description: "URL of the region where the disk resides. Only applicable for regional resources.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "self_link",
@@ -142,6 +136,24 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Name:        "type",
 				Description: "URL of the disk type resource describing which disk type to use to create the disk. Provide this when creating the disk. For example: projects/project/zones/zone/diskTypes/pd-standard  or pd-ssd",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "location_type",
+				Description: "Loation type where the disk resides.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(diskLocation, "Type"),
+			},
+			{
+				Name:        "region",
+				Description: "URL of the region where the disk resides. Only applicable for regional resources.",
+				Type:        proto.ColumnType_STRING,
+			},
+			// region_name is a simpler view of the region, without the full path
+			{
+				Name:        "region_name",
+				Description: "Name of the region where the disk resides. Only applicable for regional resources.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Region").Transform(lastPathElement),
 			},
 			{
 				Name:        "zone",
@@ -223,7 +235,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Zone").Transform(lastPathElement),
+				Transform:   transform.FromP(diskLocation, "Location"),
 			},
 			{
 				Name:        "project",
@@ -298,9 +310,23 @@ func getComputeDiskIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 
+	var resp *compute.Policy
 	project := activeProject()
 	zoneName := getLastPathElement(types.SafeString(disk.Zone))
-	resp, err := service.Disks.GetIamPolicy(project, zoneName, disk.Name).Do()
+
+	// disk can be regional or zonal
+	if zoneName == "" {
+		regionName := getLastPathElement(types.SafeString(disk.Region))
+		// regional disk get iam policy
+		resp, err = service.RegionDisks.GetIamPolicy(project, regionName, disk.Name).Do()
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	}
+
+	// zonal disk get iam policy
+	resp, err = service.Disks.GetIamPolicy(project, zoneName, disk.Name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -314,9 +340,34 @@ func diskAka(_ context.Context, d *transform.TransformData) (interface{}, error)
 	i := d.HydrateItem.(*compute.Disk)
 
 	zoneName := getLastPathElement(types.SafeString(i.Zone))
+	regionName := getLastPathElement(types.SafeString(i.Region))
 	diskName := types.SafeString(i.Name)
 
 	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/disks/" + diskName}
 
+	if zoneName == "" {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/disks/" + diskName}
+	}
+
 	return akas, nil
+}
+
+func diskLocation(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	i := d.HydrateItem.(*compute.Disk)
+	param := d.Param.(string)
+
+	zoneName := getLastPathElement(types.SafeString(i.Zone))
+	regionName := getLastPathElement(types.SafeString(i.Region))
+
+	locationData := map[string]string{
+		"Type":     "ZONAL",
+		"Location": zoneName,
+	}
+
+	if zoneName == "" {
+		locationData["Type"] = "REGIONAL"
+		locationData["Location"] = regionName
+	}
+
+	return locationData[param], nil
 }
