@@ -105,9 +105,10 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_INT,
 			},
 			{
-				Name:        "tags",
+				Name:        "instance_tags",
 				Description: "A list of instance tags to which this route applies.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Tags"),
 			},
 			{
 				Name:        "warnings",
