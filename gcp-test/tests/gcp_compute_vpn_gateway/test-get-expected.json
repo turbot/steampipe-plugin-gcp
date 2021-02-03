@@ -1,0 +1,12 @@
+[
+  {
+    "description": "Test image to verify the table.",
+    "forwarding_rules": "{{ output.forwarding_rules.value }}",
+    "id": "{{ output.resource_id.value }}",
+    "kind": "compute#vpnGateway",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "region": "{{output.region.value}}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

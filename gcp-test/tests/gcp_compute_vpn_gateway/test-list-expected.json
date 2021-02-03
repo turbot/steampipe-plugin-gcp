@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test to verify compute vpn gateway table.",
+    "name": "{{ resourceName }}"
+  }
+]
