@@ -5,10 +5,19 @@
       ],
     "description": "Test compute snapshot to verify table.",
     "disk_size_gb": 10,
+    "labels": {
+      "my_label": "value"
+    },
     "name": "{{resourceName}}",
     "project": "{{ output.project_id.value }}",
     "self_link": "{{ output.self_link.value }}",
     "source_disk": "{{output.source_disk.value}}",
+    "storage_locations": [
+      "us-central1"
+    ],
+    "tags": {
+      "my_label": "value"
+    },
     "title": "{{resourceName}}"
   }
 ]
