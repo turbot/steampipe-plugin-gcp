@@ -11,8 +11,10 @@ select
   name,
   id,
   size_gb as disk_size_in_gb,
-  split_part(type, '/', 11) as disk_type,
-  zone_name
+  type_name,
+  zone_name,
+  region_name,
+  location_type
 from
   gcp_compute_disk;
 ```
@@ -71,12 +73,13 @@ order by
 ```
 
 ### List Disks by size
+
 ```sql
-select 
-  name, 
-  size_gb 
-from 
-  gcp_compute_disk 
-order by 
+select
+  name,
+  size_gb
+from
+  gcp_compute_disk
+order by
   size_gb desc;
 ```
