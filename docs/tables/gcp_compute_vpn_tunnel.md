@@ -21,7 +21,19 @@ from
 select
   name,
   peer_ip,
-  target_vpn_gateway
+  split_part(target_vpn_gateway, '/', 11) as target_vpn_gateway
+from
+  gcp_compute_vpn_tunnel;
+```
+
+
+### Traffic selector info of each tunnel
+
+```sql
+select
+  name,
+  jsonb_array_elements_text(local_traffic_selector) as local_traffic_selector,
+  jsonb_array_elements_text(remote_traffic_selector) as remote_traffic_selector
 from
   gcp_compute_vpn_tunnel;
 ```
