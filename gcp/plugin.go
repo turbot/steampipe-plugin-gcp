@@ -27,7 +27,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
 			"gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
 			"gcp_compute_address":                 tableGcpComputeAddress(ctx),
-			"gcp_compute_disk":                    tableGcpComputeDisk(ctx),
 			"gcp_compute_firewall":                tableGcpComputeFirewall(ctx),
 			"gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
 			"gcp_compute_global_address":          tableGcpComputeGlobalAddress(ctx),
@@ -35,7 +34,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_image":                   tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                tableGcpComputeInstance(ctx),
 			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
-			"gcp_compute_route":                   tableGcpComputeRoute(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
 			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
@@ -53,6 +51,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account":                 tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
+
+			// "gcp_compute_disk":                    tableGcpComputeDisk(ctx),
+			// "gcp_compute_route":                   tableGcpComputeRoute(ctx), https://github.com/turbot/steampipe/issues/108
 		},
 	}
 
