@@ -19,7 +19,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpAuditPolicies,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "service",
 				Description: "Specifies a service that will be enabled for audit logging",
@@ -52,7 +52,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromConstant(activeProject()),
 			},
-		}),
+		},
 	}
 }
 
