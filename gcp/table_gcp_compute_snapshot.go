@@ -197,9 +197,16 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
+
+	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
+	// trying to unmarshal "projects/project/global/snapshots/" into uint64
+	if len(name) < 1 {
+		return nil, nil
+	}
+
 	resp, err := service.Snapshots.Get(project, name).Do()
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
 	return resp, nil
