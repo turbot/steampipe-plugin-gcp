@@ -1,3 +1,3 @@
 select name, id, description
-from gcp.google_compute_vpn_gateway
+from gcp.gcp_compute_target_vpn_gateway
 where name = ''

@@ -1,9 +1,8 @@
 [
   {
     "description": "Test image to verify the table.",
-    "forwarding_rules": "{{ output.forwarding_rules.value }}",
     "id": "{{ output.resource_id.value }}",
-    "kind": "compute#vpnGateway",
+    "kind": "compute#targetVpnGateway",
     "name": "{{ resourceName }}",
     "project": "{{ output.project_id.value }}",
     "region": "{{output.region.value}}",
