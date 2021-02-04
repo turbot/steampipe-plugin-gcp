@@ -29,8 +29,15 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "source_disk",
-				Description: "The source disk used to create this snapshot.",
+				Description: "The url of the source disk used to create this snapshot.",
 				Type:        proto.ColumnType_STRING,
+			},
+			// source_disk_name is a simpler view of the type, without the full path
+			{
+				Name:        "source_disk_name",
+				Description: "The name of the source disk used to create this snapshot.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SourceDisk").Transform(lastPathElement),
 			},
 			{
 				Name:        "description",
