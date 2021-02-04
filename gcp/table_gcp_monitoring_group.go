@@ -66,6 +66,12 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 
 			// standard gcp columns
 			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
