@@ -41,6 +41,7 @@ resource "google_compute_network" "network_test" {
 
 resource "google_compute_vpn_gateway" "target_gateway" {
   name    = var.resource_name
+  description   = "Test VPN target gateway to validate integration test."
   network = google_compute_network.network_test.id
 }
 

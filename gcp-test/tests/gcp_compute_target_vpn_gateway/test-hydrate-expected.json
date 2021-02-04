@@ -1,7 +1,7 @@
 [
   {
     "description": "{{output.description.value}}",
-    "kind": "compute#vpnGateway",
+    "kind": "compute#targetVpnGateway",
     "name": "{{ resourceName }}",
     "self_link": "{{ output.self_link.value }}"
   }

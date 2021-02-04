@@ -1,11 +1,9 @@
 [
   {
-    "description": "Test image to verify the table.",
-    "id": "{{ output.resource_id.value }}",
+    "description": "Test VPN target gateway to validate integration test.",
     "kind": "compute#targetVpnGateway",
     "name": "{{ resourceName }}",
     "project": "{{ output.project_id.value }}",
-    "region": "{{output.region.value}}",
     "self_link": "{{ output.self_link.value }}"
   }
 ]
