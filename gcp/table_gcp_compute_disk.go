@@ -140,7 +140,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			// type_name is a simpler view of the type, without the full path
 			{
 				Name:        "type_name",
-				Description: "Type of the the disk. For example: pd-standard or pd-ssd",
+				Description: "Type of the disk. For example: pd-standard or pd-ssd",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Type").Transform(lastPathElement),
 			},
