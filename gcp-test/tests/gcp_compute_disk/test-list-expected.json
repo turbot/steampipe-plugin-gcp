@@ -3,12 +3,16 @@
     "akas": [
       "{{ output.resource_aka.value }}"
     ],
-    "description": "Test compute snapshot to verify table.",
-    "disk_size_gb": 10,
+    "labels": {
+      "name": "{{resourceName}}"
+    },
+    "location": "us-central1-a",
     "name": "{{resourceName}}",
     "project": "{{ output.project.value }}",
     "self_link": "{{ output.self_link.value }}",
-    "source_disk": "{{output.source_disk.value}}",
+    "tags": {
+      "name": "{{resourceName}}"
+    }
     "title": "{{resourceName}}"
   }
 ]
