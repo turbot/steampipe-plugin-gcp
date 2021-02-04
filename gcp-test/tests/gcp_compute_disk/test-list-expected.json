@@ -12,7 +12,7 @@
     "self_link": "{{ output.self_link.value }}",
     "tags": {
       "name": "{{resourceName}}"
-    }
+    },
     "title": "{{resourceName}}"
   }
 ]
