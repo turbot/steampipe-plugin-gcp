@@ -5,9 +5,9 @@ _What's new?_
 - New tables added to plugin
 
   - gcp_compute_address ([#29](https://github.com/turbot/steampipe-plugin-gcp/issues/29))
+  - gcp_compute_disk ([#47](https://github.com/turbot/steampipe-plugin-gcp/issues/47))
   - gcp_compute_firewall ([#42](https://github.com/turbot/steampipe-plugin-gcp/issues/42))
   - gcp_compute_forwarding_rule ([#53](https://github.com/turbot/steampipe-plugin-gcp/issues/53))
-  - gcp_compute_disk ([#47](https://github.com/turbot/steampipe-plugin-gcp/issues/47))
   - gcp_compute_network ([#43](https://github.com/turbot/steampipe-plugin-gcp/issues/43))
   - gcp_compute_router ([#51](https://github.com/turbot/steampipe-plugin-gcp/issues/51))
   - gcp_compute_snapshot ([#60](https://github.com/turbot/steampipe-plugin-gcp/issues/60))
@@ -31,3 +31,5 @@ _What's new?_
 _Bug fixes_
 
 - Fixed: `gcp_iam_role` table. Updated `included_permissions` field to have details of role grants for list call.
+
+
