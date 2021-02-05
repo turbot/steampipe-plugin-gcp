@@ -15,6 +15,50 @@ from
   gcp_compute_subnetwork;
 ```
 
+
+### List of subnetworks where users have compute admin access
+
+```sql
+select
+  name,
+  id,
+  jsonb_array_elements_text(p -> 'members') as members,
+  p ->> 'role' as role
+from
+  gcp_compute_subnetwork,
+  jsonb_array_elements(iam_policy -> 'bindings') as p
+where
+  p ->> 'role' = 'roles/compute.admin';
+```
+
+
+### Secondary IP info of each subnetwork
+
+```sql
+select
+  name,
+  id,
+  p ->> 'rangeName' as range_name,
+  p ->> 'ipCidrRange' as ip_cidr_range
+from
+  gcp_compute_subnetwork,
+  jsonb_array_elements(secondary_ip_ranges) as p;
+```
+
+
+### Subnet count per network
+
+```sql
+select
+  split_part(network, '/', 10) as network,
+  count(*) as subnet_count
+from
+  gcp_compute_subnetwork
+group by
+  network;
+```
+
+
 ### List subnetworks having VPC flow logging set to false
 
 ```sql
@@ -25,15 +69,5 @@ select
 from
   gcp_compute_subnetwork
 where
-  enable_flow_logs = false;
-```
-
-### List IAM policy attached with subnetworks
-
-```sql
-select
-  name,
-  iam_policy
-from
-  gcp_compute_subnetwork;
+  not enable_flow_logs;
 ```
