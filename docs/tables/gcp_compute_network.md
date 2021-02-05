@@ -1,4 +1,4 @@
-# Table: gcp_compute_instance
+# Table: gcp_compute_network
 
 A Virtual Private Cloud (VPC) network is a virtual version of a physical network, implemented inside of Google's production network.
 
@@ -30,7 +30,7 @@ where
   routing_mode = 'REGIONAL';
 ```
 
-### List the subnets stats to the network
+### Subnets counts for each network
 
 ```sql
 select

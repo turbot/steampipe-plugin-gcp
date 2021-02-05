@@ -40,3 +40,18 @@ from
 where
   tags -> 'owner' is null;
 ```
+
+
+### List of compute images older than 90 days
+```sql
+select
+  name,
+  creation_timestamp,
+  age(creation_timestamp)
+from
+  gcp_compute_image
+where
+  creation_timestamp <= (current_date - interval '90' day)
+order by 
+  creation_timestamp;
+```
