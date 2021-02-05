@@ -86,7 +86,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 				Name:        "log_config_enable",
 				Description: "Specifies whether to enable logging for the load balancer traffic served by this backend service, or not.",
 				Type:        proto.ColumnType_BOOL,
-				Default:     false,
+				// Default:     false,
 				Transform:   transform.FromField("LogConfig.Enable"),
 			},
 			{
