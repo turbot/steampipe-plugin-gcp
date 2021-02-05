@@ -29,12 +29,7 @@ func tableGcpAllResource(ctx context.Context) *plugin.Table {
 				Name:        "type",
 				Description: "The type of this resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("AssetType").Transform(lastPathElement),
-			},
-			{
-				Name:        "asset_type",
-				Description: "The type of this resource.",
-				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("AssetType"),
 			},
 			{
 				Name:        "name",
