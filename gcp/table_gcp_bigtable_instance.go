@@ -146,9 +146,9 @@ func getBigtableInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	instance := h.Item.(*bigtableadmin.Instance)
-	var getiampolicyrequest *bigtableadmin.GetIamPolicyRequest
+	getIamPolicyRequest := bigtableadmin.GetIamPolicyRequest{}
 
-	req, err := service.Projects.Instances.GetIamPolicy(instance.Name, getiampolicyrequest).Do()
+	req, err := service.Projects.Instances.GetIamPolicy(instance.Name, &getIamPolicyRequest).Do()
 	if err != nil {
 		// Return nil, if the resource not present
 		result := isNotFoundError([]string{"404"})

@@ -1,0 +1,9 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "instance_type": "DEVELOPMENT",
+    "location": "global",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}"
+  }
+]
