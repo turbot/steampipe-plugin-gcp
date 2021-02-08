@@ -215,14 +215,10 @@ func getComputeNodeTemplateIamPolicy(ctx context.Context, d *plugin.QueryData, h
 	}
 
 	nodeTemplate := h.Item.(*compute.NodeTemplate)
+	regionName := getLastPathElement(types.SafeString(nodeTemplate.Region))
 
-	req, err := service.NodeTemplates.GetIamPolicy(activeProject(), nodeTemplate.Region, nodeTemplate.Name).Do()
+	req, err := service.NodeTemplates.GetIamPolicy(activeProject(), regionName, nodeTemplate.Name).Do()
 	if err != nil {
-		// // Return nil, if the resource not present
-		// result := isNotFoundError([]string{"404"})
-		// if result != nil {
-		// 	return nil, nil
-		// }
 		return nil, err
 	}
 
