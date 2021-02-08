@@ -1,0 +1,10 @@
+[
+  {
+    "description": "Test Node Template resource to verify the table.",
+    "kind": "compute#nodeTemplate",
+    "name": "{{ resourceName }}",
+    "node_type": "c2-node-60-240",
+    "self_link": "{{ output.self_link.value }}",
+    "server_binding_type": "RESTART_NODE_ON_MINIMAL_SERVERS"
+  }
+]
