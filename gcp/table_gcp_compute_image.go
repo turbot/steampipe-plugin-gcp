@@ -2,6 +2,8 @@ package gcp
 
 import (
 	"context"
+	"strings"
+	"sync"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -184,7 +186,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeImageAka),
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -192,7 +194,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -206,19 +208,80 @@ func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	if err != nil {
 		return nil, err
 	}
-
 	project := activeProject()
+
+	// List of projects in which standard images resides
+	projectList := []string{
+		"centos-cloud",
+		"cos-cloud",
+		"debian-cloud",
+		"fedora-coreos-cloud",
+		"rhel-cloud",
+		"rhel-sap-cloud",
+		"suse-cloud",
+		"suse-sap-cloud",
+		"ubuntu-os-cloud",
+		"windows-cloud",
+		"windows-sql-cloud",
+		project,
+	}
+
+	// List all the standard images
+	var wg sync.WaitGroup
+	imageCh := make(chan []*compute.Image, len(projectList))
+	errorCh := make(chan error, len(projectList))
+
+	// Iterating all the available projects
+	for _, item := range projectList {
+		wg.Add(1)
+		go getRowDataForImageAsync(ctx, service, item, &wg, imageCh, errorCh)
+	}
+
+	// wait until the listing of all images inside the mentioned projects are completed
+	wg.Wait()
+
+	// NOTE: close channel before ranging over results
+	close(imageCh)
+	close(errorCh)
+
+	for err := range errorCh {
+		// return the first error
+		return nil, err
+	}
+
+	for item := range imageCh {
+		for _, data := range item {
+			d.StreamListItem(ctx, data)
+		}
+	}
+
+	return nil, nil
+}
+
+func getRowDataForImageAsync(ctx context.Context, service *compute.Service, item string, wg *sync.WaitGroup, imageCh chan []*compute.Image, errorCh chan error) {
+	defer wg.Done()
+
+	rowData, err := getRowDataForImage(ctx, service, item)
+	if err != nil {
+		errorCh <- err
+	} else if rowData != nil {
+		imageCh <- rowData
+	}
+}
+
+func getRowDataForImage(ctx context.Context, service *compute.Service, project string) ([]*compute.Image, error) {
+	var items []*compute.Image
 	resp := service.Images.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {
-			d.StreamListItem(ctx, image)
+			items = append(items, image)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return items, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -257,6 +320,11 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	req, err := service.Images.GetIamPolicy(project, image.Name).Do()
 	if err != nil {
+		// Return nil, if the resource not present
+		result := isNotFoundError([]string{"404"})
+		if result != nil {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -265,11 +333,17 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeImageAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func computeImageSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	image := d.HydrateItem.(*compute.Image)
+	param := d.Param.(string)
 
-	// Build resource aka
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/images/" + image.Name}
+	// get the resource title
+	splittedTitle := strings.Split(image.SelfLink, "/")
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": splittedTitle[6],
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedTitle[6] + "/global/images/" + image.Name},
+	}
+
+	return turbotData[param], nil
 }
