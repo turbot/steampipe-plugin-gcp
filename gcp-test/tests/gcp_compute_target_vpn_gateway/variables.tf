@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "pikachu-aaa"
+  default     = "niteowl-aaa"
   description = "GCP project used for the test."
 }
 
