@@ -19,7 +19,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_image",
 		Description: "GCP Compute Image",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
+			KeyColumns: plugin.AllColumns([]string{"name", "project"}),
 			Hydrate:    getComputeImage,
 		},
 		List: &plugin.ListConfig{
@@ -126,13 +126,13 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Description: "A list of features to enable on the guest operating system.",
 				Type:        proto.ColumnType_JSON,
 			},
-			{
-				Name:        "iam_policy",
-				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getComputeImageIamPolicy,
-				Transform:   transform.FromValue(),
-			},
+			// {
+			// 	Name:        "iam_policy",
+			// 	Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getComputeImageIamPolicy,
+			// 	Transform:   transform.FromValue(),
+			// },
 			{
 				Name:        "licenses",
 				Description: "A list of applicable license URI.",
@@ -293,7 +293,8 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := d.KeyColumnQuals["project"].GetStringValue()
+	// project := activeProject()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64
@@ -309,27 +310,27 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	return req, nil
 }
 
-func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
+// func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+// 	service, err := compute.NewService(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	image := h.Item.(*compute.Image)
-	project := activeProject()
+// 	image := h.Item.(*compute.Image)
+// 	project := activeProject()
 
-	req, err := service.Images.GetIamPolicy(project, image.Name).Do()
-	if err != nil {
-		// Return nil, if the resource not present
-		result := isNotFoundError([]string{"404"})
-		if result != nil {
-			return nil, nil
-		}
-		return nil, err
-	}
+// 	req, err := service.Images.GetIamPolicy(project, image.Name).Do()
+// 	if err != nil {
+// 		// Return nil, if the resource not present
+// 		result := isNotFoundError([]string{"404"})
+// 		if result != nil {
+// 			return nil, nil
+// 		}
+// 		return nil, err
+// 	}
 
-	return req, nil
-}
+// 	return req, nil
+// }
 
 //// TRANSFORM FUNCTIONS
 
