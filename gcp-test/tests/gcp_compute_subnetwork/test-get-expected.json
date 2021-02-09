@@ -10,7 +10,7 @@
     "network": "{{ output.network.value }}",
     "network_name": "{{ resourceName }}",
     "project": "{{ output.project_id.value }}",
-    "region": "https://www.googleapis.com/compute/v1/projects/pikachu-aaa/regions/us-east1",
+    "region": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/regions/us-east1",
     "secondary_ip_ranges": [
       {
         "ipCidrRange": "192.168.10.0/24",
