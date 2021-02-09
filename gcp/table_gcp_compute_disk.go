@@ -146,7 +146,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "location_type",
-				Description: "Loation type where the disk resides.",
+				Description: "Location type where the disk resides.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(diskLocation, "Type"),
 			},

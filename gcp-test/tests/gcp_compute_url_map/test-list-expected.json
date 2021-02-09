@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test URL Map to validate integration test.",
+    "name": "{{ resourceName }}"
+  }
+]
