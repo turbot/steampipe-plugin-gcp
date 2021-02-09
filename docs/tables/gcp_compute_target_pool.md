@@ -15,7 +15,7 @@ from
   gcp_compute_target_pool;
 ```
 
-### List of target pools and thier attached instances that receives incoming traffic
+### List of target pools and attached instances that receives incoming traffic
 
 ```sql
 select
