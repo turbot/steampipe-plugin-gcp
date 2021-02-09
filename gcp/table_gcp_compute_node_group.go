@@ -57,7 +57,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "autoscaling_policy_mode",
-				Description: "Specifies the autoscaling mode of the node group.",
+				Description: "Specifies the autoscaling mode of the node group. Set to one of: ON, OFF, or ONLY_SCALE_OUT.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("AutoscalingPolicy.Mode"),
 			},
