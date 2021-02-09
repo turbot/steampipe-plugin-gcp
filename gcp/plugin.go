@@ -27,6 +27,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
 			"gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
 			"gcp_compute_address":                 tableGcpComputeAddress(ctx),
+			"gcp_compute_backend_service":         tableGcpComputeBackendService(ctx),
 			"gcp_compute_disk":                    tableGcpComputeDisk(ctx),
 			"gcp_compute_firewall":                tableGcpComputeFirewall(ctx),
 			"gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
