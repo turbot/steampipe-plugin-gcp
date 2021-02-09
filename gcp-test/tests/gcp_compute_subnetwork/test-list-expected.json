@@ -1,0 +1,7 @@
+[
+  {
+    "description": "Test subnetwork to validate integration test.",
+    "kind": "compute#subnetwork",
+    "name": "{{ resourceName }}"
+  }
+]
