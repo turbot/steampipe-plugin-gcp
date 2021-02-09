@@ -1,0 +1,7 @@
+[
+  {
+    "autoscaling_policy_max_nodes": 10,
+    "name": "{{ resourceName }}",
+    "size": 1
+  }
+]
