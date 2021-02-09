@@ -137,9 +137,16 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Description: "URL of the disk type resource describing which disk type to use to create the disk. Provide this when creating the disk. For example: projects/project/zones/zone/diskTypes/pd-standard  or pd-ssd",
 				Type:        proto.ColumnType_STRING,
 			},
+			// type_name is a simpler view of the type, without the full path
+			{
+				Name:        "type_name",
+				Description: "Type of the disk. For example: pd-standard or pd-ssd",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Type").Transform(lastPathElement),
+			},
 			{
 				Name:        "location_type",
-				Description: "Loation type where the disk resides.",
+				Description: "Location type where the disk resides.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(diskLocation, "Type"),
 			},

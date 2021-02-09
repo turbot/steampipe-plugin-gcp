@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test VPN Tunnel to validate integration test.",
+    "name": "{{ resourceName }}"
+  }
+]
