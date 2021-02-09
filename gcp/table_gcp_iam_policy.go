@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -42,16 +43,22 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getGcpIamPolicyTurbotData,
+				Transform:   transform.FromP(iamPolicyTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getGcpIamPolicyTurbotData,
+				Transform:   transform.FromP(iamPolicyTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
@@ -83,22 +90,17 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, nil
 }
 
-//// HYDRATE FUNCTIONS
+//// TRANSFORM FUNCTION
 
-func getGcpIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, p *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpIamPolicyTurbotData")
-	commonData, err := getCommonColumns(ctx, d, p)
-	if err != nil {
-		return err, nil
-	}
-
-	commonColumnData := commonData.(*gcpCommonColumnData)
+func iamPolicyTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	project := activeProject()
+	param := types.SafeString(d.Param)
 
 	// Get the resource title
-	title := strings.ToUpper(commonColumnData.Project) + " IAM Policy"
+	title := strings.ToUpper(project) + " IAM Policy"
 
 	// Get data for turbot defined properties
-	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + commonColumnData.Project + "/iamPolicy"}
+	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/iamPolicy"}
 
 	// Mapping all turbot defined properties
 	turbotData := map[string]interface{}{
@@ -106,5 +108,5 @@ func getGcpIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, p *plug
 		"Title": title,
 	}
 
-	return turbotData, nil
+	return turbotData[param], nil
 }

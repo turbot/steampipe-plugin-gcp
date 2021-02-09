@@ -1,0 +1,14 @@
+[
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "auto_created": false,
+    "description": "Test compute snapshot to verify table.",
+    "disk_size_gb": 10,
+    "name": "{{resourceName}}",
+    "project": "{{ output.project_id.value }}",
+    "source_disk": "{{output.source_disk.value}}",
+    "title": "{{resourceName}}"
+  }
+]

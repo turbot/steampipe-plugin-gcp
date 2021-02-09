@@ -45,3 +45,16 @@ where
   priority = 1000
   and dest_range = '0.0.0.0/0';
 ```
+
+
+# List of warning messages for potential misconfigurations detected on routes  
+
+```sql
+select
+  name, 
+  warnings 
+from 
+  gcp_compute_route 
+where 
+  warnings is not null;
+```

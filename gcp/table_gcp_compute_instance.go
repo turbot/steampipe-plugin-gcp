@@ -322,7 +322,7 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	return &instance, nil
 }
 
-//// TRANSFORM FUNCTIONS
+//// TRANSFORM FUNCTION
 
 func instanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	i := d.HydrateItem.(*compute.Instance)
