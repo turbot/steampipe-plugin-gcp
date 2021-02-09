@@ -39,6 +39,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
 			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
+			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
 			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
@@ -54,7 +55,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account":                 tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
-
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				https://github.com/turbot/steampipe/issues/126
