@@ -1,0 +1,9 @@
+[
+  {
+    "default_service": "{{ output.default_service.value }}",
+    "description": "Test URL Map to validate integration test.",
+    "kind": "compute#urlMap",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
