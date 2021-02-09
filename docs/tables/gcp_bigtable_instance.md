@@ -9,10 +9,29 @@ A Cloud Bigtable instance is a container for your data. Instances have one or mo
 ```sql
 select
   name,
-  instance_type
+  instance_type,
+  location
 from
   gcp_bigtable_instance;
 ```
+
+
+### List of bigtable instances where members have IAM security admin access
+
+```sql
+select
+  name,
+  instance_type,
+  jsonb_array_elements_text(i -> 'members') as members,
+  i ->> 'role' as role
+from
+  gcp_bigtable_instance,
+  jsonb_array_elements(iam_policy -> 'bindings') as i
+where
+  i ->> 'role' like '%securityAdmin%';
+```
+
+
 
 ### Get the count of instances which are not for production
 
@@ -24,5 +43,6 @@ from
   gcp_bigtable_instance
 where
   instance_type <> 'PRODUCTION'
-group by instance_type;
+group by
+  instance_type;
 ```
