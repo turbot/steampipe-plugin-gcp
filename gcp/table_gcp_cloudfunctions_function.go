@@ -176,16 +176,16 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 
 			// standard gcp columns
 			{
-				Name:        "project",
-				Description: ColumnDescriptionProject,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
-			},
-			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name").Transform(locationFromFunctionName),
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}

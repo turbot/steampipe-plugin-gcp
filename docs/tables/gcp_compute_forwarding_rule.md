@@ -17,7 +17,7 @@ from
 ```
 
 
-### List of forwarding rules which are globally accessible
+### List of forwarding rules which are not globally accessible
 
 ```sql
 select

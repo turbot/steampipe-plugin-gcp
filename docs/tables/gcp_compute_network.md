@@ -30,7 +30,7 @@ where
   routing_mode = 'REGIONAL';
 ```
 
-### List the subnets stats to the network
+### Subnets counts for each network
 
 ```sql
 select
