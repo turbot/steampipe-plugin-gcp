@@ -11,7 +11,7 @@
     "load_balancing_scheme": "EXTERNAL",
     "location": "global",
     "location_type": "GLOBAL",
-    "log_config_enable": false,
+    "log_config_enable": "",
     "name": "{{ resourceName }}",
     "port": 80,
     "port_name": "http",
