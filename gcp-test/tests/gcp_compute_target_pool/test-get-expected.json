@@ -1,0 +1,11 @@
+[
+  {
+    "description": "Test compute target pool to validate integration test",
+    "health_checks": [
+      "{{ output.health_check.value }}"
+    ],
+    "kind": "compute#targetPool",
+    "name": "{{ output.resource_name.value }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

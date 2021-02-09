@@ -1,0 +1,13 @@
+[
+  {
+    "autoscaling_policy_max_nodes": 10,
+    "autoscaling_policy_min_nodes": 1,
+    "autoscaling_policy_mode": "ONLY_SCALE_OUT",
+    "description": "example google_compute_node_group for Terraform Google Provider",
+    "kind": "compute#nodeGroup",
+    "maintenance_policy": "RESTART_IN_PLACE",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
