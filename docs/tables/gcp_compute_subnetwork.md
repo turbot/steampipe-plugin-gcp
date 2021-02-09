@@ -9,12 +9,15 @@ A subnetwork (also known as a subnet) is a logical partition of a Virtual Privat
 ```sql
 select
   name,
+  gateway_address,
+  ip_cidr_range,
+  ipv6_cidr_range,
+  private_ip_google_access,
   id,
   network_name
 from
   gcp_compute_subnetwork;
 ```
-
 
 ### List of subnetworks where users have compute admin access
 
@@ -31,7 +34,6 @@ where
   p ->> 'role' = 'roles/compute.admin';
 ```
 
-
 ### Secondary IP info of each subnetwork
 
 ```sql
@@ -45,19 +47,17 @@ from
   jsonb_array_elements(secondary_ip_ranges) as p;
 ```
 
-
 ### Subnet count per network
 
 ```sql
 select
-  split_part(network, '/', 10) as network,
+  network,
   count(*) as subnet_count
 from
   gcp_compute_subnetwork
 group by
   network;
 ```
-
 
 ### List subnetworks having VPC flow logging set to false
 

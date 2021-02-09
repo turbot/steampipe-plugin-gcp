@@ -32,6 +32,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				Description: "The unique identifier for the resource. This identifier is defined by the server.",
 				Type:        proto.ColumnType_INT,
 			},
+			// For simplified view of network, without including the full path url of the network
 			{
 				Name:        "network_name",
 				Description: "The name of the network to which this subnetwork belongs.",
@@ -150,13 +151,6 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "iam_policy",
-				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getComputeSubnetworkIamPolicy,
-				Transform:   transform.FromValue(),
-			},
-			{
 				Name:        "log_config_metadata_fields",
 				Description: "Can only be specified if VPC flow logs for this subnetwork is enabled and 'metadata' was set to CUSTOM_METADATA.",
 				Type:        proto.ColumnType_JSON,
@@ -166,6 +160,14 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				Name:        "secondary_ip_ranges",
 				Description: "An array of configurations for secondary IP ranges for VM instances contained in this subnetwork.",
 				Type:        proto.ColumnType_JSON,
+			},
+
+			{
+				Name:        "iam_policy",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getComputeSubnetworkIamPolicy,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard steampipe columns
