@@ -38,6 +38,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_node_group":              tableGcpComputeNodeGroup(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
+			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
+			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
 			"gcp_compute_url_map":                 tableGcpComputeURLMap(ctx),
 			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
