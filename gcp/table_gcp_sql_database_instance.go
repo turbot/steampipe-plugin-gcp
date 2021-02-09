@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -190,11 +189,6 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Settings.PricingPlan"),
 			},
 			{
-				Name:        "region",
-				Description: "Specifies the geographical region where the instance resides.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "replication_type",
 				Description: "Specifies the type of replication this instance uses.",
 				Type:        proto.ColumnType_STRING,
@@ -351,7 +345,7 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Region").Transform(lastPathElement),
+				Transform:   transform.FromField("Region"),
 			},
 			{
 				Name:        "project",
@@ -430,9 +424,8 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 
 func sqlDatabaseInstanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	instance := d.HydrateItem.(*sql.DatabaseInstance)
-	regionName := getLastPathElement(types.SafeString(instance.Region))
 
-	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/instances/" + instance.Name}
+	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + activeProject() + "/regions/" + instance.Region + "/instances/" + instance.Name}
 
 	return akas, nil
 }

@@ -12,7 +12,6 @@
     "machine_type": "db-f1-micro",
     "name": "{{ resourceName }}",
     "project": "{{ output.project_id.value }}",
-    "region": "us-east1",
     "self_link": "{{ output.self_link.value }}",
     "storage_auto_resize": true
   }
