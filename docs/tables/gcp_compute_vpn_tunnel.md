@@ -14,18 +14,16 @@ from
   gcp_compute_vpn_tunnel;
 ```
 
-
 ### Get VPN gateway peer details
 
 ```sql
 select
   name,
   peer_ip,
-  split_part(target_vpn_gateway, '/', 11) as target_vpn_gateway
+  vpn_gateway_name
 from
   gcp_compute_vpn_tunnel;
 ```
-
 
 ### Traffic selector info of each tunnel
 
