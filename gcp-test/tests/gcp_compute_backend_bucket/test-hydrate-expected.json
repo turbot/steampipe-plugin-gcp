@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Test backend bucket to validate integration test.",
+    "enable_cdn": true,
+    "kind": "compute#backendBucket",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

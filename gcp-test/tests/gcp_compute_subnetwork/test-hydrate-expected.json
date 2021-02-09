@@ -1,0 +1,18 @@
+[
+  {
+    "iam_policy": 
+    {
+      "bindings": [
+        {
+          "members": [
+            "user:test@example.com"
+          ],
+          "role": "roles/compute.networkUser"
+        }
+      ],
+      "etag": "{{ output.etag.value }}",
+      "version": 1
+    },
+    "name": "{{ resourceName }}"
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "affinity_cookie_ttl_sec": 0,
+    "connection_draining_timeout_sec": 300,
+    "description": "Test Backend Service to verify the table.",
+    "enable_cdn": true,
+    "health_checks": [
+      "{{ output.health_check.value }}"
+    ],
+    "kind": "compute#backendService",
+    "load_balancing_scheme": "EXTERNAL",
+    "location": "global",
+    "location_type": "GLOBAL",
+    "log_config_enable": "",
+    "name": "{{ resourceName }}",
+    "port": 80,
+    "port_name": "http",
+    "project": "{{ output.project_id.value }}",
+    "protocol": "HTTP",
+    "self_link": "{{ output.self_link.value }}",
+    "signed_url_cache_max_age_sec": 7200
+  }
+]
