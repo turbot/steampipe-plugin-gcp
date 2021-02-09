@@ -35,12 +35,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_global_forwarding_rule":  tableGcpComputeGlobalForwardingRule(ctx),
 			"gcp_compute_instance":                tableGcpComputeInstance(ctx),
 			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
+			"gcp_compute_node_group":              tableGcpComputeNodeGroup(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
-			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
+			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
-			"gcp_logging_exclusion":               tableGcpLoggingExclusion(ctx),
 			"gcp_logging_metric":                  tableGcpLoggingMetric(ctx),
 			"gcp_logging_sink":                    tableGcpLoggingSink(ctx),
 			"gcp_monitoring_group":                tableGcpMonitoringGroup(ctx),
@@ -58,7 +58,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 
 				"gcp_compute_image":                   tableGcpComputeImage(ctx),
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
-				"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
 			*/
 
 		},
