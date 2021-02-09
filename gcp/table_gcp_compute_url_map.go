@@ -56,6 +56,12 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "default_service_name",
+				Description: "The defaultService name of resource to which traffic is directed if none of the hostRules match.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DefaultService").Transform(lastPathElement),
+			},
+			{
 				Name:        "fingerprint",
 				Description: "An unique system generated string, to reduce conflicts when multiple users change any property of the resource.",
 				Type:        proto.ColumnType_STRING,

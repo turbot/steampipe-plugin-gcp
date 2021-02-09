@@ -8,11 +8,10 @@ When you configure an HTTP(S) load balancer or Traffic Director, you create a UR
 select
   name,
   id,
-  split_part(default_service, '/', 10)
+  default_service_name
 from
   gcp_compute_url_map;
 ```
-
 
 ### Path matcher info of each url-map
 
@@ -22,13 +21,12 @@ select
   id,
   p ->> 'name' as name,
   r ->> 'paths' as paths,
-  split_part(r ->> 'service', '/', 10) as servise
+  split_part(r ->> 'service', '/', 10) as service
 from
   gcp_compute_url_map,
   jsonb_array_elements(path_matchers) as p,
   jsonb_array_elements(p -> 'pathRules') as r;
 ```
-
 
 ### Host rule info of each url-map
 
@@ -42,7 +40,6 @@ from
   gcp_compute_url_map,
   jsonb_array_elements(host_rules) as p;
 ```
-
 
 ### List of all global type url-maps
 
