@@ -45,8 +45,6 @@ where
 ```
 
 
-
-
 ### List instances having deletion protection feature disabled
 
 ```sql
@@ -58,9 +56,6 @@ from
 where
   not deletion_protection;
 ```
-
-
-
 
 
 ### List the disk stats attached to the instances
@@ -78,7 +73,7 @@ group by
 ```
 
 
-### Find instances with IP in a given CIDR range 
+### Find instances with IP in a given CIDR range
 
 ```sql
 select
@@ -88,7 +83,7 @@ from
   gcp_compute_instance as i,
   jsonb_array_elements(network_interfaces) as nic
 where
-    (nic ->> 'networkIP') :: inet <<= '10.128.0.0/16' ; 
+    (nic ->> 'networkIP') :: inet <<= '10.128.0.0/16' ;
 ```
 
 
@@ -98,9 +93,26 @@ select
   name,
   status,
   last_stop_timestamp
-from 
+from
     gcp_compute_instance
-where 
+where
     status = 'TERMINATED'
     and last_stop_timestamp < current_timestamp - interval '30 days' ;
+```
+
+
+### Find the boot disk of each instance
+```sql
+select
+  vm.name as instance_name,
+  d.name as disk_name,
+  d.source_image
+from
+  gcp_compute_instance as vm,
+  jsonb_array_elements(vm.disks) as vmd,
+  gcp_compute_disk as d
+where
+  vmd ->> 'source' = d.self_link
+  and (vmd ->> 'boot') :: bool
+  and d.source_image like '%debian-10-buster-v20201014';
 ```
