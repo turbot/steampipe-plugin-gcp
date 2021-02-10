@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+
 	"google.golang.org/api/compute/v1"
 )
 
@@ -24,7 +25,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "Name of the resource",
+				Description: "A friendly name that identifies the resource.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -34,12 +35,12 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "creation_timestamp",
-				Description: "The creation timestamp for this instance template",
+				Description: "The creation timestamp for this instance template.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "self_link",
-				Description: "The URL for this instance template. The server defines this URL.",
+				Description: "The server-defined URL for this instance template.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -71,22 +72,28 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Properties.CanIpForward"),
 			},
 			{
-				Name:        "instance_private_ipv6_google_access",
-				Description: "The private IPv6 google access type for VMs. If not specified, use INHERIT_FROM_SUBNETWORK as default. Possible values: \"ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE\", \"ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE\", \"INHERIT_FROM_SUBNETWORK\"",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Properties.PrivateIpv6GoogleAccess"),
-			},
-			{
 				Name:        "instance_min_cpu_platform",
 				Description: "Minimum cpu/platform to be used by instances. The instance may be scheduled on the specified or newer cpu/platform. Applicable values are the friendly names of CPU platforms, such as minCpuPlatform: \"Intel Haswell\" or minCpuPlatform: \"Intel Sandy Bridge\". For more information, read Specifying a Minimum CPU Platform.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Properties.MinCpuPlatform"),
 			},
 			{
-				Name:        "instance_network_interfaces",
-				Description: "An array of network access configurations for this interface.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Properties.NetworkInterfaces"),
+				Name:        "instance_private_ipv6_google_access",
+				Description: "The private IPv6 google access type for VMs. If not specified, use INHERIT_FROM_SUBNETWORK as default. Possible values: \"ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE\", \"ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE\", \"INHERIT_FROM_SUBNETWORK\"",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Properties.PrivateIpv6GoogleAccess"),
+			},
+			{
+				Name:        "source_instance",
+				Description: "The URL of the source instance used to create the template.",
+				Type:        proto.ColumnType_STRING,
+			},
+			// source_instance_name is a simpler view of the source_instance, without the full path
+			{
+				Name:        "source_instance_name",
+				Description: "The URL of the source instance used to create the template.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SourceInstance").Transform(lastPathElement),
 			},
 			{
 				Name:        "instance_disks",
@@ -107,22 +114,10 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Properties.Metadata"),
 			},
 			{
-				Name:        "instance_service_accounts",
-				Description: "A list of service accounts with specified scopes. Access tokens for these service accounts are available to the instances that are created from these properties.",
+				Name:        "instance_network_interfaces",
+				Description: "An array of network access configurations for this interface.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Properties.ServiceAccounts"),
-			},
-			{
-				Name:        "instance_scheduling",
-				Description: "Specifies the scheduling options for the instances that are created from these properties.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Properties.Scheduling"),
-			},
-			{
-				Name:        "instance_labels",
-				Description: "Labels to apply to instances that are created from these properties.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Properties.Labels"),
+				Transform:   transform.FromField("Properties.NetworkInterfaces"),
 			},
 			{
 				Name:        "instance_reservation_affinity",
@@ -131,19 +126,43 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Properties.ReservationAffinity"),
 			},
 			{
+				Name:        "instance_resource_policies",
+				Description: "Resource policies (names, not URLs) applied to instances created from these properties.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Properties.ResourcePolicies"),
+			},
+			{
+				Name:        "instance_scheduling",
+				Description: "Specifies the scheduling options for the instances that are created from these properties.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Properties.Scheduling"),
+			},
+			{
+				Name:        "instance_service_accounts",
+				Description: "A list of service accounts with specified scopes. Access tokens for these service accounts are available to the instances that are created from these properties.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Properties.ServiceAccounts"),
+			},
+			{
 				Name:        "instance_shielded_instance_config",
 				Description: "A set of Shielded Instance options.",
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Properties.ShieldedInstanceConfig"),
 			},
 			{
-				Name:        "instance_resource_policies",
-				Description: "Resource policies (names, not ULRs) applied to instances created from these properties.",
+				Name:        "instance_tags",
+				Description: "A list of tags to apply to the instances that are created from these properties. The tags identify valid sources or targets for network firewalls.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Properties.ResourcePolicies"),
+				Transform:   transform.FromField("Properties.Tags"),
 			},
 
 			// common resource columns
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Properties.Labels"),
+			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -206,6 +225,13 @@ func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plu
 
 	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
+
+	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
+	// trying to unmarshal "projects/project/global/instanceTemplates/" into uint64
+	if len(name) < 1 {
+		return nil, nil
+	}
+
 	resp, err := service.InstanceTemplates.Get(project, name).Do()
 	if err != nil {
 		return nil, err
