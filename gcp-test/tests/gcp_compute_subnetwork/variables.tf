@@ -88,6 +88,10 @@ output "self_link" {
   value = google_compute_subnetwork.named_test_resource.self_link
 }
 
+output "gateway_address" {
+  value = google_compute_subnetwork.named_test_resource.gateway_address
+}
+
 output "network" {
   value = google_compute_subnetwork.named_test_resource.network
 }
