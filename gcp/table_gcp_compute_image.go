@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -57,6 +58,11 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "deprecated",
+				Description: "The deprecation status associated with this image.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "archive_size_bytes",
 				Description: "Size of the image tar.gz archive stored in Google Cloud Storage (in bytes).",
 				Type:        proto.ColumnType_INT,
@@ -102,6 +108,12 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "source_project",
+				Description: "The project in which the image is defined.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
+			},
+			{
 				Name:        "source_snapshot",
 				Description: "The ID value of the snapshot used to create this image.",
 				Type:        proto.ColumnType_STRING,
@@ -126,13 +138,13 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Description: "A list of features to enable on the guest operating system.",
 				Type:        proto.ColumnType_JSON,
 			},
-			// {
-			// 	Name:        "iam_policy",
-			// 	Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
-			// 	Type:        proto.ColumnType_JSON,
-			// 	Hydrate:     getComputeImageIamPolicy,
-			// 	Transform:   transform.FromValue(),
-			// },
+			{
+				Name:        "iam_policy",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getComputeImageIamPolicy,
+				Transform:   transform.FromValue(),
+			},
 			{
 				Name:        "licenses",
 				Description: "A list of applicable license URI.",
@@ -192,9 +204,9 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 			// standard gcp columns
 			{
 				Name:        "project",
-				Description: ColumnDescriptionProject,
+				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
+				Transform:   transform.FromConstant(activeProject()),
 			},
 		},
 	}
@@ -271,6 +283,8 @@ func getRowDataForImageAsync(ctx context.Context, service *compute.Service, item
 
 func getRowDataForImage(ctx context.Context, service *compute.Service, project string) ([]*compute.Image, error) {
 	var items []*compute.Image
+
+	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
 	resp := service.Images.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {
@@ -310,27 +324,28 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	return req, nil
 }
 
-// func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-// 	service, err := compute.NewService(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	service, err := compute.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-// 	image := h.Item.(*compute.Image)
-// 	project := activeProject()
+	image := h.Item.(*compute.Image)
+	splittedTitle := strings.Split(image.SelfLink, "/")
+	imageProject := types.SafeString(splittedTitle[6])
+	project := activeProject()
 
-// 	req, err := service.Images.GetIamPolicy(project, image.Name).Do()
-// 	if err != nil {
-// 		// Return nil, if the resource not present
-// 		result := isNotFoundError([]string{"404"})
-// 		if result != nil {
-// 			return nil, nil
-// 		}
-// 		return nil, err
-// 	}
+	if strings.ToLower(imageProject) != strings.ToLower(project) {
+		return nil, nil
+	}
 
-// 	return req, nil
-// }
+	resp, err := service.Images.GetIamPolicy(project, image.Name).Do()
+	if err != nil {
+		return err, nil
+	}
+
+	return resp, nil
+}
 
 //// TRANSFORM FUNCTIONS
 

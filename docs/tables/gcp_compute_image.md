@@ -14,6 +14,18 @@ from
   gcp_compute_image;
 ```
 
+### List of standard compute images
+
+```sql
+select
+  name,
+  id,
+  source_project
+from
+  gcp_compute_image
+where
+  deprecated is null;
+```
 
 ### List of compute images which are not encrypted
 
@@ -28,7 +40,6 @@ where
   image_encryption_key is null;
 ```
 
-
 ### List of compute images which do not have owner tag key
 
 ```sql
@@ -41,8 +52,8 @@ where
   tags -> 'owner' is null;
 ```
 
-
 ### List of compute images older than 90 days
+
 ```sql
 select
   name,
@@ -52,6 +63,6 @@ from
   gcp_compute_image
 where
   creation_timestamp <= (current_date - interval '90' day)
-order by 
+order by
   creation_timestamp;
 ```
