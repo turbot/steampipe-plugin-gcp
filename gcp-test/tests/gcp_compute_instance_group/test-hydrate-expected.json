@@ -5,6 +5,6 @@
     "name": "{{ resourceName }}",
     "self_link": "{{ output.self_link.value }}",
     "size": 0,
-    "zone": "https://www.googleapis.com/compute/v1/projects/pikachu-aaa/zones/us-east1-b"
+    "zone": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/zones/us-east1-b"
   }
 ]
