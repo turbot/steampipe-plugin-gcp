@@ -58,6 +58,12 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "deprecation_state",
+				Description: "The deprecation state of this resource. This can be ACTIVE, DEPRECATED, OBSOLETE, or DELETED. Operations which communicate the end of life date for an image, can use ACTIVE. Operations which create a new resource using a DEPRECATED resource will return successfully, but with a warning indicating the deprecated resource and recommending its replacement. Operations which use OBSOLETE or DELETED resources will be rejected and result in an error.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Deprecated.State"),
+			},
+			{
 				Name:        "deprecated",
 				Description: "The deprecation status associated with this image.",
 				Type:        proto.ColumnType_JSON,
