@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test Node Template resource to verify the table.",
+    "name": "{{ resourceName }}"
+  }
+]
