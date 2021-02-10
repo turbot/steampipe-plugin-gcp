@@ -1,0 +1,11 @@
+[
+	{
+		"broadcast": "10.2.255.255/16",
+		"gateway_address": "10.2.0.1",
+		"hosts_per_subnet": 65535,
+		"ip_cidr_range": "10.2.0.0/16",
+		"name": "{{ resourceName }}",
+		"netmask": "255.255.0.0",
+		"network": "10.2.0.0/16"
+	}
+]
