@@ -24,7 +24,7 @@ select
 from
   gcp_compute_image
 where
-  deprecated is null;
+  deprecation_state = 'ACTIVE';
 ```
 
 ### List of compute images which are not encrypted
