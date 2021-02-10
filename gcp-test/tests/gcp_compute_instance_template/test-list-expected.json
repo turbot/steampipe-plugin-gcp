@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test instance template to verify the table.",
+    "name": "{{ resourceName }}"
+  }
+]
