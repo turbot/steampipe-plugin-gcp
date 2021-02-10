@@ -1,0 +1,18 @@
+[
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "labels": {
+      "name": "{{resourceName}}"
+    },
+    "location": "us-central1-a",
+    "name": "{{resourceName}}",
+    "project": "{{ output.project.value }}",
+    "self_link": "{{ output.self_link.value }}",
+    "tags": {
+      "name": "{{resourceName}}"
+    },
+    "title": "{{resourceName}}"
+  }
+]

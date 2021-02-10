@@ -1,0 +1,23 @@
+[
+	{
+		"description": "Test subnetwork to validate integration test.",
+		"enable_flow_logs": false,
+		"gateway_address": "{{ output.gateway_address.value }}",
+		"ip_cidr_range": "10.2.0.0/16",
+		"kind": "compute#subnetwork",
+		"location": "us-east1",
+		"log_config_enable": false,
+		"name": "{{ resourceName }}",
+		"network": "{{ output.network.value }}",
+		"network_name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"region": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/regions/us-east1",
+		"secondary_ip_ranges": [
+			{
+				"ipCidrRange": "192.168.10.0/24",
+				"rangeName": "{{ resourceName }}"
+			}
+		],
+		"self_link": "{{ output.self_link.value }}"
+	}
+]

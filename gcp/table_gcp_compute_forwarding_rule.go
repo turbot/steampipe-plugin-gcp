@@ -2,27 +2,27 @@ package gcp
 
 import (
 	"context"
-	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
-	"google.golang.org/api/compute/v1"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 //// TABLE DEFINITION
 
-func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
+func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_compute_global_forwarding_rule",
-		Description: "GCP Compute Global Forwarding Rule",
+		Name:        "gcp_compute_forwarding_rule",
+		Description: "GCP Compute Forwarding Rule",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeGlobalForwardingRule,
+			Hydrate:    getComputeForwardingRule,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeGlobalForwardingRules,
+			Hydrate: listComputeForwardingRules,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -54,6 +54,11 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 			{
 				Name:        "kind",
 				Description: "The type of the resource.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "region",
+				Description: "The URL of the region where the regional forwarding rule resides.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -147,8 +152,19 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Description: "A list of ports can be configured.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "labels",
+				Description: "A list of labels attached to this resource.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// standard steampipe columns
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Labels"),
+			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -159,10 +175,16 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(globalForwardingRuleSelfLinkToTurbotData, "Akas"),
+				Transform:   transform.From(forwardingRuleAka),
 			},
 
 			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Region").Transform(lastPathElement),
+			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
@@ -175,17 +197,19 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	service, err := compute.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	project := activeProject()
-	resp := service.GlobalForwardingRules.List(project)
-	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleList) error {
-		for _, globalForwardingRule := range page.Items {
-			d.StreamListItem(ctx, globalForwardingRule)
+	resp := service.ForwardingRules.AggregatedList(project)
+	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleAggregatedList) error {
+		for _, item := range page.Items {
+			for _, forwardingRule := range item.ForwardingRules {
+				d.StreamListItem(ctx, forwardingRule)
+			}
 		}
 		return nil
 	}); err != nil {
@@ -197,35 +221,46 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 
 //// HYDRATE FUNCTIONS
 
-func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	service, err := compute.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	var forwardingRule compute.ForwardingRule
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	project := activeProject()
 
-	req, err := service.GlobalForwardingRules.Get(project, name).Do()
-	if err != nil {
+	resp := service.ForwardingRules.AggregatedList(project).Filter("name=" + name)
+	if err := resp.Pages(
+		ctx,
+		func(page *compute.ForwardingRuleAggregatedList) error {
+			for _, item := range page.Items {
+				for _, i := range item.ForwardingRules {
+					forwardingRule = *i
+				}
+			}
+			return nil
+		},
+	); err != nil {
 		return nil, err
 	}
 
-	return req, nil
+	// If the specified resource is not present, API does not return any not found errors
+	if len(forwardingRule.Name) < 1 {
+		return nil, nil
+	}
+
+	return &forwardingRule, nil
 }
 
 //// TRANSFORM FUNCTIONS
 
-func globalForwardingRuleSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	globalForwardingRule := d.HydrateItem.(*compute.ForwardingRule)
-	param := d.Param.(string)
+func forwardingRuleAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	forwardingRule := d.HydrateItem.(*compute.ForwardingRule)
+	regionName := getLastPathElement(types.SafeString(forwardingRule.Region))
 
-	splittedData := strings.Split(globalForwardingRule.SelfLink, "/")
+	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/forwardingRules/" + forwardingRule.Name}
 
-	turbotData := map[string]interface{}{
-		"Project": splittedData[6],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedData[6] + "/global/forwardingRules/" + globalForwardingRule.Name},
-	}
-
-	return turbotData[param], nil
+	return akas, nil
 }

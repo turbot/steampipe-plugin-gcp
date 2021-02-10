@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test router to verify the table.",
+    "name": "{{ resourceName }}"
+  }
+]
