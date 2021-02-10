@@ -2,6 +2,8 @@
 
 Node templates specify properties for creating sole-tenant nodes, such as node type, vCPU and memory requirements, node affinity labels, and region.
 
+## Examples
+
 ### List of n2-node-80-640 type node templates
 
 ```sql

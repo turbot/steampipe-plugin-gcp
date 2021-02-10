@@ -1,6 +1,8 @@
 # Table: gcp_compute_node_group
 
-Represent a sole-tenant Node Group resource. A sole-tenant node is a physical server that is dedicated to hosting VM instances only for specific project. Use sole-tenant nodes to keep the instances physically separated from instances in other projects, or to group the instances together on the same host hardware.
+Represent a sole-tenant Node Group resource.
+
+A sole-tenant node is a physical server that is dedicated to hosting VM instances only for specific project. Use sole-tenant nodes to keep the instances physically separated from instances in other projects, or to group the instances together on the same host hardware.
 
 ## Examples
 

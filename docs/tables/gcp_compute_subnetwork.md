@@ -73,11 +73,12 @@ where
 ```
 
 ### IP Info subnets
+
 ```sql
 select
   name,
   id,
-  ip_cidr_range
+  ip_cidr_range,
   gateway_address,
   broadcast(ip_cidr_range),
   netmask(ip_cidr_range),
