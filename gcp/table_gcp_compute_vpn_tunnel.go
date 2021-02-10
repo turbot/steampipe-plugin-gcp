@@ -120,6 +120,13 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 				Description: "The URL of the VPN gateway with which this VPN tunnel is associated.",
 				Type:        proto.ColumnType_STRING,
 			},
+			// simplified view of the vpn gateway, without the full path
+			{
+				Name:        "vpn_gateway_name",
+				Description: "The URL of the VPN gateway with which this VPN tunnel is associated.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("VpnGateway").Transform(lastPathElement),
+			},
 			{
 				Name:        "vpn_gateway_interface",
 				Description: "The interface ID of the VPN gateway with which this VPN tunnel is associated",

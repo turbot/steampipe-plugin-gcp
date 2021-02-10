@@ -1,0 +1,9 @@
+[
+  {
+    "description": "example google_compute_node_group for Terraform Google Provider",
+    "kind": "compute#nodeGroup",
+    "location": "us-central1-a",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

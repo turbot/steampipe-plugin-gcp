@@ -1,0 +1,16 @@
+[
+  {
+    "description": "Test VPN Tunnel to validate integration test.",
+    "ike_version": 2,
+    "kind": "compute#vpnTunnel",
+    "location": "us-east1",
+    "name": "{{ resourceName }}",
+    "peer_external_gateway_interface": 0,
+    "peer_ip": "15.0.0.120",
+    "project": "{{ output.project_id.value }}",
+    "region": "https://www.googleapis.com/compute/v1/projects/pikachu-aaa/regions/us-east1",
+    "self_link": "{{ output.self_link.value }}",
+    "target_vpn_gateway": "{{ output.target_vpn_gateway.value }}",
+    "vpn_gateway_interface": 0
+  }
+]
