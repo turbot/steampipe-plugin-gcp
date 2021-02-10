@@ -19,7 +19,7 @@ from
   gcp_compute_subnetwork;
 ```
 
-### List of subnetworks where users have compute admin access
+### List of subnetworks where users have compute admin access assigned in a resource policy
 
 ```sql
 select
@@ -70,4 +70,19 @@ from
   gcp_compute_subnetwork
 where
   not enable_flow_logs;
+```
+
+### IP Info subnets
+```sql
+select
+  name,
+  id,
+  ip_cidr_range
+  gateway_address,
+  broadcast(ip_cidr_range),
+  netmask(ip_cidr_range),
+  network(ip_cidr_range),
+  pow(2, 32 - masklen(ip_cidr_range)) -1 as hosts_per_subnet
+from
+  gcp_compute_subnetwork;
 ```
