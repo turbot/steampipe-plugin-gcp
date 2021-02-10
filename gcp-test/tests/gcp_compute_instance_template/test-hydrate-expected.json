@@ -1,0 +1,10 @@
+[
+	{
+		"description": "Test instance template to verify the table.",
+		"instance_description": "A dummy description",
+		"instance_machine_type": "f1-micro",
+		"kind": "compute#instanceTemplate",
+		"name": "{{ resourceName }}",
+		"self_link": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/global/instanceTemplates/{{ resourceName }}"
+	}
+]
