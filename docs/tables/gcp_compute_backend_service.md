@@ -1,6 +1,8 @@
 # Table: gcp_compute_backend_service
 
-A backend service defines how Google Cloud load balancers distribute traffic. The backend service configuration contains a set of values, such as the protocol used to connect to backends, various distribution and session settings, health checks, and timeouts.
+A backend service defines how Google Cloud load balancers distribute traffic. The backend service configuration contains a set of values, such as the protocol used to connect to back-ends, various distribution and session settings, health checks, and timeouts.
+
+## Examples
 
 ### Backend info of backend service
 
@@ -16,7 +18,7 @@ from
 ```
 
 
-### List of backend services where health check is not configure
+### List of backend services where health check is not configured
 
 ```sql
 select
@@ -45,7 +47,7 @@ where
 ```
 
 
-### List of backend services where log config is not enable
+### List of backend services where logging is not enabled
 
 ```sql
 select
