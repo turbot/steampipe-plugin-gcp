@@ -158,7 +158,7 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -173,7 +173,7 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Firewalls.List(project)
 	if err := resp.Pages(ctx, func(page *compute.FirewallList) error {
 		for _, firewall := range page.Items {
@@ -196,7 +196,7 @@ func getComputeFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/firewalls/" into uint64

@@ -151,7 +151,7 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -160,7 +160,7 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	project := projectName
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {
@@ -184,7 +184,7 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	service, err := pubsub.NewService(ctx)
 	if err != nil {

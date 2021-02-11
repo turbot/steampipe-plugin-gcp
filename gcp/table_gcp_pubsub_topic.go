@@ -93,7 +93,7 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Projects.Topics.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListTopicsResponse) error {
 		for _, topic := range page.Topics {
@@ -116,7 +116,7 @@ func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	req, err := service.Projects.Topics.Get("projects/" + project + "/topics/" + name).Do()
 	if err != nil {

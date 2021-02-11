@@ -125,7 +125,7 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -140,7 +140,7 @@ func listComputeRouters(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Routers.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.RouterAggregatedList) error {
 		for _, item := range page.Items {
@@ -166,7 +166,7 @@ func getComputeRouter(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	var router compute.Router
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.Routers.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

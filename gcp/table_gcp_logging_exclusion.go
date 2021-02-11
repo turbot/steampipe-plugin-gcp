@@ -81,7 +81,7 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -95,7 +95,7 @@ func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugi
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Projects.Exclusions.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -123,7 +123,7 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Exclusions.Get("projects/" + project + "/exclusions/" + name).Do()
@@ -139,7 +139,7 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 func exclusionNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	exclusion := d.HydrateItem.(*logging.LogExclusion)
-	project := activeProject()
+	project := projectName
 
 	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/exclusions/" + exclusion.Name}

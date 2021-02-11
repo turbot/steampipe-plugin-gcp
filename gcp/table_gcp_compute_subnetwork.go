@@ -195,7 +195,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -210,7 +210,7 @@ func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Subnetworks.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.SubnetworkAggregatedList) error {
 		for _, item := range page.Items {
@@ -238,7 +238,7 @@ func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	var subnetwork compute.Subnetwork
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Subnetworks.AggregatedList(project).Filter("name=" + name)
@@ -271,7 +271,7 @@ func getComputeSubnetworkIamPolicy(ctx context.Context, d *plugin.QueryData, h *
 	}
 
 	var resp *compute.Policy
-	project := activeProject()
+	project := projectName
 	regionName := getLastPathElement(types.SafeString(subnetwork.Region))
 
 	resp, err = service.Subnetworks.GetIamPolicy(project, regionName, subnetwork.Name).Do()

@@ -131,7 +131,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -145,7 +145,7 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.GlobalAddresses.List(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
 		for _, globalAddress := range page.Items {
@@ -168,7 +168,7 @@ func getComputeGlobalAddress(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/addresses/" into uint64

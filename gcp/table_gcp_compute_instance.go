@@ -253,7 +253,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -270,7 +270,7 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Instances.AggregatedList(project)
 	if err := resp.Pages(
 		ctx,
@@ -301,7 +301,7 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	var instance compute.Instance
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Instances.AggregatedList(project).Filter("name=" + name)

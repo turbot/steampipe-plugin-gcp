@@ -144,7 +144,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -159,7 +159,7 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.NodeGroups.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.NodeGroupAggregatedList) error {
 		for _, item := range page.Items {
@@ -185,7 +185,7 @@ func getComputeNodeGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	var nodeGroup compute.NodeGroup
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.NodeGroups.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -217,7 +217,7 @@ func getComputeNodeGroupIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	nodeGroup := h.Item.(*compute.NodeGroup)
-	project := activeProject()
+	project := projectName
 	zoneName := getLastPathElement(types.SafeString(nodeGroup.Zone))
 
 	req, err := service.NodeGroups.GetIamPolicy(project, zoneName, nodeGroup.Name).Do()

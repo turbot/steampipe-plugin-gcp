@@ -75,7 +75,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -84,7 +84,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	project := projectName
 
 	service, err := monitoring.NewService(ctx)
 	if err != nil {
@@ -108,7 +108,7 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := monitoring.NewService(ctx)

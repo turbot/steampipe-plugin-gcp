@@ -148,7 +148,7 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -163,7 +163,7 @@ func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Routes.List(project)
 	if err := resp.Pages(ctx, func(page *compute.RouteList) error {
 		for _, route := range page.Items {
@@ -186,7 +186,7 @@ func getComputeRoute(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/routes/" into uint64

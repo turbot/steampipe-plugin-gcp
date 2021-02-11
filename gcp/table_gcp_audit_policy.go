@@ -50,7 +50,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -64,7 +64,7 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 func serviceNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	auditConfig := d.HydrateItem.(*cloudresourcemanager.AuditConfig)
-	project := activeProject()
+	project := projectName
 
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/services/" + auditConfig.Service}
 

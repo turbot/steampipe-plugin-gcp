@@ -106,7 +106,7 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -121,7 +121,7 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, _ *p
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.TargetVpnGateways.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetVpnGatewayAggregatedList) error {
 		for _, item := range page.Items {
@@ -147,7 +147,7 @@ func getComputeTargetVpnGateway(ctx context.Context, d *plugin.QueryData, h *plu
 
 	var targetVpnGateway compute.TargetVpnGateway
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.TargetVpnGateways.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

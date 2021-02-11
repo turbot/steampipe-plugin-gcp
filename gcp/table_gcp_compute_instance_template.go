@@ -187,7 +187,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -201,7 +201,7 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.InstanceTemplates.List(project)
 	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateList) error {
 		for _, template := range page.Items {
@@ -223,7 +223,7 @@ func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plu
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,

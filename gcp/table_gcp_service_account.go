@@ -84,7 +84,7 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -98,7 +98,7 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Projects.ServiceAccounts.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,

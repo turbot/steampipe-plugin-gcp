@@ -102,7 +102,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -135,7 +135,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// TODO :: Need to fetch the details from env
-	project := activeProject()
+	project := projectName
 
 	// List all the project roles
 	customRoles := service.Projects.Roles.List("projects/" + project)

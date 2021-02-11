@@ -213,7 +213,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -227,7 +227,7 @@ func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	if err != nil {
 		return nil, err
 	}
-	project := activeProject()
+	project := projectName
 
 	// List of projects in which standard images resides
 	projectList := []string{
@@ -315,7 +315,7 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	project := d.KeyColumnQuals["project"].GetStringValue()
-	// project := activeProject()
+	// project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64
@@ -340,7 +340,7 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	image := h.Item.(*compute.Image)
 	splittedTitle := strings.Split(image.SelfLink, "/")
 	imageProject := types.SafeString(splittedTitle[6])
-	project := activeProject()
+	project := projectName
 
 	if strings.ToLower(imageProject) != strings.ToLower(project) {
 		return nil, nil

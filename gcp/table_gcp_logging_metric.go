@@ -163,7 +163,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -177,7 +177,7 @@ func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Projects.Metrics.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -205,7 +205,7 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Metrics.Get("projects/" + project + "/metrics/" + name).Do()
@@ -221,7 +221,7 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 func metricNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	metric := d.HydrateItem.(*logging.LogMetric)
-	project := activeProject()
+	project := projectName
 
 	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/metrics/" + metric.Name}

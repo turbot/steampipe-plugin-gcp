@@ -104,7 +104,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -119,7 +119,7 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.TargetPools.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetPoolAggregatedList) error {
 		for _, item := range page.Items {
@@ -145,7 +145,7 @@ func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	var targetPool compute.TargetPool
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.TargetPools.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

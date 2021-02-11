@@ -188,7 +188,7 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -203,7 +203,7 @@ func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.UrlMaps.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.UrlMapsAggregatedList) error {
 		for _, item := range page.Items {
@@ -229,7 +229,7 @@ func getComputeURLMap(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	var urlMap compute.UrlMap
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.UrlMaps.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

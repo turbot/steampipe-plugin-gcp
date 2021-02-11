@@ -189,7 +189,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -203,7 +203,7 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.ForwardingRules.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleAggregatedList) error {
 		for _, item := range page.Items {
@@ -229,7 +229,7 @@ func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	var forwardingRule compute.ForwardingRule
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.ForwardingRules.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

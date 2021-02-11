@@ -233,7 +233,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -242,7 +242,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	project := projectName
 
 	service, err := storage.NewService(ctx)
 	if err != nil {
@@ -263,7 +263,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 }
 
 func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// project := activeProject()
+	// project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := storage.NewService(ctx)
@@ -356,7 +356,7 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 
 func bucketAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	bucket := d.HydrateItem.(*storage.Bucket)
-	project := activeProject()
+	project := projectName
 
 	akas := []string{"gcp://storage.googleapis.com/projects/" + project + "/buckets/" + bucket.Name}
 	return akas, nil

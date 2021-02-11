@@ -87,7 +87,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 				Description: "Specifies whether to enable logging for the load balancer traffic served by this backend service, or not.",
 				Type:        proto.ColumnType_BOOL,
 				// Default:     false,
-				Transform:   transform.FromField("LogConfig.Enable"),
+				Transform: transform.FromField("LogConfig.Enable"),
 			},
 			{
 				Name:        "log_config_sample_rate",
@@ -220,7 +220,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -235,7 +235,7 @@ func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.BackendServices.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.BackendServiceAggregatedList) error {
 		for _, item := range page.Items {
@@ -261,7 +261,7 @@ func getComputeBackendService(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	var backendService compute.BackendService
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.BackendServices.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

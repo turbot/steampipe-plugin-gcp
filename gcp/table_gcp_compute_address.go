@@ -131,7 +131,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -146,7 +146,7 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Addresses.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
 		for _, item := range page.Items {
@@ -172,7 +172,7 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.Addresses.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

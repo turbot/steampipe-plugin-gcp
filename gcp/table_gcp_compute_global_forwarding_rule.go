@@ -173,7 +173,7 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -187,7 +187,7 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.GlobalForwardingRules.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleList) error {
 		for _, globalForwardingRule := range page.Items {
@@ -210,7 +210,7 @@ func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h 
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	req, err := service.GlobalForwardingRules.Get(project, name).Do()
 	if err != nil {

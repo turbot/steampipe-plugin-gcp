@@ -102,7 +102,7 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -116,7 +116,7 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Projects.Sinks.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -144,7 +144,7 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Sinks.Get("projects/" + project + "/sinks/" + name).Do()
@@ -160,7 +160,7 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 func sinkNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	sink := d.HydrateItem.(*logging.LogSink)
-	project := activeProject()
+	project := projectName
 
 	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/sinks/" + sink.Name}

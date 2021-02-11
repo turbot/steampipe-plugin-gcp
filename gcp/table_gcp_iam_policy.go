@@ -63,7 +63,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -72,7 +72,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	project := projectName
 	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
 
 	service, err := cloudresourcemanager.NewService(ctx)
@@ -93,7 +93,7 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 //// TRANSFORM FUNCTION
 
 func iamPolicyTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	project := activeProject()
+	project := projectName
 	param := types.SafeString(d.Param)
 
 	// Get the resource title

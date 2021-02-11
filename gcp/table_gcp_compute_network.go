@@ -115,7 +115,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -130,7 +130,7 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Networks.List(project)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
 		for _, network := range page.Items {
@@ -155,7 +155,7 @@ func getComputeNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp, err := service.Networks.Get(project, name).Do()

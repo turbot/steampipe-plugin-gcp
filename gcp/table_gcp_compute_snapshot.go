@@ -161,7 +161,7 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -177,7 +177,7 @@ func listComputeSnapshots(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Snapshots.List(project)
 	if err := resp.Pages(ctx, func(page *compute.SnapshotList) error {
 		for _, snapshot := range page.Items {
@@ -202,7 +202,7 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,

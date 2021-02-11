@@ -93,7 +93,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -107,7 +107,7 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Projects.NotificationChannels.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -130,7 +130,7 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	logger := plugin.Logger(ctx)
 	logger.Trace("getGcpMonitoringNotificationChannel")
 
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	service, err := monitoring.NewService(ctx)

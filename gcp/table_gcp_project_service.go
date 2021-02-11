@@ -63,7 +63,7 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -89,7 +89,7 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// TODO :: Need to fetch the details from env
-	project := activeProject()
+	project := projectName
 
 	result := service.Services.List("projects/" + project)
 	if err := result.Pages(
@@ -118,7 +118,7 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// TODO :: Need to fetch the details from env
-	project := activeProject()
+	project := projectName
 
 	op, err := service.Services.Get("projects/" + project + "/services/" + serviceData.Name).Do()
 	if err != nil {

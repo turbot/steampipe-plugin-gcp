@@ -185,7 +185,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -202,7 +202,7 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	data := "projects/" + project + "/locations/-" // '-' for all locations...
 
 	resp := service.Projects.Locations.Functions.List(data)

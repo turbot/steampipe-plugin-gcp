@@ -248,7 +248,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -264,7 +264,7 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.Disks.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.DiskAggregatedList) error {
 		for _, item := range page.Items {
@@ -290,7 +290,7 @@ func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	var disk compute.Disk
-	project := activeProject()
+	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Disks.AggregatedList(project).Filter("name=" + name)
@@ -318,7 +318,7 @@ func getComputeDiskIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	var resp *compute.Policy
-	project := activeProject()
+	project := projectName
 	zoneName := getLastPathElement(types.SafeString(disk.Zone))
 
 	// disk can be regional or zonal

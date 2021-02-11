@@ -168,7 +168,7 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromConstant(projectName),
 			},
 		},
 	}
@@ -183,7 +183,7 @@ func listComputeVpnTunnels(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	project := activeProject()
+	project := projectName
 	resp := service.VpnTunnels.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.VpnTunnelAggregatedList) error {
 		for _, item := range page.Items {
@@ -209,7 +209,7 @@ func getComputeVpnTunnel(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	var vpnTunnel compute.VpnTunnel
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := projectName
 
 	resp := service.VpnTunnels.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
