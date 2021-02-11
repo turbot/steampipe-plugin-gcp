@@ -6,7 +6,7 @@
       "bindings": [
         {
           "members": [
-            "{{ output.email.value }}"
+            "serviceAccount:{{ output.email.value }}"
           ],
           "role": "roles/compute.imageUser"
         }

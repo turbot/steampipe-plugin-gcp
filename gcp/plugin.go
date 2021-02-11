@@ -34,6 +34,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
 			"gcp_compute_global_address":          tableGcpComputeGlobalAddress(ctx),
 			"gcp_compute_global_forwarding_rule":  tableGcpComputeGlobalForwardingRule(ctx),
+			"gcp_compute_image":                   tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                tableGcpComputeInstance(ctx),
 			"gcp_compute_instance_template":       tableGcpComputeInstanceTemplate(ctx),
 			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
@@ -60,11 +61,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account":                 tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
+
 			/*
 				https://github.com/turbot/steampipe/issues/108
-				https://github.com/turbot/steampipe/issues/126
-
-				"gcp_compute_image":                   tableGcpComputeImage(ctx),
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
 			*/
 
