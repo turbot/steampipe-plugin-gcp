@@ -58,16 +58,16 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "deprecated",
+				Description: "An object comtaining the detailed deprecation status associated with this image.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "deprecation_state",
 				Description: "The deprecation state associated with this image.",
 				Default:     "ACTIVE",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Deprecated.State"),
-			},
-			{
-				Name:        "deprecated",
-				Description: "The deprecation status associated with this image.",
-				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "archive_size_bytes",
