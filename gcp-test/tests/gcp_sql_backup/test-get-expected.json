@@ -1,0 +1,8 @@
+[
+  {
+    "instance_name": "{{ resourceName }}",
+    "kind": "sql#backupRun",
+    "self_link": "{{ output.self_link.value }}",
+    "type": "ON_DEMAND"
+  }
+]
