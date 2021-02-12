@@ -11,11 +11,6 @@ import (
 	sql "google.golang.org/api/sql/v1beta4"
 )
 
-type sqlDatabaseInfo = struct {
-	Database *sql.BackupRun
-	Region   string
-}
-
 //// TABLE DEFINITION
 
 func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
