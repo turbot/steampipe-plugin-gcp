@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Test Backend Service to verify the table.",
+    "enable_cdn": true,
+    "kind": "compute#backendService",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

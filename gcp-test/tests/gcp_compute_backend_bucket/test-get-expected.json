@@ -1,0 +1,11 @@
+[
+  {
+    "bucket_name": "{{ resourceName }}",
+    "description": "Test backend bucket to validate integration test.",
+    "enable_cdn": true,
+    "kind": "compute#backendBucket",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
