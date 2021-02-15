@@ -350,10 +350,10 @@ func diskAka(_ context.Context, d *transform.TransformData) (interface{}, error)
 	regionName := getLastPathElement(types.SafeString(i.Region))
 	diskName := types.SafeString(i.Name)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/disks/" + diskName}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/zones/" + zoneName + "/disks/" + diskName}
 
 	if zoneName == "" {
-		akas = []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/disks/" + diskName}
+		akas = []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/disks/" + diskName}
 	}
 
 	return akas, nil

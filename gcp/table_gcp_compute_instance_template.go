@@ -246,7 +246,7 @@ func instanceTemplateAka(_ context.Context, d *transform.TransformData) (interfa
 	instanceTemplate := d.HydrateItem.(*compute.InstanceTemplate)
 	templateName := types.SafeString(instanceTemplate.Name)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/instanceTemplates/" + templateName}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/instanceTemplates/" + templateName}
 
 	return akas, nil
 }

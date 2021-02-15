@@ -241,7 +241,7 @@ func gcpComputeNodeGroupAka(_ context.Context, d *transform.TransformData) (inte
 	zoneName := getLastPathElement(types.SafeString(nodeGroup.Zone))
 	nodeGroupName := types.SafeString(nodeGroup.Name)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/nodeGroups/" + nodeGroupName}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/zones/" + zoneName + "/nodeGroups/" + nodeGroupName}
 
 	return akas, nil
 }

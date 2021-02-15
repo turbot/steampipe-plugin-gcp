@@ -292,10 +292,10 @@ func gcpComputeBackendServiceAka(_ context.Context, d *transform.TransformData) 
 	backendService := d.HydrateItem.(*compute.BackendService)
 	regionName := getLastPathElement(types.SafeString(backendService.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/backendServices/" + backendService.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/backendServices/" + backendService.Name}
 
 	if regionName == "" {
-		akas = []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/backendServices/" + backendService.Name}
+		akas = []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/backendServices/" + backendService.Name}
 	}
 
 	return akas, nil

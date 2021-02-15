@@ -228,7 +228,7 @@ func gcpComputeFirewallTurbotData(_ context.Context, d *transform.TransformData)
 
 	turbotData := map[string]interface{}{
 		"Action": action,
-		"Akas":   []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/firewalls/" + firewall.Name},
+		"Akas":   []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/firewalls/" + firewall.Name},
 	}
 
 	return turbotData[param], nil

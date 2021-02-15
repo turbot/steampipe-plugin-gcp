@@ -287,7 +287,7 @@ func computeSubnetworkAka(_ context.Context, d *transform.TransformData) (interf
 	subnetwork := d.HydrateItem.(*compute.Subnetwork)
 	regionName := getLastPathElement(types.SafeString(subnetwork.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/subnetworks/" + subnetwork.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/subnetworks/" + subnetwork.Name}
 
 	return akas, nil
 }

@@ -177,7 +177,7 @@ func targetPoolAka(_ context.Context, d *transform.TransformData) (interface{}, 
 	targetPool := d.HydrateItem.(*compute.TargetPool)
 	regionName := getLastPathElement(types.SafeString(targetPool.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/targetPools/" + targetPool.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/targetPools/" + targetPool.Name}
 
 	return akas, nil
 }

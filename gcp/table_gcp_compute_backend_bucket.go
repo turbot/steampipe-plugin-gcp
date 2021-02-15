@@ -161,7 +161,7 @@ func getComputeBackendBucket(ctx context.Context, d *plugin.QueryData, h *plugin
 func computeBackendBucketAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	backendBucket := d.HydrateItem.(*compute.BackendBucket)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/backendBuckets/" + backendBucket.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/backendBuckets/" + backendBucket.Name}
 
 	return akas, nil
 }

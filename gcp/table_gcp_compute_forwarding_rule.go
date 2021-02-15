@@ -260,7 +260,7 @@ func forwardingRuleAka(_ context.Context, d *transform.TransformData) (interface
 	forwardingRule := d.HydrateItem.(*compute.ForwardingRule)
 	regionName := getLastPathElement(types.SafeString(forwardingRule.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/forwardingRules/" + forwardingRule.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/forwardingRules/" + forwardingRule.Name}
 
 	return akas, nil
 }

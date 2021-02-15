@@ -260,10 +260,10 @@ func gcpComputeURLMapAka(_ context.Context, d *transform.TransformData) (interfa
 	urlMap := d.HydrateItem.(*compute.UrlMap)
 	regionName := getLastPathElement(types.SafeString(urlMap.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/urlMaps/" + urlMap.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/urlMaps/" + urlMap.Name}
 
 	if regionName == "" {
-		akas = []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/urlMaps/" + urlMap.Name}
+		akas = []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/urlMaps/" + urlMap.Name}
 	}
 
 	return akas, nil

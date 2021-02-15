@@ -178,7 +178,7 @@ func gcpComputeTargetVpnGatewayAka(_ context.Context, d *transform.TransformData
 	targetVpnGateway := d.HydrateItem.(*compute.TargetVpnGateway)
 	regionName := getLastPathElement(types.SafeString(targetVpnGateway.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/targetVpnGateways/" + targetVpnGateway.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/targetVpnGateways/" + targetVpnGateway.Name}
 
 	return akas, nil
 }

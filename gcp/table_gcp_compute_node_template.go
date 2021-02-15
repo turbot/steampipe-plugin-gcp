@@ -217,7 +217,7 @@ func getComputeNodeTemplateIamPolicy(ctx context.Context, d *plugin.QueryData, h
 	nodeTemplate := h.Item.(*compute.NodeTemplate)
 	regionName := getLastPathElement(types.SafeString(nodeTemplate.Region))
 
-	req, err := service.NodeTemplates.GetIamPolicy(activeProject(), regionName, nodeTemplate.Name).Do()
+	req, err := service.NodeTemplates.GetIamPolicy(projectName, regionName, nodeTemplate.Name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +231,7 @@ func computeNodeTemplateAka(_ context.Context, d *transform.TransformData) (inte
 	nodeTemplate := d.HydrateItem.(*compute.NodeTemplate)
 	regionName := getLastPathElement(types.SafeString(nodeTemplate.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/nodeTemplates/" + nodeTemplate.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/nodeTemplates/" + nodeTemplate.Name}
 
 	return akas, nil
 }

@@ -198,7 +198,7 @@ func gcpComputeRouterAka(_ context.Context, d *transform.TransformData) (interfa
 	router := d.HydrateItem.(*compute.Router)
 	regionName := getLastPathElement(types.SafeString(router.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/routers/" + router.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/routers/" + router.Name}
 
 	return akas, nil
 }

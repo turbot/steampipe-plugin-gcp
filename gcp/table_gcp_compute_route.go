@@ -208,7 +208,7 @@ func gcpComputeRouteAka(_ context.Context, d *transform.TransformData) (interfac
 	route := d.HydrateItem.(*compute.Route)
 
 	// Build resource aka
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/routes/" + route.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/routes/" + route.Name}
 
 	return akas, nil
 }

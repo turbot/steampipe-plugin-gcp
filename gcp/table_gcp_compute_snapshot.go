@@ -224,7 +224,7 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 func snapshotAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	i := d.HydrateItem.(*compute.Snapshot)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/snapshots/" + i.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/snapshots/" + i.Name}
 
 	return akas, nil
 }

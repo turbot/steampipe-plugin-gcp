@@ -331,7 +331,7 @@ func instanceAka(_ context.Context, d *transform.TransformData) (interface{}, er
 	instanceName := types.SafeString(i.Name)
 
 	// ex: gcp://compute.googleapis.com/projects/project-aaa/zones/us-central1-a/instances/instance-1
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/instances/" + instanceName}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/zones/" + zoneName + "/instances/" + instanceName}
 
 	return akas, nil
 

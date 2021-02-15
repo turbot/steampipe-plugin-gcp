@@ -198,7 +198,7 @@ func addressAka(_ context.Context, d *transform.TransformData) (interface{}, err
 	address := d.HydrateItem.(*compute.Address)
 	regionName := getLastPathElement(types.SafeString(address.Region))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/addresses/" + address.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/addresses/" + address.Name}
 
 	return akas, nil
 }

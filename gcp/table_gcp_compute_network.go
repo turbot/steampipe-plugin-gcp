@@ -171,7 +171,7 @@ func getComputeNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 func networkAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	network := d.HydrateItem.(*compute.Network)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/networks/" + network.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/networks/" + network.Name}
 
 	return akas, nil
 }
