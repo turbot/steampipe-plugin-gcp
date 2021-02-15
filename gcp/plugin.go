@@ -54,7 +54,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// "gcp_logging_sink":                    tableGcpLoggingSink(ctx),
 			// "gcp_monitoring_group":                tableGcpMonitoringGroup(ctx),
 			// "gcp_monitoring_notification_channel": tableGcpMonitoringNotificationChannel(ctx),
-			// "gcp_project_service":                 tableGcpProjectService(ctx),
+			"gcp_project_service":     tableGcpProjectService(ctx),
 			"gcp_pubsub_snapshot":     tableGcpPubSubSnapshot(ctx),
 			"gcp_pubsub_subscription": tableGcpPubSubSubscription(ctx),
 			"gcp_pubsub_topic":        tableGcpPubSubTopic(ctx),
