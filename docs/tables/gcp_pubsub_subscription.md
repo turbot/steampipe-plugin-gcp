@@ -9,7 +9,7 @@ The subscription connects the topic to a subscriber application that receives an
 ```sql
 select
   name,
-  split_part(topic, '/', 4) as topic_name,
+  topic_name,
   dead_letter_policy_topic
 from
   gcp_pubsub_subscription
@@ -23,7 +23,7 @@ where
 ```sql
 select
   name,
-  split_part(topic, '/', 4) as topic_name,
+  topic_name,
   ack_deadline_seconds,
   message_retention_duration,
   retain_acked_messages,
