@@ -24,7 +24,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 		},
 		TableMap: map[string]*plugin.Table{
-			// "gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
+			"gcp_audit_policy": tableGcpAuditPolicy(ctx),
 			// "gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
 			// "gcp_compute_address":                 tableGcpComputeAddress(ctx),
 			// "gcp_compute_backend_bucket":          tableGcpComputeBackendBucket(ctx),
@@ -58,9 +58,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// "gcp_pubsub_snapshot":                 tableGcpPubSubSnapshot(ctx),
 			// "gcp_pubsub_subscription":             tableGcpPubSubSubscription(ctx),
 			// "gcp_pubsub_topic":                    tableGcpPubSubTopic(ctx),
-			// "gcp_service_account":                 tableGcpServiceAccount(ctx),
-			// "gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
-			"gcp_storage_bucket": tableGcpStorageBucket(ctx),
+			"gcp_service_account":     tableGcpServiceAccount(ctx),
+			"gcp_service_account_key": tableGcpServiceAccountKey(ctx),
+			"gcp_storage_bucket":      tableGcpStorageBucket(ctx),
 
 			/*
 				https://github.com/turbot/steampipe/issues/108

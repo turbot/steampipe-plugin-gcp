@@ -2,9 +2,9 @@
   {
     "description": "Test service account to verify the table",
     "disabled": false,
-    "display_name": "{{resourceName}}",
+    "display_name": "{{ resourceName }}",
     "email": "{{ output.email.value }}",
-    "name": "{{output.resource_id.value }}",
+    "name": "{{output.name.value }}",
     "oauth2_client_id": "{{ output.unique_id.value }}",
     "unique_id": "{{ output.unique_id.value }}"
   }
