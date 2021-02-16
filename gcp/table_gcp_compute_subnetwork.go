@@ -2,11 +2,13 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+
 	"google.golang.org/api/compute/v1"
 )
 
@@ -181,7 +183,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(computeSubnetworkAka),
+				Transform:   transform.FromP(gcpComputeSubnetworkTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -195,7 +197,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(gcpComputeSubnetworkTurbotData, "Project"),
 			},
 		},
 	}
@@ -210,7 +212,13 @@ func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Subnetworks.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.SubnetworkAggregatedList) error {
 		for _, item := range page.Items {
@@ -237,8 +245,14 @@ func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var subnetwork compute.Subnetwork
-	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Subnetworks.AggregatedList(project).Filter("name=" + name)
@@ -271,7 +285,7 @@ func getComputeSubnetworkIamPolicy(ctx context.Context, d *plugin.QueryData, h *
 	}
 
 	var resp *compute.Policy
-	project := projectName
+	project := strings.Split(subnetwork.SelfLink, "/")[6]
 	regionName := getLastPathElement(types.SafeString(subnetwork.Region))
 
 	resp, err = service.Subnetworks.GetIamPolicy(project, regionName, subnetwork.Name).Do()
@@ -283,11 +297,17 @@ func getComputeSubnetworkIamPolicy(ctx context.Context, d *plugin.QueryData, h *
 
 //// TRANSFORM FUNCTIONS
 
-func computeSubnetworkAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeSubnetworkTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	subnetwork := d.HydrateItem.(*compute.Subnetwork)
-	regionName := getLastPathElement(types.SafeString(subnetwork.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/subnetworks/" + subnetwork.Name}
+	region := getLastPathElement(types.SafeString(subnetwork.Region))
+	project := strings.Split(subnetwork.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/subnetworks/" + subnetwork.Name},
+	}
+
+	return turbotData[param], nil
 }
