@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 
@@ -239,7 +240,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(instanceAka),
+				Transform:   transform.FromP(gcpComputeInstanceTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -253,7 +254,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(gcpComputeInstanceTurbotData, "Project"),
 			},
 		},
 	}
@@ -262,8 +263,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("listComputeInstances")
+	plugin.Logger(ctx).Trace("listComputeInstances")
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d.ConnectionManager)
@@ -271,7 +271,13 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Instances.AggregatedList(project)
 	if err := resp.Pages(
 		ctx,
@@ -293,8 +299,7 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 //// HYDRATE FUNCTIONS
 
 func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getComputeInstance")
+	plugin.Logger(ctx).Trace("getComputeInstance")
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d.ConnectionManager)
@@ -302,8 +307,14 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var instance compute.Instance
-	project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Instances.AggregatedList(project).Filter("name=" + name)
@@ -321,20 +332,27 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	// If the specified resource is not present, API does not return any not found errors
+	if len(instance.Name) < 1 {
+		return nil, nil
+	}
+
 	return &instance, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func instanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	i := d.HydrateItem.(*compute.Instance)
+func gcpComputeInstanceTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	instance := d.HydrateItem.(*compute.Instance)
+	param := d.Param.(string)
 
-	zoneName := getLastPathElement(types.SafeString(i.Zone))
-	instanceName := types.SafeString(i.Name)
+	zone := getLastPathElement(types.SafeString(instance.Zone))
+	project := strings.Split(instance.SelfLink, "/")[6]
 
-	// ex: gcp://compute.googleapis.com/projects/project-aaa/zones/us-central1-a/instances/instance-1
-	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/zones/" + zoneName + "/instances/" + instanceName}
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zone + "/instances/" + instance.Name},
+	}
 
-	return akas, nil
-
+	return turbotData[param], nil
 }
