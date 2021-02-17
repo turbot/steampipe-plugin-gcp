@@ -175,13 +175,13 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 
 func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -209,13 +209,13 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	plugin.Logger(ctx).Trace("getGcpLoggingMetric")
 
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func metricNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	metric := h.Item.(*logging.LogMetric)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

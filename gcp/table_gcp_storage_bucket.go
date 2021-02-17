@@ -244,7 +244,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +252,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	project := projectData.Project
 
 	// Create Service Connection
-	service, err := StorageService(ctx, d.ConnectionManager)
+	service, err := StorageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Create Service Connection
-	service, err := StorageService(ctx, d.ConnectionManager)
+	service, err := StorageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +297,7 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 	// Create Session
 	// Create Service Connection
-	service, err := StorageService(ctx, d.ConnectionManager)
+	service, err := StorageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +316,7 @@ func getGcpStorageBucketACLs(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	// Create Session
 	// Create Service Connection
-	service, err := StorageService(ctx, d.ConnectionManager)
+	service, err := StorageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +343,7 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 
 	// Create Session
 	// Create Service Connection
-	service, err := StorageService(ctx, d.ConnectionManager)
+	service, err := StorageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -366,7 +366,7 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 
 func getBucketAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	bucket := h.Item.(*storage.Bucket)
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

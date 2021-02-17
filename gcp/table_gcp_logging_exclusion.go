@@ -93,13 +93,13 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 
 func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -127,13 +127,13 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 	plugin.Logger(ctx).Trace("getGcpLoggingExclusion")
 
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func exclusionNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	exclusion := h.Item.(*logging.LogExclusion)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
