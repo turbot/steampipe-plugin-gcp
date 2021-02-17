@@ -251,7 +251,8 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	project := projectData.Project
 
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +274,8 @@ func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +296,8 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +315,8 @@ func getGcpStorageBucketACLs(ctx context.Context, d *plugin.QueryData, h *plugin
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -338,7 +342,8 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

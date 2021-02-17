@@ -116,7 +116,8 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 	// Fetch Service Account details
 	serviceAccount := h.Item.(*iam.ServiceAccount)
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,8 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpServiceAccountKey")
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

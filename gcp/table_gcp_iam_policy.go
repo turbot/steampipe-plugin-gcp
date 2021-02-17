@@ -72,6 +72,12 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+
 	// Get project details
 	projectData, err := activeProject(ctx, d.ConnectionManager)
 	if err != nil {
@@ -79,11 +85,6 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 	project := projectData.Project
 	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
-
-	service, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
 
 	rb := &cloudresourcemanager.GetIamPolicyRequest{}
 	resp, err := service.Projects.GetIamPolicy(project, rb).Context(ctx).Do()

@@ -102,7 +102,8 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +144,8 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	project := projectData.Project
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

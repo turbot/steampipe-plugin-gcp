@@ -130,7 +130,8 @@ func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 //// FETCH FUNCTIONS
 
 func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +180,8 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	roleData := h.Item.(*roleInfo)
 	var op *iam.Role
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

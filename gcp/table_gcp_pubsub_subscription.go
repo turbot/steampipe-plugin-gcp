@@ -173,7 +173,8 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +204,8 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.
 func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPubSubSubscription")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +234,8 @@ func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.H
 func getPubSubSubscriptionIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPubSubSubscriptionIamPolicy")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

@@ -182,7 +182,8 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +205,8 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 //// HYDRATE FUNCTIONS
 
 func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

@@ -61,7 +61,8 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := cloudresourcemanager.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

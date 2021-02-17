@@ -84,7 +84,8 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,8 @@ func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	project := projectData.Project
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

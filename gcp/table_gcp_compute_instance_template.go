@@ -196,7 +196,8 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +219,8 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 //// HYDRATE FUNCTION
 
 func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

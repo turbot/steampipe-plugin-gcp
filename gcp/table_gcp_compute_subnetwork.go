@@ -207,7 +207,8 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 
 func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeSubnetworks")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +241,8 @@ func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	logger := plugin.Logger(ctx)
 	logger.Trace("getComputeSubnetwork")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +281,8 @@ func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 func getComputeSubnetworkIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	subnetwork := h.Item.(*compute.Subnetwork)
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

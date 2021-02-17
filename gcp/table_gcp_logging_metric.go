@@ -174,7 +174,8 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +208,8 @@ func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpLoggingMetric")
 
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

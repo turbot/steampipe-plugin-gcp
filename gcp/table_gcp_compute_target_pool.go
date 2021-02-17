@@ -118,7 +118,8 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 
 func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetPools")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +149,8 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.
 //// HYDRATE FUNCTION
 
 func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

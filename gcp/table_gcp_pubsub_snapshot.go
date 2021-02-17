@@ -99,7 +99,8 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +130,8 @@ func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 func getPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPubSubSnapshot")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +154,8 @@ func getPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 func getPubSubSnapshotIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPubSubSnapshotIamPolicy")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

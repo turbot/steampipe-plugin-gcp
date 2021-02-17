@@ -93,7 +93,8 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,8 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPubSubTopic")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +154,8 @@ func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 func getPubSubTopicIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPubSubTopicIamPolicy")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

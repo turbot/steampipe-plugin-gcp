@@ -92,7 +92,8 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +126,8 @@ func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugi
 func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpLoggingExclusion")
 
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

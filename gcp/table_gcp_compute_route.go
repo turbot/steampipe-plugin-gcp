@@ -158,7 +158,8 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 
 func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeRoutes")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +181,8 @@ func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 //// HYDRATE FUNCTIONS
 
 func getComputeRoute(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

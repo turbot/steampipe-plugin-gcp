@@ -113,7 +113,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,8 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpLoggingSink")
 
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

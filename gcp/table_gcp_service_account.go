@@ -104,7 +104,8 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,8 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 func getGcpServiceAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpServiceAccount")
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +165,8 @@ func getServiceAccountIamPolicy(ctx context.Context, d *plugin.QueryData, h *plu
 	account := h.Item.(*iam.ServiceAccount)
 	plugin.Logger(ctx).Trace("getServiceAccountIamPolicy")
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
