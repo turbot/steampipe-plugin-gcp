@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -88,7 +89,7 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(computeBackendBucketAka),
+				Transform:   transform.FromP(backendBucketSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -102,7 +103,7 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(backendBucketSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -112,13 +113,20 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 
 func listComputeBackendBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeBackendBuckets")
+
 	// Create Service Connection
 	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.BackendBuckets.List(project)
 	if err := resp.Pages(ctx, func(page *compute.BackendBucketList) error {
 		for _, backendBucket := range page.Items {
@@ -141,8 +149,14 @@ func getComputeBackendBucket(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/backendBuckets/" into uint64
@@ -160,10 +174,16 @@ func getComputeBackendBucket(ctx context.Context, d *plugin.QueryData, h *plugin
 
 //// TRANSFORM FUNCTIONS
 
-func computeBackendBucketAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func backendBucketSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	backendBucket := d.HydrateItem.(*compute.BackendBucket)
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/backendBuckets/" + backendBucket.Name}
+	project := strings.Split(backendBucket.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/backendBuckets/" + backendBucket.Name},
+	}
+
+	return turbotData[param], nil
 }

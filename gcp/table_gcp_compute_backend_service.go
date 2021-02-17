@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -220,7 +221,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(gcpComputeBackendServiceLocation, "Project"),
 			},
 		},
 	}
@@ -230,13 +231,20 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 
 func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeBackendServices")
+
 	// Create Service Connection
 	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.BackendServices.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.BackendServiceAggregatedList) error {
 		for _, item := range page.Items {
@@ -261,9 +269,15 @@ func getComputeBackendService(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var backendService compute.BackendService
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := projectName
 
 	resp := service.BackendServices.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -292,12 +306,13 @@ func getComputeBackendService(ctx context.Context, d *plugin.QueryData, h *plugi
 
 func gcpComputeBackendServiceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	backendService := d.HydrateItem.(*compute.BackendService)
-	regionName := getLastPathElement(types.SafeString(backendService.Region))
+	region := getLastPathElement(types.SafeString(backendService.Region))
+	project := strings.Split(backendService.SelfLink, "/")[6]
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/backendServices/" + backendService.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/backendServices/" + backendService.Name}
 
-	if regionName == "" {
-		akas = []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/backendServices/" + backendService.Name}
+	if region == "" {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/global/backendServices/" + backendService.Name}
 	}
 
 	return akas, nil
@@ -307,10 +322,12 @@ func gcpComputeBackendServiceLocation(_ context.Context, d *transform.TransformD
 	backendService := d.HydrateItem.(*compute.BackendService)
 	param := d.Param.(string)
 	regionName := getLastPathElement(types.SafeString(backendService.Region))
+	project := strings.Split(backendService.SelfLink, "/")[6]
 
 	locationData := map[string]string{
 		"Type":     "REGIONAL",
 		"Location": regionName,
+		"Project":  project,
 	}
 
 	if regionName == "" {
