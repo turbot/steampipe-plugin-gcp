@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -92,7 +93,7 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeTargetVpnGatewayAka),
+				Transform:   transform.FromP(gcpComputeTargetVpnGatewayTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -106,7 +107,7 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeTargetVpnGatewayTurbotData, "Project"),
 			},
 		},
 	}
@@ -116,12 +117,19 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 
 func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetVpnGateways")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.TargetVpnGateways.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetVpnGatewayAggregatedList) error {
 		for _, item := range page.Items {
@@ -140,14 +148,21 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, _ *p
 //// HYDRATE FUNCTIONS
 
 func getComputeTargetVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var targetVpnGateway compute.TargetVpnGateway
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.TargetVpnGateways.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -174,11 +189,17 @@ func getComputeTargetVpnGateway(ctx context.Context, d *plugin.QueryData, h *plu
 
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeTargetVpnGatewayAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeTargetVpnGatewayTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	targetVpnGateway := d.HydrateItem.(*compute.TargetVpnGateway)
-	regionName := getLastPathElement(types.SafeString(targetVpnGateway.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/targetVpnGateways/" + targetVpnGateway.Name}
+	region := getLastPathElement(types.SafeString(targetVpnGateway.Region))
+	project := strings.Split(targetVpnGateway.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/targetVpnGateways/" + targetVpnGateway.Name},
+	}
+
+	return turbotData[param], nil
 }

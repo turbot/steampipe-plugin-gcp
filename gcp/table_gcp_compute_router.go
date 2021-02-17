@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -111,7 +112,7 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeRouterAka),
+				Transform:   transform.FromP(gcpComputeRouterTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -125,7 +126,7 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeRouterTurbotData, "Project"),
 			},
 		},
 	}
@@ -135,12 +136,20 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 
 func listComputeRouters(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeRouters")
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Routers.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.RouterAggregatedList) error {
 		for _, item := range page.Items {
@@ -159,14 +168,21 @@ func listComputeRouters(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 //// HYDRATE FUNCTIONS
 
 func getComputeRouter(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var router compute.Router
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.Routers.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -194,11 +210,17 @@ func getComputeRouter(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeRouterAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeRouterTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	router := d.HydrateItem.(*compute.Router)
-	regionName := getLastPathElement(types.SafeString(router.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/routers/" + router.Name}
+	region := getLastPathElement(types.SafeString(router.Region))
+	project := strings.Split(router.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/routers/" + router.Name},
+	}
+
+	return turbotData[param], nil
 }

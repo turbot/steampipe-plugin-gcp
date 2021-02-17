@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -117,7 +118,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(addressAka),
+				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -131,7 +132,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -141,12 +142,20 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 
 func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeAddresses")
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Addresses.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
 		for _, item := range page.Items {
@@ -165,14 +174,21 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 //// HYDRATE FUNCTIONS
 
 func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.Addresses.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -194,11 +210,17 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 //// TRANSFORM FUNCTIONS
 
-func addressAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func addressSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	address := d.HydrateItem.(*compute.Address)
-	regionName := getLastPathElement(types.SafeString(address.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/addresses/" + address.Name}
+	region := getLastPathElement(types.SafeString(address.Region))
+	project := strings.Split(address.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/addresses/" + address.Name},
+	}
+
+	return turbotData[param], nil
 }

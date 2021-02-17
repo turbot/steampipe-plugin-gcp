@@ -29,7 +29,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The full REST resource name for this channel.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
@@ -93,7 +93,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Project"),
 			},
 		},
 	}
@@ -102,12 +102,19 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.NotificationChannels.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -127,20 +134,25 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 //// HYDRATE FUNCTIONS
 
 func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getGcpMonitoringNotificationChannel")
+	plugin.Logger(ctx).Trace("getGcpMonitoringNotificationChannel")
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
 	op, err := service.Projects.NotificationChannels.Get("projects/" + project + "/notificationChannels/" + name).Do()
 	if err != nil {
-		logger.Debug("getGcpMonitoringNotificationChannel__", "ERROR", err)
+		plugin.Logger(ctx).Debug("getGcpMonitoringNotificationChannel__", "ERROR", err)
 		return nil, err
 	}
 
@@ -164,9 +176,9 @@ func notificationChannelNameToTurbotData(_ context.Context, d *transform.Transfo
 	}
 
 	turbotData := map[string]interface{}{
-		"Name":  splittedTitle[len(splittedTitle)-1],
-		"Title": title,
-		"Akas":  []string{"gcp://monitoring.googleapis.com/" + notificationChannel.Name},
+		"Project": splittedTitle[1],
+		"Title":   title,
+		"Akas":    []string{"gcp://monitoring.googleapis.com/" + notificationChannel.Name},
 	}
 	return turbotData[param], nil
 }
