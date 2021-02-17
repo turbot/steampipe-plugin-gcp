@@ -37,7 +37,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// "gcp_compute_image":                   tableGcpComputeImage(ctx),
 			// "gcp_compute_instance":                tableGcpComputeInstance(ctx),
 			// "gcp_compute_instance_template":       tableGcpComputeInstanceTemplate(ctx),
-			// "gcp_compute_network":                 tableGcpComputeNetwork(ctx),
+			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
 			"gcp_compute_node_group":              tableGcpComputeNodeGroup(ctx),
 			"gcp_compute_node_template":           tableGcpComputeNodeTemplate(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
