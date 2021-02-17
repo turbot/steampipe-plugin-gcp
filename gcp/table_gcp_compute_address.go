@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -117,7 +118,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(addressAka),
+				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -131,7 +132,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(addressSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -148,7 +149,13 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Addresses.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
 		for _, item := range page.Items {
@@ -173,9 +180,15 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := projectName
 
 	resp := service.Addresses.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -197,11 +210,17 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 //// TRANSFORM FUNCTIONS
 
-func addressAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func addressSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	address := d.HydrateItem.(*compute.Address)
-	regionName := getLastPathElement(types.SafeString(address.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/regions/" + regionName + "/addresses/" + address.Name}
+	region := getLastPathElement(types.SafeString(address.Region))
+	project := strings.Split(address.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/addresses/" + address.Name},
+	}
+
+	return turbotData[param], nil
 }
