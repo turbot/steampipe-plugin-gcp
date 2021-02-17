@@ -213,7 +213,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -228,7 +228,13 @@ func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	if err != nil {
 		return nil, err
 	}
-	project := projectName
+
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	// List of projects in which standard images resides
 	projectList := []string{
@@ -317,7 +323,6 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	project := d.KeyColumnQuals["project"].GetStringValue()
-	// project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64
@@ -340,10 +345,16 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	image := h.Item.(*compute.Image)
 	splittedTitle := strings.Split(image.SelfLink, "/")
 	imageProject := types.SafeString(splittedTitle[6])
-	project := projectName
 
 	if strings.ToLower(imageProject) != strings.ToLower(project) {
 		return nil, nil
@@ -364,11 +375,11 @@ func computeImageSelfLinkToTurbotData(_ context.Context, d *transform.TransformD
 	param := d.Param.(string)
 
 	// get the resource title
-	splittedTitle := strings.Split(image.SelfLink, "/")
+	project := strings.Split(image.SelfLink, "/")[6]
 
 	turbotData := map[string]interface{}{
-		"Project": splittedTitle[6],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedTitle[6] + "/global/images/" + image.Name},
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/images/" + image.Name},
 	}
 
 	return turbotData[param], nil

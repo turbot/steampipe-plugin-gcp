@@ -34,7 +34,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// "gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
 			// "gcp_compute_global_address":          tableGcpComputeGlobalAddress(ctx),
 			// "gcp_compute_global_forwarding_rule":  tableGcpComputeGlobalForwardingRule(ctx),
-			// "gcp_compute_image":                   tableGcpComputeImage(ctx),
+			"gcp_compute_image":                   tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                tableGcpComputeInstance(ctx),
 			"gcp_compute_instance_template":       tableGcpComputeInstanceTemplate(ctx),
 			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
