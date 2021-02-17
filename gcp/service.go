@@ -117,7 +117,7 @@ func IAMService(ctx context.Context, connectionManager *connection.Manager) (*ia
 // LoggingService returns the service connection for GCP Logging service
 func LoggingService(ctx context.Context, connectionManager *connection.Manager) (*logging.Service, error) {
 	// have we already created and cached the service?
-	serviceCacheKey := "IAMService"
+	serviceCacheKey := "LoggingService"
 	if cachedData, ok := connectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*logging.Service), nil
 	}
