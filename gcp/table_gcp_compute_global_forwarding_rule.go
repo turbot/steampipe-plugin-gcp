@@ -173,7 +173,7 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(globalForwardingRuleSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -188,7 +188,13 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.GlobalForwardingRules.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleList) error {
 		for _, globalForwardingRule := range page.Items {
@@ -211,8 +217,14 @@ func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h 
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := projectName
 
 	req, err := service.GlobalForwardingRules.Get(project, name).Do()
 	if err != nil {
@@ -228,11 +240,11 @@ func globalForwardingRuleSelfLinkToTurbotData(_ context.Context, d *transform.Tr
 	globalForwardingRule := d.HydrateItem.(*compute.ForwardingRule)
 	param := d.Param.(string)
 
-	splittedData := strings.Split(globalForwardingRule.SelfLink, "/")
+	project := strings.Split(globalForwardingRule.SelfLink, "/")[6]
 
 	turbotData := map[string]interface{}{
-		"Project": splittedData[6],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedData[6] + "/global/forwardingRules/" + globalForwardingRule.Name},
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/forwardingRules/" + globalForwardingRule.Name},
 	}
 
 	return turbotData[param], nil
