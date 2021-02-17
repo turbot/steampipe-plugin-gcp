@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -158,7 +159,7 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(gcpComputeFirewallTurbotData, "Project"),
 			},
 		},
 	}
@@ -174,7 +175,13 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Firewalls.List(project)
 	if err := resp.Pages(ctx, func(page *compute.FirewallList) error {
 		for _, firewall := range page.Items {
@@ -197,8 +204,14 @@ func getComputeFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := projectName
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/firewalls/" into uint64
@@ -228,9 +241,12 @@ func gcpComputeFirewallTurbotData(_ context.Context, d *transform.TransformData)
 		action = "Deny"
 	}
 
+	project := strings.Split(firewall.SelfLink, "/")[6]
+
 	turbotData := map[string]interface{}{
-		"Action": action,
-		"Akas":   []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/firewalls/" + firewall.Name},
+		"Action":  action,
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/firewalls/" + firewall.Name},
 	}
 
 	return turbotData[param], nil
