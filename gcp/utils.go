@@ -15,12 +15,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
 
-var projectName string
-
-func init() {
-	projectName = ""
-}
-
 func getLastPathElement(path string) string {
 	if path == "" {
 		return ""
