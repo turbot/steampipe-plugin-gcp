@@ -22,7 +22,7 @@ Installing plugin gcp...
 $
 ```
 
-Installing the latest gcp plugin will create a default connection named `gcp`. This connection will dynamically determine the scope and credentials using the same mechanism as the CLI. In effect, this means that by default Steampipe will execute with the same credentials and against the same project as the `gcloud` command would - The GCP plugin uses the standard sdk environment variables and credential files as used by the CLI.  (Of course this also  implies that the `gcloud` cli needs to be configured with the proper credentials before the steampipe gcp plugin can be used).
+Installing the latest gcp plugin will create a connection configuration file (`~/.steampipe/config/gcp.spc`) with a single default connection named `gcp`. This connection will dynamically determine the scope and credentials using the same mechanism as the CLI. In effect, this means that by default Steampipe will execute with the same credentials and against the same project as the `gcloud` command would - The GCP plugin uses the standard sdk environment variables and credential files as used by the CLI.  (Of course this also  implies that the `gcloud` cli needs to be configured with the proper credentials before the steampipe gcp plugin can be used).
 
 Note that there is nothing special about the default connection, other than that it is created by default on plugin install - You can delete or rename this connection, or modify its configuration options (via the configuration file).
 
@@ -65,24 +65,43 @@ The GCP plugin allows you set credentials static credentials with the following 
 - The default connection.  This uses standard Application Default Credentials (ADC) against the active project as configured for `gcloud`
    ```hcl
    connection "gcp" {
-   plugin    = "gcp"                 
+      plugin    = "gcp"                 
    }
    ```
 
 - A connection to a specific project, using standard ADC Credentials.
    ```hcl
    connection "gcp_my_project" {
-   plugin    = "gcp"   
-   project   = "my-project"              
+      plugin    = "gcp"   
+      project   = "my-project"              
    }
    ```
+
+- A common configuration is to have multiple connections to different projects, using the same standard ADC Credentials for all connections.
+   ```hcl
+   connection "gcp_project_aaa" {
+      plugin    = "gcp"   
+      project   = "project-aaa"              
+   }
+
+   connection "gcp_project_bbb" {
+      plugin    = "gcp"   
+      project   = "project-bbb"              
+   }
+
+   connection "gcp_project_ccc" {
+      plugin    = "gcp"   
+      project   = "project-ccc"              
+   }
+   ```
+
 
 - A connection to a specific project, using non-default credentials.
    ```hcl
    connection "gcp_my_other_project" {
-   plugin             = "gcp"   
-   project            = "my-other-project"
-   credential_file    = "/home/me/my-service-account-creds.json"        
+      plugin             = "gcp"   
+      project            = "my-other-project"
+      credential_file    = "/home/me/my-service-account-creds.json"        
    }
    ```
 
