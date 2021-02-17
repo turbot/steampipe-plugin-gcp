@@ -55,6 +55,14 @@ output "resource_id" {
   value = google_service_account_key.named_test_resource.id
 }
 
+output "service_account_name" {
+  value = split("/", google_service_account_key.named_test_resource.id)[3]
+}
+
+output "name" {
+  value = split("/", google_service_account_key.named_test_resource.id)[5]
+}
+
 output "project_id" {
   value = var.gcp_project
 }

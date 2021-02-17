@@ -213,7 +213,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -223,11 +223,18 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 
 func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeImages")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
-	project := activeProject()
+
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	// List of projects in which standard images resides
 	projectList := []string{
@@ -308,14 +315,14 @@ func getRowDataForImage(ctx context.Context, service *compute.Service, project s
 //// HYDRATE FUNCTIONS
 
 func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	project := d.KeyColumnQuals["project"].GetStringValue()
-	// project := activeProject()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64
@@ -332,15 +339,22 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 }
 
 func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	image := h.Item.(*compute.Image)
 	splittedTitle := strings.Split(image.SelfLink, "/")
 	imageProject := types.SafeString(splittedTitle[6])
-	project := activeProject()
 
 	if strings.ToLower(imageProject) != strings.ToLower(project) {
 		return nil, nil
@@ -361,11 +375,11 @@ func computeImageSelfLinkToTurbotData(_ context.Context, d *transform.TransformD
 	param := d.Param.(string)
 
 	// get the resource title
-	splittedTitle := strings.Split(image.SelfLink, "/")
+	project := strings.Split(image.SelfLink, "/")[6]
 
 	turbotData := map[string]interface{}{
-		"Project": splittedTitle[6],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedTitle[6] + "/global/images/" + image.Name},
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/images/" + image.Name},
 	}
 
 	return turbotData[param], nil

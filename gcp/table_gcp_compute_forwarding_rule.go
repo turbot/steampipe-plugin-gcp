@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -175,7 +176,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(forwardingRuleAka),
+				Transform:   transform.FromP(forwardingRuleSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -189,7 +190,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(forwardingRuleSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -198,12 +199,20 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeBetaService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.ForwardingRules.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleAggregatedList) error {
 		for _, item := range page.Items {
@@ -222,14 +231,21 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plu
 //// HYDRATE FUNCTIONS
 
 func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeBetaService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var forwardingRule compute.ForwardingRule
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.ForwardingRules.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -256,11 +272,17 @@ func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugi
 
 //// TRANSFORM FUNCTIONS
 
-func forwardingRuleAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func forwardingRuleSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	forwardingRule := d.HydrateItem.(*compute.ForwardingRule)
-	regionName := getLastPathElement(types.SafeString(forwardingRule.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/forwardingRules/" + forwardingRule.Name}
+	project := strings.Split(forwardingRule.SelfLink, "/")[6]
+	region := getLastPathElement(types.SafeString(forwardingRule.Region))
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/forwardingRules/" + forwardingRule.Name},
+	}
+
+	return turbotData[param], nil
 }

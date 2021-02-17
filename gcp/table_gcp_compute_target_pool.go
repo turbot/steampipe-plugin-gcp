@@ -2,18 +2,20 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+
 	"google.golang.org/api/compute/v1"
 )
 
 func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_target_pool",
-		Description: "GCP Compute Traget Pool",
+		Description: "GCP Compute Target Pool",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeTargetPool,
@@ -80,6 +82,8 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 				Description: "A list of resource URLs to the virtual machine instances serving this pool. They must live in zones contained in the same region as this pool.",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -90,7 +94,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(targetPoolAka),
+				Transform:   transform.FromP(gcpComputeTargetPoolTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -104,7 +108,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeTargetPoolTurbotData, "Project"),
 			},
 		},
 	}
@@ -114,12 +118,19 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 
 func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetPools")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.TargetPools.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetPoolAggregatedList) error {
 		for _, item := range page.Items {
@@ -138,14 +149,21 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.
 //// HYDRATE FUNCTION
 
 func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var targetPool compute.TargetPool
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.TargetPools.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -173,11 +191,17 @@ func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 //// TRANSFORM FUNCTION
 
-func targetPoolAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeTargetPoolTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	targetPool := d.HydrateItem.(*compute.TargetPool)
-	regionName := getLastPathElement(types.SafeString(targetPool.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/targetPools/" + targetPool.Name}
+	region := getLastPathElement(types.SafeString(targetPool.Region))
+	project := strings.Split(targetPool.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/targetPools/" + targetPool.Name},
+	}
+
+	return turbotData[param], nil
 }

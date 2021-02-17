@@ -1,6 +1,10 @@
 [
-  {
-    "name": "{{resourceName}}",
-    "project": "{{ output.project_id.value }}"
-  }
+	{
+		"labels": {
+			"name": "{{resourceName}}"
+		},
+		"location": "global",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}"
+	}
 ]

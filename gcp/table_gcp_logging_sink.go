@@ -88,7 +88,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(sinkNameToAkas),
+				Hydrate:     sinkNameToAkas,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard gcp columns
@@ -102,7 +103,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -111,12 +113,19 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.Sinks.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -136,34 +145,42 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getGcpLoggingSink")
+	plugin.Logger(ctx).Trace("getGcpLoggingSink")
 
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Sinks.Get("projects/" + project + "/sinks/" + name).Do()
 	if err != nil {
-		logger.Debug("getGcpLoggingSink__", "ERROR", err)
+		plugin.Logger(ctx).Debug("getGcpLoggingSink__", "ERROR", err)
 		return nil, err
 	}
 
 	return op, nil
 }
 
-//// TRANSFORM FUNCTIONS
+func sinkNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	sink := h.Item.(*logging.LogSink)
 
-func sinkNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	sink := d.HydrateItem.(*logging.LogSink)
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
-	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/sinks/" + sink.Name}
-
 	return akas, nil
 }

@@ -102,7 +102,8 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -129,13 +130,18 @@ func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 //// FETCH FUNCTIONS
 
 func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO :: Need to fetch the details from env
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	// List all the project roles
 	customRoles := service.Projects.Roles.List("projects/" + project)
@@ -174,7 +180,8 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	roleData := h.Item.(*roleInfo)
 	var op *iam.Role
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}

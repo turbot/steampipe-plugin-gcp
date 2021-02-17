@@ -36,7 +36,8 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(serviceNameToAkas),
+				Hydrate:     serviceNameToAkas,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard gcp columns
@@ -50,7 +51,8 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -59,12 +61,18 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := cloudresourcemanager.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
 		return nil, err
@@ -77,13 +85,14 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, nil
 }
 
-//// TRANSFORM FUNCTIONS
-
-func serviceNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	auditConfig := d.HydrateItem.(*cloudresourcemanager.AuditConfig)
-	project := activeProject()
+func serviceNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	auditConfig := h.Item.(*cloudresourcemanager.AuditConfig)
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/services/" + auditConfig.Service}
-
 	return akas, nil
 }
