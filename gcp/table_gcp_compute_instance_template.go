@@ -2,8 +2,8 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -173,7 +173,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(instanceTemplateAka),
+				Transform:   transform.FromP(gcpComputeInstanceTemplateTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -187,7 +187,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(projectName),
+				Transform:   transform.FromP(gcpComputeInstanceTemplateTurbotData, "Project"),
 			},
 		},
 	}
@@ -202,7 +202,13 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.InstanceTemplates.List(project)
 	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateList) error {
 		for _, template := range page.Items {
@@ -225,7 +231,13 @@ func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plu
 		return nil, err
 	}
 
-	project := projectName
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
@@ -244,11 +256,16 @@ func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plu
 
 //// TRANSFORM FUNCTION
 
-func instanceTemplateAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeInstanceTemplateTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	instanceTemplate := d.HydrateItem.(*compute.InstanceTemplate)
-	templateName := types.SafeString(instanceTemplate.Name)
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + projectName + "/global/instanceTemplates/" + templateName}
+	project := strings.Split(instanceTemplate.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/instanceTemplates/" + instanceTemplate.Name},
+	}
+
+	return turbotData[param], nil
 }
