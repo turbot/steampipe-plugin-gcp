@@ -30,6 +30,10 @@ func getLastPathElement(path string) string {
 	return pathItems[len(pathItems)-1]
 }
 
+type projectInfo struct {
+	Project string `json:"project,omitempty"`
+}
+
 // Constants for Standard Column Descriptions
 const (
 	ColumnDescriptionAkas     = "Array of globally unique identifier strings (also known as) for the resource."

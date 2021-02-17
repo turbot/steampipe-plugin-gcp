@@ -196,7 +196,3 @@ func StorageService(ctx context.Context, connectionManager *connection.Manager) 
 	connectionManager.Cache.Set(serviceCacheKey, svc)
 	return svc, nil
 }
-
-type projectInfo struct {
-	Project string `json:"project,omitempty"`
-}

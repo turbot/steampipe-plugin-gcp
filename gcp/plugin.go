@@ -40,7 +40,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// "gcp_compute_network":                 tableGcpComputeNetwork(ctx),
 			// "gcp_compute_node_group":              tableGcpComputeNodeGroup(ctx),
 			// "gcp_compute_node_template":           tableGcpComputeNodeTemplate(ctx),
-			// "gcp_compute_router":                  tableGcpComputeRouter(ctx),
+			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
 			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
 			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
