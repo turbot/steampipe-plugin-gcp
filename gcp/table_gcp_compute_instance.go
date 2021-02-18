@@ -351,7 +351,7 @@ func getComputeInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *pl
 	instance := h.Item.(*compute.Instance)
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
