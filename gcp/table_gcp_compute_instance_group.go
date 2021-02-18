@@ -2,9 +2,9 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
-
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -97,6 +97,13 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
 			},
+			{
+				Name:        "instances",
+				Description: "A list of instances present inside the instance group.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getComputeInstanceGroupInstancesList,
+				Transform:   transform.FromValue(),
+			},
 
 			// standard steampipe columns
 			{
@@ -109,7 +116,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeInstanceGroupAka),
+				Transform:   transform.FromP(computeInstanceGroupSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -123,7 +130,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(computeInstanceGroupSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -140,7 +147,13 @@ func listComputeInstanceGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.InstanceGroups.AggregatedList(project)
 	if err := resp.Pages(
 		ctx,
@@ -168,8 +181,14 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var instanceGroup compute.InstanceGroup
-	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.InstanceGroups.AggregatedList(project).Filter("name=" + name)
@@ -195,16 +214,53 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	return &instanceGroup, nil
 }
 
+func getComputeInstanceGroupInstancesList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+
+	instanceGroup := h.Item.(*compute.InstanceGroup)
+	splittedTitle := strings.Split(instanceGroup.SelfLink, "/")
+
+	// Build param
+	project := splittedTitle[1]
+	zone := getLastPathElement(types.SafeString(instanceGroup.Zone))
+	listInstanceRequest := &compute.InstanceGroupsListInstancesRequest{
+		InstanceState: "ALL",
+	}
+
+	var instances []*compute.InstanceWithNamedPorts
+	resp := service.InstanceGroups.ListInstances(project, zone, instanceGroup.Name, listInstanceRequest)
+	if err := resp.Pages(
+		ctx,
+		func(page *compute.InstanceGroupsListInstances) error {
+			for _, item := range page.Items {
+				instances = append(instances, item)
+			}
+			return nil
+		},
+	); err != nil {
+		return nil, err
+	}
+
+	return instances, nil
+}
+
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeInstanceGroupAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func computeInstanceGroupSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	instanceGroup := d.HydrateItem.(*compute.InstanceGroup)
+	param := d.Param.(string)
 
-	zoneName := getLastPathElement(types.SafeString(instanceGroup.Zone))
-	instanceGroupName := types.SafeString(instanceGroup.Name)
+	zone := getLastPathElement(types.SafeString(instanceGroup.Zone))
+	project := strings.Split(instanceGroup.SelfLink, "/")[6]
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/instanceGroups/" + instanceGroupName}
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zone + "/instanceGroups/" + instanceGroup.Name},
+	}
 
-	return akas, nil
-
+	return turbotData[param], nil
 }
