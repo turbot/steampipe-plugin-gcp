@@ -23,6 +23,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		DefaultGetConfig: &plugin.GetConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 		},
+		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
+			NewInstance: ConfigInstance,
+			Schema:      ConfigSchema,
+		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_all_resource":                    tableGcpAllResource(ctx),
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),

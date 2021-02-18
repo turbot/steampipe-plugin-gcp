@@ -154,7 +154,8 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeVpnTunnelAka),
+				Hydrate:     getVpnTunnelAka,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard gcp columns
@@ -168,7 +169,8 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -178,12 +180,19 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 
 func listComputeVpnTunnels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeVpnTunnels")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.VpnTunnels.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.VpnTunnelAggregatedList) error {
 		for _, item := range page.Items {
@@ -202,14 +211,21 @@ func listComputeVpnTunnels(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 //// HYDRATE FUNCTIONS
 
 func getComputeVpnTunnel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var vpnTunnel compute.VpnTunnel
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.VpnTunnels.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -234,13 +250,18 @@ func getComputeVpnTunnel(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	return &vpnTunnel, nil
 }
 
-//// TRANSFORM FUNCTIONS
+func getVpnTunnelAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	vpnTunnel := h.Item.(*compute.VpnTunnel)
+	region := getLastPathElement(types.SafeString(vpnTunnel.Region))
 
-func gcpComputeVpnTunnelAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	vpnTunnel := d.HydrateItem.(*compute.VpnTunnel)
-	regionName := getLastPathElement(types.SafeString(vpnTunnel.Region))
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/vpnTunnels/" + vpnTunnel.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/vpnTunnels/" + vpnTunnel.Name}
 
 	return akas, nil
 }

@@ -9,7 +9,7 @@ Snapshots are used in for seek operations, which allow you to manage message ack
 ```sql
 select
   name,
-  split_part(topic, '/', 4) as topic_name,
+  topic_name,
   expire_time,
   tags
 from

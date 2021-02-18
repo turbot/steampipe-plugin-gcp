@@ -15,9 +15,8 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 		Name:        "gcp_monitoring_group",
 		Description: "GCP Monitoring Group",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getMonitoringGroup,
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getMonitoringGroup,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringGroup,
@@ -27,7 +26,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The name of this group",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(groupInfoToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
@@ -75,7 +74,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(groupInfoToTurbotData, "Project"),
 			},
 		},
 	}
@@ -84,12 +83,18 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
-
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	resp := service.Projects.Groups.List("projects/" + project)
 
@@ -108,10 +113,18 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	plugin.Logger(ctx).Trace("getMonitoringGroup")
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +133,12 @@ func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	if err != nil {
 		return nil, err
 	}
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(req.Name) < 1 {
+		return nil, nil
+	}
+
 	return req, nil
 }
 
@@ -141,7 +160,6 @@ func groupInfoToTurbotData(_ context.Context, d *transform.TransformData) (inter
 
 	turbotData := map[string]interface{}{
 		"Project": splittedTitle[1],
-		"Name":    splittedTitle[len(splittedTitle)-1],
 		"Title":   title,
 		"Akas":    []string{"gcp://monitoring.googleapis.com/" + group.Name},
 	}
