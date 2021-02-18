@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/connection"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -50,7 +49,9 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		projectData = cachedData.(*projectInfo)
 	} else {
-		projectData, err = activeProject(ctx, d.ConnectionManager)
+		// To set the config argument for the connection in a project
+		setSessionConfig(d.Connection)
+		projectData, err = activeProject(ctx, d)
 		if err != nil {
 			return nil, err
 		}
@@ -60,12 +61,13 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	return projectData.Project, nil
 }
 
-func activeProject(ctx context.Context, connectionManager *connection.Manager) (*projectInfo, error) {
+func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, error) {
+	// To call the set
 
 	// have we already created and cached the session?
 	serviceCacheKey := "gcp_project_name"
 
-	if cachedData, ok := connectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*projectInfo), nil
 	}
 
@@ -74,13 +76,13 @@ func activeProject(ctx context.Context, connectionManager *connection.Manager) (
 	gcpProject := os.Getenv("GCP_PROJECT")
 	sdkCoreProject := os.Getenv("CLOUDSDK_CORE_PROJECT")
 
-	if gcpProject != "" {
-		projectData = &projectInfo{
-			Project: gcpProject,
-		}
-	} else if sdkCoreProject != "" {
+	if sdkCoreProject != "" {
 		projectData = &projectInfo{
 			Project: sdkCoreProject,
+		}
+	} else if gcpProject != "" {
+		projectData = &projectInfo{
+			Project: gcpProject,
 		}
 	} else {
 		projectData, err = getProjectFromCLI()
@@ -89,7 +91,7 @@ func activeProject(ctx context.Context, connectionManager *connection.Manager) (
 		}
 	}
 
-	connectionManager.Cache.Set(serviceCacheKey, projectData)
+	d.ConnectionManager.Cache.Set(serviceCacheKey, projectData)
 	plugin.Logger(ctx).Warn("activeProject", "projectData", projectData)
 
 	return projectData, nil
@@ -132,4 +134,18 @@ func getProjectFromCLI() (*projectInfo, error) {
 	return &projectInfo{
 		Project: project,
 	}, nil
+}
+
+// Set project values from config
+func setSessionConfig(connection *plugin.Connection) {
+	gcpConfig := GetConfig(connection)
+
+	if &gcpConfig != nil {
+		if gcpConfig.Project != nil {
+			os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
+		}
+		if gcpConfig.CredentialFile != nil {
+			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *gcpConfig.CredentialFile)
+		}
+	}
 }

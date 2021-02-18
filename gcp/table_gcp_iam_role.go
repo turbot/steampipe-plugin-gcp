@@ -131,13 +131,13 @@ func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := IAMService(ctx, d.ConnectionManager)
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	var op *iam.Role
 
 	// Create Service Connection
-	service, err := IAMService(ctx, d.ConnectionManager)
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
