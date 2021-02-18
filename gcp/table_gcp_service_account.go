@@ -17,9 +17,8 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 		Name:        "gcp_service_account",
 		Description: "GCP Service Account",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpServiceAccount,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpServiceAccount,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpServiceAccounts,
@@ -150,6 +149,11 @@ func getGcpServiceAccount(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	project := projectData.Project
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(name) < 1 {
+		return nil, nil
+	}
 	accountName := "projects/" + project + "/serviceAccounts/" + name
 
 	op, err := service.Projects.ServiceAccounts.Get(accountName).Do()
