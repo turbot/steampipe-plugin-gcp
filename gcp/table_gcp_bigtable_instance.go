@@ -29,7 +29,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "A friendly name that identifies the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(bigtableInstanceToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
@@ -66,7 +66,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(bigtableInstanceToTurbotData, "Title"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "akas",
@@ -86,7 +86,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(bigtableInstanceToTurbotData, "Project"),
 			},
 		},
 	}
@@ -96,12 +96,20 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 
 func listBigtableInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listBigtableInstances")
-	service, err := bigtableadmin.NewService(ctx)
+
+	// Create Service Connection
+	service, err := BigtableAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.Instances.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *bigtableadmin.ListInstancesResponse) error {
 		for _, instance := range page.Instances {
@@ -118,13 +126,20 @@ func listBigtableInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 //// HYDRATE FUNCTIONS
 
 func getBigtableInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := bigtableadmin.NewService(ctx)
+	// Create Service Connection
+	service, err := BigtableAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp, err := service.Projects.Instances.Get("projects/" + project + "/instances/" + name).Do()
 	if err != nil {
@@ -168,12 +183,11 @@ func bigtableInstanceToTurbotData(_ context.Context, d *transform.TransformData)
 	param := d.Param.(string)
 
 	// get the resource title
-	splittedTitle := strings.Split(instance.Name, "/")
+	project := strings.Split(instance.Name, "/")[1]
 
 	turbotData := map[string]interface{}{
-		"Name":  splittedTitle[len(splittedTitle)-1],
-		"Title": splittedTitle[len(splittedTitle)-1],
-		"Akas":  []string{"gcp://bigtableadmin.googleapis.com/" + instance.Name},
+		"Project": project,
+		"Akas":    []string{"gcp://bigtableadmin.googleapis.com/" + instance.Name},
 	}
 
 	return turbotData[param], nil

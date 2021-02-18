@@ -1,17 +1,15 @@
 [
-  {
-    "iam_policy": {
-      "bindings": [
-        {
-          "members": [
-            "serviceAccount:{{ output.email.value }}"
-          ],
-          "role": "roles/bigtable.user"
-        }
-      ],
-      "etag": "{{ output.etag.value }}",
-      "version": 1
-    },
-    "name": "{{ resourceName }}"
-  }
+	{
+		"iam_policy": {
+			"bindings": [
+				{
+					"members": ["serviceAccount:{{ output.email.value }}"],
+					"role": "roles/bigtable.user"
+				}
+			],
+			"etag": "{{ output.etag.value }}",
+			"version": 1
+		},
+		"name": "{{ resourceName }}"
+	}
 ]
