@@ -17,9 +17,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_sink",
 		Description: "GCP Logging Sink",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingSink,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingSink,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingSinks,
@@ -53,7 +52,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the sink",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_DATETIME,
+				Transform:   transform.FromField("CreateTime").NullIfZero(),
 			},
 			{
 				Name:        "include_children",
@@ -69,7 +69,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the sink",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_DATETIME,
+				Transform:   transform.FromField("UpdateTime").NullIfZero(),
 			},
 			{
 				Name:        "exclusions",
@@ -166,6 +167,11 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	if err != nil {
 		plugin.Logger(ctx).Debug("getGcpLoggingSink__", "ERROR", err)
 		return nil, err
+	}
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
 	}
 
 	return op, nil

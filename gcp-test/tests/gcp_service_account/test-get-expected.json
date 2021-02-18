@@ -1,11 +1,13 @@
 [
-  {
-    "description": "Test service account to verify the table",
-    "disabled": false,
-    "display_name": "{{ resourceName }}",
-    "email": "{{ output.email.value }}",
-    "name": "{{output.name.value }}",
-    "oauth2_client_id": "{{ output.unique_id.value }}",
-    "unique_id": "{{ output.unique_id.value }}"
-  }
+	{
+		"description": "Test service account to verify the table",
+		"disabled": false,
+		"display_name": "{{ resourceName }}",
+		"email": "{{ output.email.value }}",
+		"location": "global",
+		"name": "{{output.name.value }}",
+		"oauth2_client_id": "{{ output.unique_id.value }}",
+		"project": "{{ output.project_id.value }}",
+		"unique_id": "{{ output.unique_id.value }}"
+	}
 ]

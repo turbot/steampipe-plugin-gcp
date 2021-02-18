@@ -17,9 +17,8 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_metric",
 		Description: "GCP Logging Metric",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingMetric,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingMetric,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingMetrics,
@@ -48,7 +47,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the metric",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "exponential_buckets_options_growth_factor",
@@ -113,7 +112,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the metric",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "value_extractor",
@@ -226,6 +225,11 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	if err != nil {
 		plugin.Logger(ctx).Debug("getGcpLoggingMetric__", "ERROR", err)
 		return nil, err
+	}
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
 	}
 
 	return op, nil

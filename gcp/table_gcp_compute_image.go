@@ -210,6 +210,12 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 
 			// standard gcp columns
 			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
 				Name:        "project",
 				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,

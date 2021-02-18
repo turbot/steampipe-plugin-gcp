@@ -61,6 +61,11 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Description: "A list of user-supplied key/value data that does not need to conform to the corresponding NotificationChannelDescriptor's schema unlike the labels field.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "labels",
+				Description: "A set of labels attached with the notification channel.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// standard steampipe columns
 			{

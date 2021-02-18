@@ -56,7 +56,7 @@
       {
         "host": "hi.com",
         "path": "/home",
-        "service": "https://compute.googleapis.com/compute/v1/projects/pikachu-aaa/global/backendServices/{{ resourceName }}-home"
+        "service": "https://compute.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/global/backendServices/{{ resourceName }}-home"
       }
     ]
   }
