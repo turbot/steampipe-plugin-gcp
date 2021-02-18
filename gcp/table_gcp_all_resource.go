@@ -65,7 +65,8 @@ func tableGcpAllResource(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -79,7 +80,13 @@ func listAllResourcees(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.V1.SearchAllResources("projects/" + project)
 	if err := resp.Pages(ctx, func(page *cloudasset.SearchAllResourcesResponse) error {
 		for _, resource := range page.Results {
