@@ -1,3 +1,17 @@
+## v0.1.0 [2021-02-18]
+
+_What's new?_
+
+- Added support for [connection configuration](https://github.com/turbot/steampipe-plugin-gcp/blob/main/docs/index.md#connection-configuration). You may specify gcp `project` and `credential_file` for each connection in a configuration file. You can have multiple gcp connections, each configured for a different gcp project.
+
+- If the project id to connect to is not specified in connection configuration file or through `CLOUDSDK_CORE_PROJECT` environment variable. Now plugin will use active project, as returned by the `gcloud config get-value project` command.
+
+_Enhancements_
+
+- Added `location` column to `gcp_compute_image`, `gcp_compute_snapshot` and `gcp_monitoring_notification_channel`, `gcp_pubsub_snapshot`, `gcp_pubsub_subscription` and `gcp_pubsub_topic` tables.
+- Added `iamPolicy` column to `gcp_compute_instance` table.
+- Added `disabled` and `oauth2_client_id` columns to gcp_service_account table.
+
 ## v0.0.6 [2021-02-11]
 
 _What's new?_
