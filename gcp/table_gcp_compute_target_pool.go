@@ -24,7 +24,6 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 			Hydrate: listComputeTargetPools,
 		},
 		Columns: []*plugin.Column{
-
 			{
 				Name:        "name",
 				Description: "Name of the resource.",
@@ -181,7 +180,6 @@ func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// If the specified resource is not present, API does not return any not found errors
-	// it returns the data as {<nil> []   0 []   []    {0 map[]} [] []}
 	if len(targetPool.Name) < 1 {
 		return nil, nil
 	}

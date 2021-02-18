@@ -222,6 +222,13 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
 			},
+			{
+				Name:        "iam_policy",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getComputeInstanceIamPolicy,
+				Transform:   transform.FromValue(),
+			},
 
 			// standard steampipe columns
 			{
@@ -338,6 +345,25 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	return &instance, nil
+}
+
+func getComputeInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	instance := h.Item.(*compute.Instance)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+
+	project := strings.Split(instance.SelfLink, "/")[6]
+	zone := getLastPathElement(types.SafeString(instance.Zone))
+
+	resp, err := service.Instances.GetIamPolicy(project, zone, instance.Name).Do()
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 //// TRANSFORM FUNCTION
