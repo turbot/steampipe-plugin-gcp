@@ -108,13 +108,13 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 
 func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := MonitoringService(ctx, d.ConnectionManager)
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	plugin.Logger(ctx).Trace("getGcpMonitoringNotificationChannel")
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	// Create Service Connection
-	service, err := MonitoringService(ctx, d.ConnectionManager)
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

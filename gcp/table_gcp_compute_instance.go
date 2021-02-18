@@ -273,13 +273,13 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	plugin.Logger(ctx).Trace("listComputeInstances")
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -309,13 +309,13 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	plugin.Logger(ctx).Trace("getComputeInstance")
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

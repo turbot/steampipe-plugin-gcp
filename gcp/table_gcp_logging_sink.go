@@ -115,13 +115,13 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 
 func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -149,13 +149,13 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	plugin.Logger(ctx).Trace("getGcpLoggingSink")
 
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func sinkNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	sink := h.Item.(*logging.LogSink)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

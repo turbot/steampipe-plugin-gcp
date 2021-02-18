@@ -73,13 +73,13 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 
 func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := CloudResourceManagerService(ctx, d.ConnectionManager)
+	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func getIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

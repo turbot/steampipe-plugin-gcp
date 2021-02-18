@@ -261,13 +261,13 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	plugin.Logger(ctx).Trace("listComputeDisk")
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -294,13 +294,13 @@ func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	plugin.Logger(ctx).Trace("getComputeDisk")
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +329,7 @@ func getComputeDiskIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 	disk := h.Item.(*compute.Disk)
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

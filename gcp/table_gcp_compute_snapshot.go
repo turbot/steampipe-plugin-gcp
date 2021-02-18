@@ -180,13 +180,13 @@ func listComputeSnapshots(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	plugin.Logger(ctx).Trace("listComputeSnapshots")
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -212,13 +212,13 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	logger.Trace("getComputeSnapshot")
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

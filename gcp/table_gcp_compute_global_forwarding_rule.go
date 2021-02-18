@@ -183,13 +183,13 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 
 func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -212,13 +212,13 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 
 func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
