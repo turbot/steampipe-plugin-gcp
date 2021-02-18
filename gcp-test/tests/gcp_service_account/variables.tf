@@ -63,6 +63,10 @@ output "resource_id" {
   value = google_service_account.named_test_resource.id
 }
 
+output "name" {
+  value = split("/", google_service_account.named_test_resource.id)[3]
+}
+
 output "email" {
   value = google_service_account.named_test_resource.email
 }

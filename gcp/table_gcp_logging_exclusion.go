@@ -17,9 +17,8 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_exclusion",
 		Description: "GCP Logging Exclusion",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingExclusion,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingExclusion,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingExclusions,
@@ -48,12 +47,12 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the exclusion",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the exclusion",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 
 			// standard steampipe columns
@@ -67,7 +66,8 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(exclusionNameToAkas),
+				Hydrate:     exclusionNameToAkas,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard gcp columns
@@ -81,7 +81,8 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -90,12 +91,19 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.Exclusions.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -115,34 +123,47 @@ func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugi
 //// HYDRATE FUNCTIONS
 
 func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getGcpLoggingExclusion")
+	plugin.Logger(ctx).Trace("getGcpLoggingExclusion")
 
-	service, err := logging.NewService(ctx)
+	// Create Service Connection
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Exclusions.Get("projects/" + project + "/exclusions/" + name).Do()
 	if err != nil {
-		logger.Debug("getGcpLoggingExclusion__", "ERROR", err)
+		plugin.Logger(ctx).Debug("getGcpLoggingExclusion__", "ERROR", err)
 		return nil, err
+	}
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
 	}
 
 	return op, nil
 }
 
-//// TRANSFORM FUNCTIONS
+func exclusionNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	exclusion := h.Item.(*logging.LogExclusion)
 
-func exclusionNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	exclusion := d.HydrateItem.(*logging.LogExclusion)
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
-	// Get data for turbot defined properties
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/exclusions/" + exclusion.Name}
-
 	return akas, nil
 }

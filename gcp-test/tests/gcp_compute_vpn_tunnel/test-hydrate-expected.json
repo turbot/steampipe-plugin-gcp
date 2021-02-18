@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Test VPN Tunnel to validate integration test.",
+    "ike_version": 2,
+    "kind": "compute#vpnTunnel",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

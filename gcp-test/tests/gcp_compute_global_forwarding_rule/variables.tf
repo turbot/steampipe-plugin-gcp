@@ -106,3 +106,7 @@ output "self_link" {
 output "target" {
   value = google_compute_target_http_proxy.default.self_link
 }
+
+output "project_id" {
+  value = var.gcp_project
+}

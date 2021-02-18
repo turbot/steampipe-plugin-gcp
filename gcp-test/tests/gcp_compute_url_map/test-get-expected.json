@@ -1,0 +1,63 @@
+[
+  {
+    "default_service": "{{ output.default_service.value }}",
+    "description": "Test URL Map to validate integration test.",
+    "host_rules": [
+      {
+        "hosts": [
+          "myothersite.com"
+        ],
+        "pathMatcher": "otherpaths"
+      },
+      {
+        "hosts": [
+          "mysite.com"
+        ],
+        "pathMatcher": "mysite"
+      }
+    ],
+    "kind": "compute#urlMap",
+    "location": "global",
+    "location_type": "GLOBAL",
+    "name": "{{ resourceName }}",
+    "path_matchers": [
+      {
+        "defaultService": "{{ output.backend_service_home.value }}",
+        "name": "mysite",
+        "pathRules": [
+          {
+            "paths": [
+              "/home"
+            ],
+            "service": "{{ output.backend_service_home.value }}"
+          },
+          {
+            "paths": [
+              "/login"
+            ],
+            "service": "{{ output.backend_service_login.value }}"
+          },
+          {
+            "paths": [
+              "/static"
+            ],
+            "service": "{{ output.backend_bucket.value }}"
+          }
+        ]
+      },
+      {
+        "defaultService": "{{ output.backend_service_home.value }}",
+        "name": "otherpaths"
+      }
+    ],
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}",
+    "tests": [
+      {
+        "host": "hi.com",
+        "path": "/home",
+        "service": "https://compute.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/global/backendServices/{{ resourceName }}-home"
+      }
+    ]
+  }
+]

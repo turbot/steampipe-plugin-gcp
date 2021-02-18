@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Test VPN target gateway to validate integration test.",
+    "kind": "compute#targetVpnGateway",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

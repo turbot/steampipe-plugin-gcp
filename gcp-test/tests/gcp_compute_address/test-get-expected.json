@@ -3,10 +3,10 @@
     "address_type": "INTERNAL",
     "description": "Test address to validate integration test.",
     "kind": "compute#address",
+    "location": "us-east1",
     "name": "{{resourceName}}",
     "network_tier": "PREMIUM",
     "project": "{{ output.project_id.value }}",
-    "region": "us-east1",
     "self_link": "{{ output.self_link.value }}",
     "subnetwork": "{{ output.subnetwork.value }}"
   }
