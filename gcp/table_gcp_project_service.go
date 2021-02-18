@@ -84,13 +84,13 @@ func serviceNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := ServiceUsageService(ctx, d.ConnectionManager)
+	service, err := ServiceUsageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -118,13 +118,13 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	plugin.Logger(ctx).Trace("getGcpProjectService")
 
 	// Create Service Connection
-	service, err := ServiceUsageService(ctx, d.ConnectionManager)
+	service, err := ServiceUsageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

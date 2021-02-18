@@ -201,13 +201,13 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 
 	// Create Service Connection
-	service, err := ComputeBetaService(ctx, d.ConnectionManager)
+	service, err := ComputeBetaService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -232,13 +232,13 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plu
 
 func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := ComputeBetaService(ctx, d.ConnectionManager)
+	service, err := ComputeBetaService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

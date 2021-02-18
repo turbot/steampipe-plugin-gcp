@@ -17,9 +17,8 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_exclusion",
 		Description: "GCP Logging Exclusion",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingExclusion,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingExclusion,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingExclusions,
@@ -48,12 +47,12 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the exclusion",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the exclusion",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 
 			// standard steampipe columns
@@ -93,13 +92,13 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 
 func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -127,13 +126,13 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 	plugin.Logger(ctx).Trace("getGcpLoggingExclusion")
 
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -147,6 +146,11 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
+	}
+
 	return op, nil
 }
 
@@ -154,7 +158,7 @@ func exclusionNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	exclusion := h.Item.(*logging.LogExclusion)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

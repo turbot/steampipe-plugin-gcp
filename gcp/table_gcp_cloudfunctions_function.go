@@ -198,13 +198,13 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	logger.Trace("listCloudFunctions")
 
 	// Create Service Connection
-	service, err := CloudFunctionsService(ctx, d.ConnectionManager)
+	service, err := CloudFunctionsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func getCloudFunction(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	logger.Trace("GetCloudFunction")
 
 	// Create Service Connection
-	service, err := CloudFunctionsService(ctx, d.ConnectionManager)
+	service, err := CloudFunctionsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +252,7 @@ func getGcpCloudFunctionIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	logger.Trace("getGcpCloudFunctionIamPolicy")
 
 	// Create Service Connection
-	service, err := CloudFunctionsService(ctx, d.ConnectionManager)
+	service, err := CloudFunctionsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

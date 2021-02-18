@@ -117,7 +117,7 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 	serviceAccount := h.Item.(*iam.ServiceAccount)
 
 	// Create Service Connection
-	service, err := IAMService(ctx, d.ConnectionManager)
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -136,13 +136,13 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	plugin.Logger(ctx).Trace("getGcpServiceAccountKey")
 
 	// Create Service Connection
-	service, err := IAMService(ctx, d.ConnectionManager)
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

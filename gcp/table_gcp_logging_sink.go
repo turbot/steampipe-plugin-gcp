@@ -17,9 +17,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_sink",
 		Description: "GCP Logging Sink",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingSink,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingSink,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingSinks,
@@ -53,7 +52,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the sink",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_DATETIME,
+				Transform:   transform.FromField("CreateTime").NullIfZero(),
 			},
 			{
 				Name:        "include_children",
@@ -69,7 +69,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the sink",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_DATETIME,
+				Transform:   transform.FromField("UpdateTime").NullIfZero(),
 			},
 			{
 				Name:        "exclusions",
@@ -114,13 +115,13 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 
 func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -148,13 +149,13 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	plugin.Logger(ctx).Trace("getGcpLoggingSink")
 
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -168,6 +169,11 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
+	}
+
 	return op, nil
 }
 
@@ -175,7 +181,7 @@ func sinkNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	sink := h.Item.(*logging.LogSink)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}

@@ -15,9 +15,8 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 		Name:        "gcp_monitoring_group",
 		Description: "GCP Monitoring Group",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getMonitoringGroup,
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getMonitoringGroup,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringGroup,
@@ -85,13 +84,13 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 
 func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := MonitoringService(ctx, d.ConnectionManager)
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +116,7 @@ func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	plugin.Logger(ctx).Trace("getMonitoringGroup")
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +124,7 @@ func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Create Service Connection
-	service, err := MonitoringService(ctx, d.ConnectionManager)
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +133,12 @@ func getMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	if err != nil {
 		return nil, err
 	}
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(req.Name) < 1 {
+		return nil, nil
+	}
+
 	return req, nil
 }
 

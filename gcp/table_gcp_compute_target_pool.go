@@ -24,7 +24,6 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 			Hydrate: listComputeTargetPools,
 		},
 		Columns: []*plugin.Column{
-
 			{
 				Name:        "name",
 				Description: "Name of the resource.",
@@ -119,13 +118,13 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetPools")
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -150,13 +149,13 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +180,6 @@ func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// If the specified resource is not present, API does not return any not found errors
-	// it returns the data as {<nil> []   0 []   []    {0 map[]} [] []}
 	if len(targetPool.Name) < 1 {
 		return nil, nil
 	}

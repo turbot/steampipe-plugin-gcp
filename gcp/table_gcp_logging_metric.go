@@ -17,9 +17,8 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_metric",
 		Description: "GCP Logging Metric",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingMetric,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingMetric,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingMetrics,
@@ -48,7 +47,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the metric",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "exponential_buckets_options_growth_factor",
@@ -113,7 +112,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the metric",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "value_extractor",
@@ -175,13 +174,13 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 
 func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -209,13 +208,13 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	plugin.Logger(ctx).Trace("getGcpLoggingMetric")
 
 	// Create Service Connection
-	service, err := LoggingService(ctx, d.ConnectionManager)
+	service, err := LoggingService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -228,6 +227,11 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
+	}
+
 	return op, nil
 }
 
@@ -235,7 +239,7 @@ func metricNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	metric := h.Item.(*logging.LogMetric)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
