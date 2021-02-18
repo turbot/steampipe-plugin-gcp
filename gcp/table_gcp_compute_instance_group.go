@@ -148,7 +148,7 @@ func listComputeInstanceGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +182,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d.ConnectionManager)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +216,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 
 func getComputeInstanceGroupInstancesList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
-	service, err := ComputeService(ctx, d.ConnectionManager)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
