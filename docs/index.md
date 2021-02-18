@@ -45,6 +45,12 @@ export GOOGLE_APPLICATION_CREDENTIALS=/Users/abc/Downloads/project-aaa.json
 export GCP_PROJECT=project-aaa
 ```
 
+### Alternatively using Application Default Credentials (requires gcloud CLI)
+
+1. Run `gcloud auth application-default login`.
+   It will download the application default credentials to `~/.config/gcloud/application_default_credentials.json`
+2. Set `GCP_PROJECT` environment variable to name of the project.
+
 Run a query:
 
 ```bash

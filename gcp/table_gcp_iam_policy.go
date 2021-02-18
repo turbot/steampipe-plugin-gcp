@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -43,13 +42,13 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(iamPolicyTurbotData, "Title"),
+				Hydrate:     getIamPolicyTurbotData,
 			},
 			{
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(iamPolicyTurbotData, "Akas"),
+				Hydrate:     getIamPolicyTurbotData,
 			},
 
 			// standard gcp columns
@@ -63,7 +62,8 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -72,13 +72,19 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 //// FETCH FUNCTIONS
 
 func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
-	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
-
-	service, err := cloudresourcemanager.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
 
 	rb := &cloudresourcemanager.GetIamPolicyRequest{}
 	resp, err := service.Projects.GetIamPolicy(project, rb).Context(ctx).Do()
@@ -90,16 +96,18 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, nil
 }
 
-//// TRANSFORM FUNCTION
-
-func iamPolicyTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	project := activeProject()
-	param := types.SafeString(d.Param)
+func getIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	// Get the resource title
 	title := strings.ToUpper(project) + " IAM Policy"
 
-	// Get data for turbot defined properties
+	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/iamPolicy"}
 
 	// Mapping all turbot defined properties
@@ -108,5 +116,5 @@ func iamPolicyTurbotData(_ context.Context, d *transform.TransformData) (interfa
 		"Title": title,
 	}
 
-	return turbotData[param], nil
+	return turbotData, nil
 }

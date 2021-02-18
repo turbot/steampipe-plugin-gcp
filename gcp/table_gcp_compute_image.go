@@ -2,7 +2,10 @@ package gcp
 
 import (
 	"context"
+	"strings"
+	"sync"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -17,7 +20,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_image",
 		Description: "GCP Compute Image",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
+			KeyColumns: plugin.AllColumns([]string{"name", "project"}),
 			Hydrate:    getComputeImage,
 		},
 		List: &plugin.ListConfig{
@@ -53,6 +56,18 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "status",
 				Description: "The status of the image.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "deprecated",
+				Description: "An object comtaining the detailed deprecation status associated with this image.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "deprecation_state",
+				Description: "The deprecation state associated with this image.",
+				Default:     "ACTIVE",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Deprecated.State"),
 			},
 			{
 				Name:        "archive_size_bytes",
@@ -98,6 +113,12 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "source_image_id",
 				Description: "The ID value of the image used to create this image.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "source_project",
+				Description: "The project in which the image is defined.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
 			},
 			{
 				Name:        "source_snapshot",
@@ -184,15 +205,15 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeImageAka),
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
 			{
 				Name:        "project",
-				Description: ColumnDescriptionProject,
+				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -202,35 +223,106 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 
 func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeImages")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	// List of projects in which standard images resides
+	projectList := []string{
+		"centos-cloud",
+		"cos-cloud",
+		"debian-cloud",
+		"fedora-coreos-cloud",
+		"rhel-cloud",
+		"rhel-sap-cloud",
+		"suse-cloud",
+		"suse-sap-cloud",
+		"ubuntu-os-cloud",
+		"windows-cloud",
+		"windows-sql-cloud",
+		project,
+	}
+
+	// List all the standard images
+	var wg sync.WaitGroup
+	imageCh := make(chan []*compute.Image, len(projectList))
+	errorCh := make(chan error, len(projectList))
+
+	// Iterating all the available projects
+	for _, item := range projectList {
+		wg.Add(1)
+		go getRowDataForImageAsync(ctx, service, item, &wg, imageCh, errorCh)
+	}
+
+	// wait until the listing of all images inside the mentioned projects are completed
+	wg.Wait()
+
+	// NOTE: close channel before ranging over results
+	close(imageCh)
+	close(errorCh)
+
+	for err := range errorCh {
+		// return the first error
+		return nil, err
+	}
+
+	for item := range imageCh {
+		for _, data := range item {
+			d.StreamListItem(ctx, data)
+		}
+	}
+
+	return nil, nil
+}
+
+func getRowDataForImageAsync(ctx context.Context, service *compute.Service, item string, wg *sync.WaitGroup, imageCh chan []*compute.Image, errorCh chan error) {
+	defer wg.Done()
+
+	rowData, err := getRowDataForImage(ctx, service, item)
+	if err != nil {
+		errorCh <- err
+	} else if rowData != nil {
+		imageCh <- rowData
+	}
+}
+
+func getRowDataForImage(ctx context.Context, service *compute.Service, project string) ([]*compute.Image, error) {
+	var items []*compute.Image
+
+	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
 	resp := service.Images.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {
-			d.StreamListItem(ctx, image)
+			items = append(items, image)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return items, nil
 }
 
 //// HYDRATE FUNCTIONS
 
 func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	project := d.KeyColumnQuals["project"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64
@@ -247,29 +339,48 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 }
 
 func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	image := h.Item.(*compute.Image)
-	project := activeProject()
+	splittedTitle := strings.Split(image.SelfLink, "/")
+	imageProject := types.SafeString(splittedTitle[6])
 
-	req, err := service.Images.GetIamPolicy(project, image.Name).Do()
-	if err != nil {
-		return nil, err
+	if strings.ToLower(imageProject) != strings.ToLower(project) {
+		return nil, nil
 	}
 
-	return req, nil
+	resp, err := service.Images.GetIamPolicy(project, image.Name).Do()
+	if err != nil {
+		return err, nil
+	}
+
+	return resp, nil
 }
 
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeImageAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func computeImageSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	image := d.HydrateItem.(*compute.Image)
+	param := d.Param.(string)
 
-	// Build resource aka
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/images/" + image.Name}
+	// get the resource title
+	project := strings.Split(image.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/images/" + image.Name},
+	}
+
+	return turbotData[param], nil
 }

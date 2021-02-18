@@ -220,7 +220,8 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(bucketAka),
+				Hydrate:     getBucketAka,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard gcp columns
@@ -233,7 +234,8 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -242,9 +244,15 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := activeProject()
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
 
-	service, err := storage.NewService(ctx)
+	project := projectData.Project
+
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -263,10 +271,11 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 }
 
 func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// project := activeProject()
+	// project := projectName
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +296,8 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +315,8 @@ func getGcpStorageBucketACLs(ctx context.Context, d *plugin.QueryData, h *plugin
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -331,7 +342,8 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	service, err := storage.NewService(ctx)
+	// Create Service Connection
+	service, err := StorageService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
@@ -352,11 +364,13 @@ func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h 
 	return resp, nil
 }
 
-//// TRANSFORM FUNCTIONS
-
-func bucketAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	bucket := d.HydrateItem.(*storage.Bucket)
-	project := activeProject()
+func getBucketAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	bucket := h.Item.(*storage.Bucket)
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	akas := []string{"gcp://storage.googleapis.com/projects/" + project + "/buckets/" + bucket.Name}
 	return akas, nil

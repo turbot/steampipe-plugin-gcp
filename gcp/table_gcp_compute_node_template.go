@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -128,7 +129,7 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(computeNodeTemplateAka),
+				Transform:   transform.FromP(gcpComputeNodeTemplateTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -142,7 +143,7 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeNodeTemplateTurbotData, "Project"),
 			},
 		},
 	}
@@ -152,12 +153,20 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 
 func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeNodeTemplates")
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.NodeTemplates.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.NodeTemplateAggregatedList) error {
 		for _, item := range page.Items {
@@ -176,14 +185,21 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, _ *plugi
 //// HYDRATE FUNCTIONS
 
 func getComputeNodeTemplate(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d.ConnectionManager)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var nodeTemplate compute.NodeTemplate
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.NodeTemplates.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -209,15 +225,17 @@ func getComputeNodeTemplate(ctx context.Context, d *plugin.QueryData, h *plugin.
 }
 
 func getComputeNodeTemplateIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d.ConnectionManager)
 	if err != nil {
 		return nil, err
 	}
 
 	nodeTemplate := h.Item.(*compute.NodeTemplate)
 	regionName := getLastPathElement(types.SafeString(nodeTemplate.Region))
+	project := strings.Split(nodeTemplate.SelfLink, "/")[6]
 
-	req, err := service.NodeTemplates.GetIamPolicy(activeProject(), regionName, nodeTemplate.Name).Do()
+	req, err := service.NodeTemplates.GetIamPolicy(project, regionName, nodeTemplate.Name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -227,11 +245,17 @@ func getComputeNodeTemplateIamPolicy(ctx context.Context, d *plugin.QueryData, h
 
 //// TRANSFORM FUNCTIONS
 
-func computeNodeTemplateAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeNodeTemplateTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	nodeTemplate := d.HydrateItem.(*compute.NodeTemplate)
-	regionName := getLastPathElement(types.SafeString(nodeTemplate.Region))
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/nodeTemplates/" + nodeTemplate.Name}
+	project := strings.Split(nodeTemplate.SelfLink, "/")[6]
+	region := getLastPathElement(types.SafeString(nodeTemplate.Region))
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/nodeTemplates/" + nodeTemplate.Name},
+	}
+
+	return turbotData[param], nil
 }
