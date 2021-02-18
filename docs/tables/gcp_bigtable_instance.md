@@ -16,7 +16,7 @@ from
 ```
 
 
-### List of bigtable instances where members have IAM security admin access
+### List of bigtable instances where members have IAM security admin access assigned in a resource policy
 
 ```sql
 select
@@ -30,7 +30,6 @@ from
 where
   i ->> 'role' like '%securityAdmin%';
 ```
-
 
 
 ### Get the count of instances which are not for production
