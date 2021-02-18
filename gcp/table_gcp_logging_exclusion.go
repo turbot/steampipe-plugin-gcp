@@ -17,9 +17,8 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 		Name:        "gcp_logging_exclusion",
 		Description: "GCP Logging Exclusion",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpLoggingExclusion,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpLoggingExclusion,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingExclusions,
@@ -48,12 +47,12 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the exclusion",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the exclusion",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 
 			// standard steampipe columns
@@ -145,6 +144,11 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if err != nil {
 		plugin.Logger(ctx).Debug("getGcpLoggingExclusion__", "ERROR", err)
 		return nil, err
+	}
+
+	// If the name has been passed as empty string, API does not returns any error
+	if len(op.Name) < 1 {
+		return nil, nil
 	}
 
 	return op, nil
