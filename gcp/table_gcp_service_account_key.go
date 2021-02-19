@@ -17,10 +17,8 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 		Name:        "gcp_service_account_key",
 		Description: "GCP Service Account Key",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			ItemFromKey:       serviceAccountKeyNameFromKey,
-			Hydrate:           getGcpServiceAccountKey,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.AllColumns([]string{"name", "service_account_name"}),
+			Hydrate:    getGcpServiceAccountKey,
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listGcpServiceAccounts,
@@ -31,9 +29,10 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
 				Description: "The friendly name that identifies the service account key",
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
-				Name:        "service_account_id",
+				Name:        "service_account_name",
 				Type:        proto.ColumnType_STRING,
 				Description: "Service account in which the key is located",
 				Transform:   transform.FromP(getGcpServiceAccountKeyTurbotData, "ServiceAccountName"),
@@ -71,12 +70,12 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			{
 				Name:        "valid_after_time",
 				Description: "Specifies the timestamp, after which the key can be used",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "valid_before_time",
 				Description: "Specifies the timestamp, after which the key gets invalid",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
 			},
 
 			// standard steampipe columns
@@ -104,21 +103,11 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
-}
-
-//// ITEM FROM KEY
-
-func serviceAccountKeyNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	quals := d.KeyColumnQuals
-	name := quals["name"].GetStringValue()
-	item := &iam.ServiceAccountKey{
-		Name: name,
-	}
-	return item, nil
 }
 
 //// FETCH FUNCTIONS
@@ -127,7 +116,8 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 	// Fetch Service Account details
 	serviceAccount := h.Item.(*iam.ServiceAccount)
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -143,14 +133,26 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 //// HYDRATE FUNCTIONS
 
 func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	serviceAccountKey := h.Item.(*iam.ServiceAccountKey)
+	plugin.Logger(ctx).Trace("getGcpServiceAccountKey")
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	op, err := service.Projects.ServiceAccounts.Keys.Get(serviceAccountKey.Name).Do()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	name := d.KeyColumnQuals["name"].GetStringValue()
+	serviceAccountName := d.KeyColumnQuals["service_account_name"].GetStringValue()
+	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
+
+	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -164,13 +166,13 @@ func getGcpServiceAccountKeyTurbotData(ctx context.Context, d *transform.Transfo
 	plugin.Logger(ctx).Trace("getGcpServiceAccountKeyTurbotData")
 	serviceAccountKey := d.HydrateItem.(*iam.ServiceAccountKey)
 
-	splitName := strings.Split(serviceAccountKey.Name, "/keys/")
+	splitName := strings.Split(serviceAccountKey.Name, "/")
 	akas := []string{"gcp://iam.googleapis.com/" + serviceAccountKey.Name}
 
 	if d.Param.(string) == "Title" {
-		return splitName[1], nil
+		return splitName[5], nil
 	} else if d.Param.(string) == "ServiceAccountName" {
-		return splitName[0], nil
+		return splitName[3], nil
 	} else {
 		return akas, nil
 	}

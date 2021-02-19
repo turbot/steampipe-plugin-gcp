@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -248,7 +249,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(diskLocation, "Project"),
 			},
 		},
 	}
@@ -259,12 +260,19 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeDisk")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Disks.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.DiskAggregatedList) error {
 		for _, item := range page.Items {
@@ -284,13 +292,21 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getComputeDisk")
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var disk compute.Disk
-	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Disks.AggregatedList(project).Filter("name=" + name)
@@ -312,13 +328,14 @@ func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 func getComputeDiskIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	disk := h.Item.(*compute.Disk)
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	var resp *compute.Policy
-	project := activeProject()
+	project := strings.Split(disk.SelfLink, "/")[6]
 	zoneName := getLastPathElement(types.SafeString(disk.Zone))
 
 	// disk can be regional or zonal
@@ -348,12 +365,13 @@ func diskAka(_ context.Context, d *transform.TransformData) (interface{}, error)
 
 	zoneName := getLastPathElement(types.SafeString(i.Zone))
 	regionName := getLastPathElement(types.SafeString(i.Region))
+	project := strings.Split(i.SelfLink, "/")[6]
 	diskName := types.SafeString(i.Name)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/disks/" + diskName}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zoneName + "/disks/" + diskName}
 
 	if zoneName == "" {
-		akas = []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/disks/" + diskName}
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + regionName + "/disks/" + diskName}
 	}
 
 	return akas, nil
@@ -365,10 +383,12 @@ func diskLocation(_ context.Context, d *transform.TransformData) (interface{}, e
 
 	zoneName := getLastPathElement(types.SafeString(i.Zone))
 	regionName := getLastPathElement(types.SafeString(i.Region))
+	project := strings.Split(i.SelfLink, "/")[6]
 
 	locationData := map[string]string{
 		"Type":     "ZONAL",
 		"Location": zoneName,
+		"Project":  project,
 	}
 
 	if zoneName == "" {

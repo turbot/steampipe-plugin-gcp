@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -153,15 +154,21 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(snapshotAka),
+				Transform:   transform.FromP(gcpComputeSnapshotTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
 			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeSnapshotTurbotData, "Project"),
 			},
 		},
 	}
@@ -172,12 +179,19 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 func listComputeSnapshots(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeSnapshots")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Snapshots.List(project)
 	if err := resp.Pages(ctx, func(page *compute.SnapshotList) error {
 		for _, snapshot := range page.Items {
@@ -197,12 +211,19 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	logger := plugin.Logger(ctx)
 	logger.Trace("getComputeSnapshot")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
@@ -221,10 +242,16 @@ func getComputeSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 //// TRANSFORM FUNCTIONS
 
-func snapshotAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	i := d.HydrateItem.(*compute.Snapshot)
+func gcpComputeSnapshotTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	snapshot := d.HydrateItem.(*compute.Snapshot)
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/snapshots/" + i.Name}
+	project := strings.Split(snapshot.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/snapshots/" + snapshot.Name},
+	}
+
+	return turbotData[param], nil
 }

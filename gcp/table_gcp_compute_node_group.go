@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -110,7 +111,6 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
 			},
-
 			{
 				Name:        "iam_policy",
 				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
@@ -130,7 +130,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeNodeGroupAka),
+				Transform:   transform.FromP(gcpComputeNodeGroupTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -144,7 +144,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeNodeGroupTurbotData, "Project"),
 			},
 		},
 	}
@@ -154,12 +154,19 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 
 func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeNodeGroups")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.NodeGroups.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.NodeGroupAggregatedList) error {
 		for _, item := range page.Items {
@@ -178,14 +185,21 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 //// HYDRATE FUNCTIONS
 
 func getComputeNodeGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var nodeGroup compute.NodeGroup
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.NodeGroups.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -211,13 +225,14 @@ func getComputeNodeGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 }
 
 func getComputeNodeGroupIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	nodeGroup := h.Item.(*compute.NodeGroup)
-	project := activeProject()
+	project := strings.Split(nodeGroup.SelfLink, "/")[6]
 	zoneName := getLastPathElement(types.SafeString(nodeGroup.Zone))
 
 	req, err := service.NodeGroups.GetIamPolicy(project, zoneName, nodeGroup.Name).Do()
@@ -235,13 +250,17 @@ func getComputeNodeGroupIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeNodeGroupAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeNodeGroupTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	nodeGroup := d.HydrateItem.(*compute.NodeGroup)
+	param := d.Param.(string)
 
-	zoneName := getLastPathElement(types.SafeString(nodeGroup.Zone))
-	nodeGroupName := types.SafeString(nodeGroup.Name)
+	project := strings.Split(nodeGroup.SelfLink, "/")[6]
+	zone := getLastPathElement(types.SafeString(nodeGroup.Zone))
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/nodeGroups/" + nodeGroupName}
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zone + "/nodeGroups/" + nodeGroup.Name},
+	}
 
-	return akas, nil
+	return turbotData[param], nil
 }

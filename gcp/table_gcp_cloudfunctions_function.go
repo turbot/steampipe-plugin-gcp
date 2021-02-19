@@ -171,7 +171,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(functionAka),
+				Transform:   transform.FromP(gcpCloudFunctionTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -185,7 +185,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpCloudFunctionTurbotData, "Project"),
 			},
 		},
 	}
@@ -197,12 +197,19 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	logger := plugin.Logger(ctx)
 	logger.Trace("listCloudFunctions")
 
-	service, err := cloudfunctions.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudFunctionsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	data := "projects/" + project + "/locations/-" // '-' for all locations...
 
 	resp := service.Projects.Locations.Functions.List(data)
@@ -225,7 +232,8 @@ func getCloudFunction(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	logger := plugin.Logger(ctx)
 	logger.Trace("GetCloudFunction")
 
-	service, err := cloudfunctions.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudFunctionsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +251,8 @@ func getGcpCloudFunctionIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	logger := plugin.Logger(ctx)
 	logger.Trace("getGcpCloudFunctionIamPolicy")
 
-	service, err := cloudfunctions.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudFunctionsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -264,16 +273,18 @@ func getGcpCloudFunctionIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 //// TRANSFORM FUNCTIONS
 
-func functionAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	i := d.HydrateItem.(*cloudfunctions.CloudFunction)
+func gcpCloudFunctionTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	function := d.HydrateItem.(*cloudfunctions.CloudFunction)
+	param := d.Param.(string)
 
-	functionNamePath := types.SafeString(i.Name)
+	project := strings.Split(function.Name, "/")[1]
 
-	//ex: gcp://cloudfunctions.googleapis.com/projects/project-aaa/locations/us-central1/functions/hello-world
-	akas := []string{"gcp://cloudfunctions.googleapis.com/" + functionNamePath}
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://cloudfunctions.googleapis.com/" + function.Name},
+	}
 
-	return akas, nil
-
+	return turbotData[param], nil
 }
 
 func locationFromFunctionName(_ context.Context, d *transform.TransformData) (interface{}, error) {

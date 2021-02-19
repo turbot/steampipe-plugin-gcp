@@ -4,8 +4,8 @@
       "{{output.health_check.value}}"
     ],
     "instances": [
-      "https://www.googleapis.com/compute/v1/projects/pikachu-aaa/zones/us-east1-b/instances/myinstance2",
-      "https://www.googleapis.com/compute/v1/projects/pikachu-aaa/zones/us-east1-a/instances/myinstance1"
+      "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/zones/us-east1-b/instances/myinstance2",
+      "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/zones/us-east1-a/instances/myinstance1"
     ],
     "name": "{{ output.resource_name.value }}",
     "self_link": "{{ output.self_link.value }}"

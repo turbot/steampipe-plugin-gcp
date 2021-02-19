@@ -1,8 +1,6 @@
 [
-  {
-    "akas": [
-      "{{ output.resource_aka.value }}"
-    ],
-    "title": "{{ output.resource_id.value.split('/keys/')[1] }}"
-  }
+	{
+		"akas": ["{{ output.resource_aka.value }}"],
+		"title": "{{ output.name.value }}"
+	}
 ]

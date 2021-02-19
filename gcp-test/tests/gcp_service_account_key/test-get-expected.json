@@ -1,9 +1,11 @@
 [
-  {
-    "key_algorithm": "KEY_ALG_RSA_2048",
-    "key_origin": "GOOGLE_PROVIDED",
-    "key_type": "USER_MANAGED",
-    "name": "{{ output.resource_id.value }}",
-    "service_account_id": "{{ output.resource_id.value.split('/keys/')[0] }}"
-  }
+	{
+		"key_algorithm": "KEY_ALG_RSA_2048",
+		"key_origin": "GOOGLE_PROVIDED",
+		"key_type": "USER_MANAGED",
+		"location": "global",
+		"name": "{{ output.name.value }}",
+		"project": "{{ output.project_id.value }}",
+		"service_account_name": "{{ output.service_account_name.value }}"
+	}
 ]

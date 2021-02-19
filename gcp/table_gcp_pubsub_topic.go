@@ -27,7 +27,7 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The name of the topic.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(topicNameToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "kms_key_name",
@@ -48,18 +48,23 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromValue(),
 			},
 			{
+				Name:        "labels",
+				Description: "A set of labels attached with the topic.",
+				Type:        proto.ColumnType_JSON,
+			},
+
+			// standard steampipe columns
+			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
-
-			// standard steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(topicNameToTurbotData, "Title"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "akas",
@@ -88,12 +93,19 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.Topics.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListTopicsResponse) error {
 		for _, topic := range page.Topics {
@@ -110,14 +122,22 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 //// HYDRATE FUNCTIONS
 
 func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	plugin.Logger(ctx).Trace("getPubSubTopic")
+
+	// Create Service Connection
+	service, err := PubsubService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
+	name := d.KeyColumnQuals["name"].GetStringValue()
 	req, err := service.Projects.Topics.Get("projects/" + project + "/topics/" + name).Do()
 	if err != nil {
 		return nil, err
@@ -132,7 +152,10 @@ func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 }
 
 func getPubSubTopicIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	plugin.Logger(ctx).Trace("getPubSubTopicIamPolicy")
+
+	// Create Service Connection
+	service, err := PubsubService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +186,6 @@ func topicNameToTurbotData(_ context.Context, d *transform.TransformData) (inter
 
 	turbotData := map[string]interface{}{
 		"Project": splittedTitle[1],
-		"Name":    splittedTitle[len(splittedTitle)-1],
-		"Title":   splittedTitle[len(splittedTitle)-1],
 		"Akas":    []string{"gcp://pubsub.googleapis.com/" + topic.Name},
 	}
 
