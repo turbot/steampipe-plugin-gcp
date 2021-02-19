@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -90,7 +91,7 @@ func tableGcpSQLDatabase(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(sqlDatabaseAka),
+				Transform:   transform.FromP(sqlInstanceSelfLinkToTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -104,7 +105,7 @@ func tableGcpSQLDatabase(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(sqlInstanceSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -118,12 +119,19 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	// Get the details of Cloud SQL instance
 	instance := h.Item.(*sql.DatabaseInstance)
 
-	service, err := sql.NewService(ctx)
+	// Create service connection
+	service, err := CloudSQLAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp, err := service.Databases.List(project, instance.Name).Do()
 	if err != nil {
 		return nil, err
@@ -138,14 +146,23 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 //// HYDRATE FUNCTIONS
 
 func getSQLDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := sql.NewService(ctx)
+	plugin.Logger(ctx).Trace("getSQLDatabase")
+
+	// Create service connection
+	service, err := CloudSQLAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	instanceName := d.KeyColumnQuals["instance_name"].GetStringValue()
-	project := activeProject()
 
 	// Get the region where the specified instance is created
 	instanceData, err := service.Instances.Get(project, instanceName).Do()
@@ -164,10 +181,16 @@ func getSQLDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 //// TRANSFORM FUNCTIONS
 
-func sqlDatabaseAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	database := d.HydrateItem.(sqlDatabaseInfo)
+func sqlInstanceSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(sqlDatabaseInfo)
+	param := d.Param.(string)
 
-	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + activeProject() + "/instances/" + database.Database.Instance + "/databases/" + database.Database.Name}
+	project := strings.Split(data.Database.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://cloudsql.googleapis.com/projects/" + project + "/instances/" + data.Database.Instance + "/databases/" + data.Database.Name},
+	}
+
+	return turbotData[param], nil
 }
