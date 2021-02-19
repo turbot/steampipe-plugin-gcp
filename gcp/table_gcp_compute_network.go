@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -101,7 +102,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(networkAka),
+				Transform:   transform.FromP(gcpComputeNetworkTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -115,7 +116,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeNetworkTurbotData, "Project"),
 			},
 		},
 	}
@@ -125,12 +126,20 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 
 func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeNetworks")
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Networks.List(project)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
 		for _, network := range page.Items {
@@ -147,15 +156,21 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getComputeNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getComputeNetwork")
+	plugin.Logger(ctx).Trace("getComputeNetwork")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp, err := service.Networks.Get(project, name).Do()
@@ -168,12 +183,18 @@ func getComputeNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 //// TRANSFORM FUNCTIONS
 
-func networkAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeNetworkTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	network := d.HydrateItem.(*compute.Network)
+	param := d.Param.(string)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/networks/" + network.Name}
+	project := strings.Split(network.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/networks/" + network.Name},
+	}
+
+	return turbotData[param], nil
 }
 
 func networkMtu(_ context.Context, d *transform.TransformData) (interface{}, error) {

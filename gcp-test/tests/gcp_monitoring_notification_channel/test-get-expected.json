@@ -1,9 +1,14 @@
 [
-  {
-    "description": "Test notification channel to verify th table",
-    "display_name": "{{ resourceName }}",
-    "enabled": true,
-    "name": "{{ output.resource_id.value.split('/').pop() }}",
-    "type": "email"
-  }
+	{
+		"description": "Test notification channel to verify th table",
+		"display_name": "{{ resourceName }}",
+		"enabled": true,
+		"labels": {
+			"email_address": "test_table@blahblah.com"
+		},
+		"location": "global",
+		"name": "{{ output.resource_id.value.split('/').pop() }}",
+		"project": "{{ output.project_id.value }}",
+		"type": "email"
+	}
 ]

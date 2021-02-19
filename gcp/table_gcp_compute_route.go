@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -134,7 +135,7 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpComputeRouteAka),
+				Transform:   transform.FromP(gcpComputeRouteTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -148,7 +149,7 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeRouteTurbotData, "Project"),
 			},
 		},
 	}
@@ -158,12 +159,20 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 
 func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeRoutes")
-	service, err := compute.NewService(ctx)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Routes.List(project)
 	if err := resp.Pages(ctx, func(page *compute.RouteList) error {
 		for _, route := range page.Items {
@@ -180,13 +189,20 @@ func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 //// HYDRATE FUNCTIONS
 
 func getComputeRoute(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/routes/" into uint64
@@ -204,11 +220,16 @@ func getComputeRoute(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 //// TRANSFORM FUNCTIONS
 
-func gcpComputeRouteAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpComputeRouteTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	route := d.HydrateItem.(*compute.Route)
+	param := d.Param.(string)
 
-	// Build resource aka
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/routes/" + route.Name}
+	project := strings.Split(route.SelfLink, "/")[6]
 
-	return akas, nil
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/routes/" + route.Name},
+	}
+
+	return turbotData[param], nil
 }

@@ -23,6 +23,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		DefaultGetConfig: &plugin.GetConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 		},
+		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
+			NewInstance: ConfigInstance,
+			Schema:      ConfigSchema,
+		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
 			"gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
@@ -34,6 +38,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
 			"gcp_compute_global_address":          tableGcpComputeGlobalAddress(ctx),
 			"gcp_compute_global_forwarding_rule":  tableGcpComputeGlobalForwardingRule(ctx),
+			"gcp_compute_image":                   tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                tableGcpComputeInstance(ctx),
 			"gcp_compute_instance_template":       tableGcpComputeInstanceTemplate(ctx),
 			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
@@ -61,11 +66,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
+
 			/*
 				https://github.com/turbot/steampipe/issues/108
-				https://github.com/turbot/steampipe/issues/126
-
-				"gcp_compute_image":                   tableGcpComputeImage(ctx),
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
 			*/
 

@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -188,7 +189,7 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeURLMapLocation, "Project"),
 			},
 		},
 	}
@@ -198,12 +199,19 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 
 func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeURLMaps")
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.UrlMaps.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.UrlMapsAggregatedList) error {
 		for _, item := range page.Items {
@@ -222,14 +230,21 @@ func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 //// HYDRATE FUNCTIONS
 
 func getComputeURLMap(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var urlMap compute.UrlMap
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp := service.UrlMaps.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -258,12 +273,13 @@ func getComputeURLMap(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 func gcpComputeURLMapAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	urlMap := d.HydrateItem.(*compute.UrlMap)
-	regionName := getLastPathElement(types.SafeString(urlMap.Region))
+	region := getLastPathElement(types.SafeString(urlMap.Region))
+	project := strings.Split(urlMap.SelfLink, "/")[6]
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/regions/" + regionName + "/urlMaps/" + urlMap.Name}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/urlMaps/" + urlMap.Name}
 
-	if regionName == "" {
-		akas = []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/global/urlMaps/" + urlMap.Name}
+	if region == "" {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/global/urlMaps/" + urlMap.Name}
 	}
 
 	return akas, nil
@@ -273,10 +289,12 @@ func gcpComputeURLMapLocation(_ context.Context, d *transform.TransformData) (in
 	urlMap := d.HydrateItem.(*compute.UrlMap)
 	param := d.Param.(string)
 	regionName := getLastPathElement(types.SafeString(urlMap.Region))
+	project := strings.Split(urlMap.SelfLink, "/")[6]
 
 	locationData := map[string]string{
 		"Type":     "REGIONAL",
 		"Location": regionName,
+		"Project":  project,
 	}
 
 	if regionName == "" {

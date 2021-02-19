@@ -9,7 +9,7 @@ A service account is a special type of Google account intended to represent a no
 ```sql
 select
   display_name,
-  split_part(name, '/', 4) as service_accounts,
+  name as service_account,
   email
 from
   gcp_service_account;
@@ -24,7 +24,7 @@ select
   split_part(s ->> 'role', '/', 2) as role,
   entity
 from
-  gcp_pubsub_topic,
+  gcp_service_account,
   jsonb_array_elements(iam_policy -> 'bindings') as s,
   jsonb_array_elements_text(s -> 'members') as entity
 where
