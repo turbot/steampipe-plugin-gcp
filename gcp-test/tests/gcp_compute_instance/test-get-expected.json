@@ -1,0 +1,28 @@
+[
+	{
+		"can_ip_forward": false,
+		"cpu_platform": "Intel Haswell",
+		"deletion_protection": false,
+		"description": "Test VM instance to verify the table.",
+		"kind": "compute#instance",
+		"label_fingerprint": "{{ output.label_fingerprint.value }}",
+		"labels": {
+			"name": "{{ resourceName }}"
+		},
+		"location": "us-east1-b",
+		"machine_type": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/zones/us-east1-b/machineTypes/f1-micro",
+		"machine_type_name": "f1-micro",
+		"name": "{{ resourceName }}",
+		"network_tags": ["bar", "foo"],
+		"project": "{{ output.project_id.value }}",
+		"self_link": "{{ output.self_link.value }}",
+		"service_accounts": [
+			{
+				"email": "{{ output.service_account.value }}",
+				"scopes": ["https://www.googleapis.com/auth/cloud-platform"]
+			}
+		],
+		"zone": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/zones/us-east1-b",
+		"zone_name": "us-east1-b"
+	}
+]

@@ -1,0 +1,15 @@
+[
+	{
+		"iam_policy": {
+			"bindings": [
+				{
+					"members": ["serviceAccount:{{ output.service_account.value }}"],
+					"role": "roles/compute.osLogin"
+				}
+			],
+			"etag": "{{ output.etag.value }}",
+			"version": 1
+		},
+		"name": "{{ resourceName }}"
+	}
+]

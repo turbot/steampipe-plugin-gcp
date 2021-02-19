@@ -161,7 +161,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "reservation_affinity",
-				Description: " Specifies the reservations that this instance can consume from.",
+				Description: "Specifies the reservations that this instance can consume from.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -186,12 +186,12 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "shielded_instance_config",
-				Description: "Shielded instance configuration.  Shielded VM provides verifiable integrity to prevent against malware and rootkits.",
+				Description: "Shielded instance configuration. Shielded VM provides verifiable integrity to prevent against malware and rootkits.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "shielded_instance_integrity_policy",
-				Description: "Shielded instance integrity policy. Shielded instance configuration.  Shielded VM provides verifiable integrity to prevent against malware and rootkits.",
+				Description: "Shielded instance integrity policy. Shielded instance configuration. Shielded VM provides verifiable integrity to prevent against malware and rootkits.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -207,8 +207,8 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			{
 				Name:        "network_tags",
 				Description: "Network tags applied to this instance. Network tags are used to identify valid sources or targets for network firewalls.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Tags"),
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Tags.Items"),
 			},
 			{
 				Name:        "zone",
