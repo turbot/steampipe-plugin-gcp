@@ -360,12 +360,20 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 
 func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listSQLDatabaseInstances")
-	service, err := sql.NewService(ctx)
+
+	// Create service connection
+	service, err := CloudSQLAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Instances.List(project)
 	if err := resp.Pages(ctx, func(page *sql.InstancesListResponse) error {
 		for _, instance := range page.Items {
@@ -382,13 +390,22 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugi
 //// HYDRATE FUNCTIONS
 
 func getSQLDatabaseInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := sql.NewService(ctx)
+	plugin.Logger(ctx).Trace("getSQLDatabaseInstance")
+
+	// Create service connection
+	service, err := CloudSQLAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	resp, err := service.Instances.Get(project, name).Do()
 	if err != nil {
@@ -410,7 +427,7 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	instance := h.Item.(*sql.DatabaseInstance)
-	project := activeProject()
+	project := instance.Project
 
 	req, err := service.Users.List(project, instance.Name).Do()
 	if err != nil {
@@ -425,7 +442,7 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 func sqlDatabaseInstanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	instance := d.HydrateItem.(*sql.DatabaseInstance)
 
-	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + activeProject() + "/regions/" + instance.Region + "/instances/" + instance.Name}
+	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + instance.Project + "/regions/" + instance.Region + "/instances/" + instance.Name}
 
 	return akas, nil
 }
