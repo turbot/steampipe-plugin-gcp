@@ -1,7 +1,7 @@
 [
   {
     "description": "Test image to verify the table.",
-    "disk_size_gb": "500",
+    "disk_size_gb": 500,
     "kind": "compute#image",
     "labels": {
       "name": "{{ resourceName }}"

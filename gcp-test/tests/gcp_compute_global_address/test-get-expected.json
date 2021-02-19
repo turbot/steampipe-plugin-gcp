@@ -5,6 +5,7 @@
     "kind": "compute#address",
     "name": "{{resourceName}}",
     "network_tier": "PREMIUM",
+    "project": "{{ output.project_id.value }}",
     "self_link": "{{ output.self_link.value }}"
   }
 ]

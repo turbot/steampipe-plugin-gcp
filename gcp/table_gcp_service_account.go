@@ -17,9 +17,8 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 		Name:        "gcp_service_account",
 		Description: "GCP Service Account",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpServiceAccount,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getGcpServiceAccount,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpServiceAccounts,
@@ -29,6 +28,7 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The resource name of the service account",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "email",
@@ -46,8 +46,18 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "disabled",
+				Description: "Specifies whether the service is account is disabled, or not.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
 				Name:        "description",
 				Description: "A user-specified, human-readable description of the service account. The maximum length is 256 UTF-8 bytes.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "oauth2_client_id",
+				Description: "The OAuth 2.0 client ID for the service account.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -84,7 +94,7 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromField("ProjectId"),
 			},
 		},
 	}
@@ -93,12 +103,18 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.ServiceAccounts.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -118,18 +134,31 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.
 //// HYDRATE FUNCTIONS
 
 func getGcpServiceAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getGcpServiceAccount")
-	service, err := iam.NewService(ctx)
+	plugin.Logger(ctx).Trace("getGcpServiceAccount")
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
-	op, err := service.Projects.ServiceAccounts.Get(name).Do()
+	// If the name has been passed as empty string, API does not returns any error
+	if len(name) < 1 {
+		return nil, nil
+	}
+	accountName := "projects/" + project + "/serviceAccounts/" + name
+
+	op, err := service.Projects.ServiceAccounts.Get(accountName).Do()
 	if err != nil {
-		logger.Debug("getGcpServiceAccount__", "ERROR", err)
+		plugin.Logger(ctx).Debug("getGcpServiceAccount__", "ERROR", err)
 		return nil, err
 	}
 
@@ -138,17 +167,17 @@ func getGcpServiceAccount(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 func getServiceAccountIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	account := h.Item.(*iam.ServiceAccount)
-	logger := plugin.Logger(ctx)
-	logger.Trace("getServiceAccountIamPolicy")
+	plugin.Logger(ctx).Trace("getServiceAccountIamPolicy")
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	op, err := service.Projects.ServiceAccounts.GetIamPolicy(account.Name).Do()
 	if err != nil {
-		logger.Debug("getServiceAccountIamPolicy__", "Error", err)
+		plugin.Logger(ctx).Debug("getServiceAccountIamPolicy__", "Error", err)
 		return nil, err
 	}
 

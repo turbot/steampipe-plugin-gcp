@@ -9,11 +9,9 @@
     "kind": "compute#network",
     "mtu": 1500,
     "name": "{{resourceName}}",
-    "peerings": {},
     "project": "{{ output.project_id.value }}",
     "routing_mode": "REGIONAL",
     "self_link": "{{ output.self_link.value }}",
-    "subnetworks": {},
     "title": "{{resourceName}}"
   }
 ]

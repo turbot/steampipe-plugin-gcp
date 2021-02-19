@@ -131,7 +131,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(globalAddressSelfLinkToTurbotData, "Project"),
 			},
 		},
 	}
@@ -140,12 +140,19 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.GlobalAddresses.List(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
 		for _, globalAddress := range page.Items {
@@ -162,13 +169,20 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plu
 //// HYDRATE FUNCTIONS
 
 func getComputeGlobalAddress(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := activeProject()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/addresses/" into uint64
@@ -190,11 +204,11 @@ func globalAddressSelfLinkToTurbotData(_ context.Context, d *transform.Transform
 	globalAddress := d.HydrateItem.(*compute.Address)
 	param := d.Param.(string)
 
-	splittedData := strings.Split(globalAddress.SelfLink, "/")
+	project := strings.Split(globalAddress.SelfLink, "/")[6]
 
 	turbotData := map[string]interface{}{
-		"Project": splittedData[6],
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + splittedData[6] + "/global/addresses/" + globalAddress.Name},
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/addresses/" + globalAddress.Name},
 	}
 
 	return turbotData[param], nil

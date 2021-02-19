@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 
@@ -221,6 +222,13 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
 			},
+			{
+				Name:        "iam_policy",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getComputeInstanceIamPolicy,
+				Transform:   transform.FromValue(),
+			},
 
 			// standard steampipe columns
 			{
@@ -239,7 +247,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(instanceAka),
+				Transform:   transform.FromP(gcpComputeInstanceTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -253,7 +261,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant(activeProject()),
+				Transform:   transform.FromP(gcpComputeInstanceTurbotData, "Project"),
 			},
 		},
 	}
@@ -262,15 +270,21 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("listComputeInstances")
+	plugin.Logger(ctx).Trace("listComputeInstances")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := activeProject()
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Instances.AggregatedList(project)
 	if err := resp.Pages(
 		ctx,
@@ -292,16 +306,22 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 //// HYDRATE FUNCTIONS
 
 func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getComputeInstance")
+	plugin.Logger(ctx).Trace("getComputeInstance")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	var instance compute.Instance
-	project := activeProject()
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp := service.Instances.AggregatedList(project).Filter("name=" + name)
@@ -319,20 +339,46 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	// If the specified resource is not present, API does not return any not found errors
+	if len(instance.Name) < 1 {
+		return nil, nil
+	}
+
 	return &instance, nil
+}
+
+func getComputeInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	instance := h.Item.(*compute.Instance)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	project := strings.Split(instance.SelfLink, "/")[6]
+	zone := getLastPathElement(types.SafeString(instance.Zone))
+
+	resp, err := service.Instances.GetIamPolicy(project, zone, instance.Name).Do()
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func instanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	i := d.HydrateItem.(*compute.Instance)
+func gcpComputeInstanceTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	instance := d.HydrateItem.(*compute.Instance)
+	param := d.Param.(string)
 
-	zoneName := getLastPathElement(types.SafeString(i.Zone))
-	instanceName := types.SafeString(i.Name)
+	zone := getLastPathElement(types.SafeString(instance.Zone))
+	project := strings.Split(instance.SelfLink, "/")[6]
 
-	// ex: gcp://compute.googleapis.com/projects/project-aaa/zones/us-central1-a/instances/instance-1
-	akas := []string{"gcp://compute.googleapis.com/projects/" + activeProject() + "/zones/" + zoneName + "/instances/" + instanceName}
+	turbotData := map[string]interface{}{
+		"Project": project,
+		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zone + "/instances/" + instance.Name},
+	}
 
-	return akas, nil
-
+	return turbotData[param], nil
 }
