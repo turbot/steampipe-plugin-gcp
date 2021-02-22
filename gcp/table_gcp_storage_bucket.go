@@ -100,7 +100,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			{
 				Name:        "labels",
 				Description: "Labels that apply to this bucket.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "log_bucket",
