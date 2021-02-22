@@ -142,7 +142,8 @@ func listComputeInstanceGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 	logger := plugin.Logger(ctx)
 	logger.Trace("listComputeInstanceGroups")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +177,8 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	logger := plugin.Logger(ctx)
 	logger.Trace("getComputeInstanceGroup")
 
-	service, err := compute.NewService(ctx)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
