@@ -97,13 +97,13 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
 			},
-			{
-				Name:        "instances",
-				Description: "A list of instances present inside the instance group.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getComputeInstanceGroupInstancesList,
-				Transform:   transform.FromValue(),
-			},
+			// {
+			// 	Name:        "instances",
+			// 	Description: "A list of instances present inside the instance group.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getComputeInstanceGroupInstancesList,
+			// 	Transform:   transform.FromValue(),
+			// },
 
 			// standard steampipe columns
 			{
