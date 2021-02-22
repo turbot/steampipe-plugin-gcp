@@ -227,7 +227,7 @@ func getComputeInstanceGroupInstancesList(ctx context.Context, d *plugin.QueryDa
 	splittedTitle := strings.Split(instanceGroup.SelfLink, "/")
 
 	// Build param
-	project := splittedTitle[1]
+	project := splittedTitle[6]
 	zone := getLastPathElement(types.SafeString(instanceGroup.Zone))
 	listInstanceRequest := &compute.InstanceGroupsListInstancesRequest{
 		InstanceState: "ALL",
@@ -257,7 +257,7 @@ func computeInstanceGroupSelfLinkToTurbotData(_ context.Context, d *transform.Tr
 	param := d.Param.(string)
 
 	zone := getLastPathElement(types.SafeString(instanceGroup.Zone))
-	project := strings.Split(instanceGroup.SelfLink, "/")[1]
+	project := strings.Split(instanceGroup.SelfLink, "/")[6]
 
 	turbotData := map[string]interface{}{
 		"Project": project,
