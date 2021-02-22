@@ -257,7 +257,7 @@ func computeInstanceGroupSelfLinkToTurbotData(_ context.Context, d *transform.Tr
 	param := d.Param.(string)
 
 	zone := getLastPathElement(types.SafeString(instanceGroup.Zone))
-	project := strings.Split(instanceGroup.SelfLink, "/")[6]
+	project := strings.Split(instanceGroup.SelfLink, "/")[1]
 
 	turbotData := map[string]interface{}{
 		"Project": project,
