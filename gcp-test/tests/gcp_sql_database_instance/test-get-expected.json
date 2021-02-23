@@ -1,0 +1,18 @@
+[
+	{
+		"connection_name": "{{ output.project_id.value }}:us-east1:{{ resourceName }}",
+		"crash_safe_replication_enabled": false,
+		"data_disk_size_gb": 10,
+		"data_disk_type": "PD_HDD",
+		"database_version": "MYSQL_5_6",
+		"enable_point_in_time_recovery": true,
+		"instance_type": "CLOUD_SQL_INSTANCE",
+		"kind": "sql#instance",
+		"location": "us-east1",
+		"machine_type": "db-f1-micro",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"self_link": "{{ output.self_link.value }}",
+		"storage_auto_resize": true
+	}
+]
