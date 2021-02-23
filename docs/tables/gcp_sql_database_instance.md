@@ -30,7 +30,7 @@ where
   name='my-sql-instance';
 ```
 
-### List of replica databaases and their master instances
+### List of replica databases and their master instances
 
 ```sql
 select
