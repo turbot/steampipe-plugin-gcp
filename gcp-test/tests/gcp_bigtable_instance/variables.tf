@@ -1,7 +1,7 @@
 
 variable "resource_name" {
   type        = string
-  default     = "turbot-test-20200125-create-update"
+  default     = "turbottest20200125createupdate"
   description = "Name of the resource used throughout the test."
 }
 
@@ -30,8 +30,8 @@ provider "google" {
 
 data "google_client_config" "current" {}
 
-data "null_data_source" "resource" {
-  inputs = {
+locals {
+  resource = {
     scope = "gcp://cloudresourcemanager.googleapis.com/projects/${data.google_client_config.current.project}"
   }
 }
@@ -42,13 +42,13 @@ resource "google_service_account" "named_test_resource" {
 }
 
 resource "google_bigtable_instance" "named_test_resource" {
-  name = var.resource_name
-  instance_type = "DEVELOPMENT"
+  name                = var.resource_name
+  instance_type       = "DEVELOPMENT"
   deletion_protection = false
 
   cluster {
-    cluster_id = var.resource_name
-    zone = data.google_client_config.current.zone
+    cluster_id   = var.resource_name
+    zone         = data.google_client_config.current.zone
     storage_type = "HDD"
   }
 
