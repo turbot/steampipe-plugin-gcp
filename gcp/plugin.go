@@ -65,6 +65,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account":                 tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_sql_backup":                      tableGcpSQLBackup(ctx),
+			"gcp_sql_database":                    tableGcpSQLDatabase(ctx),
+			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
 
 			/*
