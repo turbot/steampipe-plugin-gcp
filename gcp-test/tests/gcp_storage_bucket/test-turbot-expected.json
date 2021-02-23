@@ -3,6 +3,9 @@
     "akas": [
       "{{ output.resource_aka.value }}"
     ],
+    "labels": {
+      "name": "test"
+    },
     "name": "{{ resourceName }}",
     "tags": {
       "name": "test"
