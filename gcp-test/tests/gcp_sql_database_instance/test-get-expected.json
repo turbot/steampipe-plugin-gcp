@@ -8,6 +8,9 @@
 		"enable_point_in_time_recovery": true,
 		"instance_type": "CLOUD_SQL_INSTANCE",
 		"kind": "sql#instance",
+		"labels": {
+			"name": "{{ resourceName }}"
+		},
 		"location": "us-east1",
 		"machine_type": "db-f1-micro",
 		"name": "{{ resourceName }}",

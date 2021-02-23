@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
+	"google.golang.org/api/googleapi"
 	sql "google.golang.org/api/sql/v1beta4"
 )
 
@@ -288,6 +289,12 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Settings.LocationPreference"),
 			},
 			{
+				Name:        "labels",
+				Description: "A label is a key-value pair that helps you organize your Google Cloud instances. You can attach a label to each resource, then filter the resources based on their labels.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Settings.UserLabels"),
+			},
+			{
 				Name:        "maintenance_window",
 				Description: "Describes the maintenance window for this instance.",
 				Type:        proto.ColumnType_JSON,
@@ -421,7 +428,9 @@ func getSQLDatabaseInstance(ctx context.Context, d *plugin.QueryData, h *plugin.
 }
 
 func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := sql.NewService(ctx)
+
+	// Create service connection
+	service, err := CloudSQLAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -431,6 +440,9 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 
 	req, err := service.Users.List(project, instance.Name).Do()
 	if err != nil {
+		if err.(*googleapi.Error).Message == "Invalid request: Invalid request since instance is not running." {
+			return nil, nil
+		}
 		return nil, err
 	}
 
