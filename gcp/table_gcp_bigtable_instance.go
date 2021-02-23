@@ -29,7 +29,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "A friendly name that identifies the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name").Transform(lastPathElement),
+				Transform:   transform.FromCamel().Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
@@ -46,6 +46,11 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "state",
 				Description: "Specifies the current state of the instance.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "labels",
+				Description: "Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that reflect a customer's organizational needs and deployment strategies. They can be used to filter resources and aggregate metrics.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "iam_policy",
@@ -72,7 +77,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(bigtableInstanceToTurbotData, "Akas"),
+				Transform:   transform.FromP(bigtableInstanceTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -86,7 +91,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(bigtableInstanceToTurbotData, "Project"),
+				Transform:   transform.FromP(bigtableInstanceTurbotData, "Project"),
 			},
 		},
 	}
@@ -155,7 +160,8 @@ func getBigtableInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 }
 
 func getBigtableInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := bigtableadmin.NewService(ctx)
+	// Create Service Connection
+	service, err := BigtableAdminService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +184,7 @@ func getBigtableInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 //// TRANSFORM FUNCTIONS
 
-func bigtableInstanceToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func bigtableInstanceTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	instance := d.HydrateItem.(*bigtableadmin.Instance)
 	param := d.Param.(string)
 
