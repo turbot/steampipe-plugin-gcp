@@ -10,13 +10,28 @@ A Cloud Bigtable instance is a container for your data. Instances have one or mo
 select
   name,
   instance_type,
+  state,
   location
 from
   gcp_bigtable_instance;
 ```
 
 
-### List of bigtable instances where members have IAM security admin access assigned in a resource policy
+### List of members and their associated iam roles for the big table instance
+
+```sql
+select
+  name,
+  location,
+  jsonb_array_elements_text(p -> 'members') as member,
+  p ->> 'role' as role
+from
+  gcp_bigtable_instance,
+  jsonb_array_elements(iam_policy -> 'bindings') as p;
+```
+
+
+### List of bigtable instances where members have bigtable admin access
 
 ```sql
 select
@@ -28,11 +43,11 @@ from
   gcp_bigtable_instance,
   jsonb_array_elements(iam_policy -> 'bindings') as i
 where
-  i ->> 'role' like '%securityAdmin%';
+  i ->> 'role' like '%bigtable.admin';
 ```
 
 
-### Get the count of instances which are not for production
+### Count of production instances
 
 ```sql
 select
@@ -41,7 +56,7 @@ select
 from
   gcp_bigtable_instance
 where
-  instance_type <> 'PRODUCTION'
+  instance_type = 'PRODUCTION'
 group by
   instance_type;
 ```
