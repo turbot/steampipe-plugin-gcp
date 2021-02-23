@@ -1,0 +1,7 @@
+[
+	{
+		"instance_name": "{{ resourceName }}",
+		"kind": "sql#database",
+		"name": "{{ resourceName }}"
+	}
+]
