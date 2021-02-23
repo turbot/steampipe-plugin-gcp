@@ -1,0 +1,6 @@
+[
+	{
+		"host_name": "me.com",
+		"name": "{{ resourceName }}"
+	}
+]

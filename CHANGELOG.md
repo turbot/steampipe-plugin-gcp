@@ -1,3 +1,11 @@
+## v0.1.1 [2021-02-22]
+
+_Bug fixes_
+
+- Now union query for multiple projects will work if different credential files are used for project connection in config ([#116](https://github.com/turbot/steampipe-plugin-gcp/issues/116))
+
+- Updated `gcp_storage_bucket` table `labels` field to display value correctly ([#115](https://github.com/turbot/steampipe-plugin-gcp/issues/115))
+
 ## v0.1.0 [2021-02-18]
 
 _What's new?_
