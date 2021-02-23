@@ -20,7 +20,7 @@ from
 
 ### List of users in the specified Cloud SQL instance.
 
-````sql
+```sql
 select
   name,
   instance_users
@@ -28,6 +28,7 @@ from
   gcp_sql_database_instance
 where
   name='my-sql-instance';
+```
 
 ### List of replica databaases and their master instances
 
@@ -41,7 +42,7 @@ from
   gcp_sql_database_instance
 where
   database_replication_enabled;
-````
+```
 
 ### List of assigned IP addresses to the database instances
 
