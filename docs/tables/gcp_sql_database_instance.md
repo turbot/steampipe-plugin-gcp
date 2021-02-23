@@ -1,6 +1,6 @@
 # Table: gcp_sql_database_instance
 
- Cloud SQL instance is a database running in the cloud. Its use to store, replicate, and protect databases. It can be configure the instance's behavior, such as when and where the data will be replicated, or when it is acceptable to perform database maintenance.
+Cloud SQL instance is a database running in the cloud. It is used to store, replicate, and protect databases.
 
 ## Examples
 
@@ -18,6 +18,16 @@ from
   gcp_sql_database_instance;
 ```
 
+### List of users in the specified Cloud SQL instance.
+
+````sql
+select
+  name,
+  instance_users
+from
+  gcp_sql_database_instance
+where
+  name='my-sql-instance';
 
 ### List of replica databaases and their master instances
 
@@ -31,8 +41,7 @@ from
   gcp_sql_database_instance
 where
   database_replication_enabled;
-```
-
+````
 
 ### List of assigned IP addresses to the database instances
 
@@ -45,7 +54,6 @@ from
   gcp_sql_database_instance,
   jsonb_array_elements(ip_addresses) as ip;
 ```
-
 
 ### List of external networks that can connect to the database instance
 
@@ -60,7 +68,6 @@ from
   jsonb_array_elements(ip_configuration -> 'authorizedNetworks') as i;
 ```
 
-
 ### List of database instances without application tag key
 
 ```sql
@@ -72,7 +79,6 @@ from
 where
   not tags :: JSONB ? 'application';
 ```
-
 
 ### Count of database instances per location
 
