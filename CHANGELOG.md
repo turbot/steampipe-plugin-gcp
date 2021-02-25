@@ -10,6 +10,9 @@ _What's new?_
 _Bug fixes_
 
 - Updated `gcp_compute_instance` table `network_tags` field to display value correctly ([#114](https://github.com/turbot/steampipe-plugin-gcp/pull/114))
+- Recompiled plugin with latest [steampipe-plugin-sdk](https://github.com/turbot/steampipe-plugin-sdk) to resolve SDK issues:
+  - Fix error for missing required quals [#40](https://github.com/turbot/steampipe-plugin-sdk/issues/42).
+  - Queries fail with error socket: too many open files [#190](https://github.com/turbot/steampipe/issues/190)
 
 ## v0.1.1 [2021-02-22]
 
