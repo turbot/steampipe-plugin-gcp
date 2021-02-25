@@ -1,3 +1,16 @@
+## v0.2.0 [2021-02-25]
+
+_What's new?_
+
+- New tables added
+  - gcp_sql_backup
+  - gcp_sql_database
+  - gcp_sql_database_instance
+
+_Bug fixes_
+
+- Updated `gcp_compute_instance` table `network_tags` field to display value correctly ([#114](https://github.com/turbot/steampipe-plugin-gcp/pull/114))
+
 ## v0.1.1 [2021-02-22]
 
 _Bug fixes_
