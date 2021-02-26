@@ -32,7 +32,7 @@ func tableGcpComputeRegion(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "status",
-				Description: "Status of the region, either UP or DOWN. Possible values: \"DOWN\" and \"UP\".",
+				Description: "Status of the region, either UP or DOWN.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
