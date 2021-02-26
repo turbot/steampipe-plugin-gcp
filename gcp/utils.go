@@ -71,6 +71,9 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 		return cachedData.(*projectInfo), nil
 	}
 
+	// Get the info from connection config if it overwrites env variables and others
+	setSessionConfig(d.Connection)
+
 	var err error
 	var projectData *projectInfo
 	gcpProject := os.Getenv("GCP_PROJECT")
@@ -87,7 +90,7 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 	} else {
 		projectData, err = getProjectFromCLI()
 		if err != nil {
-			panic("\n\nYou must specify a Project. You can configure your project by setting \"CLOUDSDK_CORE_PROJECT\" or \"GCP_PROJECT\" environment variable.")
+			panic("\n\n'project' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
 		}
 	}
 

@@ -219,7 +219,8 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(computeImageSelfLinkToTurbotData, "Project"),
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
