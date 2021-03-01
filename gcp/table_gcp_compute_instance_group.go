@@ -153,11 +153,10 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 	}
 }
 
-//// HYDRATE FUNCTIONS
+//// LIST FUNCTION
 
 func listComputeInstanceGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("listComputeInstanceGroups")
+	plugin.Logger(ctx).Trace("listComputeInstanceGroups")
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -223,6 +222,8 @@ func listComputeInstanceGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 	return nil, nil
 }
 
+//// HYDRATE FUNCTIONS
+
 func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getComputeInstanceGroup")
 
@@ -239,7 +240,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 	project := projectData.Project
 
-	var instanceGroup instanceGroupInfo
+	var instanceGroup *instanceGroupInfo
 	var name string
 	isManaged := true
 
@@ -258,7 +259,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 					isManaged = false
 				}
 				for _, i := range item.InstanceGroupManagers {
-					instanceGroup = instanceGroupInfo{&compute.InstanceGroup{
+					instanceGroup = &instanceGroupInfo{&compute.InstanceGroup{
 						CreationTimestamp: i.CreationTimestamp,
 						Description:       i.Description,
 						Fingerprint:       i.Fingerprint,
@@ -287,7 +288,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 			func(page *compute.InstanceGroupAggregatedList) error {
 				for _, item := range page.Items {
 					for _, i := range item.InstanceGroups {
-						instanceGroup = instanceGroupInfo{&compute.InstanceGroup{
+						instanceGroup = &instanceGroupInfo{&compute.InstanceGroup{
 							CreationTimestamp: i.CreationTimestamp,
 							Description:       i.Description,
 							Fingerprint:       i.Fingerprint,
@@ -310,11 +311,11 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// If the specified resource is not present, API does not return any not found errors
-	if len(instanceGroup.InstanceGroup.Name) < 1 {
+	if instanceGroup == nil {
 		return nil, nil
 	}
 
-	return &instanceGroup, nil
+	return instanceGroup, nil
 }
 
 func getComputeInstanceGroupInstancesList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -324,7 +325,7 @@ func getComputeInstanceGroupInstancesList(ctx context.Context, d *plugin.QueryDa
 		return nil, err
 	}
 
-	data := h.Item.(instanceGroupInfo)
+	data := h.Item.(*instanceGroupInfo)
 	splittedTitle := strings.Split(data.InstanceGroup.SelfLink, "/")
 	project := splittedTitle[6]
 	zone := getLastPathElement(types.SafeString(data.InstanceGroup.Zone))
@@ -371,7 +372,7 @@ func getComputeInstanceGroupInstancesList(ctx context.Context, d *plugin.QueryDa
 //// TRANSFORM FUNCTIONS
 
 func computeInstanceGroupSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(instanceGroupInfo)
+	data := d.HydrateItem.(*instanceGroupInfo)
 	param := d.Param.(string)
 
 	zone := getLastPathElement(types.SafeString(data.InstanceGroup.Zone))

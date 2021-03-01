@@ -1,6 +1,6 @@
 [
-  {
-    "description": "Test instance group to verify the table.",
-    "name": "{{ resourceName }}"
-  }
+	{
+		"description": "Test instance group to verify the table.",
+		"name": "{{ resourceName }}"
+	}
 ]
