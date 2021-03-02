@@ -3,7 +3,7 @@
 _Bug fixes_
 
 - Recompiled plugin with latest [steampipe-plugin-sdk](https://github.com/turbot/steampipe-plugin-sdk) to resolve issue:
-  - Fix tables failing with error `Error: pq: rpc error: code = Internal desc = get hydrate function getIamRole failed with panic interface conversion: interface {} is nil, not *gcp.roleInfo`([#129](https://github.com/turbot/steampipe-plugin-gcp/issues/129)).
+  - Fix tables failing with error similar to `Error: pq: rpc error: code = Internal desc = get hydrate function getIamRole failed with panic interface conversion: interface {} is nil, not *gcp.roleInfo`([#129](https://github.com/turbot/steampipe-plugin-gcp/issues/129)).
 
 ## v0.2.0 [2021-02-25]
 
