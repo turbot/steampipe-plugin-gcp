@@ -1,0 +1,24 @@
+[
+	{
+		"description": "Test instance group to verify the table.",
+		"is_managed": false,
+		"kind": "compute#instanceGroup",
+		"location": "us-east1-b",
+		"name": "{{ resourceName }}",
+		"named_ports": [
+			{
+				"name": "http",
+				"port": 8080
+			},
+			{
+				"name": "https",
+				"port": 8443
+			}
+		],
+		"project": "{{ output.project_id.value }}",
+		"self_link": "{{ output.self_link.value }}",
+		"size": 0,
+		"zone": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/zones/us-east1-b",
+		"zone_name": "us-east1-b"
+	}
+]
