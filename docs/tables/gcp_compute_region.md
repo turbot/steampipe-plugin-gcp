@@ -18,7 +18,7 @@ where
 ```
 
 
-### Get the quota info of each region
+### Get the quota info for a region (us-west1)
 
 ```sql
 select
@@ -27,7 +27,11 @@ select
   q -> 'limit' as quota_limit
 from
   gcp_compute_region,
-  jsonb_array_elements(quotas) as q;
+  jsonb_array_elements(quotas) as q
+where
+  name = 'us-west1'
+order by
+  quota_metric;
 ```
 
 
@@ -47,10 +51,7 @@ from
 ```sql
 select
   name,
-  count(z) as zone_count
+  jsonb_array_length(zone_names) as zone_count
 from
-  gcp_compute_region,
-  jsonb_array_elements(zone_names) as z
-group by
-  name;
+  gcp_compute_region;
 ```
