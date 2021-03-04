@@ -1,3 +1,11 @@
+## v0.3.0 [2021-03-04]
+
+_What's new?_
+
+- New tables added
+  - gcp_compute_region
+  - gcp_compute_zone
+
 ## v0.2.1 [2021-03-02]
 
 _Bug fixes_
