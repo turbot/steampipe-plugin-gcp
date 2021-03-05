@@ -6,21 +6,18 @@ import (
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/iam/v1"
-
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
 
-//// TABLE DEFINITION
-
+// TABLE DEFINITION
 func tableGcpIamRole(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_iam_role",
 		Description: "GCP IAM Role",
 		Get: &plugin.GetConfig{
 			KeyColumns:  plugin.SingleColumn("name"),
-			ItemFromKey: roleNameFromKey,
 			Hydrate:     getIamRole,
 		},
 		List: &plugin.ListConfig{
@@ -80,8 +77,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 	}
 }
 
-//// ITEM FROM KEY
-
+// ITEM FROM KEY
 func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	quals := d.KeyColumnQuals
 	name := quals["name"].GetStringValue()
@@ -91,8 +87,7 @@ func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	return item, nil
 }
 
-//// FETCH FUNCTIONS
-
+// FETCH FUNCTIONS
 func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	service, err := iam.NewService(ctx)
 	if err != nil {
@@ -132,8 +127,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	return nil, err
 }
 
-//// HYDRATE FUNCTIONS
-
+// HYDRATE FUNCTIONS
 func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	role := h.Item.(*iam.Role)
 	var op *iam.Role
@@ -157,8 +151,7 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	return op, nil
 }
 
-/// TRANSFORM FUNCTIONS
-
+// TRANSFORM FUNCTIONS
 func gcpIAMRoleTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("googleIAMRoleTurbotData")
 	role := d.HydrateItem.(*iam.Role)
