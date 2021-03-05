@@ -20,7 +20,6 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		Description: "GCP Project Service",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("name"),
-			ItemFromKey:       serviceNameFromKey,
 			Hydrate:           getGcpProjectService,
 			ShouldIgnoreError: isNotFoundError([]string{"404", "403"}),
 		},
