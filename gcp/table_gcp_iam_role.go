@@ -19,9 +19,8 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 		Name:        "gcp_iam_role",
 		Description: "GCP IAM Role",
 		Get: &plugin.GetConfig{
-			KeyColumns:  plugin.SingleColumn("name"),
-			ItemFromKey: roleNameFromKey,
-			Hydrate:     getIamRole,
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getIamRole,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIamRoles,
@@ -114,19 +113,6 @@ type roleInfo struct {
 	Type bool
 }
 
-//// ITEM FROM KEY
-
-func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	quals := d.KeyColumnQuals
-	name := quals["name"].GetStringValue()
-	item := &roleInfo{
-		Role: &iam.Role{
-			Name: name,
-		},
-	}
-	return item, nil
-}
-
 //// FETCH FUNCTIONS
 
 func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -177,7 +163,15 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getIamRole")
-	roleData := h.Item.(*roleInfo)
+
+	var name string
+	if h.Item != nil {
+		name = h.Item.(*roleInfo).Role.Name
+	} else {
+		quals := d.KeyColumnQuals
+		name = quals["name"].GetStringValue()
+	}
+
 	var op *iam.Role
 
 	// Create Service Connection
@@ -189,11 +183,11 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	gcpManaged := true
 
 	// Checking whether the role is predefined or project role
-	if strings.HasPrefix(roleData.Role.Name, "projects/") {
+	if strings.HasPrefix(name, "projects/") {
 		gcpManaged = false
-		op, err = service.Projects.Roles.Get(roleData.Role.Name).Do()
+		op, err = service.Projects.Roles.Get(name).Do()
 	} else {
-		op, err = service.Roles.Get(roleData.Role.Name).Do()
+		op, err = service.Roles.Get(name).Do()
 	}
 
 	if err != nil {
