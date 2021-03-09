@@ -2,8 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
-	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -26,12 +24,12 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpProjectServices,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The resource name of the consumer and service",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(serviceNameToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "state",
@@ -43,13 +41,30 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 				Description: "The resource name of the consumer",
 				Type:        proto.ColumnType_STRING,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(serviceNameToTurbotData, "Akas"),
+				Transform:   transform.From(projectServiceNameToAkas),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
+			},
+		},
 	}
 }
 
@@ -67,13 +82,18 @@ func serviceNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 //// FETCH FUNCTIONS
 
 func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := serviceusage.NewService(ctx)
+	// Create Service Connection
+	service, err := ServiceUsageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO :: Need to fetch the details from env
-	project := os.Getenv("GCP_PROJECT")
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	result := service.Services.List("projects/" + project)
 	if err := result.Pages(
@@ -94,16 +114,22 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 //// HYDRATE FUNCTIONS
 
 func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	serviceData := h.Item.(*serviceusage.GoogleApiServiceusageV1Service)
+	plugin.Logger(ctx).Trace("getGcpProjectService")
 
-	service, err := serviceusage.NewService(ctx)
+	// Create Service Connection
+	service, err := ServiceUsageService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO :: Need to fetch the details from env
-	project := os.Getenv("GCP_PROJECT")
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
+	serviceData := h.Item.(*serviceusage.GoogleApiServiceusageV1Service)
 	op, err := service.Services.Get("projects/" + project + "/services/" + serviceData.Name).Do()
 	if err != nil {
 		return nil, err
@@ -114,16 +140,9 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 //// TRANSFORM FUNCTIONS
 
-func serviceNameToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func projectServiceNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	service := d.HydrateItem.(*serviceusage.GoogleApiServiceusageV1Service)
-	param := d.Param.(string)
+	akas := []string{"gcp://serviceusage.googleapis.com/" + service.Name}
 
-	splittedTitle := strings.Split(service.Name, "/")
-
-	turbotData := map[string]interface{}{
-		"Name": splittedTitle[len(splittedTitle)-1],
-		"Akas": []string{"gcp://serviceusage.googleapis.com/" + service.Name},
-	}
-
-	return turbotData[param], nil
+	return akas, nil
 }

@@ -2,12 +2,12 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+
 	"google.golang.org/api/pubsub/v1"
 )
 
@@ -16,9 +16,8 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 		Name:        "gcp_pubsub_subscription",
 		Description: "GCP Pub/Sub Subscription",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getPubSubSubscription,
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getPubSubSubscription,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubSubscription,
@@ -28,12 +27,19 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The name of the subscription.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(subscriptionNameToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "topic",
 				Description: "The name of the topic from which this subscription is receiving messages.",
 				Type:        proto.ColumnType_STRING,
+			},
+			// topic_name is a simpler view of the topic, without the full path
+			{
+				Name:        "topic_name",
+				Description: "The name of the topic from which this subscription is receiving messages.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Topic").Transform(lastPathElement),
 			},
 			{
 				Name:        "filter",
@@ -121,29 +127,42 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 				Hydrate:     getPubSubSubscriptionIamPolicy,
 				Transform:   transform.FromValue(),
 			},
+			{
+				Name:        "labels",
+				Description: "A set of labels attached with the subscription.",
+				Type:        proto.ColumnType_JSON,
+			},
 
-			// standard columns
+			// standard steampipe columns
 			{
 				Name:        "tags",
-				Description: "A map of tags for the resource.",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(subscriptionNameToTurbotData, "Title"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(subscriptionNameToTurbotData, "Akas"),
 			},
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
 			{
 				Name:        "project",
-				Description: "The Google Project in which the resource is located",
+				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(subscriptionNameToTurbotData, "Project"),
 			},
@@ -154,12 +173,18 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
-
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	resp := service.Projects.Subscriptions.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListSubscriptionsResponse) error {
@@ -177,13 +202,21 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.
 //// HYDRATE FUNCTIONS
 
 func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := os.Getenv("GCP_PROJECT")
+	plugin.Logger(ctx).Trace("getPubSubSubscription")
 
-	service, err := pubsub.NewService(ctx)
+	// Create Service Connection
+	service, err := PubsubService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	req, err := service.Projects.Subscriptions.Get("projects/" + project + "/subscriptions/" + name).Do()
 	if err != nil {
@@ -199,7 +232,10 @@ func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.H
 }
 
 func getPubSubSubscriptionIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	service, err := pubsub.NewService(ctx)
+	plugin.Logger(ctx).Trace("getPubSubSubscriptionIamPolicy")
+
+	// Create Service Connection
+	service, err := PubsubService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -219,13 +255,10 @@ func subscriptionNameToTurbotData(_ context.Context, d *transform.TransformData)
 	subscription := d.HydrateItem.(*pubsub.Subscription)
 	param := d.Param.(string)
 
-	// get the resource title
 	splittedTitle := strings.Split(subscription.Name, "/")
 
 	turbotData := map[string]interface{}{
 		"Project": splittedTitle[1],
-		"Name":    splittedTitle[len(splittedTitle)-1],
-		"Title":   splittedTitle[len(splittedTitle)-1],
 		"Akas":    []string{"gcp://pubsub.googleapis.com/" + subscription.Name},
 	}
 

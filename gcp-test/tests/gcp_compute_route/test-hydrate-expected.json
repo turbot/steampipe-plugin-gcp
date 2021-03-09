@@ -1,0 +1,10 @@
+[
+  {
+    "description": "Test route to verify the table.",
+    "dest_range": "10.0.0.0/24",
+    "kind": "compute#route",
+    "name": "{{ resourceName }}",
+    "network": "{{ output.network.value }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

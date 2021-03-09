@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,12 +24,12 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpMonitoringNotificationChannels,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The full REST resource name for this channel.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
@@ -62,39 +61,65 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Description: "A list of user-supplied key/value data that does not need to conform to the corresponding NotificationChannelDescriptor's schema unlike the labels field.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "labels",
+				Description: "A set of labels attached with the notification channel.",
+				Type:        proto.ColumnType_JSON,
+			},
 
-			// Standard columns
+			// standard steampipe columns
 			{
 				Name:        "tags",
-				Description: "A map of tags attached to the resource.",
+				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Akas"),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(notificationChannelNameToTurbotData, "Project"),
+			},
+		},
 	}
 }
 
 //// FETCH FUNCTIONS
 
 func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp := service.Projects.NotificationChannels.List("projects/" + project)
 	if err := resp.Pages(
 		ctx,
@@ -114,20 +139,25 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 //// HYDRATE FUNCTIONS
 
 func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	logger.Trace("getGcpMonitoringNotificationChannel")
+	plugin.Logger(ctx).Trace("getGcpMonitoringNotificationChannel")
 
-	project := os.Getenv("GCP_PROJECT")
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-
-	service, err := monitoring.NewService(ctx)
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	op, err := service.Projects.NotificationChannels.Get("projects/" + project + "/notificationChannels/" + name).Do()
 	if err != nil {
-		logger.Debug("getGcpMonitoringNotificationChannel__", "ERROR", err)
+		plugin.Logger(ctx).Debug("getGcpMonitoringNotificationChannel__", "ERROR", err)
 		return nil, err
 	}
 
@@ -151,9 +181,9 @@ func notificationChannelNameToTurbotData(_ context.Context, d *transform.Transfo
 	}
 
 	turbotData := map[string]interface{}{
-		"Name":  splittedTitle[len(splittedTitle)-1],
-		"Title": title,
-		"Akas":  []string{"gcp://monitoring.googleapis.com/" + notificationChannel.Name},
+		"Project": splittedTitle[1],
+		"Title":   title,
+		"Akas":    []string{"gcp://monitoring.googleapis.com/" + notificationChannel.Name},
 	}
 	return turbotData[param], nil
 }

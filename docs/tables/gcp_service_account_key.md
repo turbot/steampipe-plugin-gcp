@@ -8,9 +8,9 @@ Service Account Keys are public/private RSA key pairs which are used to authenti
 
 ```sql
 select
-  split_part(name, '/', 4) as service_accounts,
+  service_account_name as service_account,
   title,
-  key_type,
+  key_type
 from
   gcp_service_account_key
 where
@@ -23,7 +23,7 @@ where
 ```sql
 select
   title,
-  split_part(name, '/', 4) as service_accounts,
+  service_account_name as service_account,
   valid_after_time,
   valid_before_time
 from

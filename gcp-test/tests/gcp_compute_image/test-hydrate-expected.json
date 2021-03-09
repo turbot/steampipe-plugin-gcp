@@ -1,0 +1,22 @@
+[
+  {
+    "description": "Test image to verify the table.",
+    "disk_size_gb": 500,
+    "iam_policy": {
+      "bindings": [
+        {
+          "members": [
+            "serviceAccount:{{ output.email.value }}"
+          ],
+          "role": "roles/compute.imageUser"
+        }
+      ],
+      "etag": "{{ output.etag.value }}",
+      "version": 1
+    },
+    "kind": "compute#image",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}",
+    "source_disk": "{{ output.source_disk.value }}"
+  }
+]

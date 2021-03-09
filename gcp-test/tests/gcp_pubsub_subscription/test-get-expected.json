@@ -1,0 +1,15 @@
+[
+	{
+		"ack_deadline_seconds": 20,
+		"labels": {
+			"name": "{{resourceName}}"
+		},
+		"location": "global",
+		"message_retention_duration": "604800s",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"push_config_endpoint": "https://example.com/push",
+		"topic": "{{ output.topic_id.value }}",
+		"topic_name": "{{ resourceName }}"
+	}
+]

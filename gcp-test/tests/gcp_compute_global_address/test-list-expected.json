@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test global address to validate integration test.",
+    "name": "{{resourceName}}"
+  }
+]

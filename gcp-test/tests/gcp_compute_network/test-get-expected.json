@@ -1,0 +1,17 @@
+[
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "auto_create_subnetworks": false,
+    "description": "Test network to validate integration test.",
+    "gateway_ipv4": "",
+    "kind": "compute#network",
+    "mtu": 1500,
+    "name": "{{resourceName}}",
+    "project": "{{ output.project_id.value }}",
+    "routing_mode": "REGIONAL",
+    "self_link": "{{ output.self_link.value }}",
+    "title": "{{resourceName}}"
+  }
+]

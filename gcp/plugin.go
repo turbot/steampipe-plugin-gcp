@@ -21,10 +21,38 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name:             pluginName,
 		DefaultTransform: transform.FromCamel(),
 		DefaultGetConfig: &plugin.GetConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
+		},
+		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
+			NewInstance: ConfigInstance,
+			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
+			"gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
+			"gcp_compute_address":                 tableGcpComputeAddress(ctx),
+			"gcp_compute_backend_bucket":          tableGcpComputeBackendBucket(ctx),
+			"gcp_compute_backend_service":         tableGcpComputeBackendService(ctx),
+			"gcp_compute_disk":                    tableGcpComputeDisk(ctx),
+			"gcp_compute_firewall":                tableGcpComputeFirewall(ctx),
+			"gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
+			"gcp_compute_global_address":          tableGcpComputeGlobalAddress(ctx),
+			"gcp_compute_global_forwarding_rule":  tableGcpComputeGlobalForwardingRule(ctx),
+			"gcp_compute_image":                   tableGcpComputeImage(ctx),
+			"gcp_compute_instance":                tableGcpComputeInstance(ctx),
+			"gcp_compute_instance_template":       tableGcpComputeInstanceTemplate(ctx),
+			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
+			"gcp_compute_node_group":              tableGcpComputeNodeGroup(ctx),
+			"gcp_compute_node_template":           tableGcpComputeNodeTemplate(ctx),
+			"gcp_compute_region":                  tableGcpComputeRegion(ctx),
+			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
+			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
+			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
+			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
+			"gcp_compute_target_vpn_gateway":      tableGcpComputeTargetVpnGateway(ctx),
+			"gcp_compute_url_map":                 tableGcpComputeURLMap(ctx),
+			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
+			"gcp_compute_zone":                    tableGcpComputeZone(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
 			"gcp_logging_exclusion":               tableGcpLoggingExclusion(ctx),
@@ -38,6 +66,16 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_pubsub_topic":                    tableGcpPubSubTopic(ctx),
 			"gcp_service_account":                 tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
+			"gcp_sql_backup":                      tableGcpSQLBackup(ctx),
+			"gcp_sql_database":                    tableGcpSQLDatabase(ctx),
+			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
+			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
+
+			/*
+				https://github.com/turbot/steampipe/issues/108
+				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
+			*/
+
 		},
 	}
 

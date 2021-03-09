@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test backend bucket to validate integration test.",
+    "name": "{{ resourceName }}"
+  }
+]

@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"os"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -20,7 +19,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpAuditPolicies,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "service",
 				Description: "Specifies a service that will be enabled for audit logging",
@@ -31,25 +30,49 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Description: "The configuration for logging of each type of permission",
 				Type:        proto.ColumnType_JSON,
 			},
+
+			// standard steampipe columns
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(serviceNameToAkas),
+				Hydrate:     serviceNameToAkas,
+				Transform:   transform.FromValue(),
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
+			},
+		},
 	}
 }
 
 //// LIST FUNCTION
 
 func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := cloudresourcemanager.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	project := os.Getenv("GCP_PROJECT")
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
 		return nil, err
@@ -62,13 +85,14 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, nil
 }
 
-//// TRANSFORM FUNCTIONS
-
-func serviceNameToAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	auditConfig := d.HydrateItem.(*cloudresourcemanager.AuditConfig)
-	project := os.Getenv("GCP_PROJECT")
+func serviceNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	auditConfig := h.Item.(*cloudresourcemanager.AuditConfig)
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/services/" + auditConfig.Service}
-
 	return akas, nil
 }

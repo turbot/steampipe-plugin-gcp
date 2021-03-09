@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Test image to verify the table.",
+    "disk_size_gb": 500,
+    "kind": "compute#image",
+    "labels": {
+      "name": "{{ resourceName }}"
+    },
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "self_link": "{{ output.self_link.value }}",
+    "source_disk": "{{ output.source_disk.value }}"
+  }
+]

@@ -1,0 +1,58 @@
+[
+	{
+		"description": "Test instance template to verify the table.",
+		"instance_can_ip_forward": false,
+		"instance_description": "A dummy description",
+		"instance_disks": [
+			{
+				"autoDelete": true,
+				"boot": true,
+				"deviceName": "persistent-disk-0",
+				"initializeParams": {
+					"diskType": "pd-standard",
+					"sourceImage": "projects/debian-cloud/global/images/family/debian-9"
+				},
+				"interface": "SCSI",
+				"kind": "compute#attachedDisk",
+				"mode": "READ_WRITE",
+				"type": "PERSISTENT"
+			}
+		],
+		"instance_machine_type": "f1-micro",
+		"instance_metadata": {
+			"fingerprint": "{{ output.metadata_fingerprint.value }}",
+			"items": [
+				{
+					"key": "foo",
+					"value": "bar"
+				}
+			],
+			"kind": "compute#metadata"
+		},
+		"instance_network_interfaces": [
+			{
+				"kind": "compute#networkInterface",
+				"name": "nic0",
+				"network": "{{ output.network.value }}"
+			}
+		],
+		"instance_scheduling": {
+			"automaticRestart": true,
+			"onHostMaintenance": "MIGRATE"
+		},
+		"instance_service_accounts": [
+			{
+				"email": "{{ output.service_account.value }}",
+				"scopes": ["https://www.googleapis.com/auth/cloud-platform"]
+			}
+		],
+		"instance_tags": {
+			"items": ["bar", "foo"]
+		},
+		"kind": "compute#instanceTemplate",
+		"location": "global",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"self_link": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/global/instanceTemplates/{{ resourceName }}"
+	}
+]

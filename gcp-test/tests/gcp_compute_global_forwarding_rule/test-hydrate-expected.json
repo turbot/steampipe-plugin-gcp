@@ -1,0 +1,12 @@
+[
+  {
+    "all_ports": false,
+    "allow_global_access": false,
+    "description": "Test Global Forwarding Rule to validate integration test.",
+    "ip_protocol": "TCP",
+    "kind": "compute#forwardingRule",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}",
+    "target": "{{ output.target.value }}"
+  }
+]

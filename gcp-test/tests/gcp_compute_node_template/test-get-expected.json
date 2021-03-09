@@ -1,0 +1,16 @@
+[
+  {
+    "description": "Test Node Template resource to verify the table.",
+    "kind": "compute#nodeTemplate",
+    "location": "us-east1",
+    "name": "{{ resourceName }}",
+    "node_affinity_labels": {
+      "name": "{{ resourceName }}"
+    },
+    "node_type": "c2-node-60-240",
+    "project": "{{ output.project_id.value }}",
+    "region": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/regions/us-east1",
+    "self_link": "{{ output.self_link.value }}",
+    "server_binding_type": "RESTART_NODE_ON_MINIMAL_SERVERS"
+  }
+]

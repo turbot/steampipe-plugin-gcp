@@ -2,11 +2,11 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -20,7 +20,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listGcpIamPolicies,
 		},
-		Columns: gcpColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			{
 				Name:        "version",
 				Description: "Version specifies the format of the policy. Valid values are `0`, `1`, and `3`.",
@@ -37,33 +37,54 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard columns
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getGcpIamPolicyTurbotData,
+				Hydrate:     getIamPolicyTurbotData,
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getGcpIamPolicyTurbotData,
+				Hydrate:     getIamPolicyTurbotData,
 			},
-		}),
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
+			},
+		},
 	}
 }
 
 //// FETCH FUNCTIONS
 
 func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	project := os.Getenv("GCP_PROJECT")
-	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
-
-	service, err := cloudresourcemanager.NewService(ctx)
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
 
 	rb := &cloudresourcemanager.GetIamPolicyRequest{}
 	resp, err := service.Projects.GetIamPolicy(project, rb).Context(ctx).Do()
@@ -75,22 +96,19 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, nil
 }
 
-//// HYDRATE FUNCTIONS
-
-func getGcpIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, p *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpIamPolicyTurbotData")
-	commonData, err := getCommonColumns(ctx, d, p)
+func getIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Get project details
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
-
-	commonColumnData := commonData.(*gcpCommonColumnData)
+	project := projectData.Project
 
 	// Get the resource title
-	title := strings.ToUpper(commonColumnData.Project) + " IAM Policy"
+	title := strings.ToUpper(project) + " IAM Policy"
 
-	// Get data for turbot defined properties
-	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + commonColumnData.Project + "/iamPolicy"}
+	// Build resource aka
+	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/iamPolicy"}
 
 	// Mapping all turbot defined properties
 	turbotData := map[string]interface{}{

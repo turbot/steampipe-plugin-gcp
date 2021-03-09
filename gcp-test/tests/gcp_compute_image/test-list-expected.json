@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Test image to verify the table.",
+    "name": "{{ resourceName }}"
+  }
+]
