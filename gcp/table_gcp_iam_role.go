@@ -2,23 +2,25 @@ package gcp
 
 import (
 	"context"
-	"os"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/iam/v1"
+
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
 
-// TABLE DEFINITION
+//// TABLE DEFINITION
+
 func tableGcpIamRole(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_iam_role",
 		Description: "GCP IAM Role",
 		Get: &plugin.GetConfig{
-			KeyColumns:  plugin.SingleColumn("name"),
-			Hydrate:     getIamRole,
+			KeyColumns: plugin.SingleColumn("name"),
+			Hydrate:    getIamRole,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIamRoles,
@@ -28,11 +30,13 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
 				Description: "The friendly name that identifies the role",
+				Transform:   transform.FromField("Role.Name"),
 			},
 			{
 				Name:        "deleted",
 				Description: "Specifies whether the role is deleted, or not",
 				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("Role.Deleted"),
 			},
 			{
 				Name:        "role_id",
@@ -41,61 +45,89 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Transform:   transform.FromP(gcpIAMRoleTurbotData, "RoleID"),
 			},
 			{
+				Name:        "is_gcp_managed",
+				Description: "Specifies whether the role is GCP Managed or Customer Managed.",
+				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("Type"),
+			},
+			{
 				Name:        "stage",
 				Description: "The current launch stage of the role",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Role.Stage"),
 			},
 			{
 				Name:        "description",
 				Description: "A human-readable description for the role",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Role.Description"),
 			},
 			{
 				Name:        "etag",
 				Description: "An unique read-only string that changes whenever the resource is updated",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Role.Etag"),
 			},
 			{
 				Name:        "included_permissions",
 				Description: "The names of the permissions this role grants when bound in an IAM policy",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     getIamRole,
+				Transform:   transform.FromField("Role.IncludedPermissions"),
 			},
 
-			// Standard columns for all tables
+			// standard steampipe columns
 			{
 				Name:        "title",
-				Description: "Title of the resource.",
+				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Role.Title"),
 			},
 			{
 				Name:        "akas",
-				Description: "Array of globally unique identifier strings (also known as) for the resource.",
+				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpIAMRoleTurbotData, "TurbotAkas"),
+				Transform:   transform.FromP(gcpIAMRoleTurbotData, "Akas"),
+			},
+
+			// standard gcp columns
+			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromConstant("global"),
+			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
 }
 
-// ITEM FROM KEY
-func roleNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	quals := d.KeyColumnQuals
-	name := quals["name"].GetStringValue()
-	item := &iam.Role{
-		Name: name,
-	}
-	return item, nil
+type roleInfo struct {
+	Role *iam.Role
+	Type bool
 }
 
-// FETCH FUNCTIONS
+//// FETCH FUNCTIONS
+
 func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO :: Need to fetch the details from env
-	project := os.Getenv("GCP_PROJECT")
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
 
 	// List all the project roles
 	customRoles := service.Projects.Roles.List("projects/" + project)
@@ -103,7 +135,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		ctx,
 		func(page *iam.ListRolesResponse) error {
 			for _, role := range page.Roles {
-				d.StreamListItem(ctx, role)
+				d.StreamListItem(ctx, &roleInfo{role, false})
 			}
 			return nil
 		},
@@ -117,7 +149,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		ctx,
 		func(page *iam.ListRolesResponse) error {
 			for _, managedRole := range page.Roles {
-				d.StreamListItem(ctx, managedRole)
+				d.StreamListItem(ctx, &roleInfo{managedRole, true})
 			}
 			return nil
 		},
@@ -127,40 +159,54 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	return nil, err
 }
 
-// HYDRATE FUNCTIONS
+//// HYDRATE FUNCTIONS
+
 func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	role := h.Item.(*iam.Role)
+	plugin.Logger(ctx).Trace("getIamRole")
+
+	var name string
+	if h.Item != nil {
+		name = h.Item.(*roleInfo).Role.Name
+	} else {
+		quals := d.KeyColumnQuals
+		name = quals["name"].GetStringValue()
+	}
+
 	var op *iam.Role
 
-	service, err := iam.NewService(ctx)
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+
+	gcpManaged := true
 
 	// Checking whether the role is predefined or project role
-	if strings.HasPrefix(role.Name, "projects/") {
-		op, err = service.Projects.Roles.Get(role.Name).Do()
+	if strings.HasPrefix(name, "projects/") {
+		gcpManaged = false
+		op, err = service.Projects.Roles.Get(name).Do()
 	} else {
-		op, err = service.Roles.Get(role.Name).Do()
+		op, err = service.Roles.Get(name).Do()
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	return op, nil
+	return &roleInfo{op, gcpManaged}, nil
 }
 
-// TRANSFORM FUNCTIONS
+/// TRANSFORM FUNCTIONS
+
 func gcpIAMRoleTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("googleIAMRoleTurbotData")
-	role := d.HydrateItem.(*iam.Role)
-
-	splitName := strings.Split(role.Name, "/")
-	akas := []string{"gcp://iam.googleapis.com/" + role.Name}
+	roleData := d.HydrateItem.(*roleInfo)
+	akas := []string{"gcp://iam.googleapis.com/" + roleData.Role.Name}
 
 	if d.Param.(string) == "RoleID" {
-		return splitName[len(splitName)-1], nil
+		return getLastPathElement(types.SafeString(roleData.Role.Name)), nil
 	}
+
 	return akas, nil
 }
