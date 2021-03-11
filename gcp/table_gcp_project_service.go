@@ -18,7 +18,6 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		Description: "GCP Project Service",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("name"),
-			ItemFromKey:       serviceNameFromKey,
 			Hydrate:           getGcpProjectService,
 			ShouldIgnoreError: isNotFoundError([]string{"404", "403"}),
 		},
@@ -69,17 +68,6 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 	}
 }
 
-//// ITEM FROM KEY
-
-func serviceNameFromKey(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	quals := d.KeyColumnQuals
-	name := quals["name"].GetStringValue()
-	item := &serviceusage.GoogleApiServiceusageV1Service{
-		Name: name,
-	}
-	return item, nil
-}
-
 //// FETCH FUNCTIONS
 
 func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -114,7 +102,7 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 //// HYDRATE FUNCTIONS
 
-func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getGcpProjectService(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpProjectService")
 
 	// Create Service Connection
@@ -129,9 +117,9 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil, err
 	}
 	project := projectData.Project
-
-	serviceData := h.Item.(*serviceusage.GoogleApiServiceusageV1Service)
-	op, err := service.Services.Get("projects/" + project + "/services/" + serviceData.Name).Do()
+	quals := d.KeyColumnQuals
+	name := quals["name"].GetStringValue()
+	op, err := service.Services.Get("projects/" + project + "/services/" + name).Do()
 	if err != nil {
 		return nil, err
 	}

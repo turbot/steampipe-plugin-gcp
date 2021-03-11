@@ -45,6 +45,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_network":                 tableGcpComputeNetwork(ctx),
 			"gcp_compute_node_group":              tableGcpComputeNodeGroup(ctx),
 			"gcp_compute_node_template":           tableGcpComputeNodeTemplate(ctx),
+			"gcp_compute_region":                  tableGcpComputeRegion(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
 			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
@@ -52,6 +53,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_target_vpn_gateway":      tableGcpComputeTargetVpnGateway(ctx),
 			"gcp_compute_url_map":                 tableGcpComputeURLMap(ctx),
 			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
+			"gcp_compute_zone":                    tableGcpComputeZone(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
 			"gcp_logging_exclusion":               tableGcpLoggingExclusion(ctx),
@@ -65,6 +67,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_pubsub_topic":                    tableGcpPubSubTopic(ctx),
 			"gcp_service_account":                 tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
+			"gcp_sql_backup":                      tableGcpSQLBackup(ctx),
+			"gcp_sql_database":                    tableGcpSQLDatabase(ctx),
+			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
 
 			/*

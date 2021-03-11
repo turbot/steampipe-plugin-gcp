@@ -2,6 +2,8 @@
 
 An Image resource contains a boot loader, an operating system and a root file system that is necessary for starting an instance.
 
+## Examples
+
 ### Compute image basic info
 
 ```sql

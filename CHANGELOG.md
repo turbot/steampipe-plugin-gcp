@@ -1,3 +1,34 @@
+## v0.3.0 [2021-03-04]
+
+_What's new?_
+
+- New tables added
+  - gcp_compute_region
+  - gcp_compute_zone
+
+## v0.2.1 [2021-03-02]
+
+_Bug fixes_
+
+- Recompiled plugin with latest [steampipe-plugin-sdk](https://github.com/turbot/steampipe-plugin-sdk) to resolve issue:
+  - Fix tables failing with error similar to `Error: pq: rpc error: code = Internal desc = get hydrate function getIamRole failed with panic interface conversion: interface {} is nil, not *gcp.roleInfo`([#129](https://github.com/turbot/steampipe-plugin-gcp/issues/129)).
+
+## v0.2.0 [2021-02-25]
+
+_What's new?_
+
+- New tables added
+  - gcp_sql_backup
+  - gcp_sql_database
+  - gcp_sql_database_instance
+
+_Bug fixes_
+
+- Updated `gcp_compute_instance` table `network_tags` field to display value correctly ([#114](https://github.com/turbot/steampipe-plugin-gcp/pull/114))
+- Recompiled plugin with latest [steampipe-plugin-sdk](https://github.com/turbot/steampipe-plugin-sdk) to resolve SDK issues:
+  - Fix error for missing required quals [#40](https://github.com/turbot/steampipe-plugin-sdk/issues/42).
+  - Queries fail with error socket: too many open files [#190](https://github.com/turbot/steampipe/issues/190)
+
 ## v0.1.1 [2021-02-22]
 
 _Bug fixes_

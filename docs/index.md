@@ -2,7 +2,7 @@
 organization: Turbot
 category: ["public cloud"]
 icon_url: "/images/plugins/turbot/gcp.svg"
-brand_color: "#e7483a"
+brand_color: "#ea4335"
 display_name: "GCP"
 name: "gcp"
 description: "Steampipe plugin for Google Cloud Platform (GCP) services and resource types"

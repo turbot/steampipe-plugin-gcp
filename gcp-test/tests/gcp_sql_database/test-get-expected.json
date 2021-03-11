@@ -1,0 +1,11 @@
+[
+	{
+		"charset": "utf8",
+		"instance_name": "{{ resourceName }}",
+		"kind": "sql#database",
+		"location": "us-east1",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"self_link": "{{ output.self_link.value }}"
+	}
+]
