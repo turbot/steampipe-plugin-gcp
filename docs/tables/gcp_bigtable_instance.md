@@ -16,7 +16,6 @@ from
   gcp_bigtable_instance;
 ```
 
-
 ### List of members and their associated iam roles for the big table instance
 
 ```sql
@@ -29,7 +28,6 @@ from
   gcp_bigtable_instance,
   jsonb_array_elements(iam_policy -> 'bindings') as p;
 ```
-
 
 ### List of bigtable instances where members have bigtable admin access
 
@@ -45,7 +43,6 @@ from
 where
   i ->> 'role' like '%bigtable.admin';
 ```
-
 
 ### Count of production instances
 
