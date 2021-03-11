@@ -1,3 +1,9 @@
+## v0.3.1 [2021-03-11]
+
+_Bug fixes_
+
+- Removed use of deprecated `ItemFromKey` function from all tables
+
 ## v0.3.0 [2021-03-04]
 
 _What's new?_
