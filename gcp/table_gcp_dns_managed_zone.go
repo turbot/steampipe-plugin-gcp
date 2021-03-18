@@ -211,7 +211,12 @@ func getDnsManagedZone(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	return resp, nil
+	// The API doesn't return any error, if we pass any invalid parameter
+	if len(resp.Name) > 0 {
+		return resp, nil
+	}
+
+	return nil, nil
 }
 
 func getDnsManagedZoneAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
