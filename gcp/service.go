@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/monitoring/v3"
@@ -115,6 +116,27 @@ func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunc
 
 	// so it was not in cache - create service
 	svc, err := cloudfunctions.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// DnsService returns the service connection for GCP DNS service
+func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "DnsService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*dns.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := dns.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
