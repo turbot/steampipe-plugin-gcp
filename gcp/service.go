@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
@@ -17,6 +18,27 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sql "google.golang.org/api/sql/v1beta4"
 )
+
+// BigQueryService returns the service connection for GCP BigQueryService service
+func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BigQueryService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*bigquery.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := bigquery.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
 
 // CloudResourceManagerService returns the service connection for GCP Cloud Resource Manager service
 func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*cloudresourcemanager.Service, error) {
