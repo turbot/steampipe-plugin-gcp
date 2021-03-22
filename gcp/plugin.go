@@ -47,6 +47,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_region":                  tableGcpComputeRegion(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
+			"gcp_compute_ssl_policy":              tableGcpComputeSslPolicy(ctx),
 			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
 			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
 			"gcp_compute_target_vpn_gateway":      tableGcpComputeTargetVpnGateway(ctx),
