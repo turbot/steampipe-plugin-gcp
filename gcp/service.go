@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"google.golang.org/api/cloudfunctions/v1"
+	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/iam/v1"
@@ -241,6 +242,27 @@ func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service,
 
 	// so it was not in cache - create service
 	svc, err := storage.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// KMSService returns the service connection for GCP kms service
+func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "KMSService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudkms.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudkms.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
