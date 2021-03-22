@@ -15,17 +15,30 @@ from
   gcp_kms_key;
 ```
 
-
 ### List of keys older than 30 days
 
 ```sql
 select
   name,
-  create_time
+  create_time,
+  rotation_period
 from
   gcp_kms_key
 where
-  create_time <= (create_time - interval '30' day)
+  create_time <= (current_date - interval '30' day)
 order by
-  name;
+  create_time;
+```
+
+### List of keys where rotation period is 100000s
+
+```sql
+select
+  name,
+  create_time,
+  rotation_period
+from
+  gcp_kms_key
+where
+  rotation_period = '100000s'
 ```

@@ -24,7 +24,7 @@ select
 from
   gcp_kms_key_ring
 where
-  create_time <= (create_time - interval '30' day)
+  create_time <= (current_date - interval '30' day)
 order by
-  name;
+  create_time;
 ```

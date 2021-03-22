@@ -19,7 +19,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			Hydrate:    getKeyDetail,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listKeyRingDetails,
+			ParentHydrate: listLocations,
 			Hydrate:       listKeyDetails,
 		},
 		Columns: []*plugin.Column{
@@ -37,7 +37,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			{
 				Name:        "next_rotation_time",
 				Description: "At next_rotation_time, the Key Management Service will automatically: 1. Create a new version of this CryptoKey. 2.Mark the new version as primary.",
-				Type:        proto.ColumnType_TIMESTAMP,
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "primary",
@@ -77,7 +77,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpKmsKeyTurbotData, "akas"),
+				Transform:   transform.FromP(gcpKmsKeyTurbotData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -107,11 +107,26 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	if err != nil {
 		return nil, err
 	}
-	keyRing := h.Item.(*cloudkms.KeyRing)
-	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name)
-	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
-		for _, key := range page.CryptoKeys {
-			d.StreamLeafListItem(ctx, key)
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	project := projectData.Project
+	location := h.Item.(*cloudkms.Location)
+	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location.LocationId)
+	if err := resp.Pages(ctx, func(page *cloudkms.ListKeyRingsResponse) error {
+		for _, ring := range page.KeyRings {
+			respKey := service.Projects.Locations.KeyRings.CryptoKeys.List(ring.Name)
+			if errDetails := respKey.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
+				for _, key := range page.CryptoKeys {
+					d.StreamLeafListItem(ctx, key)
+				}
+				return nil
+			}); errDetails != nil {
+				return errDetails
+			}
 		}
 		return nil
 	}); err != nil {
