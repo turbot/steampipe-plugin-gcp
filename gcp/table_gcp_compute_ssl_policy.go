@@ -37,7 +37,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "kind",
-				Description: "The type of the resource. Always compute#sslPolicyfor SSL policies.",
+				Description: "The type of the resource. Always compute#sslPolicy for SSL policies.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -173,6 +173,11 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		name = h.Item.(*compute.SslPolicy).Name
 	} else {
 		name = d.KeyColumnQuals["name"].GetStringValue()
+	}
+
+	// Error: json: invalid use of ,string struct tag, trying to unmarshal "projects/<project_name>/global/sslPolicies/" into uint64
+	if len(name) < 1 {
+		return nil, nil
 	}
 
 	resp, err := service.SslPolicies.Get(project, name).Do()

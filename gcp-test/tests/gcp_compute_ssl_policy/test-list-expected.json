@@ -1,0 +1,6 @@
+[
+	{
+		"description": "Test SSL policy to validate the table outcome.",
+		"name": "{{ resourceName }}"
+	}
+]
