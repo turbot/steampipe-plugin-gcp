@@ -1,0 +1,13 @@
+[
+	{
+		"description": "Test target ssl proxy to validate the table outcome.",
+		"kind": "compute#targetSslProxy",
+		"location": "global",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"proxy_header": "NONE",
+		"self_link": "{{ output.self_link.value }}",
+		"service": "{{ output.backend_service.value }}",
+		"ssl_certificates": ["{{ output.certificate_id.value }}"]
+	}
+]
