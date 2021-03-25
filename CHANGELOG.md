@@ -1,3 +1,14 @@
+## v0.4.0 [20201-03-25]
+
+_What's new?_
+
+- New tables added
+  - [gcp_bigtable_instance](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_bigtable_instance) ([#90](https://github.com/turbot/steampipe-plugin-gcp/pull/90))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v0.2.6](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v026-2021-03-18)
+
 ## v0.3.1 [2021-03-11]
 
 _Bug fixes_
