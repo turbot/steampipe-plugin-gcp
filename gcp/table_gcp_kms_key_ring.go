@@ -19,9 +19,9 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 			Hydrate:    getKeyRingDetail,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listLocations,
-			Hydrate:       listKeyRingDetails,
+			Hydrate: listKeyRingDetails,
 		},
+		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
 			// commonly used columns
 			{
@@ -34,12 +34,6 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Description: "The time at which this KeyRing was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
-
-			// {
-			// 	Name:        "description",
-			// 	Description: "An optional description of this resource. Provide this property when you create the resource.",
-			// 	Type:        proto.ColumnType_STRING,
-			// },
 
 			// standard steampipe columns
 			{
@@ -73,36 +67,8 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 }
 
 //// LIST FUNCTIONS
-
-func listLocations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listLocations")
-
-	// Create Service Connection
-	service, err := KMSService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
-	resp := service.Projects.Locations.List("projects/" + project)
-	if err := resp.Pages(ctx, func(page *cloudkms.ListLocationsResponse) error {
-		for _, location := range page.Locations {
-			d.StreamListItem(ctx, location)
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return nil, nil
-}
 func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	location := plugin.GetMatrixItem(ctx)[matrixKeyLocation].(string)
 	plugin.Logger(ctx).Trace("listKeyRingDetails")
 
 	// Create Service Connection
@@ -117,8 +83,7 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 	project := projectData.Project
-	location := h.Item.(*cloudkms.Location)
-	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location.LocationId)
+	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListKeyRingsResponse) error {
 		for _, ring := range page.KeyRings {
 			d.StreamLeafListItem(ctx, ring)

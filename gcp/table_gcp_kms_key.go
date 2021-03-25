@@ -19,9 +19,10 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			Hydrate:    getKeyDetail,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listLocations,
 			Hydrate:       listKeyDetails,
+			ParentHydrate: listKeyRingDetails,
 		},
+		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
 			// commonly used columns
 			{
@@ -55,7 +56,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "VersionTemplate",
+				Name:        "version_template",
 				Description: "A template describing settings for new CryptoKeyVersion instances.",
 				Type:        proto.ColumnType_JSON,
 			},
@@ -107,26 +108,11 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	if err != nil {
 		return nil, err
 	}
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	project := projectData.Project
-	location := h.Item.(*cloudkms.Location)
-	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location.LocationId)
-	if err := resp.Pages(ctx, func(page *cloudkms.ListKeyRingsResponse) error {
-		for _, ring := range page.KeyRings {
-			respKey := service.Projects.Locations.KeyRings.CryptoKeys.List(ring.Name)
-			if errDetails := respKey.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
-				for _, key := range page.CryptoKeys {
-					d.StreamLeafListItem(ctx, key)
-				}
-				return nil
-			}); errDetails != nil {
-				return errDetails
-			}
+	keyRing := h.Item.(*cloudkms.KeyRing)
+	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name)
+	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
+		for _, key := range page.CryptoKeys {
+			d.StreamLeafListItem(ctx, key)
 		}
 		return nil
 	}); err != nil {
@@ -163,7 +149,7 @@ func gcpKmsKeyTurbotData(_ context.Context, d *transform.TransformData) (interfa
 
 	project := strings.Split(key.Name, "/")[1]
 	location := strings.Split(key.Name, "/")[3]
-	title := strings.Split(key.Name, "/")[7]
+	title := strings.Split(key.Name, "/")[5]
 
 	turbotData := map[string]interface{}{
 		"Project":  project,

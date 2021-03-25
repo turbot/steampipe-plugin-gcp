@@ -45,10 +45,6 @@ resource "google_kms_crypto_key" "named_test_resource" {
   name            = var.resource_name
   key_ring        = google_kms_key_ring.named_test_resource.id
   rotation_period = "100000s"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 output "resource_aka" {
