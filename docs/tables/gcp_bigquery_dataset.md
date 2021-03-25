@@ -4,6 +4,18 @@ Datasets are top-level containers that are used to organize and control access t
 
 ## Examples
 
+### Basic info
+
+```sql
+select
+  dataset_id,
+  self_link,
+  creation_time,
+  location
+from
+  gcp_bigquery_dataset;
+```
+
 ### List all datasets which are not encrypted using CMK
 
 ```sql
@@ -17,7 +29,7 @@ where
   kms_key_name is null;
 ```
 
-### Get all datasets which are publicly accessible
+### List publicly accessible datasets
 
 ```sql
 select
