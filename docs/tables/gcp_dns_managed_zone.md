@@ -17,7 +17,7 @@ from
   gcp_dns_managed_zone;
 ```
 
-### Get the zones for which DNSSEC is not enabled
+### List public zones with DNSSEC disabled
 
 ```sql
 select
@@ -31,30 +31,4 @@ from
 where 
   visibility = 'public'
   and dnssec_config_state <> 'on';
-```
-
-### Get the zones which are public
-
-```sql
-select
-  name,
-  id,
-  dns_name,
-  visibility
-from
-  gcp_dns_managed_zone
-where 
-  visibility = 'public';
-```
-
-### List of zones which do not have owner tag key
-
-```sql
-select
-  name,
-  id
-from
-  gcp_dns_managed_zone
-where
-  tags -> 'owner' is null;
 ```
