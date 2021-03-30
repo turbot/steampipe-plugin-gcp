@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"google.golang.org/api/bigquery/v2"
+	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
@@ -32,6 +33,27 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 
 	// so it was not in cache - create service
 	svc, err := bigquery.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// BigtableAdminService returns the service connection for GCP Bigtable Admin service
+func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtableadmin.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BigtableAdminService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*bigtableadmin.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := bigtableadmin.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
