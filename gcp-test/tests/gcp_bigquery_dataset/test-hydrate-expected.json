@@ -1,0 +1,9 @@
+[
+	{
+		"dataset_id": "{{ resourceName }}",
+		"description": "This is a test dataset to validate the table outcome.",
+		"etag": "{{ output.etag.value }}",
+		"kind": "bigquery#dataset",
+		"self_link": "{{ output.self_link.value }}"
+	}
+]

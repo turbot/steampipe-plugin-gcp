@@ -1,0 +1,6 @@
+[
+	{
+		"description": "This is a test dataset to validate the table outcome.",
+		"name": "turbot_{{ resourceName }}"
+	}
+]
