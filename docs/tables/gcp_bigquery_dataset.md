@@ -16,7 +16,7 @@ from
   gcp_bigquery_dataset;
 ```
 
-### List all datasets which are not encrypted using CMK
+### List datasets which are not encrypted using CMK
 
 ```sql
 select
@@ -44,7 +44,7 @@ where
   or ls ->> 'iamMember' = 'allUsers';
 ```
 
-### List of datasets which do not have owner tag key
+### List datasets which do not have owner tag key
 
 ```sql
 select
