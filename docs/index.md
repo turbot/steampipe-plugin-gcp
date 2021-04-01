@@ -6,103 +6,118 @@ brand_color: "#ea4335"
 display_name: "GCP"
 name: "gcp"
 description: "Steampipe plugin for Google Cloud Platform (GCP) services and resource types"
+og_description: Query GCP with SQL! Open source CLI. No DB required. 
+og_image: "/images/plugins/turbot/gcp-social-graphic.png"
 ---
 
-# GCP
+# GCP + Steampipe
 
-The Google Cloud Platform (GCP) plugin is used to interact with the many resources supported by GCP.
+[Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
-### Installation
+[GCP](https://gcp.amazon.com/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
 
-To download and install the latest gcp plugin:
+For example:
 
-```bash
-$ steampipe plugin install gcp
-Installing plugin gcp...
-$
+```sql
+select
+  name,
+  location,
+  versioning_enabled
+from
+  gcp_storage_bucket
 ```
 
-Installing the latest gcp plugin will create a connection configuration file (`~/.steampipe/config/gcp.spc`) with a single default connection named `gcp`. This connection will dynamically determine the scope and credentials using the same mechanism as the CLI. In effect, this means that by default Steampipe will execute with the same credentials and against the same project as the `gcloud` command would - The GCP plugin uses the standard sdk environment variables and credential files as used by the CLI. (Of course this also implies that the `gcloud` cli needs to be configured with the proper credentials before the steampipe gcp plugin can be used).
+```
++--------------------+----------+--------------------+
+| name               | location | versioning_enabled |
++--------------------+----------+--------------------+
+| steampipe-io-dev   | us-east1 | false              |
+| steampipe-io-stage | us       | false              |
+| steampipe-io-prod  | us       | true               |
++--------------------+----------+--------------------+
+```
 
-Note that there is nothing special about the default connection, other than that it is created by default on plugin install - You can delete or rename this connection, or modify its configuration options (via the configuration file).
+## Documentation
 
-## Connection Configuration
+- **[Table definitions & examples →](gcp/tables)**
 
-Connection configurations are defined using HCL in one or more Steampipe config files. Steampipe will load ALL configuration files from `~/.steampipe/config` that have a `.spc` extension. A config file may contain multiple connections.
+## Get started
 
-### Scope
+### Install
 
-A GCP connection is scoped to a single GCP project, with a single set of credentials.
+Download and install the latest GCP plugin:
 
-The Google APIs are scoped at multiple levels (global, regional, zonal) depending on the resource/service, however the `gcloud` cli list commands tend to be global regardless of the API scope. For example, `gcloud compute instances list` returns ALL instances, even though the API scope is zonal. Steampipe will behave the same way as the cli -- A GCP Steampipe connection will query all regions, locations, and zones in the project.
+```bash
+steampipe plugin install gcp
+```
 
 ### Credentials
 
-By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run `gcloud auth application-default login`. This command will prompt you to log in, and then will download the application default credentials to `~/.config/gcloud/application_default_credentials.json`.
+| Item | Description |
+| - | - |
+| Credentials | configure your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) |
+| Permissions | Grant the `ReadOnlyAccess` policy to your user or role. |
+| Radius | Each connection represents a single GCP project. |
+| Resolution |  1. Credentials from the json file specified by the `credential_file` paramater in your steampipe config.<br />2. Credentials from the json file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default json file location (~/.config/gcloud/application_default_credentials.json). |
 
-Alternatively, Steampipe can use a service account to connect to GCP
+### Configuration
 
-1. In the Cloud Console, go to the Create [service account key page](https://console.cloud.google.com/apis/credentials/serviceaccountkey).
-2. From the Service account list, select New service account.
-3. In the Service account name field, enter a name.
-4. From the Role list, select Project > Viewer.
-5. Click Create. A JSON file that contains your key downloads to your computer.
+Installing the latest gcp plugin will create a config file (`~/.steampipe/config/gcp.spc`) with a single connection named `gcp`:
 
-### Configuration Arguments
+```hcl
+connection "gcp" {
+  plugin    = "gcp"
+  project   = "my-project"
+  credential_file = "~/my-service-account-creds.json"
+}
+```
 
-The GCP plugin allows you set credentials static credentials with the following arguments:
+## Get involved
 
-- `project` - The project ID to connect to. This is the project id (string), not the project number. If the `project` argument is not specified for a connection, the project will be determined in the following order:
-  - The standard gcloud SDK `CLOUDSDK_CORE_PROJECT` environment variable, if set; otherwise
-  - The `GCP_PROJECT` environment variable, if set (this is deprecated); otherwise
-  - The current active project, as returned by the `gcloud config get-value project` command
-- `credential_file` - The path to a JSON credential file that contains Google application credentials. If `credential_file` is not specified in a connection, credentials will be loaded from:
-  - The path specified in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable, if set; otherwise
-  - The standard location (`~/.config/gcloud/application_default_credentials.json`)
+* Open source: https://github.com/turbot/steampipe-plugin-gcp
+* Community: [Discussion forums](https://github.com/turbot/steampipe/discussions)
 
-#### Example configurations
+## Advanced configuration options
 
-- The default connection. This uses standard Application Default Credentials (ADC) against the active project as configured for `gcloud`
+By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run gcloud auth application-default login. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
 
-  ```hcl
-  connection "gcp" {
-    plugin    = "gcp"
-  }
-  ```
+For users with multiple GCP project and more complex authentication use cases, here are some examples of advanced configuration options:
 
-- A connection to a specific project, using standard ADC Credentials.
+### Use a service account
 
-  ```hcl
-  connection "gcp_my_project" {
-    plugin    = "gcp"
-    project   = "my-project"
-  }
-  ```
+Generate and download a JSON key for an existing service account using: [create service account key page](https://console.cloud.google.com/apis/credentials/serviceaccountkey).
 
-- A common configuration is to have multiple connections to different projects, using the same standard ADC Credentials for all connections.
+```hcl
+connection "gcp_my_other_project" {
+  plugin             = "gcp"
+  project            = "my-other-project"
+  credential_file    = "/home/me/my-service-account-creds.json"
+}
+```
 
-  ```hcl
-  connection "gcp_project_aaa" {
-    plugin    = "gcp"
-    project   = "project-aaa"
-  }
+### Specify multiple projects 
+A common configuration is to have multiple connections to different projects, using the same standard ADC Credentials for all connections:
 
-  connection "gcp_project_bbb" {
-    plugin    = "gcp"
-    project   = "project-bbb"
-  }
+```hcl
+connection "gcp_project_aaa" {
+  plugin    = "gcp"
+  project   = "project-aaa"
+}
 
-  connection "gcp_project_ccc" {
-    plugin    = "gcp"
-    project   = "project-ccc"
-  }
-  ```
+connection "gcp_project_bbb" {
+  plugin    = "gcp"
+  project   = "project-bbb"
+}
 
-- A connection to a specific project, using non-default credentials.
-  ```hcl
-  connection "gcp_my_other_project" {
-    plugin             = "gcp"
-    project            = "my-other-project"
-    credential_file    = "/home/me/my-service-account-creds.json"
-  }
-  ```
+connection "gcp_project_ccc" {
+  plugin    = "gcp"
+  project   = "project-ccc"
+}
+```
+
+### Specify static credentials using environment variables 
+
+```sh
+export CLOUDSDK_CORE_PROJECT=myproject  
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
+``` 
