@@ -76,3 +76,48 @@ connection "gcp" {
 
 * Open source: https://github.com/turbot/steampipe-plugin-gcp
 * Community: [Discussion forums](https://github.com/turbot/steampipe/discussions)
+
+## Advanced configuration options
+
+By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run gcloud auth application-default login. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
+
+For users with multiple GCP project and more complex authentication use cases, here are some examples of advanced configuration options:
+
+### Use a service account
+
+Generate and download a JSON key for an existing service account using: [create service account key page](https://console.cloud.google.com/apis/credentials/serviceaccountkey).
+
+```hcl
+connection "gcp_my_other_project" {
+  plugin             = "gcp"
+  project            = "my-other-project"
+  credential_file    = "/home/me/my-service-account-creds.json"
+}
+```
+
+### Specify multiple projects 
+A common configuration is to have multiple connections to different projects, using the same standard ADC Credentials for all connections:
+
+```hcl
+connection "gcp_project_aaa" {
+  plugin    = "gcp"
+  project   = "project-aaa"
+}
+
+connection "gcp_project_bbb" {
+  plugin    = "gcp"
+  project   = "project-bbb"
+}
+
+connection "gcp_project_ccc" {
+  plugin    = "gcp"
+  project   = "project-ccc"
+}
+```
+
+### Specify static credentials using environment variables 
+
+```sh
+export CLOUDSDK_CORE_PROJECT=myproject  
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
+``` 
