@@ -39,7 +39,7 @@ from
 
 ## Documentation
 
-- **[Table definitions & examples →](gcp/tables)**
+- **[Table definitions & examples →](/plugins/turbot/gcp/tables)**
 
 ## Get started
 
