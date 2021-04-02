@@ -1,3 +1,9 @@
+## v0.5.1 [2021-04-02]
+
+_Bug fixes_
+
+- Fixed: `Table definitions & examples` link now points to the correct location ([#163](https://github.com/turbot/steampipe-plugin-gcp/pull/163))
+
 ## v0.5.0 [2021-04-01]
 
 _What's new?_
