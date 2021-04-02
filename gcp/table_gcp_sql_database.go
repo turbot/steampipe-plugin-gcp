@@ -8,11 +8,11 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
-	sql "google.golang.org/api/sql/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 type sqlDatabaseInfo = struct {
-	Database *sql.Database
+	Database *sqladmin.Database
 	Region   string
 }
 
@@ -117,7 +117,7 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	plugin.Logger(ctx).Trace("listSQLDatabases")
 
 	// Get the details of Cloud SQL instance
-	instance := h.Item.(*sql.DatabaseInstance)
+	instance := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Create service connection
 	service, err := CloudSQLAdminService(ctx, d)
