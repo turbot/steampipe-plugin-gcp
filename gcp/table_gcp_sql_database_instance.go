@@ -196,11 +196,6 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Settings.ReplicationType"),
 			},
 			{
-				Name:        "root_password",
-				Description: "Initial root password. Use only on creation.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "self_link",
 				Description: "The server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
