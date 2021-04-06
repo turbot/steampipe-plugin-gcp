@@ -52,7 +52,7 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			{
 				Name:        "create_time",
 				Description: "The creation timestamp of the sink",
-				Type:        proto.ColumnType_DATETIME,
+				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("CreateTime").NullIfZero(),
 			},
 			{
@@ -69,7 +69,7 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			{
 				Name:        "update_time",
 				Description: "The last update timestamp of the sink",
-				Type:        proto.ColumnType_DATETIME,
+				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("UpdateTime").NullIfZero(),
 			},
 			{

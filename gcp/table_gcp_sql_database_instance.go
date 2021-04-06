@@ -8,7 +8,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	"google.golang.org/api/googleapi"
-	sql "google.golang.org/api/sql/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 //// TABLE DEFINITION
@@ -377,7 +377,7 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugi
 	project := projectData.Project
 
 	resp := service.Instances.List(project)
-	if err := resp.Pages(ctx, func(page *sql.InstancesListResponse) error {
+	if err := resp.Pages(ctx, func(page *sqladmin.InstancesListResponse) error {
 		for _, instance := range page.Items {
 			d.StreamListItem(ctx, instance)
 		}
@@ -430,7 +430,7 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	instance := h.Item.(*sql.DatabaseInstance)
+	instance := h.Item.(*sqladmin.DatabaseInstance)
 	project := instance.Project
 
 	req, err := service.Users.List(project, instance.Name).Do()
@@ -447,7 +447,7 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 //// TRANSFORM FUNCTIONS
 
 func sqlDatabaseInstanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(*sql.DatabaseInstance)
+	instance := d.HydrateItem.(*sqladmin.DatabaseInstance)
 
 	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + instance.Project + "/regions/" + instance.Region + "/instances/" + instance.Name}
 
