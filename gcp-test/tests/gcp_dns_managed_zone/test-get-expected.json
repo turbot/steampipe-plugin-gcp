@@ -1,0 +1,21 @@
+[
+	{
+		"description": "Test managed zone to validate the table outcome.",
+		"dns_name": "turbot.com.",
+		"kind": "dns#managedZone",
+		"labels": {
+			"name": "{{ resourceName }}"
+		},
+		"location": "global",
+		"name": "{{ resourceName }}",
+		"name_servers": ["ns-gcp-private.googledomains.com."],
+		"private_visibility_config_networks": [
+			{
+				"kind": "dns#managedZonePrivateVisibilityConfigNetwork",
+				"networkUrl": "{{ output.network.value }}"
+			}
+		],
+		"project": "{{ output.project_id.value }}",
+		"visibility": "private"
+	}
+]

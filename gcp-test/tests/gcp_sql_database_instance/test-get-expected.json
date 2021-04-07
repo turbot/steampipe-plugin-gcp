@@ -5,7 +5,7 @@
 		"data_disk_size_gb": 10,
 		"data_disk_type": "PD_HDD",
 		"database_version": "MYSQL_5_6",
-		"enable_point_in_time_recovery": true,
+		"enable_point_in_time_recovery": false,
 		"instance_type": "CLOUD_SQL_INSTANCE",
 		"kind": "sql#instance",
 		"labels": {
