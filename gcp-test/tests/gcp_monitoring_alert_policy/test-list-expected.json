@@ -1,0 +1,7 @@
+[
+  {
+    "combiner": "OR",
+    "display_name": "{{resourceName}}",
+    "name": "{{ output.resource_id.value.split('/').pop() }}"
+  }
+]

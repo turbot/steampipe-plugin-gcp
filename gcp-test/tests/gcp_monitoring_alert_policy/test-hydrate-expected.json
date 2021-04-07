@@ -1,0 +1,12 @@
+[
+  {
+    "combiner": "OR",
+    "display_name": "{{resourceName}}",
+    "enabled": true,
+    "name": "{{ output.resource_id.value.split('/').pop() }}",
+    "project": "{{ output.project_id.value }}",
+    "tags": {
+      "foo" : "bar"
+    }
+  }
+]
