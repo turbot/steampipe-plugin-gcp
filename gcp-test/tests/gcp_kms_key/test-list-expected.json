@@ -1,6 +1,0 @@
-[
-  {
-    "name": "{{ output.resource_id.value }}",
-    "rotation_period": "100000s"
-  }
-]

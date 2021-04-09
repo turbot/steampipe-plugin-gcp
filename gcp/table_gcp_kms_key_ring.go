@@ -86,7 +86,7 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListKeyRingsResponse) error {
 		for _, ring := range page.KeyRings {
-			d.StreamLeafListItem(ctx, ring)
+			d.StreamListItem(ctx, ring)
 		}
 		return nil
 	}); err != nil {

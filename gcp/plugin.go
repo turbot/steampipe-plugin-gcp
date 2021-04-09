@@ -76,8 +76,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
 			"gcp_kms_key_ring":                    tableGcpKmsKeyRing(ctx),
-			"gcp_kms_key":                         tableGcpKmsKey(ctx),
-
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
