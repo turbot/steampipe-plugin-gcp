@@ -8,7 +8,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
-	sql "google.golang.org/api/sql/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 //// TABLE DEFINITION
@@ -136,7 +136,7 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	plugin.Logger(ctx).Trace("listSQLBackups")
 
 	// Get the details of Cloud SQL instance
-	instance := h.Item.(*sql.DatabaseInstance)
+	instance := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Create service connection
 	service, err := CloudSQLAdminService(ctx, d)
@@ -192,7 +192,7 @@ func getSQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 }
 
 func getSQLBackupAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	backup := h.Item.(*sql.BackupRun)
+	backup := h.Item.(*sqladmin.BackupRun)
 
 	// Get project details
 	projectData, err := activeProject(ctx, d)
