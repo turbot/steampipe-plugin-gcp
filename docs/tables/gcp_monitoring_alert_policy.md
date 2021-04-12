@@ -1,4 +1,4 @@
-# Table:  gcp_monitoring_alert_policy
+# Table: gcp_monitoring_alert_policy
 
 An alerting policy describes a set of conditions that you want to monitor. These conditions might relate to the state of an unhealthy system or to resource consumption.
 

@@ -30,7 +30,6 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The resource name for this policy.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "combiner",
@@ -68,18 +67,8 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "force_send_fields",
-				Description: "ForceSendFields is a list of field names (e.g. 'Combiner') to unconditionally include in API requests.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "notification_channels",
 				Description: "Identifies the notification channels to which notifications should be sent when incidents are opened or closed or when new violations occur on an already opened incident.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "null_fields",
-				Description: "NullFields is a list of field names (e.g. 'Combiner') to include in API requests with the JSON null value.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -90,23 +79,22 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 
 			// standard steampipe columns
 			{
-				Name:        "tags",
-				Description: ColumnDescriptionTags,
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("UserLabels"),
-			},
-			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DisplayName"),
 			},
 			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("UserLabels"),
+			},
+			{
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMonitoringAlertPolicyAka,
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromP(getMonitoringAlertPolicyAka, "Akas"),
 			},
 
 			// standard gcp columns
@@ -189,10 +177,10 @@ func getMonitoringAlertPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	return req, nil
 }
 
-func getMonitoringAlertPolicyAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	alertPolicy := h.Item.(*monitoring.AlertPolicy)
-	
-	akas := []string{"gcp://monitoring.googleapis.com/" + alertPolicy.Name}
+func getMonitoringAlertPolicyAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	alertPolicy := d.HydrateItem.(*monitoring.AlertPolicy)
 
-	return akas, nil
+	Akas := []string{"gcp://monitoring.googleapis.com/" + alertPolicy.Name}
+
+	return Akas, nil
 }
