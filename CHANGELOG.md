@@ -1,3 +1,20 @@
+## v0.6.0 [2021-04-08]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_target_https_proxy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_target_https_proxy) ([#151](https://github.com/turbot/steampipe-plugin-gcp/pull/151))
+
+_Enhancements_
+
+- Updated: `gcp_sql_backup`, `gcp_sql_database`, `gcp_sql_database_instance` tables now use the `sqladmin` package instead of the `sql` package ([#161](https://github.com/turbot/steampipe-plugin-gcp/pull/161))
+- Recompiled plugin with [steampipe-plugin-sdk v0.2.7](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v027-2021-03-31)
+
+_Bug fixes_
+
+- Fixed: Backup configuration columns now return the correct data in the `gcp_sql_database_instance` table ([#166](https://github.com/turbot/steampipe-plugin-gcp/pull/166))
+- Fixed: Removed unused `root_password` column in the `gcp_sql_database_instance` table ([#166](https://github.com/turbot/steampipe-plugin-gcp/pull/166))
+
 ## v0.5.1 [2021-04-02]
 
 _Bug fixes_
