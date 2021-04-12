@@ -15,13 +15,24 @@ from
   gcp_compute_target_ssl_proxy;
 ```
 
-### Get SSL policy details
+### Get SSL policy details for each target SSL proxy
 
 ```sql
 select
   name,
   id,
   ssl_policy
+from
+  gcp_compute_target_ssl_proxy;
+```
+
+### Get SSL certificates used to authenticate connections to Backends
+
+```sql
+select
+  name,
+  id,
+  ssl_certificates
 from
   gcp_compute_target_ssl_proxy;
 ```
