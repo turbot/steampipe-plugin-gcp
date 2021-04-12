@@ -15,7 +15,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 		Name:        "gcp_kms_key_ring",
 		Description: "GCP Kms Key Ring",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
+			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getKeyRingDetail,
 		},
 		List: &plugin.ListConfig{
@@ -28,6 +28,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The resource name for the KeyRing.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Name"),
 			},
 			{
 				Name:        "create_time",
@@ -40,7 +41,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Title"),
+				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Name"),
 			},
 			{
 				Name:        "akas",
@@ -99,6 +100,7 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 //// HYDRATE FUNCTIONS
 
 func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation].(string)
 	plugin.Logger(ctx).Trace("getKeyRingDetail")
 
 	// Create Service Connection
@@ -107,8 +109,19 @@ func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	resp, err := service.Projects.Locations.KeyRings.Get(name).Do()
+	location := d.KeyColumnQuals["location"].GetStringValue()
+	if matrixLocation != location {
+		return nil, nil
+	}
+	resp, err := service.Projects.Locations.KeyRings.Get("projects/" + project + "/locations/" + location + "/keyRings/" + name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -124,12 +137,12 @@ func gcpKmsKeyRingTurbotData(_ context.Context, d *transform.TransformData) (int
 
 	project := strings.Split(key.Name, "/")[1]
 	location := strings.Split(key.Name, "/")[3]
-	title := strings.Split(key.Name, "/")[5]
+	name := strings.Split(key.Name, "/")[5]
 
 	turbotData := map[string]interface{}{
 		"Project":  project,
 		"Location": location,
-		"Title":    title,
+		"Name":     name,
 		"Akas":     []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
 
