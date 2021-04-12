@@ -17,7 +17,7 @@ from
   gcp_compute_ssl_policy;
 ```
 
-### Get the SSL policy with a minimum TLS version 1.2 with the MODERN profile
+### List SSL policies with minimum TLS version 1.2 and MODERN profile
 
 ```sql
 select
@@ -31,7 +31,7 @@ where
   and profile = 'MODERN';
 ```
 
-### Get the SSL policy whose Profile set to RESTRICTED
+### List SSL policies with RESTRICTED profile
 
 ```sql
 select
@@ -44,7 +44,7 @@ where
   profile = 'RESTRICTED';
 ```
 
-### Get the SSL policy with weak cipher suit(s)
+### List SSL policies with weak cipher suit(s)
 
 ```sql
 select
