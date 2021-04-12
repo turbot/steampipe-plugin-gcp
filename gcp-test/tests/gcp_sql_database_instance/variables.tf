@@ -46,6 +46,9 @@ resource "google_sql_database_instance" "named_test_resource" {
     tier      = "db-f1-micro"
     disk_size = 10
     disk_type = "PD_HDD"
+    backup_configuration {
+      enabled = true
+    }
 
     user_labels = {
       name = var.resource_name

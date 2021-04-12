@@ -1,0 +1,16 @@
+[
+	{
+		"authorization_policy": "",
+		"description": "Test target https proxy to validate the table outcome.",
+		"kind": "compute#targetHttpsProxy",
+		"location": "global",
+		"location_type": "GLOBAL",
+		"name": "{{ resourceName }}",
+		"project": "{{ output.project_id.value }}",
+		"proxy_bind": false,
+		"quic_override": "NONE",
+		"self_link": "{{ output.self_link.value }}",
+		"ssl_certificates": ["{{ output.certificate_id.value }}"],
+		"url_map": "{{ output.url_map_id.value }}"
+	}
+]

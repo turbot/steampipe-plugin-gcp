@@ -8,7 +8,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	"google.golang.org/api/googleapi"
-	sql "google.golang.org/api/sql/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 //// TABLE DEFINITION
@@ -74,14 +74,14 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Name:        "enable_point_in_time_recovery",
 				Description: "Allows user to recover data from a specific point in time, down to a fraction of a second.",
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("BackupConfiguration.PointInTimeRecoveryEnabled"),
+				Transform:   transform.FromField("Settings.BackupConfiguration.PointInTimeRecoveryEnabled"),
 				Default:     true,
 			},
 			{
 				Name:        "binary_log_enabled",
 				Description: "Indicates whether binary log is enabled, or not.",
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("BackupConfiguration.BinaryLogEnabled"),
+				Transform:   transform.FromField("Settings.BackupConfiguration.BinaryLogEnabled"),
 			},
 			{
 				Name:        "kind",
@@ -109,25 +109,25 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Name:        "backup_enabled",
 				Description: "Indicates whether backup configuration is enabled, or not.",
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("BackupConfiguration.Enabled"),
+				Transform:   transform.FromField("Settings.BackupConfiguration.Enabled"),
 			},
 			{
 				Name:        "backup_location",
 				Description: "Specifies the backup location.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("BackupConfiguration.Location"),
+				Transform:   transform.FromField("Settings.BackupConfiguration.Location"),
 			},
 			{
 				Name:        "backup_replication_log_archiving_enabled",
 				Description: "Indicates whether backup replication log archiving is enabled, or not.",
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("BackupConfiguration.ReplicationLogArchivingEnabled"),
+				Transform:   transform.FromField("Settings.BackupConfiguration.ReplicationLogArchivingEnabled"),
 			},
 			{
 				Name:        "backup_start_time",
 				Description: "Specifies the start time for the daily backup configuration.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("BackupConfiguration.StartTime"),
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Settings.BackupConfiguration.StartTime"),
 			},
 			{
 				Name:        "connection_name",
@@ -194,11 +194,6 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Description: "Specifies the type of replication this instance uses.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Settings.ReplicationType"),
-			},
-			{
-				Name:        "root_password",
-				Description: "Initial root password. Use only on creation.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "self_link",
@@ -382,7 +377,7 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugi
 	project := projectData.Project
 
 	resp := service.Instances.List(project)
-	if err := resp.Pages(ctx, func(page *sql.InstancesListResponse) error {
+	if err := resp.Pages(ctx, func(page *sqladmin.InstancesListResponse) error {
 		for _, instance := range page.Items {
 			d.StreamListItem(ctx, instance)
 		}
@@ -435,7 +430,7 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	instance := h.Item.(*sql.DatabaseInstance)
+	instance := h.Item.(*sqladmin.DatabaseInstance)
 	project := instance.Project
 
 	req, err := service.Users.List(project, instance.Name).Do()
@@ -452,7 +447,7 @@ func getSQLDatabaseInstanceUsers(ctx context.Context, d *plugin.QueryData, h *pl
 //// TRANSFORM FUNCTIONS
 
 func sqlDatabaseInstanceAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(*sql.DatabaseInstance)
+	instance := d.HydrateItem.(*sqladmin.DatabaseInstance)
 
 	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + instance.Project + "/regions/" + instance.Region + "/instances/" + instance.Name}
 

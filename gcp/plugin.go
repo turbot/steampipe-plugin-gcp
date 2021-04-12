@@ -28,7 +28,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
+			"gcp_bigquery_dataset":                tableGcpBigQueryDataset(ctx),
+			"gcp_bigtable_instance":               tableGcpBigtableInstance(ctx),
 			"gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
 			"gcp_compute_address":                 tableGcpComputeAddress(ctx),
 			"gcp_compute_backend_bucket":          tableGcpComputeBackendBucket(ctx),
@@ -48,12 +51,14 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
 			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
+			"gcp_compute_target_https_proxy":      tableGcpComputeTargetHttpsProxy(ctx),
 			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
 			"gcp_compute_target_ssl_proxy":        tableGcpComputeTargetSslProxy(ctx),
 			"gcp_compute_target_vpn_gateway":      tableGcpComputeTargetVpnGateway(ctx),
 			"gcp_compute_url_map":                 tableGcpComputeURLMap(ctx),
 			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),
 			"gcp_compute_zone":                    tableGcpComputeZone(ctx),
+			"gcp_dns_managed_zone":                tableGcpDnsManagedZone(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
 			"gcp_logging_exclusion":               tableGcpLoggingExclusion(ctx),
@@ -71,7 +76,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_sql_database":                    tableGcpSQLDatabase(ctx),
 			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
-
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
