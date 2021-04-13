@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -18,7 +19,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 			Hydrate:    getMonitoringAlertPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listMonitoringAlertPolicy,
+			Hydrate: listMonitoringAlertPolicies,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -30,6 +31,12 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The resource name for this policy.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
+			},
+			{
+				Name:        "enabled",
+				Description: "Indicates whether the policy is enabled, or not.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
 				Name:        "combiner",
@@ -37,23 +44,13 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "enabled",
-				Description: "Whether or not the policy is enabled.",
-				Type:        proto.ColumnType_BOOL,
+				Name:        "creation_record",
+				Description: "A read-only record of the creation of the alerting policy.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "mutation_record",
 				Description: "A read-only record of the most recent change to the alerting policy.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "validity",
-				Description: "Read-only description of how the alert policy is invalid.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "creation_record",
-				Description: "A read-only record of the creation of the alerting policy.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -76,8 +73,13 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Description: "User-supplied key/value data to be used for organizing and identifying the AlertPolicy objects.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "validity",
+				Description: "Read-only description of how the alert policy is invalid.",
+				Type:        proto.ColumnType_JSON,
+			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -94,10 +96,10 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(getMonitoringAlertPolicyAka, "Akas"),
+				Transform:   transform.FromP(monitoringAlertPolicyTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -108,8 +110,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromP(monitoringAlertPolicyTurbotData, "Project"),
 			},
 		},
 	}
@@ -117,7 +118,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMonitoringAlertPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := MonitoringService(ctx, d)
 	if err != nil {
@@ -132,7 +133,6 @@ func listMonitoringAlertPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 	project := projectData.Project
 
 	resp := service.Projects.AlertPolicies.List("projects/" + project)
-
 	if err := resp.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
 		for _, alertPolicy := range page.AlertPolicies {
 			d.StreamListItem(ctx, alertPolicy)
@@ -177,10 +177,18 @@ func getMonitoringAlertPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	return req, nil
 }
 
-func getMonitoringAlertPolicyAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	alertPolicy := d.HydrateItem.(*monitoring.AlertPolicy)
+//// TRANSFORM FUNCTIONS
 
-	Akas := []string{"gcp://monitoring.googleapis.com/" + alertPolicy.Name}
+func monitoringAlertPolicyTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*monitoring.AlertPolicy)
+	param := d.Param.(string)
 
-	return Akas, nil
+	splittedData := strings.Split(data.Name, "/")
+
+	turbotData := map[string]interface{}{
+		"Project": splittedData[1],
+		"Akas":    []string{"gcp://monitoring.googleapis.com/" + data.Name},
+	}
+
+	return turbotData[param], nil
 }
