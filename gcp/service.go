@@ -18,7 +18,7 @@ import (
 	"google.golang.org/api/storage/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
-	sql "google.golang.org/api/sql/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 // BigQueryService returns the service connection for GCP BigQueryService service
@@ -85,18 +85,18 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 }
 
 // CloudSQLAdminService returns the service connection for GCP Cloud SQL Admin service
-func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sql.Service, error) {
+func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sqladmin.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudSQLAdminService"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*sql.Service), nil
+		return cachedData.(*sqladmin.Service), nil
 	}
 
 	// To get config arguments from plugin config file
 	setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := sql.NewService(ctx)
+	svc, err := sqladmin.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
