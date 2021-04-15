@@ -38,7 +38,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "iam_policy",
 				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getIamPolicyDetail,
+				Hydrate:     getKmsKeyRingIamPolicy,
 				Transform:   transform.FromValue(),
 			},
 
@@ -137,8 +137,8 @@ func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	return resp, nil
 }
 
-func getIamPolicyDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getIamPolicyDetail")
+func getKmsKeyRingIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getKmsKeyRingIamPolicy")
 
 	// Create Service Connection
 	service, err := KMSService(ctx, d)
