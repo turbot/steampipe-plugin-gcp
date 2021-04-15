@@ -13,7 +13,7 @@ import (
 func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_kms_key_ring",
-		Description: "GCP Kms Key Ring",
+		Description: "GCP KMS Key Ring",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getKeyRingDetail,
@@ -23,25 +23,31 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 		},
 		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "The resource name for the KeyRing.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "create_time",
 				Description: "The time at which this KeyRing was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
+			{
+				Name:        "policy",
+				Description: "The access control policy for key ring.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getIamPolicyDetail,
+				Transform:   transform.FromValue(),
+			},
 
-			// standard steampipe columns
+			// Standard steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "akas",
@@ -50,7 +56,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -99,7 +105,7 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation].(string)
 	plugin.Logger(ctx).Trace("getKeyRingDetail")
 
@@ -118,10 +124,31 @@ func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()
+
+	// to prevent duplicate value
 	if matrixLocation != location {
 		return nil, nil
 	}
 	resp, err := service.Projects.Locations.KeyRings.Get("projects/" + project + "/locations/" + location + "/keyRings/" + name).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func getIamPolicyDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getIamPolicyDetail")
+
+	// Create Service Connection
+	service, err := KMSService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	keyRing := h.Item.(*cloudkms.KeyRing)
+
+	resp, err := service.Projects.Locations.KeyRings.GetIamPolicy(keyRing.Name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -137,12 +164,10 @@ func gcpKmsKeyRingTurbotData(_ context.Context, d *transform.TransformData) (int
 
 	project := strings.Split(key.Name, "/")[1]
 	location := strings.Split(key.Name, "/")[3]
-	name := strings.Split(key.Name, "/")[5]
 
 	turbotData := map[string]interface{}{
 		"Project":  project,
 		"Location": location,
-		"Name":     name,
 		"Akas":     []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
 
