@@ -1,3 +1,15 @@
+## v0.7.0 [2021-04-15]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_ssl_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_ssl_policy) ([#154](https://github.com/turbot/steampipe-plugin-gcp/pull/154))
+  - [gcp_monitoring_alert_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_monitoring_alert_policy) ([#168](https://github.com/turbot/steampipe-plugin-gcp/pull/168))
+
+_Bug fixes_
+
+- Fixed: Query example in `gcp_dns_managed_zone` table docs ([#172](https://github.com/turbot/steampipe-plugin-gcp/pull/172))
+
 ## v0.6.0 [2021-04-08]
 
 _What's new?_
