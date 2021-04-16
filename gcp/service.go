@@ -316,7 +316,7 @@ func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service,
 	return svc, nil
 }
 
-// KMSService returns the service connection for GCP kms service
+// KMSService returns the service connection for GCP KMS service
 func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "KMSService"

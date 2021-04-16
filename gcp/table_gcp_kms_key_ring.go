@@ -10,6 +10,8 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
+//// TABLE DEFINITION
+
 func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_kms_key_ring",
@@ -162,12 +164,11 @@ func gcpKmsKeyRingTurbotData(_ context.Context, d *transform.TransformData) (int
 	key := d.HydrateItem.(*cloudkms.KeyRing)
 	param := d.Param.(string)
 
-	project := strings.Split(key.Name, "/")[1]
-	location := strings.Split(key.Name, "/")[3]
+	data := strings.Split(key.Name, "/")
 
 	turbotData := map[string]interface{}{
-		"Project":  project,
-		"Location": location,
+		"Project":  data[1],
+		"Location": data[3],
 		"Akas":     []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
 
