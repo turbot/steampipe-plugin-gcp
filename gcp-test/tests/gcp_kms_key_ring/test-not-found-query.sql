@@ -1,3 +1,3 @@
 select name
 from gcp.gcp_kms_key_ring
-where name = 'dummy-{{output.resource_id.value}}'
+where name = 'dummy-{{ resourceName }}'

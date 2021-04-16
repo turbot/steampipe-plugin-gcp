@@ -36,11 +36,28 @@ data "null_data_source" "resource" {
   }
 }
 
+data "google_iam_policy" "resource" {
+  binding {
+    role = "roles/editor"
+
+    members = [
+      "user:sourav@turbot.com",
+    ]
+  }
+}
 resource "google_kms_key_ring" "named_test_resource" {
   name     = var.resource_name
   location = "global"
 }
 
+resource "google_kms_key_ring_iam_policy" "named_test_resource" {
+  key_ring_id = google_kms_key_ring.named_test_resource.id
+  policy_data = data.google_iam_policy.resource.policy_data
+}
+
+output "etag" {
+  value = google_kms_key_ring_iam_policy.named_test_resource.etag
+}
 
 output "resource_aka" {
   value = "gcp://cloudkms.googleapis.com/${google_kms_key_ring.named_test_resource.id}"
@@ -48,12 +65,4 @@ output "resource_aka" {
 
 output "resource_name" {
   value = var.resource_name
-}
-
-output "resource_id" {
-  value = google_kms_key_ring.named_test_resource.id
-}
-
-output "project_id" {
-  value = var.gcp_project
 }
