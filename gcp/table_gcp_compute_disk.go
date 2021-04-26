@@ -55,10 +55,16 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "disk_encryption_kms_key",
-				Description: "The name of the encryption key that is used to encrypt storage data.",
+				Name:        "disk_encryption_kms_key_customer_managed",
+				Description: "The name of the customer managed encryption key that is used to encrypt storage data.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DiskEncryptionKey.KmsKeyName"),
+			},
+			{
+				Name:        "disk_encryption_kms_key_customer_supplied",
+				Description: "The name of the customer supplied encryption key that is used to encrypt storage data.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DiskEncryptionKey.Sha256"),
 			},
 			{
 				Name:        "disk_encryption_kms_key_service_account",

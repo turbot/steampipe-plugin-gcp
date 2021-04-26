@@ -26,11 +26,40 @@ select
   name,
   id,
   zone_name,
-  disk_encryption_kms_key
+  disk_encryption_kms_key_customer_supplied,
+  disk_encryption_kms_key_customer_managed
 from
   gcp_compute_disk
 where
-  disk_encryption_kms_key is null;
+  disk_encryption_kms_key_customer_supplied is null and disk_encryption_kms_key_customer_managed is null;
+```
+
+### List of disks with Customer-managed key
+
+```sql
+select
+  name,
+  id,
+  zone_name,
+  disk_encryption_kms_key_customer_managed
+from
+  gcp_compute_disk
+where
+  length(disk_encryption_kms_key_customer_managed) <> 0;
+```
+
+### List of disks with Customer-supplied key
+
+```sql
+select
+  name,
+  id,
+  zone_name,
+  disk_encryption_kms_key_customer_supplied
+from
+  gcp_compute_disk
+where
+  length(disk_encryption_kms_key_customer_supplied) <> 0;
 ```
 
 ### List of disks that are not in use
