@@ -1,6 +1,6 @@
 # Table: gcp_compute_target_ssl_proxy
 
-SSL Proxy Load Balancing terminates SSL connections from the client and creates new connections to the backends.
+Target SSL Proxy is used by one or more global forwarding rules to route incoming SSL requests to a backend service.
 
 ## Examples
 
