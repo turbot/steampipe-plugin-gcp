@@ -1,0 +1,15 @@
+[
+  {
+    "iam_policy": {
+    "bindings": [
+      {
+        "members": ["user:sourav@turbot.com"],
+        "role": "roles/editor"
+      }
+    ],
+    "etag": "{{ output.etag.value }}",
+    "version": 1
+  },
+    "name": "{{ resourceName }}"
+  }
+]

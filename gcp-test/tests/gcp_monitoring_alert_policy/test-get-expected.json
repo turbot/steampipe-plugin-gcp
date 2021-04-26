@@ -1,0 +1,17 @@
+[
+	{
+		"combiner": "OR",
+		"display_name": "{{ resourceName }}",
+		"documentation": {
+			"content": "This is for testing purpose",
+			"mimeType": "text/markdown"
+		},
+		"enabled": true,
+		"location": "global",
+		"name": "{{ output.resource_id.value.split('/').pop() }}",
+		"project": "{{ output.project_id.value }}",
+		"user_labels": {
+			"foo": "bar"
+		}
+	}
+]
