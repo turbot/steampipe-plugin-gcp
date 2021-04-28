@@ -53,6 +53,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_subnetwork":              tableGcpComputeSubnetwork(ctx),
 			"gcp_compute_target_https_proxy":      tableGcpComputeTargetHttpsProxy(ctx),
 			"gcp_compute_target_pool":             tableGcpComputeTargetPool(ctx),
+			"gcp_compute_target_ssl_proxy":        tableGcpComputeTargetSslProxy(ctx),
 			"gcp_compute_target_vpn_gateway":      tableGcpComputeTargetVpnGateway(ctx),
 			"gcp_compute_url_map":                 tableGcpComputeURLMap(ctx),
 			"gcp_compute_vpn_tunnel":              tableGcpComputeVpnTunnel(ctx),

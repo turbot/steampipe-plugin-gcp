@@ -1,0 +1,6 @@
+[
+	{
+		"description": "Test target ssl proxy to validate the table outcome.",
+		"name": "{{ resourceName }}"
+	}
+]
