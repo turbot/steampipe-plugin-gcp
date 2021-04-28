@@ -25,14 +25,3 @@ select
 from
   gcp_compute_target_ssl_proxy;
 ```
-
-### Get SSL certificates used to authenticate connections to Backends
-
-```sql
-select
-  name,
-  id,
-  ssl_certificates
-from
-  gcp_compute_target_ssl_proxy;
-```
