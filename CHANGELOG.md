@@ -1,3 +1,10 @@
+## v0.9.0 [2021-04-29]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_target_ssl_proxy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_target_ssl_proxy) ([#156](https://github.com/turbot/steampipe-plugin-gcp/pull/156))
+
 ## v0.8.0 [2021-04-22]
 
 _What's new?_
