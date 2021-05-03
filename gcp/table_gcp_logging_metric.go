@@ -31,7 +31,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "description",
-				Description: "A user-specified, human-readable description of the metric.",
+				Description: "An user-specified, human-readable description of the metric.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
