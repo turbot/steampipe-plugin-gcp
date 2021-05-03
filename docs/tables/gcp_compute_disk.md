@@ -19,18 +19,16 @@ from
   gcp_compute_disk;
 ```
 
-### List of disks with Google-managed key
+### List of disks with encryption key
 
 ```sql
 select
   name,
   id,
   zone_name,
-  disk_encryption_kms_key
+  disk_encryption_key_type
 from
-  gcp_compute_disk
-where
-  disk_encryption_kms_key is null;
+  gcp_compute_disk;
 ```
 
 ### List of disks that are not in use
