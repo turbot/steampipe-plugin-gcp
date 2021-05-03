@@ -19,7 +19,7 @@ from
   gcp_compute_disk;
 ```
 
-### List of disks with encryption key
+### List of disks with encryption key type
 
 ```sql
 select
