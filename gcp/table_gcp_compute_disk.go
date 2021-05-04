@@ -63,7 +63,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Name:        "disk_encryption_key_type",
 				Description: "The type of encryption key used to encrypt storage data. Valid values are Google managed | Customer managed | Customer supplied.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(diskEncryptionKey),
+				Transform:   transform.From(diskEncryptionKeyType),
 			},
 			{
 				Name:        "kind",
@@ -398,7 +398,7 @@ func diskLocation(_ context.Context, d *transform.TransformData) (interface{}, e
 	return locationData[param], nil
 }
 
-func diskEncryptionKey(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func diskEncryptionKeyType(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	i := d.HydrateItem.(*compute.Disk)
 
 	if i.DiskEncryptionKey == nil {
