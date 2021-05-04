@@ -99,7 +99,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "metric_descriptor_type",
-				Description: "Specifies the metric type, including its DNS name in prefix.",
+				Description: "The metric type, including its DNS name in prefix.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("MetricDescriptor.Type"),
 			},
@@ -111,7 +111,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "metric_descriptor_value_type",
-				Description: "Specifies the value type of the measurement.",
+				Description: "The value type of the measurement.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("MetricDescriptor.ValueType"),
 			},
