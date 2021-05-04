@@ -19,7 +19,7 @@ from
   gcp_compute_disk;
 ```
 
-### List of disks with encryption key type
+### List of disks with Google-managed key
 
 ```sql
 select
@@ -28,7 +28,9 @@ select
   zone_name,
   disk_encryption_key_type
 from
-  gcp_compute_disk;
+  gcp_compute_disk
+where
+  disk_encryption_key_type = 'Google managed';
 ```
 
 ### List of disks that are not in use
