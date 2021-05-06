@@ -56,7 +56,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "disk_encryption_key",
-				Description: "The name of the encryption key that is used to encrypt stored data.",
+				Description: "Specifies the encryption configuration used to encrypt stored data.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
