@@ -1,3 +1,13 @@
+## v0.10.0 [2021-05-06]
+
+_What's new?_
+
+_Enhancements_
+
+- Updated: Add `disk_encryption_key` and `disk_encryption_key_type` columns to `gcp_compute_disk` table ([#185](https://github.com/turbot/steampipe-plugin-gcp/pull/185))
+- Updated: Remove `disk_encryption_kms_key` column from `gcp_compute_disk` table ([#185](https://github.com/turbot/steampipe-plugin-gcp/pull/185))
+- Updated: Add `metric_descriptor_type` column to `gcp_logging_metric` table ([#182](https://github.com/turbot/steampipe-plugin-gcp/pull/182))
+
 ## v0.9.0 [2021-04-29]
 
 _What's new?_
