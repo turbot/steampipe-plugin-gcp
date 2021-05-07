@@ -1,0 +1,21 @@
+[
+  {
+    "default_network_tier": "STANDARD",
+    "default_service_account": "{{ output.service_account.value }}",
+    "enabled_features": null,
+    "kind": "compute#project",
+    "metadata_items": [
+      {
+        "key": "fizz",
+        "value": "buzz"
+      },
+      {
+        "key": "oslogin",
+        "value": "TRUE"
+      }
+    ],
+    "metadata_kind": "compute#metadata",
+    "name": "{{ output.project_id.value }}",
+    "self_link": "https://www.googleapis.com/compute/v1/projects/{{ output.project_id.value }}"
+  }
+]
