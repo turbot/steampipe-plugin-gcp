@@ -27,7 +27,7 @@ from
   gcp_compute_project,
   jsonb_array_elements(common_instance_metadata -> 'items') as q
 where
-  common_instance_metadata -> 'items' @ > '[{"key": "enable-oslogin"}]'
+  common_instance_metadata -> 'items' @> '[{"key": "enable-oslogin"}]'
   and q ->> 'key' ilike 'enable-oslogin'
   and q ->> 'value' not ilike 'TRUE';
 ```
