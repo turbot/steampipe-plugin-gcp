@@ -7,7 +7,7 @@
     "include_children": false,
     "location": "global",
     "name": "{{ resourceName }}",
-		"project": "{{ output.project_id.value }}",
-		"self_link": "https://www.googleapis.com/logging/v2/projects/{{ output.project_id.value }}/sinks/{{ resourceName }}"
+    "project": "{{ output.project_id.value }}",
+    "self_link": "https://www.googleapis.com/logging/v2/projects/{{ output.project_id.value }}/sinks/{{ resourceName }}"
   }
 ]
