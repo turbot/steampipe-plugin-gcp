@@ -251,7 +251,7 @@ func getDnsZoneSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 	project := projectData.Project
 
-	selfLink := "https://www.googleapis.com/dns/v1beta2/projects/" + project + "/managedZones/" + zone.Name
+	selfLink := "https://www.googleapis.com/dns/v1/projects/" + project + "/managedZones/" + zone.Name
 
 	return selfLink, nil
 }
