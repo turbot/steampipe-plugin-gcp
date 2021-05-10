@@ -83,6 +83,13 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("ServiceDirectoryConfig.Namespace.DeletionTime"),
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the managed zone.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getDnsZoneSelfLink,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "dnssec_config_default_key_specs",
 				Description: "Specifies parameters for generating initial DnsKeys for this ManagedZone.",
 				Type:        proto.ColumnType_JSON,
@@ -117,7 +124,7 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -138,7 +145,7 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromValue(),
 			},
 
-			// standard gcp columns
+			// Standard gcp columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -232,4 +239,18 @@ func getDnsManagedZoneAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	akas := []string{"gcp://dns.googleapis.com/projects/" + project + "/managedZones/" + data.Name}
 
 	return akas, nil
+}
+
+func getDnsZoneSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	zone := h.Item.(*dns.ManagedZone)
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	selfLink := "https://www.googleapis.com/dns/v1beta2/projects/" + project + "/managedZones/" + zone.Name
+	return selfLink, nil
 }
