@@ -1,0 +1,27 @@
+[
+	{
+	  "dataset_id": "{{ output.parent_resource_id.value }}",
+	  "friendly_name": "{{ output.friendly_name.value }}",
+	  "id": "{{ output.project_id.value }}:{{ resourceName }}.{{ resourceName }}",
+	  "kind": "bigquery#table",
+	  "labels": {
+		  "name": "{{ resourceName }}"
+	  },
+	  "location": "{{ output.region_id.value }}",
+	  "project": "{{ output.project_id.value }}",
+	  "range_partitioning": null,
+	  "self_link": "{{ output.self_link.value }}",
+	  "table_reference": {
+		"datasetId": "{{ output.parent_resource_id.value }}",
+		"projectId": "{{ output.project_id.value }}",
+		"tableId": "{{ resourceName }}"
+	  }, 
+	  
+	  "time_partitioning": {
+		"type": "DAY"
+	  },
+	  "title": "{{ output.title.value }}",
+	  "type": "{{ output.type.value }}",
+	  "view": null
+	}
+  ]
