@@ -25,16 +25,27 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			// commonly used columns
 			{
-				Name:        "creation_time",
-				Description: "The time when this table was created, in milliseconds since the epoch.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("CreationTime").Transform(transform.UnixMsToTimestamp),
+				Name:        "id",
+				Description: "An opaque ID uniquely identifying the table.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "dataset_id",
 				Description: "The ID of the dataset containing this table.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("TableReference.DatasetId"),
+			},
+			{
+				Name:        "self_link",
+				Description: "A URL that can be used to access this resource again.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getBigqueryTable,
+			},
+			{
+				Name:        "creation_time",
+				Description: "The time when this table was created, in milliseconds since the epoch.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("CreationTime").Transform(transform.UnixMsToTimestamp),
 			},
 			{
 				Name:        "expiration_time",
@@ -46,62 +57,43 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 				Name:        "friendly_name",
 				Description: "A descriptive name for this table.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("FriendlyName"),
-			},
-			{
-				Name:        "id",
-				Description: "An opaque ID uniquely identifying the table.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id"),
 			},
 			{
 				Name:        "kind",
 				Description: "The type of resource ID.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Kind"),
 			},
 			{
 				Name:        "labels",
 				Description: "The labels associated with this table. You can use these to organize and group your tables. Label keys and values can be no longer than 63 characters, can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed. Label values are optional. Label keys must start with a letter and each label in the list must have a different key.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "range_partitioning",
 				Description: "If specified, configures range partitioning for this table.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("RangePartitioning"),
 			},
 			{
 				Name:        "table_reference",
 				Description: "The type of resource ID.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("TableReference"),
 			},
 			{
 				Name:        "time_partitioning",
 				Description: "If specified, configures time-based partitioning for this table.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("TimePartitioning"),
 			},
 			{
 				Name:        "type",
 				Description: "The type of table. Possible values are: TABLE, VIEW.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Type"),
-			},
-			{
-				Name:        "self_link",
-				Description: "A URL that can be used to access this resource again.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getBigqueryTable,
 			},
 			{
 				Name:        "view",
 				Description: "dditional details for a view.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("View"),
 			},
+
 			// standard steampipe columns
 			{
 				Name:        "title",
@@ -121,6 +113,7 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(gcpBigqueryTableAkas),
 			},
+
 			// standard gcp columns
 			{
 				Name:        "location",
@@ -140,15 +133,19 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 }
 
 //// LIST FUNCTION
+
 func listBigqueryTables(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("ListBigqueryTables")
+	
 	// Get a details of Cloud Dataset
 	dataset := h.Item.(*bigquery.DatasetListDatasets)
+	
 	// Create Service Connection
 	service, err := BigQueryService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
+	
 	// Get project details
 	projectData, err := activeProject(ctx, d)
 	if err != nil {
@@ -168,6 +165,7 @@ func listBigqueryTables(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 }
 
 //// HYDRATE FUNCTIONS
+
 func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getBigqueryTable")
 	// Create Service Connection
@@ -198,11 +196,14 @@ func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 }
 
 //// TRANSFORM FUNCTIONS
+
 func gcpBigqueryTableAkas(ctx context.Context, h *transform.TransformData) (interface{}, error) {
 	data := TableID(h.HydrateItem)
 	projectID := strings.Split(data, ":")[0]
 	id := strings.Split(data, ":")[1]
-	akas := []string{"gcp://bigquery.googleapis.com/projects/" + projectID + "/tables/" + id}
+	datasetId := strings.Split(id, ".")[0]
+	id = strings.Split(id, ".")[1]
+	akas := []string{"gcp://bigquery.googleapis.com/projects/" + projectID +"/datasets/"+ datasetId +"/tables/" + id}
 	return akas, nil
 }
 

@@ -87,7 +87,7 @@ output "friendly_name" {
 }
 
 output "resource_aka" {
-  value = "gcp://bigquery.googleapis.com/projects/${var.gcp_project}/tables/${var.resource_name}.${var.resource_name}"
+  value = "gcp://bigquery.googleapis.com/projects/${var.gcp_project}/datasets/${var.resource_name}/tables/${var.resource_name}"
 }
 output "parent_resource_id" {
   value = google_bigquery_dataset.named_test_resource.dataset_id
