@@ -19,7 +19,7 @@ from
   gcp_bigquery_table;
 ```
 
-### List tables which are not encrypted using CMK
+### List tables that are not encrypted using CMK
 
 ```sql
 select
