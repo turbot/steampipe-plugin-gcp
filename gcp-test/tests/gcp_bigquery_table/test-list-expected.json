@@ -1,6 +1,6 @@
 [
-    {
-      "dataset_id": "{{ output.parent_resource_id.value }}",
-      "id": "{{ output.project_id.value }}:{{ resourceName }}.{{ resourceName }}"
-    }
-  ]
+  {
+    "dataset_id": "{{ resourceName }}",
+    "table_id": "{{ resourceName }}"
+  }
+]

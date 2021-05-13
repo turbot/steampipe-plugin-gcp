@@ -63,7 +63,7 @@ resource "google_bigquery_table" "named_test_resource" {
     name = var.resource_name
   }
 
-  schema = <<EOF
+  schema              = <<EOF
 [
   {
     "name": "permalink",
@@ -79,19 +79,13 @@ resource "google_bigquery_table" "named_test_resource" {
   }
 ]
 EOF
-deletion_protection = "false"
-}
-
-output "friendly_name" {
-  value = google_bigquery_table.named_test_resource.friendly_name
+  deletion_protection = "false"
 }
 
 output "resource_aka" {
   value = "gcp://bigquery.googleapis.com/projects/${var.gcp_project}/datasets/${var.resource_name}/tables/${var.resource_name}"
 }
-output "parent_resource_id" {
-  value = google_bigquery_dataset.named_test_resource.dataset_id
-}
+
 output "resource_name" {
   value = var.resource_name
 }
@@ -106,22 +100,6 @@ output "service_account_email" {
 
 output "self_link" {
   value = google_bigquery_table.named_test_resource.self_link
-}
-
-output "range_partitioning" {
-  value = google_bigquery_table.named_test_resource.range_partitioning
-}
-
-output "time_partitioning" {
-  value = google_bigquery_table.named_test_resource.time_partitioning
-}
-
-output "title" {
-  value = "${var.gcp_project}:${var.resource_name}.${var.resource_name}"
-}
-
-output "type" {
-  value = google_bigquery_table.named_test_resource.type
 }
 
 output "etag" {
