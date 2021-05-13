@@ -23,7 +23,6 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 			Hydrate:       listBigqueryTables,
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "id",
 				Description: "An opaque ID uniquely identifying the table.",
@@ -42,6 +41,11 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 				Hydrate:     getBigqueryTable,
 			},
 			{
+				Name:        "friendly_name",
+				Description: "A descriptive name for this table.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "creation_time",
 				Description: "The time when this table was created, in milliseconds since the epoch.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -52,11 +56,6 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 				Description: "The time when this table expires, in milliseconds since the epoch. If not present, the table will persist indefinitely. Expired tables will be deleted and their storage reclaimed. The defaultTableExpirationMs property of the encapsulating dataset can be used to set a default expirationTime on newly created tables.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("ExpirationTime").Transform(transform.UnixMsToTimestamp),
-			},
-			{
-				Name:        "friendly_name",
-				Description: "A descriptive name for this table.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "kind",
