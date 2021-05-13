@@ -1,4 +1,4 @@
-# Table: gcp_compute_project
+# Table: gcp_compute_project_metadata
 
 A project is used to organize resources in a Google Cloud Platform environment.
 
@@ -13,7 +13,7 @@ select
   default_service_account,
   creation_timestamp
 from
-  gcp_compute_project;
+  gcp_compute_project_metadata;
 ```
 
 
@@ -24,7 +24,7 @@ select
   name,
   id
 from
-  gcp_compute_project,
+  gcp_compute_project_metadata,
   jsonb_array_elements(common_instance_metadata -> 'items') as q
 where
   common_instance_metadata -> 'items' @> '[{"key": "enable-oslogin"}]'

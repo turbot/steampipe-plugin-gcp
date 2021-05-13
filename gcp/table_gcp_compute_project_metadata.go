@@ -8,12 +8,12 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
 
-func tableGcpComputeProject(ctx context.Context) *plugin.Table {
+func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_compute_project",
-		Description: "GCP Compute Project",
+		Name:        "gcp_compute_project_metadata",
+		Description: "GCP Compute Project Metadata",
 		List: &plugin.ListConfig{
-			Hydrate: listComputeProject,
+			Hydrate: listComputeProjectMetadata,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -93,7 +93,7 @@ func tableGcpComputeProject(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getComputeProjectTurbotData,
+				Hydrate:     getComputeProjectMetadataTurbotData,
 			},
 
 			// Standard GCP columns
@@ -116,7 +116,7 @@ func tableGcpComputeProject(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeProject(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeProjectMetadata(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
@@ -129,7 +129,7 @@ func listComputeProject(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 	project := projectData.Project
-	plugin.Logger(ctx).Trace("listComputeProject", "GCP_PROJECT: ", project)
+	plugin.Logger(ctx).Trace("listComputeProjectMetadata", "GCP_PROJECT: ", project)
 
 	resp, err := service.Projects.Get(project).Do()
 	if err != nil {
@@ -142,7 +142,7 @@ func listComputeProject(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getComputeProjectTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getComputeProjectMetadataTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
 	projectData, err := activeProject(ctx, d)
 	if err != nil {
