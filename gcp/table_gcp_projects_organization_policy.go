@@ -13,26 +13,26 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpOrganizationPolicy(ctx context.Context) *plugin.Table {
+func tableGcpProjectsOrganizationPolicy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_organization_policy",
-		Description: "GCP Organization Policy",
+		Name:        "gcp_projects_organization_policy",
+		Description: "GCP Projects Organization Policy",
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    getGcpProjectsOrganizationPolicy,
+		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpOrganizationPolicies,
+			Hydrate: listGcpProjectsOrganizationPolicies,
 		},
 		Columns: []*plugin.Column{
 			{
-				Name:        "constraint",
-				Description: "The name of the Constraint the Policy is configuring, for example, constraints/serviceuser.services.",
+				Name:        "id",
+				Description: "The name of the Constraint the Policy is configuring.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Constraint").Transform(lastPathElement),
 			},
 			{
-				Name:        "etag",
-				Description: "An opaque tag indicating the current version of the Policy, used for concurrency control.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "updateTime",
+				Name:        "update_time",
 				Description: "The time stamp the Policy was previously updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
@@ -42,17 +42,22 @@ func tableGcpOrganizationPolicy(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_INT,
 			},
 			{
-				Name:        "listPolicy",
+				Name:        "etag",
+				Description: "An opaque tag indicating the current version of the Policy, used for concurrency control.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "list_policy",
 				Description: "List of values either allowed or disallowed.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "booleanPolicy",
+				Name:        "boolean_policy",
 				Description: "For boolean Constraints, whether to enforce the Constraint or not.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "restoreDefault",
+				Name:        "restore_default",
 				Description: "Restores the default behavior of the constraint; independent of Constraint type.",
 				Type:        proto.ColumnType_JSON,
 			},
@@ -62,7 +67,7 @@ func tableGcpOrganizationPolicy(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     listGcpOrganizationPolicies,
+				Transform:   transform.FromField("Constraint"),
 			},
 			{
 				Name:        "akas",
@@ -91,7 +96,7 @@ func tableGcpOrganizationPolicy(ctx context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpProjectsOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
@@ -104,16 +109,54 @@ func listGcpOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 		return nil, err
 	}
 	project := projectData.Project
-	plugin.Logger(ctx).Trace("listGcpOrganizationPolicies", "GCP_PROJECT: ", project)
+	plugin.Logger(ctx).Trace("listGcpProjectsOrganizationPolicies", "GCP_PROJECT: ", project)
 
-	rb := &cloudresourcemanager.ListOrgPoliciesRequest{}
-	resp, err := service.Projects.ListOrgPolicies(project, rb).Context(ctx).Do()
+	rb := &cloudresourcemanager.ListOrgPoliciesRequest{
+		// TODO: Add desired fields of the request body.
+	}
+
+	resp := service.Projects.ListOrgPolicies("projects/"+project, rb)
+	if err := resp.Pages(ctx, func(page *cloudresourcemanager.ListOrgPoliciesResponse) error {
+		for _, orgPolicy := range page.Policies {
+			d.StreamListItem(ctx, orgPolicy)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return nil, err
+}
+
+//// HYDRATE FUNCTIONS
+
+func getGcpProjectsOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getGcpProjectsOrganizationPolicy")
+
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-	d.StreamListItem(ctx, resp)
 
-	return nil, nil
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	project := projectData.Project
+	id := d.KeyColumnQuals["id"].GetStringValue()
+	rb := &cloudresourcemanager.GetOrgPolicyRequest{
+		Constraint: "constraints/" + id,
+	}
+
+	req, err := service.Projects.GetOrgPolicy("projects/"+project, rb).Do()
+	if err != nil {
+		plugin.Logger(ctx).Debug("getGcpProjectsOrganizationPolicy__", "ERROR", err)
+		return nil, err
+	}
+	return req, nil
 }
 
 func getOrganizationPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -128,7 +171,7 @@ func getOrganizationPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h
 	title := strings.ToUpper(project) + " Org Policy"
 
 	// Build resource aka
-	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/OrgPolicy"}
+	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project}
 
 	// Mapping all turbot defined properties
 	turbotData := map[string]interface{}{
