@@ -22,7 +22,7 @@ select
   version,
   update_time
 from
-  gcp_projects_organization_policy,
+  gcp_projects_organization_policy;
 ```
 
 
