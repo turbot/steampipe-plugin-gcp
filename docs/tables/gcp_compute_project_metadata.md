@@ -1,6 +1,6 @@
 # Table: gcp_compute_project_metadata
 
-A project is used to organize resources in a Google Cloud Platform environment.
+Compute project metadata authoritatively manages metadata common to all instances for a project in GCE.
 
 ## Examples
 
@@ -17,7 +17,7 @@ from
 ```
 
 
-### Check whether oslogin is not enabled for the project
+### Check if OS Login is enabled for Linux instances in the project
 
 ```sql
 select
