@@ -31,7 +31,7 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 			{
 				Name:        "project_number",
 				Description: "The number uniquely identifying the project.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "lifecycle_state",
@@ -56,25 +56,16 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 
 			// standard steampipe columns
 			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name"),
+			},
+			{
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getProjectAka,
-				Transform:   transform.FromValue(),
-			},
-
-			// standard gcp columns
-			{
-				Name:        "location",
-				Description: ColumnDescriptionLocation,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant("global"),
-			},
-			{
-				Name:        "project",
-				Description: ColumnDescriptionProject,
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
