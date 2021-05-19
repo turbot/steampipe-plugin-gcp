@@ -1,0 +1,6 @@
+[
+  {
+    "name": "{{ output.current_project_name.value }}",
+		"project_id": "{{ output.project_id.value }}"
+  }
+]

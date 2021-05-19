@@ -6,6 +6,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 //// TABLE DEFINITION
@@ -99,14 +100,9 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
+	project := h.Item.(*cloudresourcemanager.Project)
 	// Build resource aka
-	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project}
+	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project.ProjectId}
 
 	return akas, nil
 }

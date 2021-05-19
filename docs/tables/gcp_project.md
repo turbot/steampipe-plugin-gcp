@@ -8,7 +8,11 @@ A project organizes all your Google Cloud resources. A project consists of a set
 
 ```sql
 select
-  *
+  name,
+  project_id,
+  project_number,
+  lifecycle_state,
+  create_time
 from
   gcp_project;
 ```
