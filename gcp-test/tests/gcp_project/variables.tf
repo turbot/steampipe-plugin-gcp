@@ -36,8 +36,7 @@ data "null_data_source" "resource" {
   }
 }
 
-data "google_project" "current" {
-}
+data "google_project" "current" {}
 
 output "resource_aka" {
   value = data.null_data_source.resource.inputs.scope
@@ -51,3 +50,6 @@ output "project_id" {
   value = data.google_project.current.project_id
 }
 
+output "project_number" {
+  value = data.google_project.current.number
+}

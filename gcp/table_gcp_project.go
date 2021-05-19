@@ -26,7 +26,7 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "project_id",
-				Description: "The unique, user-assigned ID of the Project.",
+				Description: "An unique, user-assigned ID of the Project.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -55,7 +55,7 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -101,6 +101,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
 	project := h.Item.(*cloudresourcemanager.Project)
+
 	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project.ProjectId}
 
