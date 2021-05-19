@@ -98,6 +98,8 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	return nil, nil
 }
 
+//// HYDRATE FUNCTION
+
 func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
 	project := h.Item.(*cloudresourcemanager.Project)
