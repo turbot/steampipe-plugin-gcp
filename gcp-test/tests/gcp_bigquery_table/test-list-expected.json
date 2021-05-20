@@ -1,0 +1,6 @@
+[
+  {
+    "dataset_id": "{{ resourceName }}",
+    "table_id": "{{ resourceName }}"
+  }
+]

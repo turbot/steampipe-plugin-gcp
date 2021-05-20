@@ -1,0 +1,20 @@
+[
+  {
+    "dataset_id": "{{ resourceName }}",
+    "id": "{{ output.project_id.value }}:{{ resourceName }}.{{ resourceName }}",
+    "kind": "bigquery#table",
+    "labels": {
+      "name": "{{ resourceName }}"
+    },
+    "location": "{{ output.region_id.value }}",
+    "project": "{{ output.project_id.value }}",
+    "range_partitioning": null,
+    "self_link": "{{ output.self_link.value }}",
+    "table_id": "{{ resourceName }}",
+    "time_partitioning": {
+      "type": "DAY"
+    },
+    "title": "{{ resourceName }}",
+    "type": "TABLE"
+  }
+]

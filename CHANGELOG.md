@@ -1,3 +1,17 @@
+## v0.11.0 [2021-05-13]
+
+_What's new?_
+
+- New tables added
+  - [gcp_bigquery_table](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_bigquery_table) ([#198](https://github.com/turbot/steampipe-plugin-gcp/pull/198))
+
+_Enhancements_
+
+- Updated: README.md and docs/index.md now contain links to our Slack community ([#202](https://github.com/turbot/steampipe-plugin-gcp/pull/202))
+- Updated: Add `self_link` column to `gcp_dns_managed_zone` table ([#195](https://github.com/turbot/steampipe-plugin-gcp/pull/195))
+- Updated: Add `self_link` column to `gcp_logging_sink` table ([#193](https://github.com/turbot/steampipe-plugin-gcp/pull/193))
+- Updated: Bump lodash from 4.17.20 to 4.17.21 in /gcp-test ([#197](https://github.com/turbot/steampipe-plugin-gcp/pull/197))
+
 ## v0.10.0 [2021-05-06]
 
 _What's new?_

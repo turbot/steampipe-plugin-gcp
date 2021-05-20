@@ -6,7 +6,7 @@ Use SQL to query infrastructure including servers, networks, databases and more 
 
 * **[Get started →](https://hub.steampipe.io/plugins/turbot/gcp)**
 * Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/gcp/tables)
-* Community: [Discussion forums](https://github.com/turbot/steampipe/discussions)
+* Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 * Get involved: [Issues](https://github.com/turbot/steampipe-plugin-gcp/issues)
 
 ## Quick start
