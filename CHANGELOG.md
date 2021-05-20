@@ -1,3 +1,12 @@
+## v0.12.0 [2021-05-20]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_project_metadata](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_project_metadata) ([#192](https://github.com/turbot/steampipe-plugin-gcp/pull/192))
+  - [gcp_dns_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dns_policy) ([#208](https://github.com/turbot/steampipe-plugin-gcp/pull/208))
+  - [gcp_project](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_project) ([#205](https://github.com/turbot/steampipe-plugin-gcp/pull/205))
+
 ## v0.11.0 [2021-05-13]
 
 _What's new?_
