@@ -1,10 +1,27 @@
 [
-	{
-		"enable_inbound_forwarding": {{ output.enable_inbound_forwarding.value }},
-		"enable_logging": {{ output.enable_logging.value }},
-		"kind": "dns#policy",
-		"name": "{{resourceName}}",
-		"project": "{{ output.project_id.value }}",
-		"title": "{{resourceName}}"
-	  }
+  {
+    "description": "Test DNS policy to validate the table outcomes.",
+    "enable_inbound_forwarding": false,
+    "enable_logging": false,
+    "kind": "dns#policy",
+    "name": "{{ resourceName }}",
+    "networks": [
+      {
+        "kind": "dns#policyNetwork",
+        "networkUrl": "https://compute.googleapis.com/compute/v1/projects/{{ output.project_id.value }}/global/networks/{{ resourceName }}"
+      }
+    ],
+    "project": "{{ output.project_id.value }}",
+    "target_name_servers": [
+      {
+        "ipv4Address": "172.16.1.20",
+        "kind": "dns#policyAlternativeNameServerConfigTargetNameServer"
+      },
+      {
+        "forwardingPath": "private",
+        "ipv4Address": "172.16.1.10",
+        "kind": "dns#policyAlternativeNameServerConfigTargetNameServer"
+      }
+    ]
+  }
 ]

@@ -22,22 +22,11 @@ variable "gcp_zone" {
   default = "us-east1-b"
 }
 
-variable "enable_inbound_forwarding" {
-  type = bool
-  default = true
-}
-
-variable "enable_logging" {
-  type = bool
-  default = true
-}
-
 provider "google" {
   project = var.gcp_project
   region  = var.gcp_region
   zone    = var.gcp_zone
 }
-
 
 data "google_client_config" "current" {}
 
@@ -47,11 +36,16 @@ data "null_data_source" "resource" {
   }
 }
 
+resource "google_compute_network" "named_test_resource" {
+  name                    = var.resource_name
+  auto_create_subnetworks = false
+}
+
 resource "google_dns_policy" "named_test_resource" {
   name        = var.resource_name
-  enable_inbound_forwarding = var.enable_inbound_forwarding
-
-  enable_logging = var.enable_logging
+  description = "Test DNS policy to validate the table outcomes."
+  enable_inbound_forwarding = false
+  enable_logging = false
 
   alternative_name_server_config {
     target_name_servers {
@@ -63,15 +57,9 @@ resource "google_dns_policy" "named_test_resource" {
     }
   }
 
-
   networks {
     network_url = google_compute_network.named_test_resource.id
   }
-}
-
-resource "google_compute_network" "named_test_resource" {
-  name                    = var.resource_name
-  auto_create_subnetworks = false
 }
 
 output "resource_aka" {
@@ -80,14 +68,6 @@ output "resource_aka" {
 
 output "resource_name" {
   value = var.resource_name
-}
-
-output "enable_inbound_forwarding" {
-  value = var.enable_inbound_forwarding
-}
-
-output "enable_logging" {
-  value = var.enable_logging
 }
 
 output "network" {
