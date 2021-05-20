@@ -1,0 +1,10 @@
+[
+	{
+		"enable_inbound_forwarding": {{ output.enable_inbound_forwarding.value }},
+		"enable_logging": {{ output.enable_logging.value }},
+		"kind": "dns#policy",
+		"name": "{{resourceName}}",
+		"project": "{{ output.project_id.value }}",
+		"title": "{{resourceName}}"
+	  }
+]
