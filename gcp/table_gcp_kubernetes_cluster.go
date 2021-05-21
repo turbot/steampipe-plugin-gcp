@@ -8,7 +8,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/container/v1"
-	// "google.golang.org/api/container/v1"
 )
 
 func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
@@ -30,6 +29,21 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "location_type",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "status",
+				Description: "The current status of this cluster.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "description",
 				Description: "An optional description of this cluster.",
 				Type:        proto.ColumnType_STRING,
@@ -45,6 +59,30 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "shielded_nodes_enabled",
+				Description: "Shielded Nodes configuration.",
+				Type:        proto.ColumnType_BOOL,
+				Transform: transform.FromField("ShieldedNodes.Enabled"),
+			},
+			{
+				Name:        "database_encryption_key_name",
+				Description: "Name of CloudKMS key to use for the encryption.",
+				Type:        proto.ColumnType_STRING,
+				Transform: transform.FromField("DatabaseEncryption.KeyName"),
+			},
+			{
+				Name:        "database_encryption_state",
+				Description: "Denotes the state of etcd encryption.",
+				Type:        proto.ColumnType_STRING,
+				Transform: transform.FromField("DatabaseEncryption.State"),
+			},
+			{
+				Name:        "max_pods_per_node",
+				Description: "Constraint enforced on the max num of pods per node.",
+				Type:        proto.ColumnType_STRING,
+				Transform: transform.FromField("MaxPodsConstraint.MaxPodsPerNode"),
+			},
+			{
 				Name:        "current_master_version",
 				Description: "The current software version of the master endpoint.",
 				Type:        proto.ColumnType_STRING,
@@ -57,11 +95,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "current_node_version",
 				Description: "The current version of the node software components.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "status",
-				Description: "The current status of this cluster.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -93,6 +126,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Name:        "expire_time",
 				Description: "The time the cluster will be automatically deleted in RFC3339 text format.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("ExpireTime").Transform(transform.NullIfZeroValue),
 			},
 			{
 				Name:        "initial_cluster_version",
@@ -130,11 +164,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_INT,
 			},
 			{
-				Name:        "self_link",
-				Description: "Server-defined URL for the resource.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "services_ipv4_cidr",
 				Description: "The IP address range of the Kubernetes services in this cluster, in CIDR notation.",
 				Type:        proto.ColumnType_STRING,
@@ -169,16 +198,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "conditions",
 				Description: "Which conditions caused the current cluster state.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "database_encryption",
-				Description: "Configuration of etcd encryption.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "default_max_pods_constraint",
-				Description: "The default constraint on the maximum number of pods that can be run simultaneously on a node in the node pool of this cluster.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -267,11 +286,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "shielded_nodes",
-				Description: "Shielded Nodes configuration.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "vertical_pod_autoscaling",
 				Description: "Cluster-level Vertical Pod Autoscaling configuration.",
 				Type:        proto.ColumnType_JSON,
@@ -286,16 +300,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Description: "ServerResponse contains the HTTP response code and headers from the server.",
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("googleapi.ServerResponse"),
-			},
-			{
-				Name:        "force_send_fields",
-				Description: "The name of the Google Compute Engine zone in which the cluster resides.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "null_fields",
-				Description: "NullFields is a list of field names (e.g. 'AddonsConfig') to include in API requests with the JSON null value.",
-				Type:        proto.ColumnType_JSON,
 			},
 
 			// standard steampipe columns
@@ -392,11 +396,11 @@ func gcpKubernetesClusterTurbotData(_ context.Context, d *transform.TransformDat
 	param := d.Param.(string)
 
 	project := strings.Split(cluster.SelfLink, "/")[5]
-	zone := getLastPathElement(cluster.Location)
+	location := getLastPathElement(cluster.Location)
 
 	turbotData := map[string]interface{}{
 		"Project": project,
-		"Akas":    []string{"gcp://container.googleapis.com/projects/" + project + "/zones/" + zone + "/clusters/" + cluster.Name},
+		"Akas":    []string{"gcp://container.googleapis.com/projects/" + project + "/locations/" + location + "/clusters/" + cluster.Name},
 	}
 
 	return turbotData[param], nil

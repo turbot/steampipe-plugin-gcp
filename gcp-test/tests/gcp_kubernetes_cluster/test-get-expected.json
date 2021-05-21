@@ -1,3 +1,11 @@
 [
-  
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "location": "{{ output.location.value }}",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "services_ipv4_cidr": "{{ output.services_ipv4_cidr.value }}"
+  }
 ]

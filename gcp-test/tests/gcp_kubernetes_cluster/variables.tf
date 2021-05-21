@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "pikachu-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -16,7 +16,7 @@ variable "gcp_region" {
   default     = "us-east1"
   description = "GCP region used for the test."
 }
-  
+
 provider "google" {
   project = var.gcp_project
   region  = var.gcp_region
@@ -44,48 +44,16 @@ resource "google_container_cluster" "named_test_resource" {
   monitoring_service = "none"
 }
 
-
-# resource "google_container_cluster" "named_test_resource" {
-#   name     = var.resource_name
-#   location = var.gcp_region
-#   network = google_compute_network.named_test_resource.name
-#   remove_default_node_pool = false
-#   initial_node_count       = 1
-#   resource_labels = {
-#     name = var.resource_name
-#   }
-# }
-
-# resource "google_container_node_pool" "named_test_resource" {
-#   name       = var.resource_name
-#   location   = var.gcp_region
-#   cluster    = google_container_cluster.named_test_resource.name
-#   node_count = 1
-
-#   node_config {
-#     preemptible  = true
-#     machine_type = "e2-medium"
-
-#     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-#     service_account = google_service_account.named_test_resource.email
-#     oauth_scopes    = [
-#       "https://www.googleapis.com/auth/cloud-platform"
-#     ]
-#   }
-# }
-
-# output "resource_aka" {
-#   value = "gcp://compute.googleapis.com/projects/${var.gcp_project}${google_compute_firewall.named_test_resource.id}"
-# }
-
-//container.googleapis.com/projects/pikachu-aaa/zones/us-east1-b/clusters/cluster-1
-
 output "resource_name" {
   value = var.resource_name
 }
 
 output "resource_id" {
   value = google_container_cluster.named_test_resource.id
+}
+
+output "resource_aka" {
+  value = "gcp://container.googleapis.com/${google_container_cluster.named_test_resource.id}"
 }
 
 output "self_link" {
