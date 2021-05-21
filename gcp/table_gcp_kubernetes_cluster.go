@@ -35,8 +35,9 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "location_type",
-				Description: "Server-defined URL for the resource.",
+				Description: "Location type of the cluster",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(gcpKubernetesClusterLocationType),
 			},
 			{
 				Name:        "status",
@@ -60,27 +61,27 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "shielded_nodes_enabled",
-				Description: "Shielded Nodes configuration.",
+				Description: "Denotes whether Shielded Nodes features are enabled on all nodes in this cluster.",
 				Type:        proto.ColumnType_BOOL,
-				Transform: transform.FromField("ShieldedNodes.Enabled"),
+				Transform:   transform.FromField("ShieldedNodes.Enabled"),
 			},
 			{
 				Name:        "database_encryption_key_name",
 				Description: "Name of CloudKMS key to use for the encryption.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("DatabaseEncryption.KeyName"),
+				Transform:   transform.FromField("DatabaseEncryption.KeyName"),
 			},
 			{
 				Name:        "database_encryption_state",
 				Description: "Denotes the state of etcd encryption.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("DatabaseEncryption.State"),
+				Transform:   transform.FromField("DatabaseEncryption.State"),
 			},
 			{
 				Name:        "max_pods_per_node",
 				Description: "Constraint enforced on the max num of pods per node.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("MaxPodsConstraint.MaxPodsPerNode"),
+				Transform:   transform.FromField("DefaultMaxPodsConstraint.MaxPodsPerNode"),
 			},
 			{
 				Name:        "current_master_version",
@@ -391,17 +392,33 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 //// TRANSFORM FUNCTION
 
-func gcpKubernetesClusterTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpKubernetesClusterTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("gcpKubernetesClusterTurbotData")
 	cluster := d.HydrateItem.(*container.Cluster)
-	param := d.Param.(string)
 
-	project := strings.Split(cluster.SelfLink, "/")[5]
-	location := getLastPathElement(cluster.Location)
+	splitName := strings.Split(cluster.SelfLink, "/")
+	akas := []string{strings.Replace(cluster.SelfLink, "https", "gcp", 1)}
 
-	turbotData := map[string]interface{}{
-		"Project": project,
-		"Akas":    []string{"gcp://container.googleapis.com/projects/" + project + "/locations/" + location + "/clusters/" + cluster.Name},
+	if d.Param.(string) == "ClusterName" {
+		return splitName[9], nil
+	} else if d.Param.(string) == "Location" {
+		return splitName[7], nil
+	} else if d.Param.(string) == "Project" {
+		return splitName[5], nil
+	} else {
+		return akas, nil
 	}
+}
 
-	return turbotData[param], nil
+func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("gcpKubernetesClusterLocationType")
+	cluster := d.HydrateItem.(*container.Cluster)
+
+	splitName := strings.Split(cluster.SelfLink, "/")
+
+	if splitName[6] == "locations" {
+		return "Regional", nil
+	} else {
+		return "Zonal", nil
+	}
 }

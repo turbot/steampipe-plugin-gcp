@@ -1,45 +1,79 @@
 # Table:  gcp_kubernetes_cluster
 
-Cloud Router is a fully distributed and managed Google Cloud service that programs custom dynamic routes and scales with network traffic.
+A cluster is the foundation of Google Kubernetes Engine (GKE): the Kubernetes objects that represent the containerized applications all run on top of a cluster. In GKE, a cluster consists of at least one control plane and multiple worker machines called nodes.
 
 ## Examples
 
-### Cloud router basic info
+### Basic info
 
 ```sql
 select
   name,
-  bgp_asn,
-  bgp_advertise_mode
+  location_type,
+  status,
+  cluster_ipv4_cidr,
+  max_pods_per_node,
+  current_node_count,
+  endpoint,
+  location
 from
-  gcp_compute_router;
+  gcp_kubernetes_cluster;
 ```
 
 
-### NAT gateway info attached to router
+### List of all zonal clusters
 
 ```sql
 select
   name,
-  nat ->> 'name' as nat_name,
-  nat ->> 'enableEndpointIndependentMapping' as enable_endpoint_independent_mapping,
-  nat ->> 'natIpAllocateOption' as nat_ip_allocate_option,
-  nat ->> 'sourceSubnetworkIpRangesToNat' as source_subnetwork_ip_ranges_to_nat
+  location_type
 from
-  gcp_compute_router,
-  jsonb_array_elements(nats) as nat;
+  gcp_kubernetes_cluster
+where
+  location_type = 'Zonal';
 ```
 
 
-### List all routers with custom route advertisements
+### List clusters where shielded nodes features are disabled
 
 ```sql
 select
   name,
-  bgp_asn,
-  bgp_advertise_mode,
-  bgp_advertised_ip_ranges
+  location_type,
+  shielded_nodes_enabled
 from
-  gcp_compute_router
-where bgp_advertise_mode = 'CUSTOM';
+  gcp_kubernetes_cluster
+where
+  not shielded_nodes_enabled;
+```
+
+
+### List clusters where secrets in etcd are not encrypted
+
+```sql
+select
+  name,
+  database_encryption_state
+from
+  gcp_kubernetes_cluster
+where
+  database_encryption_state <> 'ENCRYPTED';
+```
+
+
+### Node configuration of clusters
+
+```sql
+select
+  name,
+  node_config ->> 'diskSizeGb' as disk_size_gb,
+  node_config ->> 'diskType' as disk_type,
+  node_config ->> 'imageType' as image_type,
+  node_config ->> 'machineType' as machine_type,
+  node_config ->> 'diskType' as disk_type,
+  node_config -> 'metadata' ->> 'disable-legacy-endpoints' as disable_legacy_endpoints,
+  node_config ->> 'serviceAccount' as service_account,
+  node_config -> 'shieldedInstanceConfig' ->> 'enableIntegrityMonitoring' as enable_integrity_monitoring
+from
+  gcp_kubernetes_cluster;
 ```
