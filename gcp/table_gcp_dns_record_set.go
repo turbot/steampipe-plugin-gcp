@@ -123,6 +123,8 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 	}
 }
 
+//// LIST FUNCTIONS
+
 func listDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listDnsRecordSet")
 
