@@ -1,3 +1,11 @@
 [
-  
+  {
+    "akas": [
+      "{{ output.resource_aka.value }}"
+    ],
+    "cluster_name": "{{ output.cluster_name.value }}",
+    "location": "{{ output.location.value }}",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}"
+  }
 ]

@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "parker-aaa"
+  default     = "niteowl-aaa"
   description = "GCP project used for the test."
 }
 
@@ -76,6 +76,10 @@ output "resource_name" {
 
 output "resource_id" {
   value = google_container_node_pool.named_test_resource.id
+}
+
+output "resource_aka" {
+  value = "gcp://container.googleapis.com/v1/${google_container_node_pool.named_test_resource.id}"
 }
 
 output "cluster_name" {

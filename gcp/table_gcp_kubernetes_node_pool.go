@@ -31,6 +31,22 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "selfLink",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "location_type",
+				Description: "Location type of the cluster",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(gcpKubernetesNodePoolLocationType),
+			},
+			{
+				Name:        "status",
+				Description: "The status of the nodes in this pool instance.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "cluster_name",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster in which the Node pool is located",
@@ -39,11 +55,6 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "initial_node_count",
 				Description: "The initial node count for the pool.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "selfLink",
-				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -59,11 +70,6 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "instance_group_urls",
 				Description: "The resource URLs of the managed instance groups associated with this node pool.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "status",
-				Description: "The status of the nodes in this pool instance.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -170,8 +176,7 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 }
 
 func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getKubernetesCluster")
-
+	plugin.Logger(ctx).Trace("getKubernetesNodePool")
 
 	// Create Service Connection
 	service, err := ContainerService(ctx, d)
@@ -207,7 +212,7 @@ func getGcpKubernetesNodePoolTurbotData(ctx context.Context, d *transform.Transf
 	nodePool := d.HydrateItem.(*container.NodePool)
 
 	splitName := strings.Split(nodePool.SelfLink, "/")
-	akas := []string{"gcp://iam.googleapis.com/" + nodePool.Name}
+	akas := []string{strings.Replace(nodePool.SelfLink, "https", "gcp", 1)}
 
 	if d.Param.(string) == "ClusterName" {
 		return splitName[9], nil
@@ -215,5 +220,18 @@ func getGcpKubernetesNodePoolTurbotData(ctx context.Context, d *transform.Transf
 		return splitName[7], nil
 	} else {
 		return akas, nil
+	}
+}
+
+func gcpKubernetesNodePoolLocationType(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("gcpKubernetesNodePoolLocationType")
+	nodePool := d.HydrateItem.(*container.NodePool)
+
+	splitName := strings.Split(nodePool.SelfLink, "/")
+
+	if splitName[6] == "locations" {
+		return "Regional", nil
+	} else {
+		return "Zonal", nil
 	}
 }
