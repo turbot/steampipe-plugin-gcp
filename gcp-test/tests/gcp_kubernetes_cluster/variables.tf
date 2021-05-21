@@ -53,7 +53,7 @@ output "resource_id" {
 }
 
 output "resource_aka" {
-  value = "gcp://container.googleapis.com/v1${google_container_cluster.named_test_resource.id}"
+  value = "gcp://container.googleapis.com/v1/${google_container_cluster.named_test_resource.id}"
 }
 
 output "self_link" {
