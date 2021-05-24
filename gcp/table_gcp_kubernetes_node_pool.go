@@ -8,8 +8,9 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/container/v1"
-	// "google.golang.org/api/container/v1"
 )
+
+//// TABLE DEFINITION
 
 func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
@@ -24,7 +25,6 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			Hydrate:    getKubernetesNodePool,
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "The name of the node pool.",
@@ -37,7 +37,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "location_type",
-				Description: "Location type of the cluster",
+				Description: "Location type of the cluster i.e REGIONAL/ZONAL.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.From(gcpKubernetesNodePoolLocationType),
 			},
@@ -49,7 +49,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "cluster_name",
 				Type:        proto.ColumnType_STRING,
-				Description: "Cluster in which the Node pool is located",
+				Description: "Cluster in which the Node pool is located.",
 				Transform:   transform.FromP(getGcpKubernetesNodePoolTurbotData, "ClusterName"),
 			},
 			{
@@ -77,8 +77,6 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Description: "The pod CIDR block size per node in this node pool.",
 				Type:        proto.ColumnType_STRING,
 			},
-
-			// JSON Columns
 			{
 				Name:        "config",
 				Description: "The node configuration of the pool.",
@@ -110,7 +108,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -175,6 +173,8 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 	return nil, nil
 }
 
+//// HYDRATE FUNCTIONS
+
 func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKubernetesNodePool")
 
@@ -205,14 +205,14 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	return resp, nil
 }
 
-/// TRANSFORM FUNCTIONS
+//// TRANSFORM FUNCTIONS
 
 func getGcpKubernetesNodePoolTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpKubernetesNodePoolTurbotData")
 	nodePool := d.HydrateItem.(*container.NodePool)
 
 	splitName := strings.Split(nodePool.SelfLink, "/")
-	akas := []string{strings.Replace(nodePool.SelfLink, "https", "gcp", 1)}
+	akas := []string{strings.Replace(nodePool.SelfLink, "https://", "gcp://", 1)}
 
 	if d.Param.(string) == "ClusterName" {
 		return splitName[9], nil
@@ -230,8 +230,7 @@ func gcpKubernetesNodePoolLocationType(ctx context.Context, d *transform.Transfo
 	splitName := strings.Split(nodePool.SelfLink, "/")
 
 	if splitName[6] == "locations" {
-		return "Regional", nil
-	} else {
-		return "Zonal", nil
+		return "REGIONAL", nil
 	}
+	return "ZONAL", nil
 }
