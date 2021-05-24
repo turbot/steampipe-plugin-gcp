@@ -34,6 +34,49 @@ where
 ```
 
 
+### List clusters where node auto upgrade is enabled
+
+```sql
+select
+  name,
+  location_type,
+  n -> 'management' ->> 'autoUpgrade' node_auto_upgrade
+from
+  gcp_kubernetes_cluster,
+  jsonb_array_elements(node_pools) as n
+where
+  n -> 'management' ->> 'autoUpgrade' = 'true';
+```
+
+
+### List clusters which uses default Service Account
+
+```sql
+select
+  name,
+  location_type,
+  node_config ->> 'serviceAccount' service_account
+from
+  gcp_kubernetes_cluster
+where
+  node_config ->> 'serviceAccount' = 'default';
+```
+
+
+### List clusters where legacy authorization is enabled
+
+```sql
+select
+  name,
+  location_type,
+  legacy_abac_enabled
+from
+  gcp_kubernetes_cluster
+where
+  legacy_abac_enabled;
+```
+
+
 ### List clusters where shielded nodes features are disabled
 
 ```sql
