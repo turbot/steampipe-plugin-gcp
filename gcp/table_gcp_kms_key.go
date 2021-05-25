@@ -26,7 +26,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The resource name for this CryptoKey.",
+				Description: "The resource name for the CryptoKey.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
@@ -49,7 +49,8 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			{
 				Name:        "next_rotation_time",
 				Description: "At next_rotation_time, the Key Management Service will automatically: 1. Create a new version of this CryptoKey. 2.Mark the new version as primary.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("NextRotationTime").Transform(transform.NullIfZeroValue),
 			},
 			{
 				Name:        "rotation_period",
