@@ -61,7 +61,7 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "rrdatas",
-				Description: "As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)",
+				Description: "As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1).",
 				Type:        proto.ColumnType_JSON,
 				Transform: transform.FromField("RecordSet.Rrdatas"),
 			},
@@ -114,7 +114,7 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listDnsRecordSet")
+	plugin.Logger(ctx).Trace("listDnsRecordSets")
 
 	// Get the details of Cloud DNS Managed Zone
 	managedZone := h.Item.(*dns.ManagedZone)
