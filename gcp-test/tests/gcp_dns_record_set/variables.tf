@@ -32,8 +32,6 @@ variable "record_set_type" {
   default = "A"
 }
 
-
-
 variable "ttl" {
   type = number
   default = 86400

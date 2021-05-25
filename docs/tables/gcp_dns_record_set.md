@@ -1,4 +1,4 @@
-# Table: gcp_dns_managed_zone
+# Table: gcp_dns_record_set
 
  A record set (also known as a resource record set) is the collection of DNS records in a zone that have the same name and are of the same type. Most record sets contain a single record.
 
@@ -20,7 +20,7 @@ from
   gcp_dns_record_set;
 ```
 
-### List recodr sets of type 'A'
+### List record sets of type 'A'
 
 ```sql
 select
@@ -35,5 +35,5 @@ select
 from
   gcp_dns_record_set
 where 
- type = 'A'
+ type = 'A';
 ```

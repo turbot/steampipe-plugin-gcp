@@ -8,4 +8,4 @@
 	  "ttl": 86400,
 	  "type": "{{ output.resource_type.value }}"
 	}
-  ]
+]

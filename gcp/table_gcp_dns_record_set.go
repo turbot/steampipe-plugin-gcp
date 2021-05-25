@@ -25,7 +25,7 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsRecordSet,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:       listDnsRecordSet,
+			Hydrate:       listDnsRecordSets,
 			ParentHydrate: listDnsManagedZones,
 		},
 		Columns: []*plugin.Column{
@@ -77,18 +77,6 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_INT,
 				Transform: transform.FromField("RecordSet.Ttl"),
 			},
-			{
-				Name:        "force_send_fields",
-				Description: "ForceSendFields is a list of field names (e.g. 'Kind') to unconditionally include in API requests. By default, fields with empty values are omitted from API requests. However, any non-pointer, non-interface field appearing in ForceSendFields will be sent to the server regardless of whether the field is empty or not. This may be used to include empty fields in Patch requests.",
-				Type:        proto.ColumnType_JSON,
-				Transform: transform.FromField("RecordSet.ForceSendFields"),
-			},
-			{
-				Name:        "null_fields",
-				Description: "NullFields is a list of field names (e.g. 'Kind') to include in API requests with the JSON null value. By default, fields with empty values are omitted from API requests. However, any field with an empty value appearing in NullFields will be sent to the server as null. It is an error if a field in this list has a non-empty value. This may be used to include null fields in Patch requests.",
-				Type:        proto.ColumnType_JSON,
-				Transform: transform.FromField("RecordSet.NullFields"),
-			},
 
 			// Steampipe standard columns
 			{
@@ -105,7 +93,7 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromValue(),
 			},
 
-			// Standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -123,9 +111,9 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 	}
 }
 
-//// LIST FUNCTIONS
+//// LIST FUNCTION
 
-func listDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listDnsRecordSet")
 
 	// Get the details of Cloud DNS Managed Zone
@@ -161,9 +149,6 @@ func listDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getDnsRecordSet")
 
-	// Get the details of Cloud DNS Managed Zone
-	managedZone := h.Item.(*dns.ManagedZone)
-
 	// Create service connection
 	service, err := DnsService(ctx, d)
 	if err != nil {
@@ -179,22 +164,18 @@ func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	rrset_type := d.KeyColumnQuals["type"].GetStringValue()
-	managedZoneName := managedZone.Name
+	managedZoneName := d.KeyColumnQuals["managedzone_name"].GetStringValue()
 
 	resp, err := service.ResourceRecordSets.List(project, managedZoneName).Name(name).Type(rrset_type).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	if len(resp.Rrsets) < 1 {
-		return nil, nil
-	}
-
 	return recordSetInfo{resp.Rrsets[0], managedZoneName}, nil
 }
 
 func getDnsRecordSetAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	
+
 	// Get project details
 	projectData, err := activeProject(ctx, d)
 	if err != nil {
