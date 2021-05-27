@@ -20,7 +20,7 @@ from
   gcp_dns_record_set;
 ```
 
-### List record sets of type 'A'
+### List record sets of type 'CNAME'
 
 ```sql
 select
@@ -35,5 +35,5 @@ select
 from
   gcp_dns_record_set
 where 
- type = 'A';
+ type = 'CNAME';
 ```
