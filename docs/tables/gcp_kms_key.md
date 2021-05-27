@@ -30,7 +30,7 @@ order by
   create_time;
 ```
 
-### List keys with rotation period more than 7776000s (90 days)
+### List keys with rotation period greater than 90 days (7776000 seconds)
 
 ```sql
 select
