@@ -1,3 +1,11 @@
+## v0.13.0 [2021-05-27]
+
+_What's new?_
+
+- Updated plugin license to Apache 2.0 per [turbot/steampipe#488](https://github.com/turbot/steampipe/issues/488)
+- New tables added
+  - [gcp_kms_key](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kms_key) ([#215](https://github.com/turbot/steampipe-plugin-gcp/pull/215))
+
 ## v0.12.0 [2021-05-20]
 
 _What's new?_
