@@ -61,7 +61,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "policy",
-				Description: "A copy of the primary CryptoKeyVersion that will be used by Encrypt when this CryptoKey is given in EncryptRequest.name.",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getKeyIamPolicy,
 				Transform:   transform.FromValue(),
