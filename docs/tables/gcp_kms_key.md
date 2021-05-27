@@ -30,7 +30,7 @@ order by
   create_time;
 ```
 
-### List keys where rotation period is more than 7776000s (90 days)
+### List keys with rotation period more than 7776000s (90 days)
 
 ```sql
 select
@@ -40,23 +40,19 @@ select
 from
   gcp_kms_key
 where
-  substring(rotation_period, 1, LENGTH(rotation_period) -1) :: int > 7776000
-  and rotation_period <> '';
+  split_part(rotation_period, 's', 1) :: int > 7776000;
 ```
 
 ### List publicly accessible keys
 
 ```sql
 select
-  name,
-  create_time,
-  rotation_period,
-  members
+  distinct name,
+  key_ring_name,
+  location
 from
   gcp_kms_key,
-  jsonb_array_elements(policy -> 'bindings') as b,
-  jsonb_array_elements_text(b -> 'members') as members
+  jsonb_array_elements(iam_policy -> 'bindings') as b
 where
-  members = 'allAuthenticatedUsers'
-  or members = 'allUsers';
+  b -> 'members' ?| array['allAuthenticatedUsers', 'allUsers'];
 ```

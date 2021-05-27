@@ -58,10 +58,11 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				Name:        "rotation_period",
 				Description: "Next rotation time will be advanced by this period when the service automatically rotates a key.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("RotationPeriod").Transform(transform.NullIfZeroValue),
 			},
 			{
-				Name:        "policy",
-				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources.",
+				Name:        "iam_policy",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getKeyIamPolicy,
 				Transform:   transform.FromValue(),
@@ -178,23 +179,7 @@ func getKeyIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
-	var param string
-	if h.Item != nil {
-		param = h.Item.(*cloudkms.CryptoKey).Name
-	} else {
-		name := d.KeyColumnQuals["name"].GetStringValue()
-		location := d.KeyColumnQuals["location"].GetStringValue()
-		ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
-		param = "projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name
-	}
+	param := h.Item.(*cloudkms.CryptoKey).Name
 
 	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(param).Do()
 	if err != nil {
