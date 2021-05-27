@@ -195,20 +195,6 @@ func getKeyIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	return resp, nil
 }
 
-func getKeySelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	sink := h.Item.(*cloudkms.CryptoKey)
-
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
-	selfLink := "https://www.googleapis.com/logging/v2/projects/" + project + "/sinks/" + sink.Name
-	return selfLink, nil
-}
-
 //// TRANSFORM FUNCTIONS
 
 func kmsKeyTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
