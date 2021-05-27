@@ -115,7 +115,9 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	if err != nil {
 		return nil, err
 	}
+
 	keyRing := h.Item.(*cloudkms.KeyRing)
+
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
 		for _, key := range page.CryptoKeys {
