@@ -39,6 +39,12 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromP(kmsKeyTurbotData, "KeyRing"),
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(kmsKeySelfLink),
+			},
+			{
 				Name:        "create_time",
 				Description: "The time at which this CryptoKey was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -189,6 +195,20 @@ func getKeyIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	return resp, nil
 }
 
+func getKeySelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	sink := h.Item.(*cloudkms.CryptoKey)
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	selfLink := "https://www.googleapis.com/logging/v2/projects/" + project + "/sinks/" + sink.Name
+	return selfLink, nil
+}
+
 //// TRANSFORM FUNCTIONS
 
 func kmsKeyTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
@@ -207,4 +227,11 @@ func kmsKeyTurbotData(_ context.Context, d *transform.TransformData) (interface{
 	}
 
 	return turbotData[param], nil
+}
+
+func kmsKeySelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*cloudkms.CryptoKey)
+	selfLink := "https://cloudkms.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }
