@@ -1,0 +1,6 @@
+[
+  {
+    "name": "{{ resourceName }}",
+    "rotation_period": "100000s"
+  }
+]
