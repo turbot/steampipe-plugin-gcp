@@ -1,11 +1,11 @@
 [
-	{
-	  "location": "global",
-	  "managedzone_name": "{{ resourceName }}",
-	  "name": "{{ output.record_set_name.value }}",
-	  "project": "{{ output.project_id.value }}",
-	  "title": "{{ output.record_set_name.value }}",
-	  "ttl": 86400,
-	  "type": "{{ output.resource_type.value }}"
-	}
+  {
+    "location": "global",
+    "managed_zone_name": "{{ resourceName }}",
+    "name": "{{ output.record_set_name.value }}",
+    "project": "{{ output.project_id.value }}",
+    "title": "{{ output.record_set_name.value }}",
+    "ttl": 86400,
+    "type": "A"
+  }
 ]

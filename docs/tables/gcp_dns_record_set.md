@@ -9,7 +9,7 @@ A record set (also known as a resource record set) is the collection of DNS reco
 ```sql
 select
   name, 
-  managedzone_name, 
+  managed_zone_name, 
   type, 
   kind, 
   routing_policy,
@@ -25,12 +25,8 @@ from
 ```sql
 select
   name, 
-  managedzone_name, 
+  managed_zone_name, 
   type, 
-  kind, 
-  routing_policy,
-  rrdatas,
-  signature_rrdatas,
   ttl
 from
   gcp_dns_record_set
