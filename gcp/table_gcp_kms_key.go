@@ -10,10 +10,12 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
+//// TABLE DEFINITION
+
 func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_kms_key",
-		Description: "GCP Kms Key",
+		Description: "GCP KMS Key",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location", "key_ring_name"}),
 			Hydrate:    getKeyDetail,
@@ -48,13 +50,13 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "next_rotation_time",
-				Description: "At next_rotation_time, the Key Management Service will automatically: 1. Create a new version of this CryptoKey. 2.Mark the new version as primary.",
+				Description: "At next rotation time, the Key Management Service will automatically: 1. Create a new version of this CryptoKey. 2.Mark the new version as primary.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("NextRotationTime").Transform(transform.NullIfZeroValue),
 			},
 			{
 				Name:        "rotation_period",
-				Description: "RotationPeriod: next_rotation_time will be advanced by this period when the service automatically rotates a key.",
+				Description: "Next rotation time will be advanced by this period when the service automatically rotates a key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -133,7 +135,7 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 //// HYDRATE FUNCTIONS
 
-func getKeyDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getKeyDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKeyDetail")
 
 	// Create Service Connection

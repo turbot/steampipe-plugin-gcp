@@ -15,7 +15,7 @@ from
   gcp_kms_key;
 ```
 
-### List of keys older than 30 days
+### List keys older than 30 days
 
 ```sql
 select
@@ -30,7 +30,7 @@ order by
   create_time;
 ```
 
-### List of keys where rotation period is 100000s
+### List keys where rotation period is 100000s
 
 ```sql
 select
