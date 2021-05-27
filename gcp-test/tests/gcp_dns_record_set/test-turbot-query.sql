@@ -1,3 +1,3 @@
 select title, akas
 from gcp.gcp_dns_record_set
-where name = '{{ output.record_set_name.value }}' and type = '{{ output.resource_type.value }}';
+where name = '{{ output.record_set_name.value }}' and type = 'A';

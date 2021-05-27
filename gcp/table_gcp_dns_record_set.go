@@ -10,8 +10,8 @@ import (
 )
 
 type recordSetInfo = struct {
-	RecordSet *dns.ResourceRecordSet
-	ManagedZoneName   string
+	RecordSet       *dns.ResourceRecordSet
+	ManagedZoneName string
 }
 
 //// TABLE DEFINITION
@@ -31,51 +31,50 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The record set name",
+				Description: "The name of the record set.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("RecordSet.Name"),
+				Transform:   transform.FromField("RecordSet.Name"),
 			},
 			{
-				Name: "managedzone_name",
+				Name:        "managed_zone_name",
 				Description: "An user assigned, friendly name that identifies the managed zone.",
-				Type: proto.ColumnType_STRING,
-				Transform: transform.FromField("ManagedZoneName"),
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "type",
 				Description: "The identifier of a supported record type. See the list of Supported DNS record types.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("RecordSet.Type"),
+				Transform:   transform.FromField("RecordSet.Type"),
 			},
 			{
 				Name:        "kind",
 				Description: "The type of the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("RecordSet.Kind"),
+				Transform:   transform.FromField("RecordSet.Kind"),
 			},
 			{
 				Name:        "routing_policy",
 				Description: "Configures dynamic query responses based on geo location of querying user or a weighted round robin based routing policy. A ResourceRecordSet should only have either rrdata (static) or routing_policy(dynamic). An error is returned otherwise.",
 				Type:        proto.ColumnType_JSON,
-				Transform: transform.FromField("RecordSet.RoutingPolicy"),
+				Transform:   transform.FromField("RecordSet.RoutingPolicy"),
 			},
 			{
 				Name:        "rrdatas",
 				Description: "As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1).",
 				Type:        proto.ColumnType_JSON,
-				Transform: transform.FromField("RecordSet.Rrdatas"),
+				Transform:   transform.FromField("RecordSet.Rrdatas"),
 			},
 			{
 				Name:        "signature_rrdatas",
 				Description: "As defined in RFC 4034 (section 3.2).",
 				Type:        proto.ColumnType_JSON,
-				Transform: transform.FromField("RecordSet.SignatureRrdatas"),
+				Transform:   transform.FromField("RecordSet.SignatureRrdatas"),
 			},
 			{
 				Name:        "ttl",
 				Description: "Number of seconds that this ResourceRecordSet can be cached by resolvers.",
 				Type:        proto.ColumnType_INT,
-				Transform: transform.FromField("RecordSet.Ttl"),
+				Transform:   transform.FromField("RecordSet.Ttl"),
 			},
 
 			// Steampipe standard columns
@@ -146,7 +145,7 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 //// HYDRATE FUNCTIONS
 
-func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getDnsRecordSet")
 
 	// Create service connection
@@ -175,14 +174,13 @@ func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 }
 
 func getDnsRecordSetAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	// Get project details
 	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 	project := projectData.Project
-	
+
 	data := h.Item.(recordSetInfo)
 
 	akas := []string{"gcp://dns.googleapis.com/projects/" + project + "/managedZones/" + data.ManagedZoneName + "/rrsets/" + data.RecordSet.Name + "/" + data.RecordSet.Type}

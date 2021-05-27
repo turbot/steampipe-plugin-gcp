@@ -5,11 +5,6 @@ variable "resource_name" {
   description = "Name of the resource used throughout the test."
 }
 
-variable "record_set_name" {
-  type = string
-  default = "test-record.turbot.com."
-}
-
 variable "gcp_project" {
   type        = string
   default     = "niteowl-aaa"
@@ -25,16 +20,6 @@ variable "gcp_region" {
 variable "gcp_zone" {
   type    = string
   default = "us-east1-b"
-}
-
-variable "record_set_type" {
-  type = string
-  default = "A"
-}
-
-variable "ttl" {
-  type = number
-  default = 86400
 }
 
 provider "google" {
@@ -64,10 +49,10 @@ resource "google_dns_managed_zone" "named_test_resource" {
 
 resource "google_dns_record_set" "named_test_resource" {
   managed_zone = google_dns_managed_zone.named_test_resource.name
-  name         = var.record_set_name
-  type         = var.record_set_type
+  name         = "${var.resource_name}.turbot.com."
+  type         = "A"
   rrdatas      = ["10.0.0.1", "10.1.0.1"]
-  ttl          = var.ttl
+  ttl          = 86400
 }
 
 output "resource_aka" {
@@ -75,11 +60,7 @@ output "resource_aka" {
 }
 
 output "record_set_name" {
-  value = var.record_set_name
-}
-
-output "resource_type" {
-  value = var.record_set_type
+  value = "${var.resource_name}.turbot.com."
 }
 
 output "resource_id" {
