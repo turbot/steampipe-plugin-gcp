@@ -60,6 +60,13 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "policy",
+				Description: "A copy of the primary CryptoKeyVersion that will be used by Encrypt when this CryptoKey is given in EncryptRequest.name.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getKeyIamPolicy,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "primary",
 				Description: "A copy of the primary CryptoKeyVersion that will be used by Encrypt when this CryptoKey is given in EncryptRequest.name.",
 				Type:        proto.ColumnType_JSON,
@@ -156,6 +163,40 @@ func getKeyDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
 
 	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.Get("projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func getKeyIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getKeyIamPolicy")
+
+	// Create Service Connection
+	service, err := KMSService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	var param string
+	if h.Item != nil {
+		param = h.Item.(*cloudkms.CryptoKey).Name
+	} else {
+		name := d.KeyColumnQuals["name"].GetStringValue()
+		location := d.KeyColumnQuals["location"].GetStringValue()
+		ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
+		param = "projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name
+	}
+
+	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(param).Do()
 	if err != nil {
 		return nil, err
 	}
