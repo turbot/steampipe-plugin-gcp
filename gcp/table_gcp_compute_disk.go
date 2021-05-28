@@ -55,16 +55,15 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "disk_encryption_kms_key",
-				Description: "The name of the encryption key that is used to encrypt storage data.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DiskEncryptionKey.KmsKeyName"),
+				Name:        "disk_encryption_key",
+				Description: "Specifies the encryption configuration used to encrypt stored data.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "disk_encryption_kms_key_service_account",
-				Description: "The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.",
+				Name:        "disk_encryption_key_type",
+				Description: "The type of encryption key used to encrypt storage data. Valid values are Google managed | Customer managed | Customer supplied.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DiskEncryptionKey.KmsKeyServiceAccount"),
+				Transform:   transform.From(diskEncryptionKeyType),
 			},
 			{
 				Name:        "kind",
@@ -397,4 +396,17 @@ func diskLocation(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return locationData[param], nil
+}
+
+func diskEncryptionKeyType(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	i := d.HydrateItem.(*compute.Disk)
+
+	if i.DiskEncryptionKey == nil {
+		return "Google managed", nil
+	} else if len(i.DiskEncryptionKey.KmsKeyName) > 0 {
+		return "Customer managed", nil
+	} else if len(i.DiskEncryptionKey.Sha256) > 0 {
+		return "Customer supplied", nil
+	}
+	return nil, nil
 }

@@ -5,7 +5,7 @@ icon_url: "/images/plugins/turbot/gcp.svg"
 brand_color: "#ea4335"
 display_name: "GCP"
 name: "gcp"
-description: "Steampipe plugin for Google Cloud Platform (GCP) services and resource types"
+description: "Steampipe plugin for querying buckets, instances, functions and more from GCP."
 og_description: Query GCP with SQL! Open source CLI. No DB required. 
 og_image: "/images/plugins/turbot/gcp-social-graphic.png"
 ---
@@ -75,7 +75,7 @@ connection "gcp" {
 ## Get involved
 
 * Open source: https://github.com/turbot/steampipe-plugin-gcp
-* Community: [Discussion forums](https://github.com/turbot/steampipe/discussions)
+* Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 
 ## Advanced configuration options
 

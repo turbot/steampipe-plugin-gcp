@@ -61,6 +61,13 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getSinkSelfLink,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "unique_writer_identity",
 				Description: "An IAM identity—a service account or group—under which Logging writes the exported log entries to the sink's destination",
 				Type:        proto.ColumnType_STRING,
@@ -189,4 +196,18 @@ func sinkNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/sinks/" + sink.Name}
 	return akas, nil
+}
+
+func getSinkSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	sink := h.Item.(*logging.LogSink)
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	selfLink := "https://www.googleapis.com/logging/v2/projects/" + project + "/sinks/" + sink.Name
+	return selfLink, nil
 }

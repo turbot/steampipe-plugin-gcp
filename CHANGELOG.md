@@ -1,3 +1,58 @@
+## v0.13.0 [2021-05-27]
+
+_What's new?_
+
+- Updated plugin license to Apache 2.0 per [turbot/steampipe#488](https://github.com/turbot/steampipe/issues/488)
+- New tables added
+  - [gcp_kms_key](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kms_key) ([#215](https://github.com/turbot/steampipe-plugin-gcp/pull/215))
+
+## v0.12.0 [2021-05-20]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_project_metadata](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_project_metadata) ([#192](https://github.com/turbot/steampipe-plugin-gcp/pull/192))
+  - [gcp_dns_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dns_policy) ([#208](https://github.com/turbot/steampipe-plugin-gcp/pull/208))
+  - [gcp_project](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_project) ([#205](https://github.com/turbot/steampipe-plugin-gcp/pull/205))
+
+## v0.11.0 [2021-05-13]
+
+_What's new?_
+
+- New tables added
+  - [gcp_bigquery_table](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_bigquery_table) ([#198](https://github.com/turbot/steampipe-plugin-gcp/pull/198))
+
+_Enhancements_
+
+- Updated: README.md and docs/index.md now contain links to our Slack community ([#202](https://github.com/turbot/steampipe-plugin-gcp/pull/202))
+- Updated: Add `self_link` column to `gcp_dns_managed_zone` table ([#195](https://github.com/turbot/steampipe-plugin-gcp/pull/195))
+- Updated: Add `self_link` column to `gcp_logging_sink` table ([#193](https://github.com/turbot/steampipe-plugin-gcp/pull/193))
+- Updated: Bump lodash from 4.17.20 to 4.17.21 in /gcp-test ([#197](https://github.com/turbot/steampipe-plugin-gcp/pull/197))
+
+## v0.10.0 [2021-05-06]
+
+_What's new?_
+
+_Enhancements_
+
+- Updated: Add `disk_encryption_key` and `disk_encryption_key_type` columns to `gcp_compute_disk` table ([#185](https://github.com/turbot/steampipe-plugin-gcp/pull/185))
+- Updated: Remove `disk_encryption_kms_key` column from `gcp_compute_disk` table ([#185](https://github.com/turbot/steampipe-plugin-gcp/pull/185))
+- Updated: Add `metric_descriptor_type` column to `gcp_logging_metric` table ([#182](https://github.com/turbot/steampipe-plugin-gcp/pull/182))
+
+## v0.9.0 [2021-04-29]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_target_ssl_proxy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_target_ssl_proxy) ([#156](https://github.com/turbot/steampipe-plugin-gcp/pull/156))
+
+## v0.8.0 [2021-04-22]
+
+_What's new?_
+
+- New tables added
+  - [gcp_kms_key_ring](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kms_key_ring) ([#171](https://github.com/turbot/steampipe-plugin-gcp/pull/171))
+
 ## v0.7.0 [2021-04-15]
 
 _What's new?_

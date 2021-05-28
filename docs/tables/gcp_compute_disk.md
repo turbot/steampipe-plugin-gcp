@@ -19,21 +19,21 @@ from
   gcp_compute_disk;
 ```
 
-### List of disks with Google-managed key
+### List disks encrypted with Google-managed key
 
 ```sql
 select
   name,
   id,
   zone_name,
-  disk_encryption_kms_key
+  disk_encryption_key_type
 from
   gcp_compute_disk
 where
-  disk_encryption_kms_key is null;
+  disk_encryption_key_type = 'Google managed';
 ```
 
-### List of disks that are not in use
+### List disks that are not in use
 
 ```sql
 select
@@ -46,7 +46,7 @@ where
   users is null;
 ```
 
-### List of disks that are Regional
+### List regional disks
 
 ```sql
 select
@@ -58,7 +58,7 @@ where
   location_type = 'REGIONAL';
 ```
 
-### Disk count in each availability zone
+### Count the number of disks per availability zone
 
 ```sql
 select
@@ -72,7 +72,7 @@ order by
   count desc;
 ```
 
-### List Disks by size
+### List disks ordered by size
 
 ```sql
 select
