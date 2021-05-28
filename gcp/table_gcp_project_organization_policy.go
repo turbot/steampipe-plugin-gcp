@@ -15,14 +15,14 @@ import (
 
 func tableGcpProjectsOrganizationPolicy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_projects_organization_policy",
-		Description: "GCP Projects Organization Policy",
+		Name:        "gcp_project_organization_policy",
+		Description: "GCP Project Organization Policy",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getGcpProjectsOrganizationPolicy,
+			Hydrate:    getGcpProjectOrganizationPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpProjectsOrganizationPolicies,
+			Hydrate: listGcpProjectOrganizationPolicies,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -62,12 +62,12 @@ func tableGcpProjectsOrganizationPolicy(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Constraint"),
+				Transform:   transform.FromField("Constraint").Transform(lastPathElement),
 			},
 			{
 				Name:        "akas",
@@ -94,9 +94,9 @@ func tableGcpProjectsOrganizationPolicy(ctx context.Context) *plugin.Table {
 	}
 }
 
-//// FETCH FUNCTIONS
+//// LIST FUNCTION
 
-func listGcpProjectsOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
@@ -109,11 +109,9 @@ func listGcpProjectsOrganizationPolicies(ctx context.Context, d *plugin.QueryDat
 		return nil, err
 	}
 	project := projectData.Project
-	plugin.Logger(ctx).Trace("listGcpProjectsOrganizationPolicies", "GCP_PROJECT: ", project)
+	plugin.Logger(ctx).Trace("listGcpProjectOrganizationPolicies", "GCP_PROJECT: ", project)
 
-	rb := &cloudresourcemanager.ListOrgPoliciesRequest{
-		// TODO: Add desired fields of the request body.
-	}
+	rb := &cloudresourcemanager.ListOrgPoliciesRequest{}
 
 	resp := service.Projects.ListOrgPolicies("projects/"+project, rb)
 	if err := resp.Pages(ctx, func(page *cloudresourcemanager.ListOrgPoliciesResponse) error {
@@ -130,8 +128,8 @@ func listGcpProjectsOrganizationPolicies(ctx context.Context, d *plugin.QueryDat
 
 //// HYDRATE FUNCTIONS
 
-func getGcpProjectsOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpProjectsOrganizationPolicy")
+func getGcpProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getGcpProjectOrganizationPolicy")
 
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
@@ -151,9 +149,9 @@ func getGcpProjectsOrganizationPolicy(ctx context.Context, d *plugin.QueryData, 
 		Constraint: "constraints/" + id,
 	}
 
-	req, err := service.Projects.GetOrgPolicy("projects/"+project, rb).Do()
+	req, err := service.Projects.GetOrgPolicy("projects/" + project, rb).Do()
 	if err != nil {
-		plugin.Logger(ctx).Debug("getGcpProjectsOrganizationPolicy__", "ERROR", err)
+		plugin.Logger(ctx).Debug("getGcpProjectOrganizationPolicy", "ERROR", err)
 		return nil, err
 	}
 	return req, nil

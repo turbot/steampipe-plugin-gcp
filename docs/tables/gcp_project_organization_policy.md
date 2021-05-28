@@ -1,4 +1,4 @@
-# Table:  gcp_projects_organization_policy
+# Table: gcp_project_organization_policy
 
 The Organization Policy Service gives you centralized and programmatic control over your organization's cloud resources.
 
@@ -10,9 +10,8 @@ The Organization Policy Service gives you centralized and programmatic control o
 select
   *
 from
-  gcp_projects_organization_policy;
+  gcp_project_organization_policy;
 ```
-
 
 ### Check policy's previously updated time by server
 
@@ -22,11 +21,10 @@ select
   version,
   update_time
 from
-  gcp_projects_organization_policy;
+  gcp_project_organization_policy;
 ```
 
-
-### Check the policy values given to constraint.
+### Check the policy values given to constraint
 
 ```sql
 select
@@ -34,5 +32,5 @@ select
   version,
   list_policy ->> 'allValues' as policy_value
 from
-  gcp_projects_organization_policy;
+  gcp_project_organization_policy;
 ```
