@@ -21,7 +21,7 @@ from
 ```
 
 
-### List of all zonal clusters
+### List zonal clusters
 
 ```sql
 select
@@ -49,7 +49,7 @@ where
 ```
 
 
-### List clusters which uses default Service Account
+### List clusters with default Service Account
 
 ```sql
 select
@@ -63,7 +63,7 @@ where
 ```
 
 
-### List clusters where legacy authorization is enabled
+### List clusters with legacy authorization is enabled
 
 ```sql
 select
@@ -77,7 +77,7 @@ where
 ```
 
 
-### List clusters where shielded nodes features are disabled
+### List clusters with shielded nodes features disabled
 
 ```sql
 select

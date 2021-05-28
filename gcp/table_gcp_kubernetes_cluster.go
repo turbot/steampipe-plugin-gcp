@@ -296,6 +296,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Description: "Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.",
 				Type:        proto.ColumnType_JSON,
 			},
+
 			// Steampipe standard columns
 			{
 				Name:        "title",
@@ -316,7 +317,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromP(gcpKubernetesClusterTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
