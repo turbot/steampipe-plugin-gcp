@@ -8,7 +8,9 @@ The Organization Policy Service gives you centralized and programmatic control o
 
 ```sql
 select
-  *
+  id,
+  version,
+  update_time
 from
   gcp_project_organization_policy;
 ```

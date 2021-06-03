@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -13,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpProjectsOrganizationPolicy(ctx context.Context) *plugin.Table {
+func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_project_organization_policy",
 		Description: "GCP Project Organization Policy",
@@ -109,8 +108,6 @@ func listGcpProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData
 		return nil, err
 	}
 	project := projectData.Project
-	plugin.Logger(ctx).Trace("listGcpProjectOrganizationPolicies", "GCP_PROJECT: ", project)
-
 	rb := &cloudresourcemanager.ListOrgPoliciesRequest{}
 
 	resp := service.Projects.ListOrgPolicies("projects/"+project, rb)
@@ -149,7 +146,7 @@ func getGcpProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h
 		Constraint: "constraints/" + id,
 	}
 
-	req, err := service.Projects.GetOrgPolicy("projects/" + project, rb).Do()
+	req, err := service.Projects.GetOrgPolicy("projects/"+project, rb).Do()
 	if err != nil {
 		plugin.Logger(ctx).Debug("getGcpProjectOrganizationPolicy", "ERROR", err)
 		return nil, err
@@ -165,16 +162,12 @@ func getOrganizationPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h
 	}
 	project := projectData.Project
 
-	// Get the resource title
-	title := strings.ToUpper(project) + " Org Policy"
-
 	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project}
 
 	// Mapping all turbot defined properties
 	turbotData := map[string]interface{}{
-		"Akas":  akas,
-		"Title": title,
+		"Akas": akas,
 	}
 
 	return turbotData, nil
