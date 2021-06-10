@@ -18,10 +18,10 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 		Description: "GCP Project Organization Policy",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getGcpProjectOrganizationPolicy,
+			Hydrate:    getProjectOrganizationPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpProjectOrganizationPolicies,
+			Hydrate: listProjectOrganizationPolicies,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -72,10 +72,11 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getOrganizationPolicyTurbotData,
+				Hydrate:     getOrganizationPolicyAkas,
+				Transform:   transform.FromValue(),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -95,7 +96,7 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listGcpProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
@@ -125,8 +126,8 @@ func listGcpProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData
 
 //// HYDRATE FUNCTIONS
 
-func getGcpProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpProjectOrganizationPolicy")
+func getProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getProjectOrganizationPolicy")
 
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
@@ -139,8 +140,8 @@ func getGcpProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h
 	if err != nil {
 		return nil, err
 	}
-
 	project := projectData.Project
+
 	id := d.KeyColumnQuals["id"].GetStringValue()
 	rb := &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: "constraints/" + id,
@@ -148,13 +149,13 @@ func getGcpProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h
 
 	req, err := service.Projects.GetOrgPolicy("projects/"+project, rb).Do()
 	if err != nil {
-		plugin.Logger(ctx).Debug("getGcpProjectOrganizationPolicy", "ERROR", err)
+		plugin.Logger(ctx).Debug("getProjectOrganizationPolicy", "ERROR", err)
 		return nil, err
 	}
 	return req, nil
 }
 
-func getOrganizationPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getOrganizationPolicyAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
 	projectData, err := activeProject(ctx, d)
 	if err != nil {
@@ -165,10 +166,5 @@ func getOrganizationPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h
 	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project}
 
-	// Mapping all turbot defined properties
-	turbotData := map[string]interface{}{
-		"Akas": akas,
-	}
-
-	return turbotData, nil
+	return akas, nil
 }
