@@ -81,7 +81,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "max_pods_per_node",
 				Description: "Constraint enforced on the max num of pods per node.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("DefaultMaxPodsConstraint.MaxPodsPerNode"),
 			},
 			{
@@ -401,15 +401,13 @@ func gcpKubernetesClusterTurbotData(ctx context.Context, d *transform.TransformD
 	splitName := strings.Split(cluster.SelfLink, "/")
 	akas := []string{strings.Replace(cluster.SelfLink, "https://", "gcp://", 1)}
 
-	if d.Param.(string) == "ClusterName" {
-		return splitName[9], nil
-	} else if d.Param.(string) == "Location" {
-		return splitName[7], nil
-	} else if d.Param.(string) == "Project" {
-		return splitName[5], nil
-	} else {
-		return akas, nil
+	result := map[string]interface{}{
+		"ClusterName": splitName[9],
+		"Location": splitName[7],
+		"Project": splitName[5],
+		"Akas": akas,
 	}
+	return result[d.Param.(string)], nil
 }
 
 func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.TransformData) (interface{}, error) {

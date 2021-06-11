@@ -30,11 +30,11 @@ select
 from
   gcp_kubernetes_cluster
 where
-  location_type = 'Zonal';
+  location_type = 'ZONAL';
 ```
 
 
-### List clusters where node auto upgrade is enabled
+### List clusters with node auto-upgrade enabled
 
 ```sql
 select
@@ -63,7 +63,7 @@ where
 ```
 
 
-### List clusters with legacy authorization is enabled
+### List clusters with legacy authorization enabled
 
 ```sql
 select
