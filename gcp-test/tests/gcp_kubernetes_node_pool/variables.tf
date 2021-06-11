@@ -31,8 +31,8 @@ data "null_data_source" "resource" {
 }
 
 resource "google_service_account" "default" {
-  account_id   = "service-account-id"
-  display_name = "Service Account"
+  account_id   = var.resource_name
+  display_name = var.resource_name
 }
 
 resource "google_compute_network" "named_test_resource" {
@@ -59,7 +59,7 @@ resource "google_container_node_pool" "named_test_resource" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-medium"
+    machine_type = "n1-standard-1"
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = google_service_account.default.email

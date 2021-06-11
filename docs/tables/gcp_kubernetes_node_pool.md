@@ -46,3 +46,16 @@ select
 from
   gcp_kubernetes_node_pool;
 ```
+
+
+### List of all ZONAL node pools
+
+```sql
+select
+  name,
+  location_type
+from
+  gcp_kubernetes_node_pool
+where
+  location_type = 'ZONAL';
+```
