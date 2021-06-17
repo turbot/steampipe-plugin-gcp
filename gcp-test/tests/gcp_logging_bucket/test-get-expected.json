@@ -1,0 +1,8 @@
+[
+  {
+    "location": "{{ output.region_id.value }}",
+    "name": "{{ output.resource_id.value }}",
+    "project": "{{ output.project_id.value }}",
+    "retention_days": "30"
+  }
+]
