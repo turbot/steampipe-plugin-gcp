@@ -20,7 +20,7 @@ from
   gcp_dns_record_set;
 ```
 
-### List record sets of type 'CNAME'
+### List CNAME record sets
 
 ```sql
 select
