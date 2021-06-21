@@ -62,6 +62,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_zone":                    tableGcpComputeZone(ctx),
 			"gcp_dns_managed_zone":                tableGcpDnsManagedZone(ctx),
 			"gcp_dns_policy":                      tableDnsPolicy(ctx),
+			"gcp_dns_record_set":                  tableDnsRecordSet(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
 			"gcp_kms_key":                         tableGcpKmsKey(ctx),
