@@ -15,18 +15,7 @@ from
   gcp_project_organization_policy;
 ```
 
-### Check policy's previously updated time by server
-
-```sql
-select
-  id,
-  version,
-  update_time
-from
-  gcp_project_organization_policy;
-```
-
-### Check the policy values given to constraint
+### Get organization policy constraints for each policy
 
 ```sql
 select
