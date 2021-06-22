@@ -49,6 +49,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_node_template":           tableGcpComputeNodeTemplate(ctx),
 			"gcp_compute_project_metadata":        tableGcpComputeProjectMetadata(ctx),
 			"gcp_compute_region":                  tableGcpComputeRegion(ctx),
+			"gcp_compute_resource_policy":         tableGcpComputeResourcePolicy(ctx),
 			"gcp_compute_router":                  tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                tableGcpComputeSnapshot(ctx),
 			"gcp_compute_ssl_policy":              tableGcpComputeSslPolicy(ctx),
