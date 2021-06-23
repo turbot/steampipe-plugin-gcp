@@ -81,8 +81,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_sql_backup":                      tableGcpSQLBackup(ctx),
 			"gcp_sql_database":                    tableGcpSQLDatabase(ctx),
+			"gcp_sql_database_connections_daily":  tableGcpSQLDatabaseConnectionsMetricDaily(ctx),
 			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
-			"gcp_sql_database_connections_daily":   tableGcpSQLDatabaseConnectionsMetricDaily(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108
