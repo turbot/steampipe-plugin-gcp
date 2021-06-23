@@ -14,7 +14,7 @@ select
   average,
   sample_count
 from
-  gcp_sql_database_connection_daily
+  gcp_sql_database_connections_daily
 order by
   instance_id;
 ```
@@ -29,7 +29,7 @@ select
   round(average::numeric,2) as avg_connection,
   sample_count
 from
-  gcp_sql_database_connection_daily
+  gcp_sql_database_connections_daily
 where average > 100
 order by
   instance_id;
@@ -45,7 +45,7 @@ select
   round(average::numeric,2) as avg_connection,
   sample_count
 from
-  gcp_sql_database_connection_daily
+  gcp_sql_database_connections_daily
 where average < 10
 order by
   instance_id;
