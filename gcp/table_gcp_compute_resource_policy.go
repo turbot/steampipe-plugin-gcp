@@ -223,8 +223,7 @@ func getComputeResourcePolicyIamPolicy(ctx context.Context, d *plugin.QueryData,
 func gcpComputeResourcePolicyAkas(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	data := d.HydrateItem.(*compute.ResourcePolicy)
 
-	id := strings.ReplaceAll(data.SelfLink, "https://www.googleapis.com/compute/v1/", "gcp://compute.googleapis.com/")
-	akas := []string{"gcp://compute.googleapis.com/projects/" + id}
+	akas := strings.ReplaceAll(data.SelfLink, "https://www.googleapis.com/compute/v1/", "gcp://compute.googleapis.com/")
 
-	return akas, nil
+	return []string{akas}, nil
 }
