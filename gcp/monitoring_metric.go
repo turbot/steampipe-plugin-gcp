@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func monitoringMetricColumn(columns []*plugin.Column) []*plugin.Column {
+func monitoringMetricColumns(columns []*plugin.Column) []*plugin.Column {
 	return append(columns, commonMonitoringMetricColumns()...)
 }
 
@@ -32,7 +32,7 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 			Transform:   transform.FromField("Metric.Type"),
 		},
 		{
-			Name:        "metric_labes",
+			Name:        "metric_labels",
 			Description: "The set of label values that uniquely identify this metric.",
 			Type:        proto.ColumnType_JSON,
 			Transform:   transform.FromField("Metric.Labels"),

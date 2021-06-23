@@ -19,7 +19,7 @@ func tableGcpSQLDatabaseConnectionsMetricDaily(_ context.Context) *plugin.Table 
 			ParentHydrate: listSQLDatabaseInstances,
 			Hydrate:       listSQLDatabaseMetricConnectionsDaily,
 		},
-		Columns: monitoringMetricColumn([]*plugin.Column{
+		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "instance_id",
 				Description: "The SQL Instance name.",
