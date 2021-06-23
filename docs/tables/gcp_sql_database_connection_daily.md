@@ -22,7 +22,7 @@ order by
 
 
 
-### Connection Over 80 average
+### Connection Over 100 average
 
 ```sql
 select
@@ -35,7 +35,7 @@ from
   gcp_sql_database_connection_daily
 where average > 100
 order by
-  instance_id,
+  instance_id;
 ```
 
 ### Connection daily average < 10
@@ -51,5 +51,5 @@ from
   gcp_sql_database_connection_daily
 where average < 10
 order by
-  instance_id,
+  instance_id;
 ```
