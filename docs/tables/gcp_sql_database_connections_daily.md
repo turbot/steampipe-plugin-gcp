@@ -1,6 +1,6 @@
 # Table: gcp_sql_database_connections_daily
 
-Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_sql_database_connections_daily` table provides metric statistics at 24 hour intervals for the last year.
+Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_sql_database_connections_daily` table provides metric statistics at 24 hour intervals for the past year.
 
 ## Examples
 
@@ -19,7 +19,7 @@ order by
   instance_id;
 ```
 
-### Connection Over 100 average
+### Intervals averaging over 100 connections
 
 ```sql
 select
@@ -35,7 +35,7 @@ order by
   instance_id;
 ```
 
-### Connection daily average < 10
+### Intervals averaging fewer than 10 connections
 
 ```sql
 select
