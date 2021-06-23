@@ -13,7 +13,7 @@ import (
 
 func tableGcpSQLDatabaseConnectionsMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "table_gcp_sql_database_connection_daily",
+		Name:        "gcp_sql_database_connection_daily",
 		Description: "GCP SQL Database Daily connections",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
