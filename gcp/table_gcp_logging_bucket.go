@@ -2,8 +2,6 @@ package gcp
 
 import (
 	"context"
-	"errors"
-	"regexp"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -14,12 +12,13 @@ import (
 )
 
 //// TABLE DEFINITION
+
 func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_logging_bucket",
 		Description: "GCP Logging Bucket",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
+			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getLoggingBucket,
 		},
 		List: &plugin.ListConfig{
@@ -30,6 +29,13 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The resource name of the bucket.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(bucketName),
+			},
+			{
+				Name: "self_link",
+				Description: "The server-defined URL for the resource.",
+				Type: proto.ColumnType_STRING,
+				Transform: transform.From(bucketSelfLink),
 			},
 			{
 				Name:        "create_time",
@@ -49,22 +55,22 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "locked",
-				Description: "Locked: Whether the bucket has been locked. The retention period on a locked bucket may not be changed. Locked buckets may only be deleted if they are empty.",
+				Description: "Specifies whether the bucket has been locked, or not. The retention period on a locked bucket may not be changed. Locked buckets may only be deleted if they are empty.",
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
 				Name:        "retention_days",
 				Description: "Logs will be retained by default for this amount of time, after which they will automatically be deleted.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "update_time",
-				Description: "he last update timestamp of the bucket.",
+				Description: "The last update timestamp of the bucket.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromGo().NullIfZero(),
 			},
 
-			// standard steampipe columns
+			// GCP standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -115,6 +121,7 @@ func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	project := projectData.Project
 
+	// If we want to list out all the bucket through out all the region then we have to pass '-' character in param after '/locations/' otherwise we have to specify a particular region for listing out the buckets
 	resp := service.Projects.Locations.Buckets.List("projects/" + project + "/locations/-")
 	if err := resp.Pages(
 		ctx,
@@ -143,15 +150,17 @@ func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	bucketName := d.KeyColumnQuals["name"].GetStringValue()
+	locationId := d.KeyColumnQuals["location"].GetStringValue()
 
-	// Match the bucket name pattern if we are doing query with where clause by passing name value
-	matched, err := regexp.MatchString(`projects/.+/locations/.+/buckets/.+`, bucketName)
+	projectInfo, err := activeProject(ctx, d)
 
-	if !matched {
-		return nil, errors.New("Bucket name should match 'projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]'")
+	if err != nil {
+		return nil, err
 	}
 
-	op, err := service.Projects.Locations.Buckets.Get(bucketName).Do()
+	bucketNameWithLocation := "projects/" + projectInfo.Project + "/locations/" + locationId + "/buckets/" + bucketName
+
+	op, err := service.Projects.Locations.Buckets.Get(bucketNameWithLocation).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -161,6 +170,23 @@ func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 }
 
 //// TRANSFORM FUNCTIONS
+
+func bucketName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	bucket := d.HydrateItem.(*logging.LogBucket)
+	name := strings.Split(bucket.Name, "/")[len(strings.Split(bucket.Name, "/"))-1]
+	if name != "" {
+		return name, nil
+	}
+	return "", nil
+}
+
+func bucketSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	bucket := d.HydrateItem.(*logging.LogBucket)
+	if bucket.Name == "" {
+		return nil, nil
+	}
+	return "https://logging.googleapis.com/v2/" + bucket.Name, nil
+}
 
 func bucketLocation(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	bucket := d.HydrateItem.(*logging.LogBucket)
