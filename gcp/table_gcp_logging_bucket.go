@@ -151,6 +151,11 @@ func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	bucketName := d.KeyColumnQuals["name"].GetStringValue()
 	locationId := d.KeyColumnQuals["location"].GetStringValue()
 
+	// Return nil, if no input provided
+	if bucketName == "" || locationId == "" {
+		return nil, nil
+	}
+
 	projectInfo, err := activeProject(ctx, d)
 	if err != nil {
 		return nil, err
