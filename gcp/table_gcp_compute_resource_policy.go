@@ -12,6 +12,8 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+//// TABLE DEFINITION
+
 func tableGcpComputeResourcePolicy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_resource_policy",
@@ -175,6 +177,11 @@ func getComputeResourcePolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	var resourcePolicy compute.ResourcePolicy
 	name := d.KeyColumnQuals["name"].GetStringValue()
+
+	// Return nil, if no input provided
+	if name == "" {
+		return nil, nil
+	}
 
 	resp := service.ResourcePolicies.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
