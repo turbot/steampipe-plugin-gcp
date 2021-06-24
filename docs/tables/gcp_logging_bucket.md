@@ -2,6 +2,8 @@
 
 Logs buckets store the logs that are routed from other projects, folders, or organizations.
 
+## Examples
+
 ### Basic info
 
 ```sql
