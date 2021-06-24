@@ -1,3 +1,3 @@
-select name, disabled, description, filter
-from gcp.gcp_logging_exclusion
-where name = 'projects/parker-aaa/locations/global/dummy-{{resourceName}}'
+select name, self_link, description
+from gcp.gcp_logging_bucket
+where name = 'dummy-{{resourceName}}' and location = '{{ output.region_id.value }}';

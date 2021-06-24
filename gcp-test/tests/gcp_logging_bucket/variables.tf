@@ -37,10 +37,10 @@ data "null_data_source" "resource" {
 }
 
 resource "google_logging_project_bucket_config" "named_test_resource" {
-    project    = var.gcp_project
-    location  = var.gcp_region
-    retention_days = 30
-    bucket_id = var.resource_name
+  project        = var.gcp_project
+  location       = var.gcp_region
+  retention_days = 30
+  bucket_id      = var.resource_name
 }
 
 output "resource_aka" {
