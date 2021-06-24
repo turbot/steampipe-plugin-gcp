@@ -19,10 +19,9 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeMachineType,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeMachineType,
+			Hydrate: listComputeMachineTypes,
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "Name of the resource.",
@@ -32,6 +31,11 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The unique identifier for the resource. This identifier is defined by the server.",
 				Type:        proto.ColumnType_INT,
+			},
+			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "creation_timestamp",
@@ -67,11 +71,6 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			{
 				Name:        "maximum_persistent_disks_size_gb",
 				Description: "Maximum total persistent disks size (GB) allowed.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "self_link",
-				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -115,10 +114,10 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 	}
 }
 
-//// LIST FUNCTIONS
+//// LIST FUNCTION
 
-func listComputeMachineType(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listComputeMachineType")
+func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("listComputeMachineTypes")
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)

@@ -36,7 +36,7 @@ data "null_data_source" "resource" {
   }
 }
 
-// Test with a perticular machine type
+// Test with a particular machine typeT
 
 output "machine_type" {
   value = "a2-highgpu-4g"

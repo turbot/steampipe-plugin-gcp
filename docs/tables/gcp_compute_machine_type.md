@@ -4,7 +4,7 @@ A machine type is a set of virtualized hardware resources available to a virtual
 
 ## Examples
 
-### Compute machine type basic info
+### Basic info
 
 ```sql
 select
@@ -34,7 +34,7 @@ where
 ```
 
 
-### List maching types having shared CPUs
+### List machine types with shared CPUs
 
 ```sql
 select
