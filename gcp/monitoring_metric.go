@@ -1,0 +1,254 @@
+package gcp
+
+import (
+	"context"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"google.golang.org/api/monitoring/v3"
+)
+
+//// TABLE DEFINITION
+
+func monitoringMetricColumns(columns []*plugin.Column) []*plugin.Column {
+	return append(columns, commonMonitoringMetricColumns()...)
+}
+
+func commonMonitoringMetricColumns() []*plugin.Column {
+	return []*plugin.Column{
+		{
+			Name:        "metric_type",
+			Description: "The associated metric. A fully-specified metric used to identify the time series.",
+			Type:        proto.ColumnType_STRING,
+			Transform:   transform.FromField("Metric.Type"),
+		},
+		{
+			Name:        "metric_kind",
+			Description: "The metric type.",
+			Type:        proto.ColumnType_STRING,
+		},
+		{
+			Name:        "maximum",
+			Description: "The maximum metric value for the data point.",
+			Type:        proto.ColumnType_DOUBLE,
+		},
+		{
+			Name:        "minimum",
+			Description: "The minimum metric value for the data point.",
+			Type:        proto.ColumnType_DOUBLE,
+		},
+		{
+			Name:        "average",
+			Description: "The average of the metric values that correspond to the data point.",
+			Type:        proto.ColumnType_DOUBLE,
+		},
+		{
+			Name:        "sample_count",
+			Description: "The number of metric values that contributed to the aggregate value of this data point.",
+			Type:        proto.ColumnType_DOUBLE,
+		},
+		{
+			Name:        "sum",
+			Description: "The sum of the metric values for the data point.",
+			Type:        proto.ColumnType_DOUBLE,
+		},
+		{
+			Name:        "unit",
+			Description: "The data points of this time series. When listing time series, points are returned in reverse time order.When creating a time series, this field must contain exactly one point and the point's type must be the same as the value type of the associated metric. If the associated metric's descriptor must be auto-created, then the value type of the descriptor is determined by the point's type, which must be BOOL, INT64, DOUBLE, or DISTRIBUTION.",
+			Type:        proto.ColumnType_STRING,
+		},
+		{
+			Name:        "metadata",
+			Description: "The associated monitored resource metadata.",
+			Type:        proto.ColumnType_JSON,
+		},
+		{
+			Name:        "metric_labels",
+			Description: "The set of label values that uniquely identify this metric.",
+			Type:        proto.ColumnType_JSON,
+			Transform:   transform.FromField("Metric.Labels"),
+		},
+		{
+			Name:        "resource",
+			Description: "The associated monitored resource.",
+			Type:        proto.ColumnType_JSON,
+		},
+	}
+}
+
+type monitorMetric struct {
+	// Resource  Name
+	DimensionValue string
+
+	// The associated monitored resource metadata.
+	Metadata *monitoring.MonitoredResourceMetadata
+
+	// The associated metric. A fully-specified metric used to identify the time series.
+	Metric *monitoring.Metric
+
+	//Possible values:
+	//   "METRIC_KIND_UNSPECIFIED" - Do not use this default value.
+	//   "GAUGE" - An instantaneous measurement of a value.
+	//   "DELTA" - The change in a value during a time interval.
+	//   "CUMULATIVE" - A value accumulated over a time interval.
+	MetricKind string
+
+	// The maximum metric value for the data point.
+	Maximum *float64
+
+	// The minimum metric value for the data point.
+	Minimum *float64
+
+	// The average of the metric values that correspond to the data point.
+	Average *float64
+
+	// The data points of this time series. When listing time series, points are returned in reverse time order.When creating a time series, this field must contain exactly one point and the point's type must be the same as the value type of the associated metric. If the associated metric's descriptor must be auto-created, then the value type of the descriptor is determined by the point's type, which must be BOOL, INT64, DOUBLE, or DISTRIBUTION.
+	Points []*monitoring.Point
+
+	// The number of metric values that contributed to the aggregate value of this data point.
+	SampleCount *float64
+
+	// The sum of the metric values for the data point.
+	Sum *float64
+
+	// The associated monitored resource.
+	Resource *monitoring.MonitoredResource
+
+	// The units in which the metric value is reported. It is only applicable if the value_type is INT64, DOUBLE, or DISTRIBUTION. The unit defines the representation of the stored metric values.
+	Unit string
+}
+
+func getMonitoringStartDateForGranularity(granularity string) time.Time {
+	switch strings.ToUpper(granularity) {
+	case "DAILY":
+		// 1 year
+		return time.Now().AddDate(-1, 0, 0)
+	case "HOURLY":
+		// 60 days
+		return time.Now().AddDate(0, 0, -60)
+	}
+	// else 5 days
+	return time.Now().AddDate(0, 0, -5)
+}
+
+func getMonitoringPeriodForGranularity(granularity string) string {
+	switch strings.ToUpper(granularity) {
+	case "DAILY":
+		// 24 hours
+		return "86400s"
+	case "HOURLY":
+		// 1 hour
+		return "3600s"
+	}
+	// else 5 minutes
+	return "300s"
+}
+
+func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string) (*monitoring.ListTimeSeriesResponse, error) {
+	plugin.Logger(ctx).Trace("listMonitorMetricStatistics")
+
+	// Create Service Connection
+	service, err := MonitoringService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	endTime := time.Now().Format(time.RFC3339)
+	startTime := getMonitoringStartDateForGranularity(granularity).Format(time.RFC3339)
+
+	period := getMonitoringPeriodForGranularity(granularity)
+
+	filterString := "metric.type = " + metricType + " AND " + dimensionKey + dimensionValue
+
+	resp := service.Projects.TimeSeries.List("projects/" + project).Filter(filterString).IntervalStartTime(startTime).IntervalEndTime(endTime).AggregationAlignmentPeriod(period)
+	if err := resp.Pages(ctx, func(page *monitoring.ListTimeSeriesResponse) error {
+		for _, metric := range page.TimeSeries {
+			statistic, _ := metricstatistic(metric.Points)
+			d.StreamLeafListItem(ctx, &monitorMetric{
+				DimensionValue: strings.ReplaceAll(dimensionValue, "\"", ""),
+				Metadata:       metric.Metadata,
+				Metric:         metric.Metric,
+				MetricKind:     metric.MetricKind,
+				Points:         metric.Points,
+				Maximum:        statistic["Maximum"],
+				Minimum:        statistic["Minimum"],
+				Average:        statistic["Average"],
+				SampleCount:    statistic["SampleCount"],
+				Sum:            statistic["Sum"],
+				Resource:       metric.Resource,
+				Unit:           metric.Unit,
+			})
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// Get metric statistic
+
+func metricstatistic(points []*monitoring.Point) (map[string]*float64, error) {
+
+	var pointValues []float64
+	for _, value := range points {
+		pointValueType := value.Value
+
+		// TODO: Need to handle BoolType, StringValue and DistributionValue
+		if pointValueType.DoubleValue != nil {
+			pointValues = append(pointValues, *pointValueType.DoubleValue)
+		}
+
+		if pointValueType.Int64Value != nil {
+			val := float64(*pointValueType.Int64Value)
+			pointValues = append(pointValues, val)
+		}
+
+		if pointValueType.StringValue != nil {
+			val, err := strconv.ParseFloat(*pointValueType.StringValue, 64)
+			if err != nil {
+				return nil, err
+			}
+			pointValues = append(pointValues, val)
+		}
+	}
+
+	var sum, average, sampleCount float64 = 0, 0, 0
+	minValue := pointValues[0]
+	maxValue := minValue
+
+	for _, point := range pointValues {
+		if point > maxValue {
+			maxValue = point
+		}
+		if point < minValue {
+			minValue = point
+		}
+		sum += point
+	}
+
+	sampleCount = float64(len(pointValues))
+	average = sum / sampleCount
+
+	result := map[string]*float64{
+		"Maximum":     &maxValue,
+		"Minimum":     &minValue,
+		"Sum":         &sum,
+		"Average":     &average,
+		"SampleCount": &sampleCount,
+	}
+
+	return result, nil
+}

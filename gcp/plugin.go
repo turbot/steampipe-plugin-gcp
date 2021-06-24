@@ -62,6 +62,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_zone":                    tableGcpComputeZone(ctx),
 			"gcp_dns_managed_zone":                tableGcpDnsManagedZone(ctx),
 			"gcp_dns_policy":                      tableDnsPolicy(ctx),
+			"gcp_dns_record_set":                  tableDnsRecordSet(ctx),
 			"gcp_iam_policy":                      tableGcpIAMPolicy(ctx),
 			"gcp_iam_role":                        tableGcpIamRole(ctx),
 			"gcp_kms_key":                         tableGcpKmsKey(ctx),
@@ -73,6 +74,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_monitoring_alert_policy":         tableGcpMonitoringAlert(ctx),
 			"gcp_monitoring_group":                tableGcpMonitoringGroup(ctx),
 			"gcp_monitoring_notification_channel": tableGcpMonitoringNotificationChannel(ctx),
+			"gcp_project_organization_policy":     tableGcpProjectOrganizationPolicy(ctx),
 			"gcp_project":                         tableGcpProject(ctx),
 			"gcp_project_service":                 tableGcpProjectService(ctx),
 			"gcp_pubsub_snapshot":                 tableGcpPubSubSnapshot(ctx),
@@ -82,6 +84,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account_key":             tableGcpServiceAccountKey(ctx),
 			"gcp_sql_backup":                      tableGcpSQLBackup(ctx),
 			"gcp_sql_database":                    tableGcpSQLDatabase(ctx),
+			"gcp_sql_database_connections_daily":  tableGcpSQLDatabaseConnectionsMetricDaily(ctx),
 			"gcp_sql_database_instance":           tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                  tableGcpStorageBucket(ctx),
 			/*

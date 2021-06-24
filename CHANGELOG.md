@@ -1,3 +1,10 @@
+## v0.13.1 [2021-06-17]
+
+_Bug fixes_
+
+- Fixed: `id` column type in `gcp_compute_disk` table ([#228](https://github.com/turbot/steampipe-plugin-gcp/pull/228))
+- Fixed: Example query in `gcp_compute_address` table doc ([#224](https://github.com/turbot/steampipe-plugin-gcp/pull/224))
+
 ## v0.13.0 [2021-05-27]
 
 _What's new?_
