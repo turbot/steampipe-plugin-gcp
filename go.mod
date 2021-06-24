@@ -5,5 +5,5 @@ go 1.15
 require (
 	github.com/turbot/go-kit v0.1.1
 	github.com/turbot/steampipe-plugin-sdk v0.2.7
-	google.golang.org/api v0.39.0
+	google.golang.org/api v0.48.0
 )
