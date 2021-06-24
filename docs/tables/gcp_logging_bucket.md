@@ -1,6 +1,6 @@
 # Table: gcp_logging_bucket
 
-Logs buckets store the logs that are routed from other projects, folders, or organizations.
+Logging buckets store the logs that are routed from other projects, folders, or organizations.
 
 ## Examples
 
@@ -16,8 +16,7 @@ from
   gcp_logging_bucket;
 ```
 
-
-### List of locked bucket
+### List locked buckets
 
 ```sql
 select
