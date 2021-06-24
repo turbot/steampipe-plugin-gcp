@@ -1,6 +1,6 @@
 # Table: gcp_compute_resource_policy
 
-A policy that can be attached to a resource to specify or schedule actions on that resource.
+A compute resource policy can be attached to a resource to specify or schedule actions on that resource.
 
 ## Examples
 
@@ -16,7 +16,7 @@ from
 ```
 
 
-### List of policy used to schedule an instance
+### List policies used to schedule an instance
 
 ```sql
 select
@@ -31,7 +31,7 @@ where
 ```
 
 
-### List invalid policy
+### List invalid policies
 
 ```sql
 select
