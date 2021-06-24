@@ -55,12 +55,12 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "memory_mb",
-				Description: "The amount of physical memory available to disks size (GB) allowed.",
+				Description: "The amount of physical memory available to the instance, defined in MB.",
 				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "image_space_gb",
-				Description: "Specifies the encryption configuration used to encrypt stored data.",
+				Description: "The amount of memory available for image ig GB.",
 				Type:        proto.ColumnType_INT,
 			},
 			{
