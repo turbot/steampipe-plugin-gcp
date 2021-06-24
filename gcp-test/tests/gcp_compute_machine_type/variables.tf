@@ -36,8 +36,6 @@ data "null_data_source" "resource" {
   }
 }
 
-// Test with a particular machine typeT
-
 output "machine_type" {
   value = "a2-highgpu-4g"
 }
@@ -47,6 +45,5 @@ output "zone" {
 }
 
 output "resource_aka" {
-  value = "gcp://compute.googleapis.com/projects/pikachu-aaa/machineTypes/a2-highgpu-4g"
+  value = "gcp://compute.googleapis.com/projects/${var.gcp_project}/machineTypes/a2-highgpu-4g"
 }
-

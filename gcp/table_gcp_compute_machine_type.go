@@ -10,10 +10,12 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+//// TABLE DEFINITION
+
 func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_machine_type",
-		Description: "GCP Compute Machine type",
+		Description: "GCP Compute Machine Type",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeMachineType,
@@ -29,7 +31,7 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "id",
-				Description: "The unique identifier for the resource. This identifier is defined by the server.",
+				Description: "An unique identifier for the resource. This identifier is defined by the server.",
 				Type:        proto.ColumnType_INT,
 			},
 			{
@@ -71,7 +73,7 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			{
 				Name:        "maximum_persistent_disks_size_gb",
 				Description: "Maximum total persistent disks size (GB) allowed.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "is_shared_cpu",
@@ -86,6 +88,11 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			{
 				Name:        "accelerators",
 				Description: "A list of accelerator configurations assigned to this machine type.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "scratch_disks",
+				Description: "A list of extended scratch disks assigned to the instance.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -148,7 +155,7 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 //// HYDRATE FUNCTIONS
 
-func getComputeMachineType(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getComputeMachineType(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getComputeMachineType")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -164,9 +171,13 @@ func getComputeMachineType(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	project := projectData.Project
 	zone := "us-central1-c"
 	machineTypeName := d.KeyColumnQuals["name"].GetStringValue()
+	
+	// Return nil, if no input provided
+	if machineTypeName == "" {
+		return nil, nil
+	}
 
 	resp, err := service.MachineTypes.Get(project, zone, machineTypeName).Do()
-
 	if err != nil {
 		return nil, err
 	}

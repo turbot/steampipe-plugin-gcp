@@ -1,6 +1,7 @@
 # Table: gcp_compute_machine_type
 
 A machine type is a set of virtualized hardware resources available to a virtual machine (VM) instance, including the system memory size, virtual CPU (vCPU) count, and persistent disk limits.
+In Compute Engine, machine types are grouped and curated by families for different workloads. Compute Engine offers general-purpose, memory-optimized, compute-optimized, and accelerated-optimized families.
 
 ## Examples
 
@@ -19,7 +20,7 @@ from
 ```
 
 
-### List machine types having or more CPUs
+### List machine types with more than 48 cores
 
 ```sql
 select
@@ -30,7 +31,7 @@ select
 from
   gcp_compute_machine_type
 where
-  guest_cpus >= 64;
+  guest_cpus >= 48;
 ```
 
 

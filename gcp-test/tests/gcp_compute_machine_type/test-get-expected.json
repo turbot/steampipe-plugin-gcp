@@ -1,8 +1,13 @@
 [
   {
-    "akas": [
-      "{{ output.resource_aka.value }}"
-    ],
+    "akas": ["{{ output.resource_aka.value }}"],
+    "guest_cpus": 48,
+    "image_space_gb": 0,
+    "is_shared_cpu": false,
+    "kind": "compute#machineType",
+    "maximum_persistent_disks": 128,
+    "maximum_persistent_disks_size_gb": 263168,
+    "memory_mb": 348160,
     "name": "{{ output.machine_type.value }}",
     "title": "{{ output.machine_type.value }}"
   }
