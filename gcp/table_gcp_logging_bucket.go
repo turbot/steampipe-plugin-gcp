@@ -29,13 +29,13 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The resource name of the bucket.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(bucketName),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
-				Name: "self_link",
+				Name:        "self_link",
 				Description: "The server-defined URL for the resource.",
-				Type: proto.ColumnType_STRING,
-				Transform: transform.From(bucketSelfLink),
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(loggingBucketTurbotData, "SelfLink"),
 			},
 			{
 				Name:        "create_time",
@@ -75,28 +75,27 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(bucketAka),
+				Transform:   transform.FromP(loggingBucketTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(bucketLocation),
+				Transform:   transform.FromP(loggingBucketTurbotData, "Location"),
 			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromP(loggingBucketTurbotData, "Project"),
 			},
 		},
 	}
@@ -121,7 +120,7 @@ func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	project := projectData.Project
 
-	// If we want to list out all the bucket through out all the region then we have to pass '-' character in param after '/locations/' otherwise we have to specify a particular region for listing out the buckets
+	// '-' for all locations...
 	resp := service.Projects.Locations.Buckets.List("projects/" + project + "/locations/-")
 	if err := resp.Pages(
 		ctx,
@@ -138,7 +137,7 @@ func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, err
 }
 
-//// HYDRATED FUNCTIONS
+//// HYDRATE FUNCTIONS
 
 func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getLoggingBucket")
@@ -153,11 +152,9 @@ func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	locationId := d.KeyColumnQuals["location"].GetStringValue()
 
 	projectInfo, err := activeProject(ctx, d)
-
 	if err != nil {
 		return nil, err
 	}
-
 	bucketNameWithLocation := "projects/" + projectInfo.Project + "/locations/" + locationId + "/buckets/" + bucketName
 
 	op, err := service.Projects.Locations.Buckets.Get(bucketNameWithLocation).Do()
@@ -171,36 +168,19 @@ func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 //// TRANSFORM FUNCTIONS
 
-func bucketName(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	bucket := d.HydrateItem.(*logging.LogBucket)
-	name := strings.Split(bucket.Name, "/")[len(strings.Split(bucket.Name, "/"))-1]
-	if name != "" {
-		return name, nil
-	}
-	return "", nil
-}
+func loggingBucketTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*logging.LogBucket)
+	param := d.Param.(string)
 
-func bucketSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	bucket := d.HydrateItem.(*logging.LogBucket)
-	if bucket.Name == "" {
-		return nil, nil
-	}
-	return "https://logging.googleapis.com/v2/" + bucket.Name, nil
-}
+	// Fetch data from name
+	splittedTitle := strings.Split(data.Name, "/")
 
-func bucketLocation(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	bucket := d.HydrateItem.(*logging.LogBucket)
-	location := strings.Split(bucket.Name, "/")[3]
-	if location != "" {
-		return location, nil
+	turbotData := map[string]interface{}{
+		"Project":  splittedTitle[1],
+		"Location": splittedTitle[3],
+		"SelfLink": "https://logging.googleapis.com/v2/" + data.Name,
+		"Akas":     []string{"gcp://logging.googleapis.com/" + data.Name},
 	}
-	return "", nil
-}
 
-func bucketAka(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	bucketName := d.HydrateItem.(*logging.LogBucket).Name
-	if bucketName != "" {
-		return []string{"gcp://logging.googleapis.com/" + bucketName}, nil
-	}
-	return nil, nil
+	return turbotData[param], nil
 }
