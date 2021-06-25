@@ -36,6 +36,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_address":                 tableGcpComputeAddress(ctx),
 			"gcp_compute_backend_bucket":          tableGcpComputeBackendBucket(ctx),
 			"gcp_compute_backend_service":         tableGcpComputeBackendService(ctx),
+			"gcp_disk_metric_read_ops_daily":      tableGcpDiskMetricReadOpsDaily(ctx),
 			"gcp_compute_disk":                    tableGcpComputeDisk(ctx),
 			"gcp_compute_firewall":                tableGcpComputeFirewall(ctx),
 			"gcp_compute_forwarding_rule":         tableGcpComputeForwardingRule(ctx),
