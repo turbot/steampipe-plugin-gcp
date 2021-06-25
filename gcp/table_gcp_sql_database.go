@@ -118,6 +118,12 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	// Get the details of Cloud SQL instance
 	instance := h.Item.(*sqladmin.DatabaseInstance)
+	
+	// ERROR: rpc error: code = Unknown desc = googleapi: Error 400: Invalid request: Invalid request since instance is not running., invalid
+	// Return nil, if the instance not in running state
+	if instance.State != "RUNNABLE" {
+		return nil, nil
+	}
 
 	// Create service connection
 	service, err := CloudSQLAdminService(ctx, d)
@@ -163,6 +169,11 @@ func getSQLDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	instanceName := d.KeyColumnQuals["instance_name"].GetStringValue()
+
+	// Return nil, if no input provided
+	if name == "" || instanceName == "" {
+		return nil, nil
+	}
 
 	// Get the region where the specified instance is created
 	instanceData, err := service.Instances.Get(project, instanceName).Do()
