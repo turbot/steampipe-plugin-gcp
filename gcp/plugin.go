@@ -30,6 +30,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		TableMap: map[string]*plugin.Table{
 			"gcp_audit_policy":                    tableGcpAuditPolicy(ctx),
 			"gcp_bigquery_dataset":                tableGcpBigQueryDataset(ctx),
+			"gcp_bigquery_job":                    tableGcpBigQueryJob(ctx),
 			"gcp_bigquery_table":                  tableGcpBigqueryTable(ctx),
 			"gcp_bigtable_instance":               tableGcpBigtableInstance(ctx),
 			"gcp_cloudfunctions_function":         tableGcpCloudfunctionFunction(ctx),
@@ -75,8 +76,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_monitoring_alert_policy":         tableGcpMonitoringAlert(ctx),
 			"gcp_monitoring_group":                tableGcpMonitoringGroup(ctx),
 			"gcp_monitoring_notification_channel": tableGcpMonitoringNotificationChannel(ctx),
-			"gcp_project_organization_policy":     tableGcpProjectOrganizationPolicy(ctx),
 			"gcp_project":                         tableGcpProject(ctx),
+			"gcp_project_organization_policy":     tableGcpProjectOrganizationPolicy(ctx),
 			"gcp_project_service":                 tableGcpProjectService(ctx),
 			"gcp_pubsub_snapshot":                 tableGcpPubSubSnapshot(ctx),
 			"gcp_pubsub_subscription":             tableGcpPubSubSubscription(ctx),
