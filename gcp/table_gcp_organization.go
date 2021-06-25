@@ -63,8 +63,7 @@ func tableGcpOrganization(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getOrganizationAka,
-				Transform:   transform.FromValue(),
+				Transform:   transform.From(getOrganizationAka),
 			},
 		},
 	}
@@ -95,13 +94,12 @@ func listGCPOrganizations(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, nil
 }
 
-//// HYDRATE FUNCTIONS
+//// TRANSFORM FUNCTIONS
 
-func getOrganizationAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getOrganizationAka(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getOrganizationAka")
 
-	// Get project details
-	data := h.Item.(*cloudresourcemanager.Organization)
+	data := d.HydrateItem.(*cloudresourcemanager.Organization)
 
 	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/organizations/" + data.DisplayName}
