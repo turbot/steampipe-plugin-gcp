@@ -57,9 +57,10 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 			Type:        proto.ColumnType_DOUBLE,
 		},
 		{
-			Name:        "time_stamp",
+			Name:        "timestamp",
 			Description: "The time stamp used for the data point.",
 			Type:        proto.ColumnType_STRING,
+			Transform:   transform.FromField("TimeStamp"),
 		},
 		{
 			Name:        "unit",
@@ -210,10 +211,10 @@ func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granu
 }
 
 type PointWithTimeStamp struct {
-	// Point Vlaue
-	Point     float64
+	// Point Value
+	Point float64
 
-	// Time stamp of the poing value
+	// Time stamp of the point value
 	TimeStamp string
 }
 
@@ -266,7 +267,7 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 	var pointCount, pointIndex int64
 	var diffCheckExecuted bool
 
-	// Iterate the ponts value and extract statistics
+	// Iterate the points value and extract statistics
 	for _, point := range pointValues {
 
 		if startTime != "" {
@@ -280,7 +281,7 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 		interval, _ := strconv.ParseFloat(strings.ReplaceAll(getMonitoringPeriodForGranularity(granularity), "s", ""), 64)
 		diffCheckExecuted = false
 
-		// Check time diff(DAILY, HOURLY) and push the details to statisctics
+		// Check time diff(DAILY, HOURLY) and push the details to statistics
 		if timeDiff >= interval {
 			sampleCount = float64(pointCount)
 			average = sum / sampleCount
@@ -307,7 +308,6 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 		pointCount++
 		pointIndex++
 	}
-
 
 	// Left over points which is not with in the same time interval
 	if pointIndex == int64(len(pointValues)) && !diffCheckExecuted {
