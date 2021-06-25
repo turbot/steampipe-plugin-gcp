@@ -222,7 +222,7 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 				Transform:   transform.From(bigQueryJobAka),
 			},
 
-			// Standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,

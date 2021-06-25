@@ -1,7 +1,7 @@
 [
-	{
-		"id": "{{ output.resource_id.value }}",
-		"job_id": "{{ resourceName }}",
-		"kind": "bigquery#job"
-	}
+  {
+    "id": "{{ output.resource_id.value }}",
+    "job_id": "{{ resourceName }}",
+    "kind": "bigquery#job"
+  }
 ]

@@ -1,9 +1,9 @@
 [
-	{
-		"id": "{{ output.resource_id.value }}",
-		"job_id": "{{ resourceName }}",
-		"kind": "bigquery#job",
-		"location": "{{ output.region_id.value }}",
-		"project": "{{ output.project_id.value }}"
-	}
+  {
+    "id": "{{ output.resource_id.value }}",
+    "job_id": "{{ resourceName }}",
+    "kind": "bigquery#job",
+    "location": "{{ output.region_id.value }}",
+    "project": "{{ output.project_id.value }}"
+  }
 ]
