@@ -157,6 +157,17 @@ func getMonitoringPeriodForGranularity(granularity string) string {
 	return "300s"
 }
 
+func getIncrementalTimeAsPerGranularity(granularity string) time.Duration {
+	switch granularity {
+	case "DAILY":
+		return 86400
+	case "HOURLY":
+		return 3600
+	default:
+		return 500
+	}
+}
+
 func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string) (*monitoring.ListTimeSeriesResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitorMetricStatistics")
 
@@ -230,7 +241,6 @@ type Statistics struct {
 // Get metric statistic
 
 func metricstatistic(granularity string, points []*monitoring.Point, ctx context.Context) ([]*Statistics, error) {
-
 	var pointValues []*PointWithTimeStamp
 	var statistics []*Statistics
 
@@ -262,7 +272,7 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 	minValue := pointValues[0].Point
 	maxValue := minValue
 
-	var startTime string
+	startTime := pointValues[0].TimeStamp
 	var timeDiff float64
 	var pointCount, pointIndex int64
 	var diffCheckExecuted bool
@@ -270,12 +280,8 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 	// Iterate the points value and extract statistics
 	for _, point := range pointValues {
 
-		if startTime != "" {
-			timeDiff = checkTimeDiff(point.TimeStamp, startTime)
-			plugin.Logger(ctx).Trace("Time Diff", timeDiff)
-		} else {
-			startTime = point.TimeStamp
-		}
+		timeDiff = checkTimeDiff(point.TimeStamp, startTime)
+		plugin.Logger(ctx).Trace("Time Diff", timeDiff)
 
 		// Check time duration between start time and current point time stamp
 		interval, _ := strconv.ParseFloat(strings.ReplaceAll(getMonitoringPeriodForGranularity(granularity), "s", ""), 64)
@@ -294,7 +300,11 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 				TimeStamp:   startTime,
 			})
 			maxValue, minValue = pointValues[pointCount].Point, pointValues[pointCount].Point
-			pointCount, sum, average, sampleCount, startTime, timeDiff, diffCheckExecuted = 0, 0, 0, 0, "", 0, true
+			pointCount, sum, average, sampleCount, timeDiff, diffCheckExecuted = 0, 0, 0, 0, 0, true
+
+			// Set the time interval as per granularity			
+			currentStartTime, _ := time.Parse(time.RFC3339, startTime)
+			startTime = currentStartTime.Add(-time.Second * getIncrementalTimeAsPerGranularity(granularity)).Format(time.RFC3339)
 		}
 
 		if point.Point > maxValue {
