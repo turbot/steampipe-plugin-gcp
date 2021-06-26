@@ -186,7 +186,6 @@ func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granu
 
 	endTime := time.Now().Format(time.RFC3339)
 	startTime := getMonitoringStartDateForGranularity(granularity).Format(time.RFC3339)
-
 	period := getMonitoringPeriodForGranularity(granularity)
 
 	filterString := "metric.type = " + metricType + " AND " + dimensionKey + dimensionValue
@@ -239,7 +238,6 @@ type Statistics struct {
 }
 
 // Get metric statistic
-
 func metricstatistic(granularity string, points []*monitoring.Point, ctx context.Context) ([]*Statistics, error) {
 	var pointValues []*PointWithTimeStamp
 	var statistics []*Statistics
@@ -268,7 +266,8 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 		}
 	}
 
-	var sum, average, sampleCount float64 = 0, 0, 0
+	// Initialize max and min value with first point value
+	var sum, average, sampleCount float64
 	minValue := pointValues[0].Point
 	maxValue := minValue
 
@@ -279,7 +278,6 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 
 	// Iterate the points value and extract statistics
 	for _, point := range pointValues {
-
 		timeDiff = checkTimeDiff(point.TimeStamp, startTime)
 		plugin.Logger(ctx).Trace("Time Diff", timeDiff)
 
@@ -302,7 +300,7 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 			maxValue, minValue = pointValues[pointCount].Point, pointValues[pointCount].Point
 			pointCount, sum, average, sampleCount, timeDiff, diffCheckExecuted = 0, 0, 0, 0, 0, true
 
-			// Set the time interval as per granularity			
+			// Set the time interval as per granularity
 			currentStartTime, _ := time.Parse(time.RFC3339, startTime)
 			startTime = currentStartTime.Add(-time.Second * getIncrementalTimeAsPerGranularity(granularity)).Format(time.RFC3339)
 		}
@@ -337,7 +335,6 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 }
 
 // Check time difference in second
-
 func checkTimeDiff(startTime string, endTime string) float64 {
 	dt1, err := time.Parse(time.RFC3339, startTime)
 	if err != nil {
