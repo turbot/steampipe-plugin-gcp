@@ -11,13 +11,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableComputeInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Table {
+func tableComputeInstanceCpuUtilizationMetricHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_compute_instance_metric_cpu_utilization_daily",
-		Description: "GCP Compute Instance Daily CPU Utilization",
+		Name:        "gcp_compute_instance_metric_cpu_utilization_hourly",
+		Description: "GCP Compute Instance Hourly CPU Utilization",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeInstances,
-			Hydrate:       listComputeInstanceMetricCpuUtilizationDaily,
+			Hydrate:       listComputeInstanceMetricCpuUtilizationHourly,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
@@ -32,10 +32,10 @@ func tableComputeInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Ta
 
 //// LIST FUNCTION
 
-func listComputeInstanceMetricCpuUtilizationDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listComputeInstanceMetricCpuUtilizationHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	instanceInfo := h.Item.(*compute.Instance)
 
 	dimensionValue := "\"" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"compute.googleapis.com/instance/cpu/utilization\"", "metric.labels.instance_name = ", dimensionValue, instanceInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/cpu/utilization\"", "metric.labels.instance_name = ", dimensionValue, instanceInfo.Name)
 }
