@@ -13,25 +13,25 @@ select
   maximum,
   average,
   sample_count,
-  time_stamp
+  timestamp
 from
   gcp_sql_database_instance_metric_cpu_utilization
 order by
   instance_id;
 ```
 
-### Intervals averaging over 100%
+### Intervals averaging over 80%
 
 ```sql
 select
   instance_id,
-  round(minimum::numeric,2) as min_connection,
-  round(maximum::numeric,2) as max_connection,
-  round(average::numeric,2) as avg_connection,
+  round(minimum::numeric,2) as min_cpu,
+  round(maximum::numeric,2) as max_cpu,
+  round(average::numeric,2) as avg_cpu,
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization
-where average > 100
+where average > 80
 order by
   instance_id;
 ```
@@ -41,9 +41,9 @@ order by
 ```sql
 select
   instance_id,
-  round(minimum::numeric,2) as min_connection,
-  round(maximum::numeric,2) as max_connection,
-  round(average::numeric,2) as avg_connection,
+  round(minimum::numeric,2) as min_cpu,
+  round(maximum::numeric,2) as max_cpu,
+  round(average::numeric,2) as avg_cpu,
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization
