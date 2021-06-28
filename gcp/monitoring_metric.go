@@ -164,7 +164,7 @@ func getIncrementalTimeAsPerGranularity(granularity string) time.Duration {
 	case "HOURLY":
 		return 3600
 	default:
-		return 500
+		return 300
 	}
 }
 
