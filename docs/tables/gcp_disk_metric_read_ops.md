@@ -30,7 +30,7 @@ select
   sample_count
 from
   gcp_disk_metric_read_ops
-where average > 100
+where average > 10
 order by
   instance_id;
 ```
