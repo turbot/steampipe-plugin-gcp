@@ -20,7 +20,7 @@ order by
   instance_id;
 ```
 
-### Intervals averaging over 100%
+### Intervals averaging over 80%
 
 ```sql
 select
@@ -31,7 +31,7 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_hourly
-where average > 100
+where average > 80
 order by
   instance_id;
 ```
