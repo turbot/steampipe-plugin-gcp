@@ -13,7 +13,7 @@ import (
 
 func tableGcpSQLDatabaseInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_sql_database_connection_daily",
+		Name:        "gcp_sql_database_instance_metric_cpu_utilization_daily",
 		Description: "GCP SQL Database Instance Daily CPU utilization",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
