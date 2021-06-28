@@ -33,10 +33,10 @@ func tableGcpDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listDiskMetricReadOpsHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	diskInfo := h.Item.(*compute.Instance)
+	instanceInfo := h.Item.(*compute.Instance)
 	plugin.Logger(ctx).Trace("log11111")
 
-	dimentionValue := "\"" + diskInfo.Name + "\""
+	dimentionValue := "\"" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.instance_name = ", dimentionValue, "")
+	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.instance_name = ", dimentionValue, instanceInfo.Name)
 }
