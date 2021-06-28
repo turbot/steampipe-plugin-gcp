@@ -6,7 +6,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 )
 
 //// TABLE DEFINITION
@@ -14,7 +14,7 @@ import (
 func tableGcpDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_disk_metric_read_ops_hourly",
-		Description: "GCP SQL Database Daily connections",
+		Description: "GCP Compute Disk Daily connections",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeInstances,
 			Hydrate:       listDiskMetricReadOpsHourly,
@@ -22,7 +22,7 @@ func tableGcpDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "instance_id",
-				Description: "The SQL Instance name.",
+				Description: "The VM Instance name.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
@@ -33,9 +33,10 @@ func tableGcpDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listDiskMetricReadOpsHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	instanceInfo := h.Item.(*compute.Instance)
+	diskInfo := h.Item.(*compute.Instance)
+	plugin.Logger(ctx).Trace("log11111")
 
-	dimentionValue := "\"" + instanceInfo.Name + "\""
+	dimentionValue := "\"" + diskInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "resource.label.instance_name = ", dimentionValue, "")
+	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.instance_name = ", dimentionValue, "")
 }
