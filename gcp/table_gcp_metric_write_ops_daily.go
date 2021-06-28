@@ -13,8 +13,8 @@ import (
 
 func tableGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_disk_metric_write_ops_hourly",
-		Description: "GCP SQL Database Daily connections",
+		Name:        "gcp_disk_metric_write_ops_daily",
+		Description: "GCP Disk metric write operations",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeInstances,
 			Hydrate:       listDiskMetricWriteOpsDaily,
@@ -22,7 +22,7 @@ func tableGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "instance_id",
-				Description: "",
+				Description: "The VM Instance name.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
@@ -37,5 +37,5 @@ func listDiskMetricWriteOpsDaily(ctx context.Context, d *plugin.QueryData, h *pl
 
 	dimentionValue := "\"" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"compute.googleapis.com/instance/disk/write_ops_count\"", "resource.label.instance_name = ", dimentionValue, "")
+	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"compute.googleapis.com/instance/disk/write_ops_count\"", "metric.label.instance_name = ", dimentionValue, instanceInfo.Name)
 }
