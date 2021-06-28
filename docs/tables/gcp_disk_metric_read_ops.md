@@ -35,7 +35,7 @@ order by
   instance_id;
 ```
 
-### Intervals averaging fewer than 10 write ops
+### Intervals averaging fewer than 1 write ops
 
 ```sql
 select
@@ -46,7 +46,7 @@ select
   sample_count
 from
   gcp_disk_metric_write_ops_daily
-where average < 10
+where average < 1
 order by
   instance_id;
 ```
