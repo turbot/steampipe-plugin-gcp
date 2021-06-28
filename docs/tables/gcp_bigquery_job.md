@@ -16,7 +16,7 @@ from
   gcp_bigquery_job;
 ```
 
-### List jobs which are currently running
+### List running jobs
 
 ```sql
 select

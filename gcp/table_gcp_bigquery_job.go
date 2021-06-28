@@ -42,6 +42,12 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Status.State"),
 			},
 			{
+				Name:        "self_link",
+				Description: "An URL that can be used to access the resource again.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getBigQueryJob,
+			},
+			{
 				Name:        "completion_ratio",
 				Description: "Job progress (0.0 -> 1.0) for LOAD and EXTRACT jobs.",
 				Type:        proto.ColumnType_STRING,
@@ -87,12 +93,6 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 				Description: "Name of the primary reservation assigned to this job.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Statistics.ReservationId"),
-			},
-			{
-				Name:        "self_link",
-				Description: "An URL that can be used to access the resource again.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getBigQueryJob,
 			},
 			{
 				Name:        "start_time",
