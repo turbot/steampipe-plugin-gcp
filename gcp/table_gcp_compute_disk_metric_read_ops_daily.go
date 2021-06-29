@@ -11,10 +11,10 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
+func tableGcpComputeDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_disk_metric_read_ops_daily",
-		Description: "GCP Disk metric read operation",
+		Name:        "gcp_compute_disk_metric_read_ops_daily",
+		Description: "GCP Compute Disk metric read operation",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeDisk,
 			Hydrate:       listDiskMetricReadOpsDaily,
@@ -22,7 +22,7 @@ func tableGcpDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The Compute Disk name.",
+				Description: "The name of the Disk.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},

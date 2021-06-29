@@ -1,6 +1,6 @@
-# Table: gcp_disk_metric_read_ops_daily
+# Table: gcp_compute_disk_metric_read_ops_daily
 
-Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_disk_metric_read_ops_daily` table provides metric statistics at 24 hour intervals for the past year.
+Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_compute_disk_metric_read_ops_daily` table provides metric statistics at 24 hour intervals for the past year.
 
 ## Examples
 
@@ -14,7 +14,7 @@ select
   average,
   sample_count
 from
-  gcp_disk_metric_read_ops_daily
+  gcp_compute_disk_metric_read_ops_daily
 order by
   name;
 ```
@@ -29,7 +29,7 @@ select
   round(average::numeric,2) as avg_read_ops,
   sample_count
 from
-  gcp_disk_metric_read_ops_daily
+  gcp_compute_disk_metric_read_ops_daily
 where average > 10
 order by
   name;
@@ -45,7 +45,7 @@ select
   round(average::numeric,2) as avg_read_ops,
   sample_count
 from
-  gcp_disk_metric_read_ops_daily
+  gcp_compute_disk_metric_read_ops_daily
 where average < 1
 order by
   name;
