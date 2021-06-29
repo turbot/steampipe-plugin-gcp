@@ -8,7 +8,7 @@ Google Monitoring Metrics provide data about the performance of your systems. Th
 
 ```sql
 select
-  instance_id,
+  name,
   timestamp,
   minimum,
   maximum,
@@ -17,7 +17,7 @@ select
 from
   gcp_compute_instance_metric_cpu_utilization
 order by
-  instance_id,
+  name,
   timestamp;
 ```
 
@@ -25,7 +25,7 @@ order by
 
 ```sql
 select
-  instance_id,
+  name,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
@@ -35,6 +35,6 @@ from
   gcp_compute_instance_metric_cpu_utilization
 where average > 80
 order by
-  instance_id,
+  name,
   timestamp;
 ```
