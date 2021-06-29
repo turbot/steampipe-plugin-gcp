@@ -86,6 +86,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_sql_backup":                              tableGcpSQLBackup(ctx),
 			"gcp_sql_database":                            tableGcpSQLDatabase(ctx),
 			"gcp_sql_database_instance_connections_daily": tableGcpSQLDatabaseInstanceConnectionsMetricDaily(ctx),
+			"gcp_sql_database_instance_connections_hourly": tableGcpSQLDatabaseInstanceConnectionsMetricHourly(ctx),
 			"gcp_sql_database_instance":                   tableGcpSQLDatabaseInstance(ctx),
 			"gcp_storage_bucket":                          tableGcpStorageBucket(ctx),
 			/*
