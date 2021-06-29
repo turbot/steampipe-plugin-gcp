@@ -1,6 +1,6 @@
 # Table: gcp_sql_database_instance_connections
 
-Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_sql_database_instance_connections` table provides metric statistics at 24 hour intervals for the past year.
+Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_sql_database_instance_connections` table provides metric statistics at 5 minute intervals for the past year.
 
 ## Examples
 
