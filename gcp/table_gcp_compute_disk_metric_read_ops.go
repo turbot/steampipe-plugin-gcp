@@ -11,18 +11,18 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpDiskMetricReadOps(_ context.Context) *plugin.Table {
+func tableGcpComputeDiskMetricReadOps(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_disk_metric_read_ops",
+		Name:        "gcp_compute_disk_metric_read_ops",
 		Description: "GCP Disk metric read operations",
 		List: &plugin.ListConfig{
-			ParentHydrate: listComputeInstances,
+			ParentHydrate: listComputeDisk,
 			Hydrate:       listDiskMetricReadOps,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
-				Name:        "instance_id",
-				Description: "The VM Instance name.",
+				Name:        "name",
+				Description: "The name of the Disk.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
@@ -33,9 +33,9 @@ func tableGcpDiskMetricReadOps(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listDiskMetricReadOps(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	instanceInfo := h.Item.(*compute.Instance)
+	diskInfo := h.Item.(*compute.Disk)
 
-	dimentionValue := "\"" + instanceInfo.Name + "\""
+	dimentionValue := "\"" + diskInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "5_MIN", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.instance_name = ", dimentionValue, instanceInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "5_MIN", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.device_name = ", dimentionValue, diskInfo.Name)
 }
