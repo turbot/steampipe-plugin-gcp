@@ -14,7 +14,7 @@ import (
 func tableGcpSQLDatabaseInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_sql_database_instance_metric_cpu_utilization_daily",
-		Description: "GCP SQL Database Instance Daily CPU utilization",
+		Description: "GCP SQL Database Instance Metrics - CPU Utilization (Daily)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
 			Hydrate:       listSQLDatabaseInstanceCpuUtilizationMetricDaily,
@@ -22,7 +22,7 @@ func tableGcpSQLDatabaseInstanceCpuUtilizationMetricDaily(_ context.Context) *pl
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "instance_id",
-				Description: "The SQL Instance name.",
+				Description: "The ID of the instance.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
