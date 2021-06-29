@@ -14,7 +14,7 @@ import (
 func tableComputeInstanceCpuUtilizationMetric(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_instance_metric_cpu_utilization",
-		Description: "GCP Compute Instance CPU Utilization",
+		Description: "GCP Compute Instance Metrics - CPU Utilization",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeInstances,
 			Hydrate:       listComputeInstanceMetricCpuUtilization,
