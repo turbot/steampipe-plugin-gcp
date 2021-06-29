@@ -75,8 +75,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_monitoring_alert_policy":                 tableGcpMonitoringAlert(ctx),
 			"gcp_monitoring_group":                        tableGcpMonitoringGroup(ctx),
 			"gcp_monitoring_notification_channel":         tableGcpMonitoringNotificationChannel(ctx),
-			"gcp_project_organization_policy":             tableGcpProjectOrganizationPolicy(ctx),
 			"gcp_project":                                 tableGcpProject(ctx),
+			"gcp_project_organization_policy":             tableGcpProjectOrganizationPolicy(ctx),
 			"gcp_project_service":                         tableGcpProjectService(ctx),
 			"gcp_pubsub_snapshot":                         tableGcpPubSubSnapshot(ctx),
 			"gcp_pubsub_subscription":                     tableGcpPubSubSubscription(ctx),
@@ -85,10 +85,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_service_account_key":                     tableGcpServiceAccountKey(ctx),
 			"gcp_sql_backup":                              tableGcpSQLBackup(ctx),
 			"gcp_sql_database":                            tableGcpSQLDatabase(ctx),
+			"gcp_sql_database_instance":                   tableGcpSQLDatabaseInstance(ctx),
 			"gcp_sql_database_instance_connections_daily": tableGcpSQLDatabaseInstanceConnectionsMetricDaily(ctx),
 			"gcp_sql_database_instance_metric_cpu_utilization_hourly": tableGcpSQLDatabaseInstanceCpuUtilizationMetricHourly(ctx),
-			"gcp_sql_database_instance":                               tableGcpSQLDatabaseInstance(ctx),
-			"gcp_storage_bucket":                                      tableGcpStorageBucket(ctx),
+			"gcp_storage_bucket": tableGcpStorageBucket(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
