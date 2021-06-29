@@ -1,7 +1,6 @@
 # Table: gcp_compute_instance_metric_cpu_utilization
 
-Google Monitoring Metrics provide data about the performance of your systems.  The `gcp_compute_instance_metric_cpu_utilization` table provides metric statistics at 5 minute intervals for the most recent 5 days.
-
+Google Monitoring Metrics provide data about the performance of your systems. The `gcp_compute_instance_metric_cpu_utilization` table provides metric statistics at 5 minute intervals for the most recent 5 days.
 
 ## Examples
 
@@ -21,8 +20,6 @@ order by
   instance_id,
   timestamp;
 ```
-
-
 
 ### CPU Over 80% average
 
