@@ -6,8 +6,9 @@ import (
 )
 
 type gcpConfig struct {
-	Project        *string `cty:"project"`
-	CredentialFile *string `cty:"credential_file"`
+	Project                   *string `cty:"project"`
+	CredentialFile            *string `cty:"credential_file"`
+	ImpersonateServiceAccount *string `cty:"impersonate_service_account"`
 }
 
 var ConfigSchema = map[string]*schema.Attribute{
@@ -15,6 +16,9 @@ var ConfigSchema = map[string]*schema.Attribute{
 		Type: schema.TypeString,
 	},
 	"credential_file": {
+		Type: schema.TypeString,
+	},
+	"impersonate_service_account": {
 		Type: schema.TypeString,
 	},
 }

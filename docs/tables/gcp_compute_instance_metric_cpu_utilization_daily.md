@@ -1,7 +1,6 @@
 # Table: gcp_compute_instance_metric_cpu_utilization_daily
 
-Google Monitoring Metrics provide data about the performance of your systems.  The `gcp_compute_instance_metric_cpu_utilization_daily` table provides metric statistics at 24 hour intervals for the most recent 5 days.
-
+Google Monitoring Metrics provide data about the performance of your systems. The `gcp_compute_instance_metric_cpu_utilization_daily` table provides metric statistics at 24 hour intervals for the most recent 5 days.
 
 ## Examples
 
