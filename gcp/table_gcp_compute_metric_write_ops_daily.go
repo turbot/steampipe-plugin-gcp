@@ -11,7 +11,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
+func tableComputeGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_disk_metric_write_ops_daily",
 		Description: "GCP Disk metric write operations",
@@ -21,7 +21,7 @@ func tableGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
-				Name:        "instance_id",
+				Name:        "name",
 				Description: "The name of the Disk.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
