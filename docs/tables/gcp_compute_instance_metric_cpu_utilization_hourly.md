@@ -1,7 +1,6 @@
 # Table: gcp_compute_instance_metric_cpu_utilization_hourly
 
-GCloud Monitoring Metrics provide data about the performance of your systems.  The `gcp_compute_instance_metric_cpu_utilization_hourly` table provides metric statistics at 60 minute intervals for the most recent 5 days.
-
+GCloud Monitoring Metrics provide data about the performance of your systems. The `gcp_compute_instance_metric_cpu_utilization_hourly` table provides metric statistics at 60 minute intervals for the most recent 5 days.
 
 ## Examples
 
