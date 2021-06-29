@@ -13,8 +13,8 @@ import (
 
 func tableGcpSQLDatabaseInstanceConnectionsMetricHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_sql_database_instance_connections_hourly",
-		Description: "GCP SQL Database Instance Hourly connections",
+		Name:        "gcp_sql_database_instance_metric_connections_hourly",
+		Description: "GCP SQL Database Instance Metrics - Connections (Hourly)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
 			Hydrate:       listSQLDatabaseInstanceMetricConnectionsHourly,
@@ -22,7 +22,7 @@ func tableGcpSQLDatabaseInstanceConnectionsMetricHourly(_ context.Context) *plug
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "instance_id",
-				Description: "The SQL Instance name.",
+				Description: "The ID of the instance.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
