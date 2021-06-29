@@ -1,6 +1,6 @@
 # Table: gcp_sql_database_instance_metric_cpu_utilization_hourly
 
-Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_sql_database_instance_metric_cpu_utilization_hourly` table provides metric statistics at 24 hour intervals for the past year.
+GCP cloud Monitoring metrics provide data about the performance of your systems. The `gcp_sql_database_instance_metric_cpu_utilization_hourly` table provides metric statistics at 1 hour intervals for the most recent 60 days.
 
 ## Examples
 
