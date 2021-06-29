@@ -22,7 +22,7 @@ func tableComputeInstanceCpuUtilizationMetric(_ context.Context) *plugin.Table {
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The Compute Instance name.",
+				Description: "The name of the instance.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
