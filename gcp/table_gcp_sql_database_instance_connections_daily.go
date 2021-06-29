@@ -11,13 +11,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpSQLDatabaseConnectionsMetricDaily(_ context.Context) *plugin.Table {
+func tableGcpSQLDatabaseInstanceConnectionsMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_sql_database_connection_daily",
-		Description: "GCP SQL Database Daily connections",
+		Name:        "gcp_sql_database_instance_connections_daily",
+		Description: "GCP SQL Database Instance Daily connections",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
-			Hydrate:       listSQLDatabaseMetricConnectionsDaily,
+			Hydrate:       listSQLDatabaseInstanceMetricConnectionsDaily,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
@@ -32,8 +32,8 @@ func tableGcpSQLDatabaseConnectionsMetricDaily(_ context.Context) *plugin.Table 
 
 //// LIST FUNCTION
 
-func listSQLDatabaseMetricConnectionsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	databaseinfo := h.Item.(*sqladmin.DatabaseInstance)
+func listSQLDatabaseInstanceMetricConnectionsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	instanceInfo := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Get project details
 	projectData, err := activeProject(ctx, d)
@@ -41,7 +41,7 @@ func listSQLDatabaseMetricConnectionsDaily(ctx context.Context, d *plugin.QueryD
 		return nil, err
 	}
 	project := projectData.Project
-	dimentionValue := "\"" + project + ":" + databaseinfo.Name + "\""
+	dimensionValue := "\"" + project + ":" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimentionValue, databaseinfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name)
 }

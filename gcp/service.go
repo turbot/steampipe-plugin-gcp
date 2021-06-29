@@ -31,10 +31,10 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := bigquery.NewService(ctx)
+	svc, err := bigquery.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,10 +52,10 @@ func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtablead
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := bigtableadmin.NewService(ctx)
+	svc, err := bigtableadmin.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,10 +73,10 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := cloudresourcemanager.NewService(ctx)
+	svc, err := cloudresourcemanager.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,10 +94,10 @@ func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sqladmin.S
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := sqladmin.NewService(ctx)
+	svc, err := sqladmin.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -115,10 +115,10 @@ func ComputeBetaService(ctx context.Context, d *plugin.QueryData) (*computeBeta.
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := computeBeta.NewService(ctx)
+	svc, err := computeBeta.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,10 +136,10 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := compute.NewService(ctx)
+	svc, err := compute.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,10 +157,10 @@ func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunc
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := cloudfunctions.NewService(ctx)
+	svc, err := cloudfunctions.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,10 +178,10 @@ func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) 
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := dns.NewService(ctx)
+	svc, err := dns.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -199,10 +199,10 @@ func IAMService(ctx context.Context, d *plugin.QueryData) (*iam.Service, error) 
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := iam.NewService(ctx)
+	svc, err := iam.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -220,10 +220,10 @@ func LoggingService(ctx context.Context, d *plugin.QueryData) (*logging.Service,
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := logging.NewService(ctx)
+	svc, err := logging.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -241,10 +241,10 @@ func MonitoringService(ctx context.Context, d *plugin.QueryData) (*monitoring.Se
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := monitoring.NewService(ctx)
+	svc, err := monitoring.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -262,10 +262,10 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := pubsub.NewService(ctx)
+	svc, err := pubsub.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -283,10 +283,10 @@ func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusag
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := serviceusage.NewService(ctx)
+	svc, err := serviceusage.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -304,10 +304,10 @@ func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service,
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := storage.NewService(ctx)
+	svc, err := storage.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -325,10 +325,10 @@ func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, er
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	opts := setSessionConfig(d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := cloudkms.NewService(ctx)
+	svc, err := cloudkms.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
