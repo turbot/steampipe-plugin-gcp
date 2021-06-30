@@ -1,6 +1,7 @@
 # Table: gcp_compute_machine_type
 
 A machine type is a set of virtualized hardware resources available to a virtual machine (VM) instance, including the system memory size, virtual CPU (vCPU) count, and persistent disk limits.
+
 In Compute Engine, machine types are grouped and curated by families for different workloads. Compute Engine offers general-purpose, memory-optimized, compute-optimized, and accelerated-optimized families.
 
 ## Examples
@@ -49,7 +50,7 @@ where
 ```
 
 
-### List accelerator configurations assigned to this machine type
+### Get accelerator configurations assigned to each machine type
 
 ```sql
 select
