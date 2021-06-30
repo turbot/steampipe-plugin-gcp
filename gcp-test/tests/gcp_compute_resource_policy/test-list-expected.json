@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Start and stop instances",
+    "name": "{{ resourceName }}"
+  }
+]
