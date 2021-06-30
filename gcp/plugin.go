@@ -43,6 +43,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_global_forwarding_rule":                      tableGcpComputeGlobalForwardingRule(ctx),
 			"gcp_compute_image":                                       tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                                    tableGcpComputeInstance(ctx),
+			"gcp_compute_instance_metric_cpu_utilization":             tableComputeInstanceCpuUtilizationMetric(ctx),
 			"gcp_compute_instance_template":                           tableGcpComputeInstanceTemplate(ctx),
 			"gcp_compute_machine_type":                                tableGcpComputeMachineType(ctx),
 			"gcp_compute_network":                                     tableGcpComputeNetwork(ctx),
