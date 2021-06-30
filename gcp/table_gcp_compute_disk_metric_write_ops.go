@@ -6,7 +6,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 //// TABLE DEFINITION
@@ -14,7 +14,7 @@ import (
 func tableGcpComputeDiskMetricWriteOps(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_disk_metric_write_ops",
-		Description: "GCP Disk metric write operations",
+		Description: "GCP Compute Disk Metrics - Write Ops",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeDisk,
 			Hydrate:       listDiskMetricWriteOps,
@@ -22,7 +22,7 @@ func tableGcpComputeDiskMetricWriteOps(_ context.Context) *plugin.Table {
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The name of the Disk.",
+				Description: "The name of the disk.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
@@ -35,7 +35,7 @@ func tableGcpComputeDiskMetricWriteOps(_ context.Context) *plugin.Table {
 func listDiskMetricWriteOps(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	diskInfo := h.Item.(*compute.Disk)
 
-	dimentionValue := "\"" + diskInfo.Name + "\""
+	dimensionValue := "\"" + diskInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "5_MIN", "\"compute.googleapis.com/instance/disk/write_ops_count\"", "metric.label.device_name = ", dimentionValue, diskInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "5_MIN", "\"compute.googleapis.com/instance/disk/write_ops_count\"", "metric.label.device_name = ", dimensionValue, diskInfo.Name)
 }
