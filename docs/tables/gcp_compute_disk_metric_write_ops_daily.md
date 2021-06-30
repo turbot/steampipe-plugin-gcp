@@ -1,6 +1,6 @@
 # Table: gcp_compute_disk_metric_write_ops_daily
 
-Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_compute_disk_metric_write_ops_daily` table provides metric statistics at 5 min intervals for the past year.
+GCP Monitoring metrics provide data about the performance of your systems. The `gcp_compute_disk_metric_write_ops_daily` table provides metric statistics at 24 hour intervals for the last year.
 
 ## Examples
 
@@ -8,7 +8,7 @@ Google cloud Monitoring Metrics provide data about the performance of your syste
 
 ```sql
 select
-  instance_id,
+  name,
   minimum,
   maximum,
   average,
@@ -16,14 +16,14 @@ select
 from
   gcp_compute_disk_metric_write_ops_daily
 order by
-  instance_id;
+  name;
 ```
 
 ### Intervals averaging over 100 write ops
 
 ```sql
 select
-  instance_id,
+  name,
   round(minimum::numeric,2) as min_write_ops,
   round(maximum::numeric,2) as max_write_ops,
   round(average::numeric,2) as avg_write_ops,
@@ -32,14 +32,14 @@ from
   gcp_compute_disk_metric_write_ops_daily
 where average > 10
 order by
-  instance_id;
+  name;
 ```
 
 ### Intervals averaging fewer than 1 write ops
 
 ```sql
 select
-  instance_id,
+  name,
   round(minimum::numeric,2) as min_write_ops,
   round(maximum::numeric,2) as max_write_ops,
   round(average::numeric,2) as avg_write_ops,
@@ -48,5 +48,5 @@ from
   gcp_compute_disk_metric_write_ops_daily
 where average < 1
 order by
-  instance_id;
+  name;
 ```
