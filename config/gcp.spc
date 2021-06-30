@@ -15,5 +15,8 @@ connection "gcp" {
   #   - The path specified in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable, if set; otherwise
   #   - The standard location (`~/.config/gcloud/application_default_credentials.json`)
   #credential_file    = "~/.config/gcloud/application_default_credentials.json"        
-   
+
+  # `impersonate_service_account` (optional) - The GCP service account (string) which should be impersonated.
+  # If not set, no impersonation is done.
+  #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
 }
