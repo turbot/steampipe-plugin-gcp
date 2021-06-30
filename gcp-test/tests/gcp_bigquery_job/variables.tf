@@ -36,14 +36,14 @@ data "null_data_source" "resource" {
 }
 
 resource "google_bigquery_dataset" "named_test_resource" {
-  dataset_id                  = var.resource_name
+  dataset_id = var.resource_name
 }
 
 resource "google_bigquery_table" "named_test_resource" {
-  depends_on = [google_bigquery_dataset.named_test_resource]
+  depends_on          = [google_bigquery_dataset.named_test_resource]
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.named_test_resource.dataset_id
-  table_id   = var.resource_name
+  dataset_id          = google_bigquery_dataset.named_test_resource.dataset_id
+  table_id            = var.resource_name
 }
 
 resource "google_bigquery_job" "named_test_resource" {
