@@ -1,6 +1,6 @@
 # Table: gcp_compute_disk_metric_read_ops_hourly
 
-Google cloud Monitoring Metrics provide data about the performance of your systems. The `gcp_compute_disk_metric_read_ops_hourly` table provides metric statistics at 24 hour intervals for the past year.
+GCP Monitoring metrics provide data about the performance of your systems. The `gcp_compute_disk_metric_read_ops_hourly` table provides metric statistics at 1 hour intervals for the most recent 60 days.
 
 ## Examples
 

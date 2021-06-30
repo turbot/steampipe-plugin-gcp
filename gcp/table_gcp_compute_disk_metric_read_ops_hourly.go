@@ -14,7 +14,7 @@ import (
 func tableGcpComputeDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_disk_metric_read_ops_hourly",
-		Description: "GCP Compute Disk Daily connections",
+		Description: "GCP Compute Disk Metrics - Read Ops (Hourly)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeDisk,
 			Hydrate:       listDiskMetricReadOpsHourly,
@@ -22,7 +22,7 @@ func tableGcpComputeDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The name of the Disk.",
+				Description: "The name of the disk.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
@@ -35,7 +35,7 @@ func tableGcpComputeDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 func listDiskMetricReadOpsHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	diskInfo := h.Item.(*compute.Disk)
 
-	dimentionValue := "\"" + diskInfo.Name + "\""
+	dimensionValue := "\"" + diskInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.device_name = ", dimentionValue, diskInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.device_name = ", dimensionValue, diskInfo.Name)
 }
