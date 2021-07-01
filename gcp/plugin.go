@@ -41,6 +41,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_disk_metric_read_ops":                        tableGcpComputeDiskMetricReadOps(ctx),
 			"gcp_compute_disk_metric_read_ops_daily":                  tableGcpComputeDiskMetricReadOpsDaily(ctx),
 			"gcp_compute_disk_metric_read_ops_hourly":                 tableGcpComputeDiskMetricReadOpsHourly(ctx),
+			"gcp_compute_disk_metric_write_ops":                       tableGcpComputeDiskMetricWriteOps(ctx),
 			"gcp_compute_disk_metric_write_ops_daily":                 tableComputeGcpDiskMetricWriteOpsDaily(ctx),
 			"gcp_compute_disk_metric_write_ops_hourly":                tableGcpComputeDiskMetricWriteOpsHourly(ctx),
 			"gcp_compute_firewall":                                    tableGcpComputeFirewall(ctx),
