@@ -1,6 +1,6 @@
-# Table: gcp_sql_database_instance_connections_daily
+# Table: gcp_sql_database_instance_metric_connections_daily
 
-GCP Monitoring metrics provide data about the performance of your systems. The `gcp_sql_database_instance_connections_daily` table provides metric statistics at 24 hour intervals for the past year.
+GCP Monitoring metrics provide data about the performance of your systems. The `gcp_sql_database_instance_metric_connections_daily` table provides metric statistics at 24 hour intervals for the past year.
 
 ## Examples
 
@@ -14,7 +14,7 @@ select
   average,
   sample_count
 from
-  gcp_sql_database_connections_daily
+  gcp_sql_database_instance_metric_connections_daily
 order by
   instance_id;
 ```
@@ -29,7 +29,7 @@ select
   round(average::numeric,2) as avg_connection,
   sample_count
 from
-  gcp_sql_database_connections_daily
+  gcp_sql_database_instance_metric_connections_daily
 where average > 100
 order by
   instance_id;
@@ -45,7 +45,7 @@ select
   round(average::numeric,2) as avg_connection,
   sample_count
 from
-  gcp_sql_database_connections_daily
+  gcp_sql_database_instance_metric_connections_daily
 where average < 10
 order by
   instance_id;
