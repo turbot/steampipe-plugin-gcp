@@ -1,0 +1,12 @@
+[
+  {
+    "akas": [
+      "gcp://cloudresourcemanager.googleapis.com/organizations/{{ output.display_name.value }}"
+    ],
+    "display_name": "{{ output.display_name.value }}",
+    "lifecycle_state": "{{ output.lifecycle_state.value }}",
+    "name": "{{ output.name.value }}",
+    "organization_id": {{ output.name.value.split('/')[1] }},
+    "title": "{{ output.display_name.value }}"
+  }
+]
