@@ -59,7 +59,7 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 		{
 			Name:        "timestamp",
 			Description: "The time stamp used for the data point.",
-			Type:        proto.ColumnType_STRING,
+			Type:        proto.ColumnType_TIMESTAMP,
 			Transform:   transform.FromField("TimeStamp"),
 		},
 		{
