@@ -41,7 +41,8 @@ func listSQLDatabaseInstanceCpuUtilizationMetricDaily(ctx context.Context, d *pl
 		return nil, err
 	}
 	project := projectData.Project
+	location := instanceInfo.Region
 	dimensionValue := "\"" + project + ":" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/cpu/utilization\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/cpu/utilization\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
 }
