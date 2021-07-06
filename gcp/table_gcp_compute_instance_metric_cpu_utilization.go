@@ -35,7 +35,8 @@ func tableComputeInstanceCpuUtilizationMetric(_ context.Context) *plugin.Table {
 func listComputeInstanceMetricCpuUtilization(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	instanceInfo := h.Item.(*compute.Instance)
 
+	location := getLastPathElement(instanceInfo.Zone)
 	dimensionValue := "\"" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "FIVE_MIMUTES", "\"compute.googleapis.com/instance/cpu/utilization\"", "metric.labels.instance_name = ", dimensionValue, instanceInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "FIVE_MIMUTES", "\"compute.googleapis.com/instance/cpu/utilization\"", "metric.labels.instance_name = ", dimensionValue, instanceInfo.Name, location)
 }
