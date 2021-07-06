@@ -18,10 +18,10 @@ type recordSetInfo = struct {
 
 func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_dns_resord_set",
+		Name:        "gcp_dns_record_set",
 		Description: "GCP DNS Record Set",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"managedzone_name", "name", "type"}),
+			KeyColumns: plugin.AllColumns([]string{"managed_zone_name", "name", "type"}),
 			Hydrate:    getDnsRecordSet,
 		},
 		List: &plugin.ListConfig{
