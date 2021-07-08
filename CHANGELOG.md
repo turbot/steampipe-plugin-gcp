@@ -1,3 +1,20 @@
+## v0.15.0 [2021-07-08]
+
+_What's new?_
+
+- New tables added
+  - [gcp_sql_database_instance_metric_connections](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_connections) ([#267](https://github.com/turbot/steampipe-plugin-gcp/pull/267))
+  - [gcp_sql_database_instance_metric_connections_hourly](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_connections_hourly) ([#268](https://github.com/turbot/steampipe-plugin-gcp/pull/268))
+
+_Enhancements_
+
+- Updated: Add columns `location` and `project` to all metric tables ([#279](https://github.com/turbot/steampipe-plugin-gcp/pull/279))
+
+_Bug fixes_
+
+- Fixed: `timestamp` column type in all metric tables is now `TIMESTAMP` instead of `STRING` ([#277](https://github.com/turbot/steampipe-plugin-gcp/pull/277))
+- Fixed: Typo in table name and invalid key column definition for `gcp_dns_record_set table`
+
 ## v0.14.0 [2021-07-01]
 
 _What's new?_
