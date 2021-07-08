@@ -6,6 +6,8 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
+	billingbudgets "google.golang.org/api/billingbudgets/v1beta1"
+	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -56,6 +58,48 @@ func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtablead
 
 	// so it was not in cache - create service
 	svc, err := bigtableadmin.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// BillingBudgetService returns the service connection for GCP Billing service
+func BillingBudgetService(ctx context.Context, d *plugin.QueryData) (*billingbudgets.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BillingBudgetService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*billingbudgets.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := billingbudgets.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudBillingService returns the service connection for GCP Billing service
+func CloudBillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudBillingService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudbilling.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudbilling.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
