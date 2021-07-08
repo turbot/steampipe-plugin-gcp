@@ -13,8 +13,8 @@ import (
 
 func tableGcpSQLDatabaseInstanceConnectionsMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_sql_database_instance_connections_daily",
-		Description: "GCP SQL Database Instance Daily connections",
+		Name:        "gcp_sql_database_instance_metric_connections_daily",
+		Description: "GCP SQL Database Instance Metrics - Connections (Daily)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
 			Hydrate:       listSQLDatabaseInstanceMetricConnectionsDaily,
@@ -22,7 +22,7 @@ func tableGcpSQLDatabaseInstanceConnectionsMetricDaily(_ context.Context) *plugi
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
 				Name:        "instance_id",
-				Description: "The SQL Instance name.",
+				Description: "The ID of the instance.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DimensionValue"),
 			},
@@ -41,7 +41,8 @@ func listSQLDatabaseInstanceMetricConnectionsDaily(ctx context.Context, d *plugi
 		return nil, err
 	}
 	project := projectData.Project
+	location := instanceInfo.Region
 	dimensionValue := "\"" + project + ":" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
 }

@@ -11,13 +11,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpSQLDatabaseInstanceCpuUtilizationMetricHourly(_ context.Context) *plugin.Table {
+func tableGcpSQLDatabaseInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_sql_database_instance_metric_cpu_utilization_hourly",
-		Description: "GCP SQL Database Instance Metrics - CPU Utilization (Hourly)",
+		Name:        "gcp_sql_database_instance_metric_cpu_utilization_daily",
+		Description: "GCP SQL Database Instance Metrics - CPU Utilization (Daily)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
-			Hydrate:       listSQLDatabaseInstanceCpuUtilizationMetricHourly,
+			Hydrate:       listSQLDatabaseInstanceCpuUtilizationMetricDaily,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
@@ -32,7 +32,7 @@ func tableGcpSQLDatabaseInstanceCpuUtilizationMetricHourly(_ context.Context) *p
 
 //// LIST FUNCTION
 
-func listSQLDatabaseInstanceCpuUtilizationMetricHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listSQLDatabaseInstanceCpuUtilizationMetricDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	instanceInfo := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Get project details
@@ -44,5 +44,5 @@ func listSQLDatabaseInstanceCpuUtilizationMetricHourly(ctx context.Context, d *p
 	location := instanceInfo.Region
 	dimensionValue := "\"" + project + ":" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"cloudsql.googleapis.com/database/cpu/utilization\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
+	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"cloudsql.googleapis.com/database/cpu/utilization\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
 }

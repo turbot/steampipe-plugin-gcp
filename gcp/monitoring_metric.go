@@ -59,7 +59,7 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 		{
 			Name:        "timestamp",
 			Description: "The time stamp used for the data point.",
-			Type:        proto.ColumnType_STRING,
+			Type:        proto.ColumnType_TIMESTAMP,
 			Transform:   transform.FromField("TimeStamp"),
 		},
 		{
@@ -82,6 +82,16 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 			Name:        "resource",
 			Description: "The associated monitored resource.",
 			Type:        proto.ColumnType_JSON,
+		},
+		{
+			Name:        "location",
+			Description: ColumnDescriptionLocation,
+			Type:        proto.ColumnType_STRING,
+		},
+		{
+			Name:        "project",
+			Description: ColumnDescriptionProject,
+			Type:        proto.ColumnType_STRING,
 		},
 	}
 }
@@ -129,6 +139,12 @@ type monitorMetric struct {
 
 	// The units in which the metric value is reported. It is only applicable if the value_type is INT64, DOUBLE, or DISTRIBUTION. The unit defines the representation of the stored metric values.
 	Unit string
+
+	// The GCP multi-region, region, or zone in which the resource is located.
+	Location string
+
+	// The GCP Project in which the resource is located.
+	Project string
 }
 
 func getMonitoringStartDateForGranularity(granularity string) time.Time {
@@ -168,7 +184,7 @@ func getIncrementalTimeAsPerGranularity(granularity string) time.Duration {
 	}
 }
 
-func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string) (*monitoring.ListTimeSeriesResponse, error) {
+func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string, location string) (*monitoring.ListTimeSeriesResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitorMetricStatistics")
 
 	// Create Service Connection
@@ -209,6 +225,8 @@ func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granu
 					TimeStamp:      &statistic.TimeStamp,
 					Resource:       metric.Resource,
 					Unit:           metric.Unit,
+					Location:       location,
+					Project:        project,
 				})
 			}
 		}
