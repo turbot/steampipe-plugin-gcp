@@ -41,7 +41,8 @@ func listSQLDatabaseInstanceMetricConnectionsHourly(ctx context.Context, d *plug
 		return nil, err
 	}
 	project := projectData.Project
+	location := instanceInfo.Region
 	dimensionValue := "\"" + project + ":" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name)
+	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
 }
