@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableComputeGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
+func tableGcpComputeGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_disk_metric_write_ops_daily",
 		Description: "GCP Compute Disk Metrics - Write Ops (Daily)",

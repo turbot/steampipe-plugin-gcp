@@ -11,7 +11,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableComputeInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Table {
+func tableGcpComputeInstanceCpuUtilizationMetricDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_instance_metric_cpu_utilization_daily",
 		Description: "GCP Compute Instance Metrics - CPU Utilization (Daily)",
