@@ -11,7 +11,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpComputeInstanceCpuUtilizationMetricHourly(_ context.Context) *plugin.Table {
+func tableGcpComputeInstanceMetricCpuUtilizationHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_instance_metric_cpu_utilization_hourly",
 		Description: "GCP Compute Instance Metrics - CPU Utilization (Hourly)",
