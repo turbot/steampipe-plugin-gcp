@@ -18,7 +18,7 @@ func tableGcpComputeDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
 		Description: "GCP Compute Disk Metrics - Read Ops (Daily)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeDisk,
-			Hydrate:       listDiskMetricReadOpsDaily,
+			Hydrate:       listComputeDiskMetricReadOpsDaily,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
@@ -33,7 +33,7 @@ func tableGcpComputeDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDiskMetricReadOpsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listComputeDiskMetricReadOpsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	diskInfo := h.Item.(*compute.Disk)
 
 	// Get location

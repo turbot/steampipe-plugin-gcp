@@ -11,7 +11,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpSQLDatabaseInstanceConnectionsMetric(_ context.Context) *plugin.Table {
+func tableGcpSQLDatabaseInstanceMetricConnections(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_sql_database_instance_metric_connections",
 		Description: "GCP SQL Database Instance Metrics Connections",

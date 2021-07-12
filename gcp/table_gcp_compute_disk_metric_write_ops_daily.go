@@ -12,13 +12,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableComputeGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
+func tableGcpComputeDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_disk_metric_write_ops_daily",
 		Description: "GCP Compute Disk Metrics - Write Ops (Daily)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeDisk,
-			Hydrate:       listDiskMetricWriteOpsDaily,
+			Hydrate:       listComputeDiskMetricWriteOpsDaily,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
@@ -33,7 +33,7 @@ func tableComputeGcpDiskMetricWriteOpsDaily(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDiskMetricWriteOpsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listComputeDiskMetricWriteOpsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	diskInfo := h.Item.(*compute.Disk)
 
 	// Get location
