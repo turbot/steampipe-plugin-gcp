@@ -11,7 +11,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpSQLDatabaseInstanceConnectionsMetricHourly(_ context.Context) *plugin.Table {
+func tableGcpSQLDatabaseInstanceMetricConnectionsHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_sql_database_instance_metric_connections_hourly",
 		Description: "GCP SQL Database Instance Metrics - Connections (Hourly)",

@@ -11,13 +11,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpSQLDatabaseInstanceCpuUtilizationMetric(_ context.Context) *plugin.Table {
+func tableGcpSQLDatabaseInstanceMetricCpuUtilization(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_sql_database_instance_metric_cpu_utilization",
 		Description: "GCP SQL Database Instance Metrics - CPU Utilization",
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
-			Hydrate:       listSQLDatabaseInstanceCpuUtilizationMetric,
+			Hydrate:       listSQLDatabaseInstanceMetricCpuUtilization,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
@@ -32,7 +32,7 @@ func tableGcpSQLDatabaseInstanceCpuUtilizationMetric(_ context.Context) *plugin.
 
 //// LIST FUNCTION
 
-func listSQLDatabaseInstanceCpuUtilizationMetric(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listSQLDatabaseInstanceMetricCpuUtilization(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	instanceInfo := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Get project details
