@@ -4,10 +4,13 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
+	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -153,6 +156,11 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	resp, err := service.BackupRuns.List(project, instance.Name).Do()
 	if err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok {
+			if helpers.StringSliceContains([]string{"403"}, types.ToString(gerr.Code)) {
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 	for _, backup := range resp.Items {

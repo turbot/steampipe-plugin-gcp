@@ -3,10 +3,13 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/dns/v1"
+	"google.golang.org/api/googleapi"
 )
 
 type recordSetInfo = struct {
@@ -133,6 +136,11 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	resp, err := service.ResourceRecordSets.List(project, managedZone.Name).Do()
 	if err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok {
+			if helpers.StringSliceContains([]string{"403"}, types.ToString(gerr.Code)) {
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 

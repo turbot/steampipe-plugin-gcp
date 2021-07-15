@@ -4,10 +4,13 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
+	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -118,7 +121,7 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	// Get the details of Cloud SQL instance
 	instance := h.Item.(*sqladmin.DatabaseInstance)
-	
+
 	// ERROR: rpc error: code = Unknown desc = googleapi: Error 400: Invalid request: Invalid request since instance is not running., invalid
 	// Return nil, if the instance not in running state
 	if instance.State != "RUNNABLE" {
@@ -140,6 +143,11 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	resp, err := service.Databases.List(project, instance.Name).Do()
 	if err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok {
+			if helpers.StringSliceContains([]string{"403"}, types.ToString(gerr.Code)) {
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 	for _, database := range resp.Items {
