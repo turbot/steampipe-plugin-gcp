@@ -9,9 +9,11 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 )
 
@@ -157,4 +159,12 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 		}
 	}
 	return opts
+}
+
+// Function which returns an IsForbiddenError for GCP API calls
+func IsForbiddenError(err error) bool {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		return helpers.StringSliceContains([]string{"403"}, types.ToString(gerr.Code))
+	}
+	return false
 }

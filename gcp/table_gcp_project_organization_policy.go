@@ -3,14 +3,11 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/googleapi"
 )
 
 //// TABLE DEFINITION
@@ -121,10 +118,8 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _
 		}
 		return nil
 	}); err != nil {
-		if gerr, ok := err.(*googleapi.Error); ok {
-			if helpers.StringSliceContains([]string{"403"}, types.ToString(gerr.Code)) {
-				return nil, nil
-			}
+		if IsForbiddenError(err) {
+			return nil, nil
 		}
 		return nil, err
 	}
