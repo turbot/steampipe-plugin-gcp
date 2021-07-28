@@ -308,9 +308,7 @@ func getRowDataForImage(ctx context.Context, service *compute.Service, project s
 	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
 	resp := service.Images.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
-		for _, image := range page.Items {
-			items = append(items, image)
-		}
+		items = append(items, page.Items...)
 		return nil
 	}); err != nil {
 		return nil, err
@@ -363,7 +361,7 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	splittedTitle := strings.Split(image.SelfLink, "/")
 	imageProject := types.SafeString(splittedTitle[6])
 
-	if strings.ToLower(imageProject) != strings.ToLower(project) {
+	if !strings.EqualFold(imageProject, project) {
 		return nil, nil
 	}
 

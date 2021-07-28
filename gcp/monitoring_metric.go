@@ -316,7 +316,7 @@ func metricstatistic(granularity string, points []*monitoring.Point, ctx context
 				TimeStamp:   startTime,
 			})
 			maxValue, minValue = pointValues[pointCount].Point, pointValues[pointCount].Point
-			pointCount, sum, average, sampleCount, timeDiff, diffCheckExecuted = 0, 0, 0, 0, 0, true
+			pointCount, sum, average, sampleCount, timeDiff, diffCheckExecuted = 0, 0.0, 0.0, 0.0, 0.0, true
 
 			// Set the time interval as per granularity
 			currentStartTime, _ := time.Parse(time.RFC3339, startTime)

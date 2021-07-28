@@ -102,7 +102,7 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 }
 
 func getProjectFromCLI() (*projectInfo, error) {
-	const gcloudCLIPath = "/usr/lib/google-cloud-sdk/bin"
+	// const gcloudCLIPath = "/usr/lib/google-cloud-sdk/bin"
 
 	// The default install paths are used to find Google cloud CLI.
 	// This is for security, so that any path in the calling program's Path environment is not used to execute Google Cloud CLI.
@@ -110,7 +110,7 @@ func getProjectFromCLI() (*projectInfo, error) {
 	gcloudCLIDefaultPathWindows := fmt.Sprintf("%s\\Google\\Cloud SDK\\cloud_env.bat; %s\\Google\\Cloud SDK\\cloud_env.bat", os.Getenv("ProgramFiles(x86)"), os.Getenv("ProgramFiles"))
 
 	// Default path for non-Windows.
-	const gcloudCLIDefaultPath = "/bin:/sbin:/usr/bin:/usr/local/bin"
+	// const gcloudCLIDefaultPath = "/bin:/sbin:/usr/bin:/usr/local/bin"
 
 	// Execute GOOGLE CLOUD CLI to get project info
 	var cliCmd *exec.Cmd
@@ -145,16 +145,14 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	if &gcpConfig != nil {
-		if gcpConfig.Project != nil {
-			os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
-		}
-		if gcpConfig.CredentialFile != nil {
-			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *gcpConfig.CredentialFile)
-		}
-		if gcpConfig.ImpersonateServiceAccount != nil {
-			opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
-		}
+	if gcpConfig.Project != nil {
+		os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
+	}
+	if gcpConfig.CredentialFile != nil {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *gcpConfig.CredentialFile)
+	}
+	if gcpConfig.ImpersonateServiceAccount != nil {
+		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
 	}
 	return opts
 }
