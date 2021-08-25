@@ -1,0 +1,7 @@
+[
+  {
+    "managed_zone_name": "{{ resourceName }}",
+    "name": "{{ output.record_set_name.value }}",
+    "type": "A"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "akas": ["{{ output.project_aka.value }}"],
+    "location": "global",
+    "project": "{{ output.project_id.value }}",
+    "title": "{{ output.resource_title.value }}"
+  }
+]

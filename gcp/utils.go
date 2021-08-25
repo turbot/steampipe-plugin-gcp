@@ -12,6 +12,7 @@ import (
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"google.golang.org/api/option"
 )
 
 func getLastPathElement(path string) string {
@@ -139,9 +140,10 @@ func getProjectFromCLI() (*projectInfo, error) {
 	}, nil
 }
 
-// Set project values from config
-func setSessionConfig(connection *plugin.Connection) {
+// Set project values from config and return client options
+func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
+	opts := []option.ClientOption{}
 
 	if &gcpConfig != nil {
 		if gcpConfig.Project != nil {
@@ -150,5 +152,9 @@ func setSessionConfig(connection *plugin.Connection) {
 		if gcpConfig.CredentialFile != nil {
 			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *gcpConfig.CredentialFile)
 		}
+		if gcpConfig.ImpersonateServiceAccount != nil {
+			opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
+		}
 	}
+	return opts
 }
