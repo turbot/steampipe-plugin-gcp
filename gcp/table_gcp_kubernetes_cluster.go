@@ -383,6 +383,11 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()
+	
+	// Return nil, if no input provided
+	if name == "" || location == "" {
+		return nil, nil
+	}
 
 	resp, err := service.Projects.Locations.Clusters.Get("projects/" + project + "/locations/" + location + "/clusters/" + name).Do()
 	if err != nil {
