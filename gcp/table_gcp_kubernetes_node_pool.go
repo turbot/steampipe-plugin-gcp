@@ -55,7 +55,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "initial_node_count",
 				Description: "The initial node count for the pool.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "version",
@@ -63,19 +63,14 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "locations",
-				Description: "The initial node count for the pool.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "instance_group_urls",
 				Description: "The resource URLs of the managed instance groups associated with this node pool.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "pod_ipv4_cidr_size",
 				Description: "The pod CIDR block size per node in this node pool.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "config",
@@ -85,6 +80,11 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "autoscaling",
 				Description: "Autoscaler configuration for this node pool.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "locations",
+				Description: "The list of Google Compute Engine zones.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

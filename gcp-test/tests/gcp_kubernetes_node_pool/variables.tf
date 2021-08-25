@@ -69,7 +69,6 @@ resource "google_container_node_pool" "named_test_resource" {
   }
 }
 
-
 output "resource_name" {
   value = var.resource_name
 }
