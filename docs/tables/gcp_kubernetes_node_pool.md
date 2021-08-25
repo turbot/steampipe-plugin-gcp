@@ -1,6 +1,6 @@
 # Table: gcp_kubernetes_node_pool
 
-A node pool is a group of nodes within a cluster that all have the same configuration. Node pools use a NodeConfig specification. Each node in the pool has a Kubernetes node label, cloud.google.com/gke-nodepool , which has the node pool's name as its value.
+A node pool is a group of nodes within a cluster that all have the same configuration. Node pools use a NodeConfig specification. Each node in the pool has a Kubernetes node label, cloud.google.com/gke-nodepool, which has the node pool's name as its value.
 
 ## Examples
 
@@ -48,7 +48,7 @@ from
 ```
 
 
-### List of all ZONAL node pools
+### List of all zonal node pools
 
 ```sql
 select

@@ -50,7 +50,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Name:        "cluster_name",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster in which the Node pool is located.",
-				Transform:   transform.FromP(GcpKubernetesNodePoolTurbotData, "ClusterName"),
+				Transform:   transform.FromP(kubernetesNodePoolTurbotData, "ClusterName"),
 			},
 			{
 				Name:        "initial_node_count",
@@ -84,7 +84,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "autoscaling",
-				Description: "Autoscaler configuration for this NodePool.",
+				Description: "Autoscaler configuration for this node pool.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -119,7 +119,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(GcpKubernetesNodePoolTurbotData, "Akas"),
+				Transform:   transform.FromP(kubernetesNodePoolTurbotData, "Akas"),
 			},
 
 			// GCP standard columns
@@ -127,7 +127,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(GcpKubernetesNodePoolTurbotData, "Location"),
+				Transform:   transform.FromP(kubernetesNodePoolTurbotData, "Location"),
 			},
 			{
 				Name:        "project",
@@ -195,6 +195,11 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	location := d.KeyColumnQuals["location"].GetStringValue()
 	clusterName := d.KeyColumnQuals["cluster_name"].GetStringValue()
 
+	// Empty check
+	if name == "" || location == "" || clusterName == "" {
+		plugin.Logger(ctx).Trace("Name or Location or Cluster name can not be empty")
+		return nil, nil
+	}
 	parent := "projects/" + project + "/locations/" + location + "/clusters/" + clusterName + "/nodePools/" + name
 
 	resp, err := service.Projects.Locations.Clusters.NodePools.Get(parent).Do()
@@ -207,8 +212,8 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 //// TRANSFORM FUNCTIONS
 
-func GcpKubernetesNodePoolTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("GcpKubernetesNodePoolTurbotData")
+func kubernetesNodePoolTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("kubernetesNodePoolTurbotData")
 	nodePool := d.HydrateItem.(*container.NodePool)
 
 	splitName := strings.Split(nodePool.SelfLink, "/")
