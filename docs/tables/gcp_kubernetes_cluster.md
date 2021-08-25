@@ -49,7 +49,7 @@ where
 ```
 
 
-### List clusters with default Service Account
+### List clusters with default service account
 
 ```sql
 select

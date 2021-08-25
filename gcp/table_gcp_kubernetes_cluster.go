@@ -58,7 +58,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "cluster_ipv4_cidr",
 				Description: "The IP address range of the container pods in this cluster, in CIDR notation.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "shielded_nodes_enabled",
@@ -132,7 +132,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "expire_time",
-				Description: "The time the cluster will be automatically deleted in RFC3339 text format.",
+				Description: "The time the cluster will be automatically deleted.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("ExpireTime").Transform(transform.NullIfZeroValue),
 			},
@@ -174,12 +174,12 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "services_ipv4_cidr",
 				Description: "The IP address range of the Kubernetes services in this cluster, in CIDR notation.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "tpu_ipv4_cidr_block",
 				Description: "The IP address range of the Cloud TPUs in this cluster, in CIDR notation.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "zone",
