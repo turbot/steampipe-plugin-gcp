@@ -1,0 +1,7 @@
+[
+  {
+    "akas": ["{{ output.project_aka.value }}"],
+    "name": "{{ output.project_id.value }}",
+    "title": "{{ output.project_id.value }}"
+  }
+]

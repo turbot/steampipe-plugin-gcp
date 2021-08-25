@@ -1,3 +1,92 @@
+## v0.15.0 [2021-07-08]
+
+_What's new?_
+
+- New tables added
+  - [gcp_sql_database_instance_metric_connections](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_connections) ([#267](https://github.com/turbot/steampipe-plugin-gcp/pull/267))
+  - [gcp_sql_database_instance_metric_connections_hourly](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_connections_hourly) ([#268](https://github.com/turbot/steampipe-plugin-gcp/pull/268))
+
+_Enhancements_
+
+- Updated: Add columns `location` and `project` to all metric tables ([#279](https://github.com/turbot/steampipe-plugin-gcp/pull/279))
+
+_Bug fixes_
+
+- Fixed: `timestamp` column type in all metric tables is now `TIMESTAMP` instead of `STRING` ([#277](https://github.com/turbot/steampipe-plugin-gcp/pull/277))
+- Fixed: Typo in table name and invalid key column definition for `gcp_dns_record_set table`
+
+## v0.14.0 [2021-07-01]
+
+_What's new?_
+
+- New tables added
+  - [gcp_bigquery_job](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_bigquery_job) ([#247](https://github.com/turbot/steampipe-plugin-gcp/pull/247))
+  - [gcp_compute_disk_metric_read_ops](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_disk_metric_read_ops) ([#262](https://github.com/turbot/steampipe-plugin-gcp/pull/262))
+  - [gcp_compute_disk_metric_read_ops_daily](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_disk_metric_read_ops_daily) ([#264](https://github.com/turbot/steampipe-plugin-gcp/pull/264))
+  - [gcp_compute_disk_metric_read_ops_hourly](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_disk_metric_read_ops_hourly) ([#260](https://github.com/turbot/steampipe-plugin-gcp/pull/260))
+  - [gcp_compute_disk_metric_write_ops](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_disk_metric_write_ops) ([#272](https://github.com/turbot/steampipe-plugin-gcp/pull/272))
+  - [gcp_compute_disk_metric_write_ops_daily](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_disk_metric_write_ops_daily) ([#263](https://github.com/turbot/steampipe-plugin-gcp/pull/263))
+  - [gcp_compute_disk_metric_write_ops_hourly](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_disk_metric_write_ops_hourly) ([#271](https://github.com/turbot/steampipe-plugin-gcp/pull/271))
+  - [gcp_compute_instance_metric_cpu_utilization](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_metric_cpu_utilization) ([#254](https://github.com/turbot/steampipe-plugin-gcp/pull/254))
+  - [gcp_compute_instance_metric_cpu_utilization_daily](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_metric_cpu_utilization_daily) ([#256](https://github.com/turbot/steampipe-plugin-gcp/pull/256))
+  - [gcp_compute_instance_metric_cpu_utilization_hourly](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_metric_cpu_utilization_hourly) ([#255](https://github.com/turbot/steampipe-plugin-gcp/pull/255))
+  - [gcp_compute_machine_type](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_machine_type) ([#238](https://github.com/turbot/steampipe-plugin-gcp/pull/238))
+  - [gcp_compute_resource_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_resource_policy) ([#237](https://github.com/turbot/steampipe-plugin-gcp/pull/237))
+  - [gcp_dns_record_set](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dns_record_set) ([#212](https://github.com/turbot/steampipe-plugin-gcp/pull/212))
+  - [gcp_logging_bucket](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_logging_bucket) ([#232](https://github.com/turbot/steampipe-plugin-gcp/pull/232))
+  - [gcp_organization](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_organization) ([#250](https://github.com/turbot/steampipe-plugin-gcp/pull/250))
+  - [gcp_project_organization_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_project_organization_policy) ([#204](https://github.com/turbot/steampipe-plugin-gcp/pull/204))
+  - [gcp_sql_database_instance_metric_connections_daily](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_connections_daily) ([#240](https://github.com/turbot/steampipe-plugin-gcp/pull/240))
+  - [gcp_sql_database_instance_metric_cpu_utilization](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_cpu_utilization) ([#259](https://github.com/turbot/steampipe-plugin-gcp/pull/259))
+  - [gcp_sql_database_instance_metric_cpu_utilization_daily](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_cpu_utilization_daily) ([#251](https://github.com/turbot/steampipe-plugin-gcp/pull/251))
+  - [gcp_sql_database_instance_metric_cpu_utilization_hourly](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_sql_database_instance_metric_cpu_utilization_hourly) ([#261](https://github.com/turbot/steampipe-plugin-gcp/pull/261))
+
+_Enhancements_
+
+- Updated: Add support for service account impersonation credentials ([#249](https://github.com/turbot/steampipe-plugin-gcp/pull/249))
+
+_Bug fixes_
+
+- Fixed: List and get calls should not error in `gcp_sql_database` table for stopped databases ([#244](https://github.com/turbot/steampipe-plugin-gcp/pull/244))
+
+## v0.13.1 [2021-06-17]
+
+_Bug fixes_
+
+- Fixed: `id` column type in `gcp_compute_disk` table ([#228](https://github.com/turbot/steampipe-plugin-gcp/pull/228))
+- Fixed: Example query in `gcp_compute_address` table doc ([#224](https://github.com/turbot/steampipe-plugin-gcp/pull/224))
+
+## v0.13.0 [2021-05-27]
+
+_What's new?_
+
+- Updated plugin license to Apache 2.0 per [turbot/steampipe#488](https://github.com/turbot/steampipe/issues/488)
+- New tables added
+  - [gcp_kms_key](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kms_key) ([#215](https://github.com/turbot/steampipe-plugin-gcp/pull/215))
+
+## v0.12.0 [2021-05-20]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_project_metadata](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_project_metadata) ([#192](https://github.com/turbot/steampipe-plugin-gcp/pull/192))
+  - [gcp_dns_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dns_policy) ([#208](https://github.com/turbot/steampipe-plugin-gcp/pull/208))
+  - [gcp_project](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_project) ([#205](https://github.com/turbot/steampipe-plugin-gcp/pull/205))
+
+## v0.11.0 [2021-05-13]
+
+_What's new?_
+
+- New tables added
+  - [gcp_bigquery_table](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_bigquery_table) ([#198](https://github.com/turbot/steampipe-plugin-gcp/pull/198))
+
+_Enhancements_
+
+- Updated: README.md and docs/index.md now contain links to our Slack community ([#202](https://github.com/turbot/steampipe-plugin-gcp/pull/202))
+- Updated: Add `self_link` column to `gcp_dns_managed_zone` table ([#195](https://github.com/turbot/steampipe-plugin-gcp/pull/195))
+- Updated: Add `self_link` column to `gcp_logging_sink` table ([#193](https://github.com/turbot/steampipe-plugin-gcp/pull/193))
+- Updated: Bump lodash from 4.17.20 to 4.17.21 in /gcp-test ([#197](https://github.com/turbot/steampipe-plugin-gcp/pull/197))
+
 ## v0.10.0 [2021-05-06]
 
 _What's new?_

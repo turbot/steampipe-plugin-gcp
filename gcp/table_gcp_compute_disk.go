@@ -32,7 +32,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "The unique identifier for the resource. This identifier is defined by the server.",
-				Type:        proto.ColumnType_DOUBLE,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "creation_timestamp",

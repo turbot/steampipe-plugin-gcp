@@ -1,0 +1,18 @@
+[
+  {
+    "description": "Start and stop instances",
+    "instance_schedule_policy": {
+      "timeZone": "US/Central",
+      "vmStartSchedule": {
+        "schedule": "0 * * * *"
+      },
+      "vmStopSchedule": {
+        "schedule": "15 * * * *"
+      }
+    },
+    "kind": "compute#resourcePolicy",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}",
+    "status": "READY"
+  }
+]

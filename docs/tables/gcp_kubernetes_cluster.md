@@ -1,4 +1,4 @@
-# Table:  gcp_kubernetes_cluster
+# Table: gcp_kubernetes_cluster
 
 A cluster is the foundation of Google Kubernetes Engine (GKE): the Kubernetes objects that represent the containerized applications all run on top of a cluster. In GKE, a cluster consists of at least one control plane and multiple worker machines called nodes.
 
