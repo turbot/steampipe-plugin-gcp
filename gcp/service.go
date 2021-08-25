@@ -149,7 +149,7 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 	return svc, nil
 }
 
-// ContainerService returns the service connection for GCP Kubernetes service
+// ContainerService returns the service connection for GCP Container service
 func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ContainerService"
