@@ -37,7 +37,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "location_type",
-				Description: "Location type of the cluster i.e REGIONAL/ZONAL.",
+				Description: "Location type of the cluster. Possible values are: 'REGIONAL', 'ZONAL'.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.From(gcpKubernetesNodePoolLocationType),
 			},
@@ -89,7 +89,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "management",
-				Description: "Node management configuration for this NodePool.",
+				Description: "Node management configuration for this node pool.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -197,7 +197,6 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	// Empty check
 	if name == "" || location == "" || clusterName == "" {
-		plugin.Logger(ctx).Trace("Name or Location or Cluster name can not be empty")
 		return nil, nil
 	}
 	parent := "projects/" + project + "/locations/" + location + "/clusters/" + clusterName + "/nodePools/" + name
