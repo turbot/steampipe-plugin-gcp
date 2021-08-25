@@ -63,14 +63,19 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "instance_group_urls",
-				Description: "The resource URLs of the managed instance groups associated with this node pool.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "pod_ipv4_cidr_size",
 				Description: "The pod CIDR block size per node in this node pool.",
 				Type:        proto.ColumnType_INT,
+			},
+			{
+				Name:        "autoscaling",
+				Description: "Autoscaler configuration for this node pool.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "conditions",
+				Description: "Which conditions caused the current node pool state.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "config",
@@ -78,8 +83,8 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "autoscaling",
-				Description: "Autoscaler configuration for this node pool.",
+				Name:        "instance_group_urls",
+				Description: "The resource URLs of the managed instance groups associated with this node pool.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -95,11 +100,6 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "max_pods_constraint",
 				Description: "The constraint on the maximum number of pods that can be run simultaneously on a node in the node pool.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "conditions",
-				Description: "Which conditions caused the current node pool state.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
