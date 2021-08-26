@@ -1,3 +1,15 @@
+## v0.16.0 [2021-08-26]
+
+_What's new?_
+
+- New tables added
+  - [gcp_kubernetes_cluster](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kubernetes_cluster) ([#213](https://github.com/turbot/steampipe-plugin-gcp/pull/213))
+  - [gcp_kubernetes_node_pool](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kubernetes_node_pool) ([#214](https://github.com/turbot/steampipe-plugin-gcp/pull/214))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.5.0](https://github.com/turbot/steampipe-plugin-gcp/pull/290)
+
 ## v0.15.0 [2021-07-08]
 
 _What's new?_
