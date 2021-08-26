@@ -1,4 +1,4 @@
-# Table:  gcp_kubernetes_cluster
+# Table: gcp_kubernetes_cluster
 
 A cluster is the foundation of Google Kubernetes Engine (GKE): the Kubernetes objects that represent the containerized applications all run on top of a cluster. In GKE, a cluster consists of at least one control plane and multiple worker machines called nodes.
 
@@ -21,7 +21,7 @@ from
 ```
 
 
-### List of all zonal clusters
+### List zonal clusters
 
 ```sql
 select
@@ -30,11 +30,54 @@ select
 from
   gcp_kubernetes_cluster
 where
-  location_type = 'Zonal';
+  location_type = 'ZONAL';
 ```
 
 
-### List clusters where shielded nodes features are disabled
+### List clusters with node auto-upgrade enabled
+
+```sql
+select
+  name,
+  location_type,
+  n -> 'management' ->> 'autoUpgrade' node_auto_upgrade
+from
+  gcp_kubernetes_cluster,
+  jsonb_array_elements(node_pools) as n
+where
+  n -> 'management' ->> 'autoUpgrade' = 'true';
+```
+
+
+### List clusters with default service account
+
+```sql
+select
+  name,
+  location_type,
+  node_config ->> 'serviceAccount' service_account
+from
+  gcp_kubernetes_cluster
+where
+  node_config ->> 'serviceAccount' = 'default';
+```
+
+
+### List clusters with legacy authorization enabled
+
+```sql
+select
+  name,
+  location_type,
+  legacy_abac_enabled
+from
+  gcp_kubernetes_cluster
+where
+  legacy_abac_enabled;
+```
+
+
+### List clusters with shielded nodes features disabled
 
 ```sql
 select

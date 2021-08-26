@@ -10,6 +10,8 @@ import (
 	"google.golang.org/api/container/v1"
 )
 
+//// TABLE DEFINITION
+
 func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_kubernetes_cluster",
@@ -22,7 +24,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			Hydrate:    getKubernetesCluster,
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "The name of this cluster.",
@@ -35,7 +36,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "location_type",
-				Description: "Location type of the cluster",
+				Description: "Location type of the cluster i.e REGIONAL/ZONAL.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.From(gcpKubernetesClusterLocationType),
 			},
@@ -57,7 +58,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "cluster_ipv4_cidr",
 				Description: "The IP address range of the container pods in this cluster, in CIDR notation.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "shielded_nodes_enabled",
@@ -80,8 +81,14 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "max_pods_per_node",
 				Description: "Constraint enforced on the max num of pods per node.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("DefaultMaxPodsConstraint.MaxPodsPerNode"),
+			},
+			{
+				Name:        "legacy_abac_enabled",
+				Description: "Configuration for the legacy ABAC authorization mode.",
+				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("LegacyAbac.Enabled"),
 			},
 			{
 				Name:        "current_master_version",
@@ -125,7 +132,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "expire_time",
-				Description: "The time the cluster will be automatically deleted in RFC3339 text format.",
+				Description: "The time the cluster will be automatically deleted.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("ExpireTime").Transform(transform.NullIfZeroValue),
 			},
@@ -167,20 +174,18 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "services_ipv4_cidr",
 				Description: "The IP address range of the Kubernetes services in this cluster, in CIDR notation.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "tpu_ipv4_cidr_block",
 				Description: "The IP address range of the Cloud TPUs in this cluster, in CIDR notation.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "zone",
 				Description: "The name of the Google Compute Engine zone in which the cluster resides.",
 				Type:        proto.ColumnType_STRING,
 			},
-
-			// JSON Columns
 			{
 				Name:        "addons_config",
 				Description: "Configurations for the various addons available to run in the cluster.",
@@ -214,11 +219,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "ip_allocation_policy",
 				Description: "Configuration for cluster IP allocation.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "legacy_abac",
-				Description: "Configuration for the legacy ABAC authorization mode.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -296,19 +296,19 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Description: "Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.",
 				Type:        proto.ColumnType_JSON,
 			},
-			{
-				Name:        "server_response",
-				Description: "ServerResponse contains the HTTP response code and headers from the server.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("googleapi.ServerResponse"),
-			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
+			},
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ResourceLabels"),
 			},
 			{
 				Name:        "akas",
@@ -317,7 +317,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromP(gcpKubernetesClusterTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -363,6 +363,8 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	return nil, nil
 }
 
+/// HYDRATE FUNCTIONS
+
 func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKubernetesCluster")
 
@@ -382,6 +384,11 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()
 
+	// Return nil, if no input provided
+	if name == "" || location == "" {
+		return nil, nil
+	}
+
 	resp, err := service.Projects.Locations.Clusters.Get("projects/" + project + "/locations/" + location + "/clusters/" + name).Do()
 	if err != nil {
 		return nil, err
@@ -390,24 +397,22 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return resp, nil
 }
 
-//// TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
 
 func gcpKubernetesClusterTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("gcpKubernetesClusterTurbotData")
 	cluster := d.HydrateItem.(*container.Cluster)
 
 	splitName := strings.Split(cluster.SelfLink, "/")
-	akas := []string{strings.Replace(cluster.SelfLink, "https", "gcp", 1)}
+	akas := []string{strings.Replace(cluster.SelfLink, "https://", "gcp://", 1)}
 
-	if d.Param.(string) == "ClusterName" {
-		return splitName[9], nil
-	} else if d.Param.(string) == "Location" {
-		return splitName[7], nil
-	} else if d.Param.(string) == "Project" {
-		return splitName[5], nil
-	} else {
-		return akas, nil
+	result := map[string]interface{}{
+		"ClusterName": splitName[9],
+		"Location": splitName[7],
+		"Project": splitName[5],
+		"Akas": akas,
 	}
+	return result[d.Param.(string)], nil
 }
 
 func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.TransformData) (interface{}, error) {
@@ -417,8 +422,7 @@ func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.Transfor
 	splitName := strings.Split(cluster.SelfLink, "/")
 
 	if splitName[6] == "locations" {
-		return "Regional", nil
-	} else {
-		return "Zonal", nil
+		return "REGIONAL", nil
 	}
+	return "ZONAL", nil
 }
