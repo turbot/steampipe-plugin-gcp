@@ -10,6 +10,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/container/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
@@ -140,6 +141,27 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 
 	// so it was not in cache - create service
 	svc, err := compute.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// ContainerService returns the service connection for GCP Container service
+func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "ContainerService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*container.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := container.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
