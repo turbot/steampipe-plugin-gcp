@@ -8,7 +8,7 @@ _What's new?_
 
 _Enhancements_
 
-- Recompiled plugin with [steampipe-plugin-sdk v1.5.0](https://github.com/turbot/steampipe-plugin-gcp/pull/290)
+- Recompiled plugin with [steampipe-plugin-sdk v1.5.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v150--2021-08-06)
 
 ## v0.15.0 [2021-07-08]
 
