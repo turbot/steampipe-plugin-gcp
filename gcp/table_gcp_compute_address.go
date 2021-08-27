@@ -23,7 +23,8 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeAddress,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeAddresses,
+			Hydrate:           listComputeAddresses,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

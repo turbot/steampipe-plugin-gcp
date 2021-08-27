@@ -21,7 +21,8 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigQueryJob,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBigQueryJobs,
+			Hydrate:           listBigQueryJobs,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

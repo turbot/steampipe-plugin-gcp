@@ -16,8 +16,9 @@ func tableGcpSQLDatabaseInstanceMetricCpuUtilizationHourly(_ context.Context) *p
 		Name:        "gcp_sql_database_instance_metric_cpu_utilization_hourly",
 		Description: "GCP SQL Database Instance Metrics - CPU Utilization (Hourly)",
 		List: &plugin.ListConfig{
-			ParentHydrate: listSQLDatabaseInstances,
-			Hydrate:       listSQLDatabaseInstanceMetricCpuUtilizationHourly,
+			ParentHydrate:     listSQLDatabaseInstances,
+			Hydrate:           listSQLDatabaseInstanceMetricCpuUtilizationHourly,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

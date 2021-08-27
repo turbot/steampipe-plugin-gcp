@@ -19,7 +19,8 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeSnapshots,
+			Hydrate:           listComputeSnapshots,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns

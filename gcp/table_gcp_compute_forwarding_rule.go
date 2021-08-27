@@ -23,7 +23,8 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeForwardingRule,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeForwardingRules,
+			Hydrate:           listComputeForwardingRules,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

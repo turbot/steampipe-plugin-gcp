@@ -17,7 +17,8 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 		Name:        "gcp_kubernetes_cluster",
 		Description: "GCP Kubernetes Cluster",
 		List: &plugin.ListConfig{
-			Hydrate: listKubernetesClusters,
+			Hydrate:           listKubernetesClusters,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
@@ -408,9 +409,9 @@ func gcpKubernetesClusterTurbotData(ctx context.Context, d *transform.TransformD
 
 	result := map[string]interface{}{
 		"ClusterName": splitName[9],
-		"Location": splitName[7],
-		"Project": splitName[5],
-		"Akas": akas,
+		"Location":    splitName[7],
+		"Project":     splitName[5],
+		"Akas":        akas,
 	}
 	return result[d.Param.(string)], nil
 }

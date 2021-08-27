@@ -21,7 +21,8 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeMachineType,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeMachineTypes,
+			Hydrate:           listComputeMachineTypes,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -171,7 +172,7 @@ func getComputeMachineType(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	project := projectData.Project
 	zone := "us-central1-c"
 	machineTypeName := d.KeyColumnQuals["name"].GetStringValue()
-	
+
 	// Return nil, if no input provided
 	if machineTypeName == "" {
 		return nil, nil

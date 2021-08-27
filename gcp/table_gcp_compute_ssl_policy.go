@@ -22,7 +22,8 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSslPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeSslPolicies,
+			Hydrate:           listComputeSslPolicies,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

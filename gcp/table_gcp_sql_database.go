@@ -27,8 +27,9 @@ func tableGcpSQLDatabase(ctx context.Context) *plugin.Table {
 			Hydrate:    getSQLDatabase,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:       listSQLDatabases,
-			ParentHydrate: listSQLDatabaseInstances,
+			Hydrate:           listSQLDatabases,
+			ParentHydrate:     listSQLDatabaseInstances,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -118,7 +119,7 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	// Get the details of Cloud SQL instance
 	instance := h.Item.(*sqladmin.DatabaseInstance)
-	
+
 	// ERROR: rpc error: code = Unknown desc = googleapi: Error 400: Invalid request: Invalid request since instance is not running., invalid
 	// Return nil, if the instance not in running state
 	if instance.State != "RUNNABLE" {

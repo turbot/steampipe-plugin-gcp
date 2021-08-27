@@ -20,7 +20,8 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpStorageBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpStorageBuckets,
+			Hydrate:           listGcpStorageBuckets,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

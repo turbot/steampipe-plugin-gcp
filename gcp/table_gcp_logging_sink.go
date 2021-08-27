@@ -21,7 +21,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpLoggingSink,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpLoggingSinks,
+			Hydrate:           listGcpLoggingSinks,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

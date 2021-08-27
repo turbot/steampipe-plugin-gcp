@@ -16,8 +16,9 @@ func tableGcpSQLDatabaseInstanceMetricCpuUtilizationDaily(_ context.Context) *pl
 		Name:        "gcp_sql_database_instance_metric_cpu_utilization_daily",
 		Description: "GCP SQL Database Instance Metrics - CPU Utilization (Daily)",
 		List: &plugin.ListConfig{
-			ParentHydrate: listSQLDatabaseInstances,
-			Hydrate:       listSQLDatabaseInstanceMetricCpuUtilizationDaily,
+			ParentHydrate:     listSQLDatabaseInstances,
+			Hydrate:           listSQLDatabaseInstanceMetricCpuUtilizationDaily,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

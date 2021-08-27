@@ -20,7 +20,8 @@ func tableDnsPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDnsPolicies,
+			Hydrate:           listDnsPolicies,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -153,7 +154,7 @@ func getDnsPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-  if len(resp.Name) < 1 {
+	if len(resp.Name) < 1 {
 		return nil, nil
 	}
 

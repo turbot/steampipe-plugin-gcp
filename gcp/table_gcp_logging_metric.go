@@ -21,7 +21,8 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpLoggingMetric,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpLoggingMetrics,
+			Hydrate:           listGcpLoggingMetrics,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

@@ -19,7 +19,8 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 			Hydrate:    getMonitoringAlertPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listMonitoringAlertPolicies,
+			Hydrate:           listMonitoringAlertPolicies,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

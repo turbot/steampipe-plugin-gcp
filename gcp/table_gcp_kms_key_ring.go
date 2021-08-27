@@ -21,7 +21,8 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 			Hydrate:    getKeyRingDetail,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listKeyRingDetails,
+			Hydrate:           listKeyRingDetails,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
@@ -77,8 +78,14 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	location := plugin.GetMatrixItem(ctx)[matrixKeyLocation].(string)
 	plugin.Logger(ctx).Trace("listKeyRingDetails")
+
+	var location string
+	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	// Since, when the service API is disabled, matrixLocation value will be nil
+	if matrixLocation != nil {
+		location = matrixLocation.(string)
+	}
 
 	// Create Service Connection
 	service, err := KMSService(ctx, d)
@@ -108,8 +115,13 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 //// HYDRATE FUNCTIONS
 
 func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation].(string)
 	plugin.Logger(ctx).Trace("getKeyRingDetail")
+
+	var location string
+	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	if matrixLocation != nil {
+		location = matrixLocation.(string)
+	}
 
 	// Create Service Connection
 	service, err := KMSService(ctx, d)
@@ -125,13 +137,13 @@ func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	project := projectData.Project
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	location := d.KeyColumnQuals["location"].GetStringValue()
+	loc := d.KeyColumnQuals["location"].GetStringValue()
 
 	// to prevent duplicate value
-	if matrixLocation != location {
+	if location != loc {
 		return nil, nil
 	}
-	resp, err := service.Projects.Locations.KeyRings.Get("projects/" + project + "/locations/" + location + "/keyRings/" + name).Do()
+	resp, err := service.Projects.Locations.KeyRings.Get("projects/" + project + "/locations/" + loc + "/keyRings/" + name).Do()
 	if err != nil {
 		return nil, err
 	}
