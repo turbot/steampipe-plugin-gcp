@@ -19,7 +19,8 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 			Hydrate:    getMonitoringAlertPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listMonitoringAlertPolicies,
+			Hydrate:           listMonitoringAlertPolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -139,9 +140,6 @@ func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

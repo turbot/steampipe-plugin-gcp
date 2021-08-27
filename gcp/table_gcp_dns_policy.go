@@ -20,7 +20,8 @@ func tableDnsPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDnsPolicies,
+			Hydrate:           listDnsPolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -123,9 +124,6 @@ func listDnsPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

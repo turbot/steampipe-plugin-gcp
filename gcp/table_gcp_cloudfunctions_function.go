@@ -22,7 +22,8 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 			Hydrate:    getCloudFunction,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCloudFunctions,
+			Hydrate:           listCloudFunctions,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -222,9 +223,6 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

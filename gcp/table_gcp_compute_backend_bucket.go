@@ -22,7 +22,8 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeBackendBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeBackendBuckets,
+			Hydrate:           listComputeBackendBuckets,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -134,9 +135,6 @@ func listComputeBackendBuckets(ctx context.Context, d *plugin.QueryData, _ *plug
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

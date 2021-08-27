@@ -23,7 +23,8 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeForwardingRule,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeForwardingRules,
+			Hydrate:           listComputeForwardingRules,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -222,9 +223,6 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plu
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

@@ -16,7 +16,8 @@ func tableGcpOrganization(_ context.Context) *plugin.Table {
 		Name:        "gcp_organization",
 		Description: "GCP Organization",
 		List: &plugin.ListConfig{
-			Hydrate: listGCPOrganizations,
+			Hydrate:           listGCPOrganizations,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -88,9 +89,6 @@ func listGCPOrganizations(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

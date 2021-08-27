@@ -22,7 +22,8 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeVpnTunnel,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeVpnTunnels,
+			Hydrate:           listComputeVpnTunnels,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -239,9 +240,6 @@ func getComputeVpnTunnel(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

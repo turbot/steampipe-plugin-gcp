@@ -22,7 +22,8 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSslPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeSslPolicies,
+			Hydrate:           listComputeSslPolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -144,9 +145,6 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

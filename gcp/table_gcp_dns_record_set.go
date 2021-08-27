@@ -25,8 +25,9 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsRecordSet,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:       listDnsRecordSets,
-			ParentHydrate: listDnsManagedZones,
+			Hydrate:           listDnsRecordSets,
+			ParentHydrate:     listDnsManagedZones,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -133,9 +134,6 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	resp, err := service.ResourceRecordSets.List(project, managedZone.Name).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

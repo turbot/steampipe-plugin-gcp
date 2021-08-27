@@ -23,7 +23,8 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNodeGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeNodeGroups,
+			Hydrate:           listComputeNodeGroups,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -176,9 +177,6 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

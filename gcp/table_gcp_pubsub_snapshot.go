@@ -20,7 +20,8 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listPubSubSnapshot,
+			Hydrate:           listPubSubSnapshot,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -119,9 +120,6 @@ func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

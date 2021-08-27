@@ -44,9 +44,6 @@ func BuildLocationList(ctx context.Context, connection *plugin.Connection) []map
 
 	resp, err := service.Projects.Locations.List("projects/" + project).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil
-		}
 		return nil
 	}
 

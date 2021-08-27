@@ -20,7 +20,8 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeInstanceTemplate,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeInstanceTemplate,
+			Hydrate:           listComputeInstanceTemplate,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -216,9 +217,6 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

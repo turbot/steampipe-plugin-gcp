@@ -23,7 +23,8 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 			Hydrate:    getIamRole,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listIamRoles,
+			Hydrate:           listIamRoles,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -154,9 +155,6 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 	return nil, err

@@ -22,8 +22,9 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 			Hydrate:    getSQLBackup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:       listSQLBackups,
-			ParentHydrate: listSQLDatabaseInstances,
+			Hydrate:           listSQLBackups,
+			ParentHydrate:     listSQLDatabaseInstances,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -153,9 +154,6 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	resp, err := service.BackupRuns.List(project, instance.Name).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 	for _, backup := range resp.Items {

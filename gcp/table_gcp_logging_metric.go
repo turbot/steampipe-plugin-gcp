@@ -21,7 +21,8 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpLoggingMetric,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpLoggingMetrics,
+			Hydrate:           listGcpLoggingMetrics,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -202,9 +203,6 @@ func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

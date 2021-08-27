@@ -20,7 +20,8 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubTopic,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listPubSubTopics,
+			Hydrate:           listPubSubTopics,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -113,9 +114,6 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

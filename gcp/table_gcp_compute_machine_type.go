@@ -21,7 +21,8 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeMachineType,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeMachineTypes,
+			Hydrate:           listComputeMachineTypes,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -147,9 +148,6 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, _ *plugin
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

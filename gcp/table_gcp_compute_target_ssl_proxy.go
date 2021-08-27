@@ -22,7 +22,8 @@ func tableGcpComputeTargetSslProxy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetSslProxy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeTargetSslProxies,
+			Hydrate:           listComputeTargetSslProxies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -132,9 +133,6 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, _ *pl
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

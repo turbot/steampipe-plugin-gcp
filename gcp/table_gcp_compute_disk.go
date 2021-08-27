@@ -20,7 +20,8 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeDisk,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeDisk,
+			Hydrate:           listComputeDisk,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -281,9 +282,6 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

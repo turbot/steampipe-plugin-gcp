@@ -22,7 +22,8 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigtableInstance,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBigtableInstances,
+			Hydrate:           listBigtableInstances,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -122,9 +123,6 @@ func listBigtableInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

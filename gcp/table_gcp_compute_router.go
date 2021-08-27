@@ -23,7 +23,8 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeRouter,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeRouters,
+			Hydrate:           listComputeRouters,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -159,9 +160,6 @@ func listComputeRouters(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

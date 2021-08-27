@@ -21,7 +21,8 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetPool,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeTargetPools,
+			Hydrate:           listComputeTargetPools,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -176,9 +177,6 @@ func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

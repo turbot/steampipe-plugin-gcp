@@ -21,7 +21,8 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpServiceAccount,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpServiceAccounts,
+			Hydrate:           listGcpServiceAccounts,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -125,9 +126,6 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

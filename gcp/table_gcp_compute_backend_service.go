@@ -23,7 +23,8 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeBackendService,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeBackendServices,
+			Hydrate:           listComputeBackendServices,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -254,9 +255,6 @@ func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, _ *plu
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

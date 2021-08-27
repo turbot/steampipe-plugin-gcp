@@ -22,7 +22,8 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeInstance,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeInstances,
+			Hydrate:           listComputeInstances,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -297,9 +298,6 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

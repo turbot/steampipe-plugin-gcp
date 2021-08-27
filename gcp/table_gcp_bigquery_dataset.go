@@ -22,7 +22,8 @@ func tableGcpBigQueryDataset(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigQueryDataset,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBigQueryDatasets,
+			Hydrate:           listBigQueryDatasets,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -171,9 +172,6 @@ func listBigQueryDatasets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

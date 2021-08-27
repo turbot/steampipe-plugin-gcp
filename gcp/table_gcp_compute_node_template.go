@@ -23,7 +23,8 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNodeTemplate,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeNodeTemplates,
+			Hydrate:           listComputeNodeTemplates,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -176,9 +177,6 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, _ *plugi
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

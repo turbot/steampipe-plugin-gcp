@@ -13,7 +13,8 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_project_metadata",
 		Description: "GCP Compute Project Metadata",
 		List: &plugin.ListConfig{
-			Hydrate: listComputeProjectMetadata,
+			Hydrate:           listComputeProjectMetadata,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -133,9 +134,6 @@ func listComputeProjectMetadata(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	resp, err := service.Projects.Get(project).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 	d.StreamListItem(ctx, resp)

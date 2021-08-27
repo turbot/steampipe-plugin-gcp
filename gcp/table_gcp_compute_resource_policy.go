@@ -23,7 +23,8 @@ func tableGcpComputeResourcePolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeResourcePolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeResourcePolicies,
+			Hydrate:           listComputeResourcePolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -151,9 +152,6 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

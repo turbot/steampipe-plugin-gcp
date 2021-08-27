@@ -21,7 +21,8 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpLoggingSink,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpLoggingSinks,
+			Hydrate:           listGcpLoggingSinks,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -144,9 +145,6 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

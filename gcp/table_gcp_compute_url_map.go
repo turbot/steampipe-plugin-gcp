@@ -23,7 +23,8 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeURLMap,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeURLMaps,
+			Hydrate:           listComputeURLMaps,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -221,9 +222,6 @@ func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

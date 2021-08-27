@@ -17,7 +17,8 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 		Name:        "gcp_audit_policy",
 		Description: "GCP Audit Policy",
 		List: &plugin.ListConfig{
-			Hydrate: listGcpAuditPolicies,
+			Hydrate:           listGcpAuditPolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -75,9 +76,6 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

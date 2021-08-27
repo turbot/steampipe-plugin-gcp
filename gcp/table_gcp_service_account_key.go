@@ -21,8 +21,9 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpServiceAccountKey,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listGcpServiceAccounts,
-			Hydrate:       listGcpServiceAccountKeys,
+			ParentHydrate:     listGcpServiceAccounts,
+			Hydrate:           listGcpServiceAccountKeys,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -127,9 +128,6 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 		d.StreamLeafListItem(ctx, serviceAccountKey)
 	}
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

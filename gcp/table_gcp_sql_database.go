@@ -27,8 +27,9 @@ func tableGcpSQLDatabase(ctx context.Context) *plugin.Table {
 			Hydrate:    getSQLDatabase,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:       listSQLDatabases,
-			ParentHydrate: listSQLDatabaseInstances,
+			Hydrate:           listSQLDatabases,
+			ParentHydrate:     listSQLDatabaseInstances,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -140,9 +141,6 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	resp, err := service.Databases.List(project, instance.Name).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 	for _, database := range resp.Items {

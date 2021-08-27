@@ -22,7 +22,8 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 			Hydrate:    getSQLDatabaseInstance,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listSQLDatabaseInstances,
+			Hydrate:           listSQLDatabaseInstances,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -383,9 +384,6 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugi
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

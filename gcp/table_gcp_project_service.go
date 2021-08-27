@@ -22,7 +22,8 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"404", "403"}),
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpProjectServices,
+			Hydrate:           listGcpProjectServices,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -94,9 +95,6 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

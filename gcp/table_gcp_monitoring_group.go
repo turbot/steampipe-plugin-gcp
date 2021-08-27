@@ -19,7 +19,8 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 			Hydrate:    getMonitoringGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listMonitoringGroup,
+			Hydrate:           listMonitoringGroup,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -104,9 +105,6 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

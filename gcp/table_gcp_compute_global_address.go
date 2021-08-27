@@ -22,7 +22,8 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeGlobalAddress,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeGlobalAddresses,
+			Hydrate:           listComputeGlobalAddresses,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -160,9 +161,6 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plu
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

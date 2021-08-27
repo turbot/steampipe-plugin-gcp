@@ -18,7 +18,8 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		Name:        "gcp_iam_policy",
 		Description: "GCP IAM Policy",
 		List: &plugin.ListConfig{
-			Hydrate: listGcpIamPolicies,
+			Hydrate:           listGcpIamPolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -89,9 +90,6 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	rb := &cloudresourcemanager.GetIamPolicyRequest{}
 	resp, err := service.Projects.GetIamPolicy(project, rb).Context(ctx).Do()
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 	d.StreamListItem(ctx, resp)

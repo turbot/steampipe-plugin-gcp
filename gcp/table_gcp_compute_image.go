@@ -24,7 +24,8 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeImage,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeImages,
+			Hydrate:           listComputeImages,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -313,9 +314,6 @@ func getRowDataForImage(ctx context.Context, service *compute.Service, project s
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

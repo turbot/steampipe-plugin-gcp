@@ -20,7 +20,8 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpStorageBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpStorageBuckets,
+			Hydrate:           listGcpStorageBuckets,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -264,9 +265,6 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

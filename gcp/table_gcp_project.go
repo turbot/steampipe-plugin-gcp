@@ -16,7 +16,8 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 		Name:        "gcp_project",
 		Description: "GCP Project",
 		List: &plugin.ListConfig{
-			Hydrate: listGCPProjects,
+			Hydrate:           listGCPProjects,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -102,9 +103,6 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		d.StreamListItem(ctx, project)
 	}
 	if err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

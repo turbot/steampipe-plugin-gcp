@@ -17,8 +17,9 @@ func tableGcpComputeDiskMetricWriteOpsHourly(_ context.Context) *plugin.Table {
 		Name:        "gcp_compute_disk_metric_write_ops_hourly",
 		Description: "GCP Compute Disk Metrics - Write Ops (Hourly)",
 		List: &plugin.ListConfig{
-			ParentHydrate: listComputeDisk,
-			Hydrate:       listComputeDiskMetricWriteOpsHourly,
+			ParentHydrate:     listComputeDisk,
+			Hydrate:           listComputeDiskMetricWriteOpsHourly,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

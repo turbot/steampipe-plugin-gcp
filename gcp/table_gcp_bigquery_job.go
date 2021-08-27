@@ -21,7 +21,8 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigQueryJob,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBigQueryJobs,
+			Hydrate:           listBigQueryJobs,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -263,9 +264,6 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

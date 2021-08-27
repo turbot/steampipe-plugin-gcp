@@ -22,7 +22,8 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 			Hydrate:    getLoggingBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listLoggingBuckets,
+			Hydrate:           listLoggingBuckets,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -131,9 +132,6 @@ func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

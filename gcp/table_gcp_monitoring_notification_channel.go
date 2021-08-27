@@ -22,7 +22,8 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpMonitoringNotificationChannel,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpMonitoringNotificationChannels,
+			Hydrate:           listGcpMonitoringNotificationChannels,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -130,9 +131,6 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 			return nil
 		},
 	); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

@@ -19,7 +19,8 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeSnapshots,
+			Hydrate:           listComputeSnapshots,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -199,9 +200,6 @@ func listComputeSnapshots(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

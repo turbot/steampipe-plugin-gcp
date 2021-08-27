@@ -21,7 +21,8 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getProjectOrganizationPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listProjectOrganizationPolicies,
+			Hydrate:           listProjectOrganizationPolicies,
+			ShouldIgnoreError: isNotFoundError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -118,9 +119,6 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _
 		}
 		return nil
 	}); err != nil {
-		if IsForbiddenError(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
