@@ -24,7 +24,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeNodeGroups,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -239,7 +239,7 @@ func getComputeNodeGroupIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	req, err := service.NodeGroups.GetIamPolicy(project, zoneName, nodeGroup.Name).Do()
 	if err != nil {
 		// Return nil, if the resource not present
-		result := isNotFoundError([]string{"404"})
+		result := isIgnorableError([]string{"404"})
 		if result != nil {
 			return nil, nil
 		}

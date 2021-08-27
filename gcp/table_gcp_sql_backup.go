@@ -24,7 +24,7 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listSQLBackups,
 			ParentHydrate:     listSQLDatabaseInstances,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

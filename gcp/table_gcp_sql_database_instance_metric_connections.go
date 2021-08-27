@@ -18,7 +18,7 @@ func tableGcpSQLDatabaseInstanceMetricConnections(_ context.Context) *plugin.Tab
 		List: &plugin.ListConfig{
 			ParentHydrate:     listSQLDatabaseInstances,
 			Hydrate:           listSQLDatabaseInstanceMetricConnections,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

@@ -18,7 +18,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 		Description: "GCP Audit Policy",
 		List: &plugin.ListConfig{
 			Hydrate:           listGcpAuditPolicies,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

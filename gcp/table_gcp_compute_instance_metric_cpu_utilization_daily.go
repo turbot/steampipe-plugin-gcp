@@ -18,7 +18,7 @@ func tableGcpComputeInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin
 		List: &plugin.ListConfig{
 			ParentHydrate:     listComputeInstances,
 			Hydrate:           listComputeInstanceMetricCpuUtilizationDaily,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

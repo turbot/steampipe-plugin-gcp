@@ -9,8 +9,8 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-// function which returns an IsNotFoundErrorPredicate for GCP API calls
-func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
+// function which returns an isIgnorableErrorPredicate for GCP API calls
+func isIgnorableError(notFoundErrors []string) plugin.ErrorPredicate {
 	return func(err error) bool {
 		if gerr, ok := err.(*googleapi.Error); ok {
 			if types.ToString(gerr.Code) == "403" {

@@ -23,7 +23,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listKeyDetails,
 			ParentHydrate:     listKeyRingDetails,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{

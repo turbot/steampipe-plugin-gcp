@@ -21,7 +21,7 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listPubSubTopics,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -166,7 +166,7 @@ func getPubSubTopicIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 	req, err := service.Projects.Topics.GetIamPolicy(topic.Name).Do()
 	if err != nil {
 		// Return nil, if the resource not present
-		result := isNotFoundError([]string{"404"})
+		result := isIgnorableError([]string{"404"})
 		if result != nil {
 			return nil, nil
 		}

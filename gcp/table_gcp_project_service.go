@@ -19,11 +19,11 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("name"),
 			Hydrate:           getGcpProjectService,
-			ShouldIgnoreError: isNotFoundError([]string{"404", "403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"404", "403"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listGcpProjectServices,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

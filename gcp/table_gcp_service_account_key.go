@@ -23,7 +23,7 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate:     listGcpServiceAccounts,
 			Hydrate:           listGcpServiceAccountKeys,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

@@ -18,7 +18,7 @@ func tableGcpSQLDatabaseInstanceMetricCpuUtilizationHourly(_ context.Context) *p
 		List: &plugin.ListConfig{
 			ParentHydrate:     listSQLDatabaseInstances,
 			Hydrate:           listSQLDatabaseInstanceMetricCpuUtilizationHourly,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

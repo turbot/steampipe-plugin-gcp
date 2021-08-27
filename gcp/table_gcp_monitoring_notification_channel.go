@@ -23,7 +23,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listGcpMonitoringNotificationChannels,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

@@ -22,7 +22,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listKeyRingDetails,
-			ShouldIgnoreError: isNotFoundError([]string{"403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
