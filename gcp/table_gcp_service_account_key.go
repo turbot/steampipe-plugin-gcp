@@ -124,11 +124,11 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	result, err := service.Projects.ServiceAccounts.Keys.List(serviceAccount.Name).Do()
-	for _, serviceAccountKey := range result.Keys {
-		d.StreamLeafListItem(ctx, serviceAccountKey)
-	}
 	if err != nil {
 		return nil, err
+	}
+	for _, serviceAccountKey := range result.Keys {
+		d.StreamLeafListItem(ctx, serviceAccountKey)
 	}
 
 	return nil, nil
