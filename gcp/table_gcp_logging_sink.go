@@ -112,7 +112,7 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
