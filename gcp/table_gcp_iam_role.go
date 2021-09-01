@@ -129,30 +129,54 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 	project := projectData.Project
 
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
+	// Counter for no. of roles
+	var count int64
+
 	// List all the project roles
-	customRoles := service.Projects.Roles.List("projects/" + project).View("FULL")
-	if err := customRoles.Pages(
-		ctx,
-		func(page *iam.ListRolesResponse) error {
-			for _, role := range page.Roles {
-				d.StreamListItem(ctx, &roleInfo{role, false})
+	customRoles := service.Projects.Roles.List("projects/" + project).View("FULL").PageSize(*pageSize)
+	if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
+		for _, role := range page.Roles {
+			d.StreamListItem(ctx, &roleInfo{role, false})
+
+			count++
+			// Break for loop if requested no of results acheived
+			// Check if the context is cancelled for query// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				page.NextPageToken = ""
+				break
 			}
-			return nil
-		},
+		}
+		return nil
+	},
 	); err != nil {
 		return nil, err
 	}
 
 	// List all the pre-defined roles
-	managedRole := service.Roles.List().View("FULL")
-	if err := managedRole.Pages(
-		ctx,
-		func(page *iam.ListRolesResponse) error {
-			for _, managedRole := range page.Roles {
-				d.StreamListItem(ctx, &roleInfo{managedRole, true})
+	managedRole := service.Roles.List().View("FULL").PageSize(*pageSize)
+	if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
+		for _, managedRole := range page.Roles {
+			d.StreamListItem(ctx, &roleInfo{managedRole, true})
+
+			count++
+			// Break for loop if requested no of results acheived
+			// Check if the context is cancelled for query// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				page.NextPageToken = ""
+				break
 			}
-			return nil
-		},
+		}
+
+		return nil
+	},
 	); err != nil {
 		return nil, err
 	}

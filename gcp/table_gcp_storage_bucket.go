@@ -2,12 +2,12 @@ package gcp
 
 import (
 	"context"
-	"strings"
 
+	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -170,15 +170,11 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "acl",
 				Description: "An access-control list",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getGcpStorageBucketACLs,
-				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "default_object_acl",
 				Description: "Lists of object access control entries",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getGcpStorageBucketDefaultACLs,
-				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "cors",
@@ -258,10 +254,33 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	resp := service.Buckets.List(project)
+	projection := "noAcl"
+	if helpers.StringSliceContains(d.QueryContext.Columns, "acl") || helpers.StringSliceContains(d.QueryContext.Columns, "default_object_acl") {
+		projection = "full"
+	}
+
+	maxResults := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *maxResults {
+			maxResults = limit
+		}
+	}
+
+	// Counter for no. of roles
+	var count int64
+
+	resp := service.Buckets.List(project).Projection(projection).MaxResults(*maxResults)
 	if err := resp.Pages(ctx, func(page *storage.Buckets) error {
 		for _, bucket := range page.Items {
 			d.StreamListItem(ctx, bucket)
+			count++
+			// Break for loop if requested no of results acheived
+			// Check if the context is cancelled for query// Check if the context is cancelled for query
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				page.NextPageToken = ""
+				break
+			}
 		}
 		return nil
 	}); err != nil {
@@ -305,60 +324,6 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 	resp, err := service.Buckets.GetIamPolicy(bucket.Name).Do()
 	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
-
-func getGcpStorageBucketACLs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpStorageBucketACLs")
-	bucket := h.Item.(*storage.Bucket)
-
-	// Create Session
-	// Create Service Connection
-	service, err := StorageService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := service.BucketAccessControls.List(bucket.Name).Do()
-	if err != nil {
-		gerr, _ := err.(*googleapi.Error)
-
-		// It should not error out if the bucket has uniform bucket-level accesss
-		// googleapi: Error 400: Cannot get legacy ACL for a bucket that has uniform bucket-level access.
-		// Read more at https://cloud.google.com/storage/docs/uniform-bucket-level-access, invalid
-		if gerr.Code == 400 && strings.HasPrefix(gerr.Message, "Cannot get legacy ACL for a bucket that has uniform bucket-level access") {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return resp, nil
-}
-
-func getGcpStorageBucketDefaultACLs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpStorageBucketDefaultACLs")
-	bucket := h.Item.(*storage.Bucket)
-
-	// Create Session
-	// Create Service Connection
-	service, err := StorageService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := service.DefaultObjectAccessControls.List(bucket.Name).Do()
-	if err != nil {
-		gerr, _ := err.(*googleapi.Error)
-
-		// It should not error out if the bucket has uniform bucket-level accesss
-		// googleapi: Error 400: Cannot get legacy ACL for a bucket that has uniform bucket-level access.
-		// Read more at https://cloud.google.com/storage/docs/uniform-bucket-level-access, invalid
-		if gerr.Code == 400 && strings.HasPrefix(gerr.Message, "Cannot get legacy ACL for a bucket that has uniform bucket-level access") {
-			return nil, nil
-		}
 		return nil, err
 	}
 
