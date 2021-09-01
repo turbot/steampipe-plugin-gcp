@@ -73,7 +73,6 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "included_permissions",
 				Description: "The names of the permissions this role grants when bound in an IAM policy",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getIamRole,
 				Transform:   transform.FromField("Role.IncludedPermissions"),
 			},
 
@@ -131,7 +130,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	project := projectData.Project
 
 	// List all the project roles
-	customRoles := service.Projects.Roles.List("projects/" + project)
+	customRoles := service.Projects.Roles.List("projects/" + project).View("FULL")
 	if err := customRoles.Pages(
 		ctx,
 		func(page *iam.ListRolesResponse) error {
@@ -145,7 +144,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// List all the pre-defined roles
-	managedRole := service.Roles.List()
+	managedRole := service.Roles.List().View("FULL")
 	if err := managedRole.Pages(
 		ctx,
 		func(page *iam.ListRolesResponse) error {
