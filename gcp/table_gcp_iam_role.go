@@ -145,10 +145,10 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
 		for _, role := range page.Roles {
 			d.StreamListItem(ctx, &roleInfo{role, false})
-
 			count++
-			// Break for loop if requested no of results acheived
-			// Check if the context is cancelled for query// Check if the context is cancelled for query
+
+			// Break for loop if requested no of results achieved
+			// Check if the context is cancelled for query
 			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
 				page.NextPageToken = ""
 				break
@@ -165,10 +165,10 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
 		for _, managedRole := range page.Roles {
 			d.StreamListItem(ctx, &roleInfo{managedRole, true})
-
 			count++
-			// Break for loop if requested no of results acheived
-			// Check if the context is cancelled for query// Check if the context is cancelled for query
+
+			// Break for loop if requested no of results achieved
+			// Check if the context is cancelled for query
 			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
 				page.NextPageToken = ""
 				break

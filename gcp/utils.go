@@ -72,15 +72,17 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 		return cachedData.(*projectInfo), nil
 	}
 
-	// Get the info from connection config if it overwrites env variables and others
-	setSessionConfig(d.Connection)
-
 	var err error
 	var projectData *projectInfo
 	gcpProject := os.Getenv("GCP_PROJECT")
 	sdkCoreProject := os.Getenv("CLOUDSDK_CORE_PROJECT")
+	projectFromConfig := getProjectFromConfig(d.Connection)
 
-	if sdkCoreProject != "" {
+	if projectFromConfig != "" {
+		projectData = &projectInfo{
+			Project: projectFromConfig,
+		}
+	} else if sdkCoreProject != "" {
 		projectData = &projectInfo{
 			Project: sdkCoreProject,
 		}
@@ -140,21 +142,25 @@ func getProjectFromCLI() (*projectInfo, error) {
 	}, nil
 }
 
+func getProjectFromConfig(connection *plugin.Connection) string {
+	gcpConfig := GetConfig(connection)
+
+	if gcpConfig.Project != nil {
+		return *gcpConfig.Project
+	}
+	return ""
+}
+
 // Set project values from config and return client options
 func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	if &gcpConfig != nil {
-		if gcpConfig.Project != nil {
-			os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
-		}
-		if gcpConfig.CredentialFile != nil {
-			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *gcpConfig.CredentialFile)
-		}
-		if gcpConfig.ImpersonateServiceAccount != nil {
-			opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
-		}
+	if gcpConfig.CredentialFile != nil {
+		opts = append(opts, option.WithCredentialsFile(*gcpConfig.CredentialFile))
+	}
+	if gcpConfig.ImpersonateServiceAccount != nil {
+		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
 	}
 	return opts
 }

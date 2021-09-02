@@ -317,7 +317,7 @@ func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusag
 	return svc, nil
 }
 
-// StorageService returns the service connection for GCP Storgae service
+// StorageService returns the service connection for GCP Storage service
 func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "StorageService"

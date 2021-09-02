@@ -267,7 +267,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		}
 	}
 
-	// Counter for no. of roles
+	// Counter for no. of buckets
 	var count int64
 
 	resp := service.Buckets.List(project).Projection(projection).MaxResults(*maxResults)
@@ -275,8 +275,8 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		for _, bucket := range page.Items {
 			d.StreamListItem(ctx, bucket)
 			count++
-			// Break for loop if requested no of results acheived
-			// Check if the context is cancelled for query// Check if the context is cancelled for query
+			// Break for loop if requested no of results achieved
+			// Check if the context is cancelled for query
 			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
 				page.NextPageToken = ""
 				break
