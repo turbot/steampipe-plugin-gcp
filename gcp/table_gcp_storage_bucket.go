@@ -240,13 +240,14 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	projectData, err := activeProject(ctx, d)
+func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-
-	project := projectData.Project
+	project := projectId.(string)
 
 	// Create Service Connection
 	service, err := StorageService(ctx, d)
@@ -316,7 +317,6 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	bucket := h.Item.(*storage.Bucket)
 
 	// Create Session
-	// Create Service Connection
 	service, err := StorageService(ctx, d)
 	if err != nil {
 		return nil, err
@@ -332,11 +332,14 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 
 func getBucketAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	bucket := h.Item.(*storage.Bucket)
-	projectData, err := activeProject(ctx, d)
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://storage.googleapis.com/projects/" + project + "/buckets/" + bucket.Name}
 	return akas, nil

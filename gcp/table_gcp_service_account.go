@@ -103,18 +103,20 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := IAMService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	projectData, err := activeProject(ctx, d)
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.ServiceAccounts.List("projects/" + project)
 	if err := resp.Pages(
