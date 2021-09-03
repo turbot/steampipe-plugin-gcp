@@ -97,7 +97,7 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
@@ -105,11 +105,13 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
+
 	rb := &cloudresourcemanager.ListOrgPoliciesRequest{}
 
 	resp := service.Projects.ListOrgPolicies("projects/"+project, rb)
@@ -127,7 +129,7 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, _
 
 //// HYDRATE FUNCTIONS
 
-func getProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getProjectOrganizationPolicy")
 
 	// Create Service Connection
@@ -137,11 +139,12 @@ func getProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, _ *p
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 	rb := &cloudresourcemanager.GetOrgPolicyRequest{
@@ -158,11 +161,12 @@ func getProjectOrganizationPolicy(ctx context.Context, d *plugin.QueryData, _ *p
 
 func getOrganizationPolicyAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project}

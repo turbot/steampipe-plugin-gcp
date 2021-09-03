@@ -46,5 +46,5 @@ func listComputeDiskMetricWriteOpsDaily(ctx context.Context, d *plugin.QueryData
 	}
 	dimensionValue := "\"" + diskInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "DAILY", "\"compute.googleapis.com/instance/disk/write_ops_count\"", "metric.label.device_name = ", dimensionValue, diskInfo.Name, location)
+	return listMonitorMetricStatistics(ctx, d, h, "DAILY", "\"compute.googleapis.com/instance/disk/write_ops_count\"", "metric.label.device_name = ", dimensionValue, diskInfo.Name, location)
 }

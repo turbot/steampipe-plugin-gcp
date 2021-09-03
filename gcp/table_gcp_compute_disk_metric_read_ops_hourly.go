@@ -46,5 +46,5 @@ func listComputeDiskMetricReadOpsHourly(ctx context.Context, d *plugin.QueryData
 	}
 	dimensionValue := "\"" + diskInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.device_name = ", dimensionValue, diskInfo.Name, location)
+	return listMonitorMetricStatistics(ctx, d, h, "HOURLY", "\"compute.googleapis.com/instance/disk/read_ops_count\"", "metric.label.device_name = ", dimensionValue, diskInfo.Name, location)
 }

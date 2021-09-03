@@ -71,7 +71,7 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := ServiceUsageService(ctx, d)
 	if err != nil {
@@ -79,11 +79,12 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	result := service.Services.List("projects/" + project)
 	if err := result.Pages(
@@ -103,7 +104,7 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 //// HYDRATE FUNCTIONS
 
-func getGcpProjectService(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpProjectService")
 
 	// Create Service Connection
@@ -113,11 +114,12 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	quals := d.KeyColumnQuals
 	name := quals["name"].GetStringValue()
 	op, err := service.Services.Get("projects/" + project + "/services/" + name).Do()

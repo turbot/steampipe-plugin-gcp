@@ -99,7 +99,7 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := PubsubService(ctx, d)
 	if err != nil {
@@ -107,11 +107,12 @@ func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Snapshots.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListSnapshotsResponse) error {
@@ -138,11 +139,12 @@ func getPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	req, err := service.Projects.Snapshots.Get("projects/" + project + "/snapshots/" + name).Do()

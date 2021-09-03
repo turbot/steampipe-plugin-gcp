@@ -93,7 +93,7 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listPubSubTopics(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := PubsubService(ctx, d)
 	if err != nil {
@@ -101,11 +101,12 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Topics.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListTopicsResponse) error {
@@ -132,11 +133,12 @@ func getPubSubTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	req, err := service.Projects.Topics.Get("projects/" + project + "/topics/" + name).Do()

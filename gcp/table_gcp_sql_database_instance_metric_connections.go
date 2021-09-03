@@ -37,13 +37,14 @@ func listSQLDatabaseInstanceMetricConnections(ctx context.Context, d *plugin.Que
 	instanceInfo := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	location := instanceInfo.Region
 	dimensionValue := "\"" + project + ":" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "FIVE_MINUTES", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
+	return listMonitorMetricStatistics(ctx, d, h, "FIVE_MINUTES", "\"cloudsql.googleapis.com/database/network/connections\"", "resource.label.database_id = ", dimensionValue, instanceInfo.Name, location)
 }

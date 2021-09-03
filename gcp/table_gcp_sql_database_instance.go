@@ -361,7 +361,7 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listSQLDatabaseInstances")
 
 	// Create service connection
@@ -371,11 +371,12 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, _ *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Instances.List(project)
 	if err := resp.Pages(ctx, func(page *sqladmin.InstancesListResponse) error {
@@ -402,11 +403,12 @@ func getSQLDatabaseInstance(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
