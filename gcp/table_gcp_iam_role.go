@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -130,6 +131,13 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 	project := projectId.(string)
 
+	view := "BASIC"
+	if helpers.StringSliceContains(d.QueryContext.Columns, "included_permissions") {
+		view = "FULL"
+	}
+
+	showDeleted := helpers.StringSliceContains(d.QueryContext.Columns, "deleted")
+
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -142,7 +150,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	var count int64
 
 	// List all the project roles
-	customRoles := service.Projects.Roles.List("projects/" + project).View("FULL").PageSize(*pageSize)
+	customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
 	if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
 		for _, role := range page.Roles {
 			d.StreamListItem(ctx, &roleInfo{role, false})
@@ -162,7 +170,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 
 	// List all the pre-defined roles
-	managedRole := service.Roles.List().View("FULL").PageSize(*pageSize)
+	managedRole := service.Roles.List().View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
 	if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
 		for _, managedRole := range page.Roles {
 			d.StreamListItem(ctx, &roleInfo{managedRole, true})

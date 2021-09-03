@@ -63,8 +63,6 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 }
 
 func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, error) {
-	// To call the set
-
 	// have we already created and cached the session?
 	serviceCacheKey := "gcp_project_name"
 
@@ -98,7 +96,7 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 	}
 
 	d.ConnectionManager.Cache.Set(serviceCacheKey, projectData)
-	plugin.Logger(ctx).Warn("activeProject", "projectData", projectData)
+	plugin.Logger(ctx).Info("activeProject", "Project", projectData.Project)
 
 	return projectData, nil
 }
