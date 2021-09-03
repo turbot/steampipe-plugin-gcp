@@ -26,6 +26,9 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listIamRoles,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "is_gcp_managed", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -131,12 +134,32 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 	project := projectId.(string)
 
+	showDeleted := helpers.StringSliceContains(d.QueryContext.Columns, "deleted")
 	view := "BASIC"
 	if helpers.StringSliceContains(d.QueryContext.Columns, "included_permissions") {
 		view = "FULL"
 	}
 
-	showDeleted := helpers.StringSliceContains(d.QueryContext.Columns, "deleted")
+	roleType := "ALL"
+	// Handling for non equal quals
+	if d.Quals["is_gcp_managed"] != nil {
+		for _, q := range d.Quals["is_gcp_managed"].Quals {
+			value := q.Value.GetBoolValue()
+			roleType = "CUSTOM"
+			switch q.Operator {
+			case "<>":
+				if !value {
+					roleType = "GCP"
+				}
+			case "=":
+				if value {
+					roleType = "GCP"
+				}
+			}
+		}
+	}
+
+	plugin.Logger(ctx).Error("listIamRoles", "roleType", roleType)
 
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
@@ -149,45 +172,49 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	// Counter for no. of roles
 	var count int64
 
-	// List all the project roles
-	customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
-	if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
-		for _, role := range page.Roles {
-			d.StreamListItem(ctx, &roleInfo{role, false})
-			count++
+	if roleType == "ALL" || roleType == "CUSTOM" {
+		// List all the custom project roles
+		customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
+		if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
+			for _, role := range page.Roles {
+				d.StreamListItem(ctx, &roleInfo{role, false})
+				count++
 
-			// Break for loop if requested no of results achieved
-			// Check if the context is cancelled for query
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
-				page.NextPageToken = ""
-				break
+				// Break for loop if requested no of results achieved
+				// Check if the context is cancelled for query
+				if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+					page.NextPageToken = ""
+					break
+				}
 			}
+			return nil
+		},
+		); err != nil {
+			return nil, err
 		}
-		return nil
-	},
-	); err != nil {
-		return nil, err
 	}
 
-	// List all the pre-defined roles
-	managedRole := service.Roles.List().View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
-	if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
-		for _, managedRole := range page.Roles {
-			d.StreamListItem(ctx, &roleInfo{managedRole, true})
-			count++
+	if roleType == "ALL" || roleType == "GCP" {
+		// List all the pre-defined roles
+		managedRole := service.Roles.List().View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
+		if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
+			for _, managedRole := range page.Roles {
+				d.StreamListItem(ctx, &roleInfo{managedRole, true})
+				count++
 
-			// Break for loop if requested no of results achieved
-			// Check if the context is cancelled for query
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
-				page.NextPageToken = ""
-				break
+				// Break for loop if requested no of results achieved
+				// Check if the context is cancelled for query
+				if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+					page.NextPageToken = ""
+					break
+				}
 			}
-		}
 
-		return nil
-	},
-	); err != nil {
-		return nil, err
+			return nil
+		},
+		); err != nil {
+			return nil, err
+		}
 	}
 	return nil, err
 }
