@@ -284,6 +284,11 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	for _, projectName := range projectList {
 		d.StreamListItem(ctx, projectName)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if plugin.IsCancelled(ctx) {
+			return nil, nil
+		}
 	}
 
 	return nil, nil
@@ -324,6 +329,11 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {
 			d.StreamListItem(ctx, image)
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				page.NextPageToken = ""
+				break
+			}
 		}
 		return nil
 	}); err != nil {

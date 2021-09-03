@@ -169,20 +169,15 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		}
 	}
 
-	// Counter for no. of roles
-	var count int64
-
 	if roleType == "ALL" || roleType == "CUSTOM" {
 		// List all the custom project roles
 		customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
 		if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
 			for _, role := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{role, false})
-				count++
 
-				// Break for loop if requested no of results achieved
-				// Check if the context is cancelled for query
-				if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if plugin.IsCancelled(ctx) {
 					page.NextPageToken = ""
 					break
 				}
@@ -200,11 +195,9 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
 			for _, managedRole := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{managedRole, true})
-				count++
 
-				// Break for loop if requested no of results achieved
-				// Check if the context is cancelled for query
-				if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if plugin.IsCancelled(ctx) {
 					page.NextPageToken = ""
 					break
 				}
