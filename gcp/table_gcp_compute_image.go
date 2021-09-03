@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"strings"
-	"sync"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -11,6 +10,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/googleapi"
 )
 
 //// TABLE DEFINITION
@@ -20,12 +20,20 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_image",
 		Description: "GCP Compute Image",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"name", "project"}),
+			KeyColumns: plugin.AllColumns([]string{"name", "source_project"}),
 			Hydrate:    getComputeImage,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeImages,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			ParentHydrate:     listComputeImageProjects,
+			Hydrate:           listImagesForProject,
+			ShouldIgnoreError: isIgnorableError([]string{"403", "404"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "deprecation_state", Require: plugin.Optional},
+				{Name: "family", Require: plugin.Optional},
+				{Name: "source_project", Require: plugin.Optional},
+				{Name: "status", Require: plugin.Optional},
+				{Name: "source_type", Require: plugin.Optional},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -66,7 +74,6 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 			{
 				Name:        "deprecation_state",
 				Description: "The deprecation state associated with this image.",
-				Default:     "ACTIVE",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Deprecated.State"),
 			},
@@ -229,13 +236,8 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeImages(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listComputeImages")
-	// Create Service Connection
-	service, err := ComputeService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
+func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("listComputeImageProjects")
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
@@ -244,6 +246,25 @@ func listComputeImages(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 	project := projectId.(string)
+
+	qualProjects := []string{}
+
+	if d.KeyColumnQuals["source_project"] != nil {
+		value := d.KeyColumnQuals["source_project"]
+		if value.GetStringValue() != "" {
+			qualProjects = []string{value.GetStringValue()}
+		} else if value.GetListValue() != nil {
+			qualProjects = getListValues(value.GetListValue())
+		}
+	}
+
+	// List images only for requested projects
+	if len(qualProjects) > 0 {
+		for _, projectName := range qualProjects {
+			d.StreamListItem(ctx, projectName)
+		}
+		return nil, nil
+	}
 
 	// List of projects in which standard images resides
 	projectList := []string{
@@ -261,62 +282,60 @@ func listComputeImages(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		project,
 	}
 
-	// List all the standard images
-	var wg sync.WaitGroup
-	imageCh := make(chan []*compute.Image, len(projectList))
-	errorCh := make(chan error, len(projectList))
-
-	// Iterating all the available projects
-	for _, item := range projectList {
-		wg.Add(1)
-		go getRowDataForImageAsync(ctx, service, item, &wg, imageCh, errorCh)
-	}
-
-	// wait until the listing of all images inside the mentioned projects are completed
-	wg.Wait()
-
-	// NOTE: close channel before ranging over results
-	close(imageCh)
-	close(errorCh)
-
-	for err := range errorCh {
-		// return the first error
-		return nil, err
-	}
-
-	for item := range imageCh {
-		for _, data := range item {
-			d.StreamListItem(ctx, data)
-		}
+	for _, projectName := range projectList {
+		d.StreamListItem(ctx, projectName)
 	}
 
 	return nil, nil
 }
 
-func getRowDataForImageAsync(ctx context.Context, service *compute.Service, item string, wg *sync.WaitGroup, imageCh chan []*compute.Image, errorCh chan error) {
-	defer wg.Done()
+func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	projectName := h.Item.(string)
 
-	rowData, err := getRowDataForImage(ctx, service, item)
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
 	if err != nil {
-		errorCh <- err
-	} else if rowData != nil {
-		imageCh <- rowData
-	}
-}
-
-func getRowDataForImage(ctx context.Context, service *compute.Service, project string) ([]*compute.Image, error) {
-	var items []*compute.Image
-
-	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
-	resp := service.Images.List(project)
-	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
-		items = append(items, page.Items...)
-		return nil
-	}); err != nil {
 		return nil, err
 	}
 
-	return items, nil
+	filterQuals := []filterQualMap{
+		{"family", "family", "string"},
+		{"deprecation_state", "deprecated.state", "string"},
+		{"source_type", "sourceType", "string"},
+	}
+
+	filters := buildQueryFilter(filterQuals, d.KeyColumnQuals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
+	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
+	plugin.Logger(ctx).Info("listImagesForProject", "Project Name", projectName, "filter string", filterString)
+	resp := service.Images.List(projectName).MaxResults(*pageSize).Filter(filterString)
+	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
+		for _, image := range page.Items {
+			d.StreamListItem(ctx, image)
+		}
+		return nil
+	}); err != nil {
+		plugin.Logger(ctx).Error("listImagesForProject", "list error", err)
+		// Handle project not found error
+		if err.(*googleapi.Error).Code == 404 {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -329,7 +348,7 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := d.KeyColumnQuals["project"].GetStringValue()
+	project := d.KeyColumnQuals["source_project"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64
@@ -364,6 +383,8 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	splittedTitle := strings.Split(image.SelfLink, "/")
 	imageProject := types.SafeString(splittedTitle[6])
 
+	// If image project is not same as the project where api is called
+	// do not make GetIamPolicy call as we might not have access to other project
 	if strings.EqualFold(imageProject, project) {
 		return nil, nil
 	}

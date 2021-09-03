@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"google.golang.org/api/option"
@@ -156,4 +157,64 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
 	}
 	return opts
+}
+
+// Get QualValueList as an list of items
+func getListValues(listValue *proto.QualValueList) []string {
+	values := make([]string, 0)
+	for _, value := range listValue.Values {
+		values = append(values, value.GetStringValue())
+	}
+	return values
+}
+
+/**
+ * buildQueryFilter: To build gcp query filter from equal quals
+ * Sample for gcp_compute_image table
+ * select name, id, status, source_project, deprecation_state, family
+ * from	gcp_morales_aaa.gcp_compute_image
+ * where family in ('sles-12', 'sles-15') and deprecation_state = 'ACTIVE'
+ * -------------------------------------------------------------------------
+ * 	Column: family, Operator: '=', Value: '[sles-12 sles-15]'
+ * 	Column: deprecation_state, Operator: '=', Value: 'ACTIVE'
+ * -------------------------------------------------------------------------
+ *
+ * Output: []string{"(family = sles-12) OR (family = sles-15)", "(deprecated.state = ACTIVE)"}
+ */
+func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEqualsQualMap) []string {
+	filters := []string{}
+
+	for _, qual := range filterQuals {
+		qualValue := equalQuals[qual.ColumnName]
+		if qualValue != nil {
+			switch qual.Type {
+			case "string":
+
+				// In case of a in caluse
+				if qualValue.GetListValue() != nil {
+					filter := ""
+					for i, q := range qualValue.GetListValue().Values {
+						if i == 0 {
+							filter = fmt.Sprintf("(%s = %s)", qual.PropertyPath, q.GetStringValue())
+						} else {
+							filter = fmt.Sprintf("%s OR (%s = %s)", filter, qual.PropertyPath, q.GetStringValue())
+						}
+					}
+					filters = append(filters, fmt.Sprintf("(%s)", filter))
+				} else {
+					filters = append(filters, fmt.Sprintf("(%s = %s)", qual.PropertyPath, qualValue.GetStringValue()))
+				}
+			case "bool":
+				filters = append(filters, fmt.Sprintf("(%s = %t)", qual.PropertyPath, qualValue.GetBoolValue()))
+			}
+		}
+	}
+
+	return filters
+}
+
+type filterQualMap struct {
+	ColumnName   string
+	PropertyPath string
+	Type         string
 }
