@@ -116,7 +116,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetPools")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -125,11 +125,12 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.TargetPools.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetPoolAggregatedList) error {
@@ -156,11 +157,12 @@ func getComputeTargetPool(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var targetPool compute.TargetPool
 	name := d.KeyColumnQuals["name"].GetStringValue()

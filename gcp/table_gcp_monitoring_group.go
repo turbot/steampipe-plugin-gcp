@@ -83,7 +83,7 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := MonitoringService(ctx, d)
 	if err != nil {
@@ -91,11 +91,12 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Groups.List("projects/" + project)
 

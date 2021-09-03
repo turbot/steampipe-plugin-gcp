@@ -158,7 +158,7 @@ func tableGcpComputeRoute(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeRoutes")
 
 	// Create Service Connection
@@ -168,11 +168,12 @@ func listComputeRoutes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Routes.List(project)
 	if err := resp.Pages(ctx, func(page *compute.RouteList) error {
@@ -197,11 +198,12 @@ func getComputeRoute(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 

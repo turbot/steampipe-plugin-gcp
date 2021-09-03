@@ -194,7 +194,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 
 //// HYDRATE FUNCTIONS
 
-func listCloudFunctions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCloudFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	logger.Trace("listCloudFunctions")
 
@@ -205,11 +205,12 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	data := "projects/" + project + "/locations/-" // '-' for all locations...
 

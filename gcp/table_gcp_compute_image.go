@@ -229,7 +229,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeImages(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeImages")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -238,11 +238,12 @@ func listComputeImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	// List of projects in which standard images resides
 	projectList := []string{
@@ -352,11 +353,12 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	image := h.Item.(*compute.Image)
 	splittedTitle := strings.Split(image.SelfLink, "/")

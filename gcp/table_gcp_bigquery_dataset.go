@@ -149,7 +149,7 @@ func tableGcpBigQueryDataset(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listBigQueryDatasets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listBigQueryDatasets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listBigQueryDatasets")
 
 	// Create Service Connection
@@ -159,11 +159,12 @@ func listBigQueryDatasets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Datasets.List(project)
 	if err := resp.Pages(ctx, func(page *bigquery.DatasetList) error {
@@ -188,11 +189,12 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var id string
 	if h.Item != nil {

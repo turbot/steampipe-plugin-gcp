@@ -257,7 +257,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTIONS
 
-func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeDisk")
 
 	// Create Service Connection
@@ -267,11 +267,12 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Disks.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.DiskAggregatedList) error {
@@ -300,11 +301,12 @@ func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var disk compute.Disk
 	name := d.KeyColumnQuals["name"].GetStringValue()

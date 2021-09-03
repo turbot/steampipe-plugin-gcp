@@ -166,7 +166,7 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDnsManagedZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listDnsManagedZones(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listDnsManagedZones")
 
 	// Create Service Connection
@@ -176,11 +176,12 @@ func listDnsManagedZones(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.ManagedZones.List(project)
 	if err := resp.Pages(ctx, func(page *dns.ManagedZonesListResponse) error {
@@ -207,11 +208,12 @@ func getDnsManagedZone(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp, err := service.ManagedZones.Get(project, name).Do()
@@ -231,11 +233,12 @@ func getDnsManagedZoneAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	data := h.Item.(*dns.ManagedZone)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://dns.googleapis.com/projects/" + project + "/managedZones/" + data.Name}
 
@@ -246,11 +249,12 @@ func getDnsZoneSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	zone := h.Item.(*dns.ManagedZone)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	selfLink := "https://www.googleapis.com/dns/v1/projects/" + project + "/managedZones/" + zone.Name
 

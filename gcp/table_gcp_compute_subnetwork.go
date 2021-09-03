@@ -206,7 +206,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeSubnetworks")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -215,11 +215,12 @@ func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Subnetworks.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.SubnetworkAggregatedList) error {
@@ -238,7 +239,7 @@ func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 //// HYDRATE FUNCTIONS
 
-func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	logger.Trace("getComputeSubnetwork")
 
@@ -249,11 +250,12 @@ func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var subnetwork compute.Subnetwork
 	name := d.KeyColumnQuals["name"].GetStringValue()

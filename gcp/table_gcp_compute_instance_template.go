@@ -204,11 +204,12 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.InstanceTemplates.List(project)
 	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateList) error {
@@ -233,11 +234,12 @@ func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 

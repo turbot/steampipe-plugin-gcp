@@ -125,7 +125,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeNetworks")
 
 	// Create Service Connection
@@ -135,11 +135,12 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Networks.List(project)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
@@ -156,7 +157,7 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 //// HYDRATE FUNCTIONS
 
-func getComputeNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getComputeNetwork(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getComputeNetwork")
 
 	// Create Service Connection
@@ -166,11 +167,12 @@ func getComputeNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 

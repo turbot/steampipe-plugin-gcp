@@ -124,7 +124,7 @@ func tableGcpComputeResourcePolicy(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeResourcePolicies")
 
 	// Create Service Connection
@@ -134,11 +134,12 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.ResourcePolicies.AggregatedList(project)
 	if err := resp.Pages(
@@ -170,11 +171,12 @@ func getComputeResourcePolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var resourcePolicy compute.ResourcePolicy
 	name := d.KeyColumnQuals["name"].GetStringValue()

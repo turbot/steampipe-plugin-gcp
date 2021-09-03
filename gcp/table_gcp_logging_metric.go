@@ -179,7 +179,7 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := LoggingService(ctx, d)
 	if err != nil {
@@ -187,11 +187,12 @@ func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Metrics.List("projects/" + project)
 	if err := resp.Pages(
@@ -221,11 +222,12 @@ func getGcpLoggingMetric(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	op, err := service.Projects.Metrics.Get("projects/" + project + "/metrics/" + name).Do()
@@ -246,11 +248,12 @@ func metricNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	metric := h.Item.(*logging.LogMetric)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/metrics/" + metric.Name}
 	return akas, nil

@@ -141,7 +141,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeAddresses(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeAddresses")
 
 	// Create Service Connection
@@ -149,13 +149,13 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	if err != nil {
 		return nil, err
 	}
-
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Addresses.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
@@ -180,13 +180,13 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	if err != nil {
 		return nil, err
 	}
-
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()

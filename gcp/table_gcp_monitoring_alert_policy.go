@@ -152,11 +152,12 @@ func getMonitoringAlertPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	plugin.Logger(ctx).Trace("getMonitoringAlertPolicy")
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Create Service Connection

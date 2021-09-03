@@ -152,7 +152,7 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeNodeTemplates")
 
 	// Create Service Connection
@@ -162,11 +162,12 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, _ *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.NodeTemplates.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.NodeTemplateAggregatedList) error {
@@ -193,11 +194,12 @@ func getComputeNodeTemplate(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var nodeTemplate compute.NodeTemplate
 	name := d.KeyColumnQuals["name"].GetStringValue()

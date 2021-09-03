@@ -182,7 +182,7 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
@@ -190,11 +190,12 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.GlobalForwardingRules.List(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleList) error {
@@ -219,11 +220,12 @@ func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h 
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 

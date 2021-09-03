@@ -121,7 +121,7 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := LoggingService(ctx, d)
 	if err != nil {
@@ -129,11 +129,12 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Sinks.List("projects/" + project)
 	if err := resp.Pages(
@@ -163,11 +164,12 @@ func getGcpLoggingSink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
@@ -189,11 +191,12 @@ func sinkNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	sink := h.Item.(*logging.LogSink)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/sinks/" + sink.Name}
 	return akas, nil
@@ -203,11 +206,12 @@ func getSinkSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	sink := h.Item.(*logging.LogSink)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	selfLink := "https://www.googleapis.com/logging/v2/projects/" + project + "/sinks/" + sink.Name
 	return selfLink, nil

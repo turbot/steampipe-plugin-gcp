@@ -107,7 +107,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := MonitoringService(ctx, d)
 	if err != nil {
@@ -115,11 +115,12 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.NotificationChannels.List("projects/" + project)
 	if err := resp.Pages(
@@ -143,11 +144,12 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	plugin.Logger(ctx).Trace("getGcpMonitoringNotificationChannel")
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	// Create Service Connection

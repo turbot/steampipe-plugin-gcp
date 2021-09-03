@@ -156,11 +156,12 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp, err := service.Projects.Locations.Clusters.NodePools.List("projects/" + project + "/locations/" + cluster.Zone + "/clusters/" + cluster.Name).Do()
 	if err != nil {
@@ -176,7 +177,7 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 
 //// HYDRATE FUNCTIONS
 
-func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKubernetesNodePool")
 
 	// Create Service Connection
@@ -186,11 +187,12 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()

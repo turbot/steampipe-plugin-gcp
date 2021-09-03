@@ -270,7 +270,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeInstances")
 
 	// Create Service Connection
@@ -280,11 +280,12 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Instances.AggregatedList(project)
 	if err := resp.Pages(
@@ -316,11 +317,12 @@ func getComputeInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var instance compute.Instance
 	name := d.KeyColumnQuals["name"].GetStringValue()

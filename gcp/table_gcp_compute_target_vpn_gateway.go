@@ -116,7 +116,7 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetVpnGateways")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -125,11 +125,12 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, _ *p
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.TargetVpnGateways.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetVpnGatewayAggregatedList) error {
@@ -156,11 +157,12 @@ func getComputeTargetVpnGateway(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var targetVpnGateway compute.TargetVpnGateway
 	name := d.KeyColumnQuals["name"].GetStringValue()

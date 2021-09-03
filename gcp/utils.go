@@ -104,15 +104,10 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 }
 
 func getProjectFromCLI() (*projectInfo, error) {
-	const gcloudCLIPath = "/usr/lib/google-cloud-sdk/bin"
-
 	// The default install paths are used to find Google cloud CLI.
 	// This is for security, so that any path in the calling program's Path environment is not used to execute Google Cloud CLI.
 	// https://stackoverflow.com/questions/62949119/how-to-use-google-cloud-shell-with-the-new-windows-terminal
 	gcloudCLIDefaultPathWindows := fmt.Sprintf("%s\\Google\\Cloud SDK\\cloud_env.bat; %s\\Google\\Cloud SDK\\cloud_env.bat", os.Getenv("ProgramFiles(x86)"), os.Getenv("ProgramFiles"))
-
-	// Default path for non-Windows.
-	const gcloudCLIDefaultPath = "/bin:/sbin:/usr/bin:/usr/local/bin"
 
 	// Execute GOOGLE CLOUD CLI to get project info
 	var cliCmd *exec.Cmd

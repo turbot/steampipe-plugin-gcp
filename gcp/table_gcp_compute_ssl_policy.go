@@ -122,7 +122,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeSslPolicies")
 
 	// Create Service Connection
@@ -132,11 +132,12 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.SslPolicies.List(project)
 	if err := resp.Pages(ctx, func(page *compute.SslPoliciesList) error {
@@ -163,11 +164,12 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var name string
 	if h.Item != nil {
