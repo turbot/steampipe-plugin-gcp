@@ -230,6 +230,8 @@ func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEq
  *  ----------------------------------------------------------------
  *
  * Output: []string{"(cpuPlatform = \"Intel Haswell\")", "((status = \"TERMINATED\") OR (status = \"RUNNING\"))", "(deletionProtection = false)"}
+ *
+ * This can be used for almost all the API's in GCP if it supports filter option
  */
 func buildQueryFilterFromQuals(filterQuals []filterQualMap, equalQuals plugin.KeyColumnQualMap) []string {
 	filters := []string{}
