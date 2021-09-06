@@ -175,11 +175,11 @@ func getListValues(listValue *proto.QualValueList) []string {
  * from	gcp_morales_aaa.gcp_compute_image
  * where family in ('sles-12', 'sles-15') and deprecation_state = 'ACTIVE'
  * -------------------------------------------------------------------------
- * 	Column: family, Operator: '=', Value: '[sles-12 sles-15]'
- * 	Column: deprecation_state, Operator: '=', Value: 'ACTIVE'
+ * 	Column: family, Operator: "=", Value: "[sles-12 sles-15]"
+ * 	Column: deprecation_state, Operator: "=", Value: "ACTIVE"
  * -------------------------------------------------------------------------
  *
- * Output: []string{"(family = sles-12) OR (family = sles-15)", "(deprecated.state = ACTIVE)"}
+ * Output: []string{"(family = "sles-12") OR (family = "sles-15")", "(deprecated.state = "ACTIVE")"}
  */
 func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEqualsQualMap) []string {
 	filters := []string{}
@@ -195,18 +195,93 @@ func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEq
 					filter := ""
 					for i, q := range qualValue.GetListValue().Values {
 						if i == 0 {
-							filter = fmt.Sprintf("(%s = %s)", qual.PropertyPath, q.GetStringValue())
+							filter = fmt.Sprintf("(%s = \"%s\")", qual.PropertyPath, q.GetStringValue())
 						} else {
-							filter = fmt.Sprintf("%s OR (%s = %s)", filter, qual.PropertyPath, q.GetStringValue())
+							filter = fmt.Sprintf("%s OR (%s = \"%s\")", filter, qual.PropertyPath, q.GetStringValue())
 						}
 					}
 					filters = append(filters, fmt.Sprintf("(%s)", filter))
 				} else {
-					filters = append(filters, fmt.Sprintf("(%s = %s)", qual.PropertyPath, qualValue.GetStringValue()))
+					filters = append(filters, fmt.Sprintf("(%s = \"%s\")", qual.PropertyPath, qualValue.GetStringValue()))
 				}
-			case "bool":
+			case "boolean":
 				filters = append(filters, fmt.Sprintf("(%s = %t)", qual.PropertyPath, qualValue.GetBoolValue()))
 			}
+		}
+	}
+
+	return filters
+}
+
+/**
+ * buildQueryFilter: To build gcp query filter from equal quals
+ * Sample for gcp_compute_instance table
+ * select name, id, machine_type_name, status, can_ip_forward, cpu_platform, deletion_protection, start_restricted, hostname
+ * from gcp_morales_aaa.gcp_compute_instance
+ * where
+ *	status in ('TERMINATED', 'RUNNING') and
+ *	cpu_platform = 'Intel Haswell' and
+ *  not deletion_protection
+
+ *  -----------------------STEAMPIPE QUAL INFO-----------------------------------------
+ *  	Column: deletion_protection, Operator: '<>', Value: 'true'
+ *  	Column: status, Operator: '=', Value: '[TERMINATED RUNNING]'
+ *  	Column: cpu_platform, Operator: '=', Value: 'Intel Haswell'
+ *  ----------------------------------------------------------------
+ *
+ * Output: []string{"(cpuPlatform = \"Intel Haswell\")", "((status = \"TERMINATED\") OR (status = \"RUNNING\"))", "(deletionProtection = false)"}
+ */
+func buildQueryFilterFromQuals(filterQuals []filterQualMap, equalQuals plugin.KeyColumnQualMap) []string {
+	filters := []string{}
+
+	for _, filterQualItem := range filterQuals {
+		filterQual := equalQuals[filterQualItem.ColumnName]
+		if filterQual == nil {
+			continue
+		}
+
+		// Check only if filter qual map matches with optional column name
+		if filterQual.Name == filterQualItem.ColumnName {
+			if filterQual.Quals == nil {
+				continue
+			}
+
+			for _, qual := range filterQual.Quals {
+				if qual.Value != nil {
+					value := qual.Value
+					switch filterQualItem.Type {
+					case "string":
+						// In case of IN caluse
+						if value.GetListValue() != nil {
+							filter := ""
+							for i, q := range value.GetListValue().Values {
+								if i == 0 {
+									filter = fmt.Sprintf("(%s = \"%s\")", filterQualItem.PropertyPath, q.GetStringValue())
+								} else {
+									filter = fmt.Sprintf("%s OR (%s = \"%s\")", filter, filterQualItem.PropertyPath, q.GetStringValue())
+								}
+							}
+							filters = append(filters, fmt.Sprintf("(%s)", filter))
+						} else {
+							switch qual.Operator {
+							case "=", "<>", "!=", ">", ",":
+								filters = append(filters, fmt.Sprintf("(%s %s \"%s\")", filterQualItem.PropertyPath, GcpFilterOperatorMap[qual.Operator], value.GetStringValue()))
+							case "<=", ">=":
+								filters = append(filters, fmt.Sprintf("((%s = \"%s\") OR (%s %s \"%s\"))", filterQualItem.PropertyPath, value.GetStringValue(), filterQualItem.PropertyPath, GcpFilterOperatorMap[qual.Operator], value.GetStringValue()))
+							}
+						}
+					case "boolean":
+						boolValue := value.GetBoolValue()
+						switch qual.Operator {
+						case "<>":
+							filters = append(filters, fmt.Sprintf("(%s = %t)", filterQualItem.PropertyPath, !boolValue))
+						case "=":
+							filters = append(filters, fmt.Sprintf("(%s = %t)", filterQualItem.PropertyPath, boolValue))
+						}
+					}
+				}
+			}
+
 		}
 	}
 
@@ -217,4 +292,22 @@ type filterQualMap struct {
 	ColumnName   string
 	PropertyPath string
 	Type         string
+}
+
+// Steampipe to GCP query filter map
+//
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either `=`, `!=`, `>`, or
+// `<`.
+var GcpFilterOperatorMap = map[string]string{
+	"=":  "=",
+	"<>": "!=",
+	"!=": "!=",
+	">":  ">",
+	"<":  "<",
+	"<=": "<", // Filter ((property=value) OR (property<value))
+	">=": ">", // Filter ((property=value) OR (property>value))
 }

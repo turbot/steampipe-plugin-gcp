@@ -24,6 +24,17 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeInstances,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "cpu_platform", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "hostname", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+
+				// Boolean columns
+				{Name: "can_ip_forward", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "deletion_protection", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "start_restricted", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -281,6 +292,30 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"cpu_platform", "cpuPlatform", "string"},
+		{"hostname", "hostname", "string"},
+		{"status", "status", "string"},
+		{"can_ip_forward", "canIpForward", "boolean"},
+		{"deletion_protection", "deletionProtection", "boolean"},
+		{"start_restricted", "startRestricted", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeInstances", "IAM I HERE")
+
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -289,18 +324,21 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 	project := projectId.(string)
 
-	resp := service.Instances.AggregatedList(project)
-	if err := resp.Pages(
-		ctx,
-		func(page *compute.InstanceAggregatedList) error {
-			for _, item := range page.Items {
-				for _, instance := range item.Instances {
-					d.StreamListItem(ctx, instance)
+	plugin.Logger(ctx).Info("listComputeInstances", "filter string", filterString)
+	resp := service.Instances.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
+	if err := resp.Pages(ctx, func(page *compute.InstanceAggregatedList) error {
+		for _, item := range page.Items {
+			for _, instance := range item.Instances {
+				d.StreamListItem(ctx, instance)
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if plugin.IsCancelled(ctx) {
+					page.NextPageToken = ""
+					return nil
 				}
 			}
-			return nil
-		},
-	); err != nil {
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
