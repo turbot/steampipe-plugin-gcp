@@ -23,12 +23,13 @@ from
 select
   name,
   id,
-  source_project
+  source_project,
+  deprecation_state
 from
   gcp_compute_image
 where
-  deprecation_state = 'ACTIVE'
-  and source_project != project;
+  deprecation_state is null
+  and is_standard_image;
 ```
 
 ### List of custom (user-defined) images defined in this project
@@ -41,10 +42,10 @@ select
 from
   gcp_compute_image
 where
-  source_project = project;
+  not is_standard_image;
 ```
 
-### List of compute images which are not encrypted with a customer key
+### List of custom (user-defined) images which are not encrypted with a customer key
 
 ```sql
 select
@@ -54,7 +55,8 @@ select
 from
   gcp_compute_image
 where
-  image_encryption_key is null;
+  image_encryption_key is null and
+  not is_standard_image;
 ```
 
 ### List of user-defined compute images which do not have owner tag key
@@ -62,12 +64,12 @@ where
 ```sql
 select
   name,
-  id
+  id,
+  tags
 from
-  gcp_compute_image
-where
-  tags -> 'owner' is null
-  and  source_project = project;
+  gcp_morales_aaa.gcp_compute_image
+where  tags -> 'owner' is null
+  and source_project = project
 ```
 
 ### List of active compute images older than 90 days

@@ -33,6 +33,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				{Name: "source_project", Require: plugin.Optional},
 				{Name: "status", Require: plugin.Optional},
 				{Name: "source_type", Require: plugin.Optional},
+				{Name: "is_standard_image", Require: plugin.Optional, Operators: []string{"=", "<>"}},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -60,6 +61,11 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "The server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "is_standard_image",
+				Description: "True if image is from public image projects. The public image projects that are available include the following: centos-cloud, cos-cloud, debian-cloud, fedora-coreos-cloud, rhel-cloud, rhel-sap-cloud, rocky-linux-cloud, suse-cloud, suse-sap-cloud, ubuntu-os-cloud, ubuntu-os-pro-cloud, windows-cloud and windows-sql-cloud. Set to false in query to list on project custom images",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
 				Name:        "status",
@@ -257,16 +263,7 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 			qualProjects = getListValues(value.GetListValue())
 		}
 	}
-
-	// List images only for requested projects
-	if len(qualProjects) > 0 {
-		for _, projectName := range qualProjects {
-			d.StreamListItem(ctx, projectName)
-		}
-		return nil, nil
-	}
-
-	// List of projects in which standard images resides
+	// List of standard image projects in which standard images resides
 	projectList := []string{
 		"centos-cloud",
 		"cos-cloud",
@@ -279,9 +276,35 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 		"ubuntu-os-cloud",
 		"windows-cloud",
 		"windows-sql-cloud",
-		project,
 	}
 
+	if value, ok := GetBoolQualValue(d.Quals, "is_standard_image"); ok {
+		if *value {
+			// If is_standard_image is true list only public images
+			for _, projectName := range projectList {
+				d.StreamListItem(ctx, projectName)
+
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if plugin.IsCancelled(ctx) {
+					return nil, nil
+				}
+			}
+		} else {
+			// If is_standard_image is false list only custom images
+			d.StreamListItem(ctx, project)
+		}
+		return nil, nil
+	}
+
+	// List images only for requested projects
+	if len(qualProjects) > 0 {
+		for _, projectName := range qualProjects {
+			d.StreamListItem(ctx, projectName)
+		}
+		return nil, nil
+	}
+
+	// To list standard images
 	for _, projectName := range projectList {
 		d.StreamListItem(ctx, projectName)
 
@@ -291,7 +314,15 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 		}
 	}
 
+	// To list custom images
+	d.StreamListItem(ctx, project)
+
 	return nil, nil
+}
+
+type imageInfo struct {
+	compute.Image
+	IsStandardImage bool
 }
 
 func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -323,12 +354,27 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		}
 	}
 
+	standardImageType := true
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	queryProject := projectId.(string)
+	// If image project is not same as the project where api is called
+	// then the image is not standard and is specific to that project
+	if strings.EqualFold(projectName, queryProject) {
+		standardImageType = false
+	}
+
 	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
 	plugin.Logger(ctx).Info("listImagesForProject", "Project Name", projectName, "filter string", filterString)
 	resp := service.Images.List(projectName).MaxResults(*pageSize).Filter(filterString)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {
-			d.StreamListItem(ctx, image)
+			d.StreamListItem(ctx, imageInfo{*image, standardImageType})
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if plugin.IsCancelled(ctx) {
 				page.NextPageToken = ""
@@ -389,13 +435,13 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 	project := projectId.(string)
 
-	image := h.Item.(*compute.Image)
+	image := h.Item.(imageInfo)
 	splittedTitle := strings.Split(image.SelfLink, "/")
 	imageProject := types.SafeString(splittedTitle[6])
 
 	// If image project is not same as the project where api is called
 	// do not make GetIamPolicy call as we might not have access to other project
-	if strings.EqualFold(imageProject, project) {
+	if !strings.EqualFold(imageProject, project) {
 		return nil, nil
 	}
 
@@ -410,7 +456,7 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 //// TRANSFORM FUNCTIONS
 
 func computeImageSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	image := d.HydrateItem.(*compute.Image)
+	image := d.HydrateItem.(imageInfo)
 	param := d.Param.(string)
 
 	// get the resource title
