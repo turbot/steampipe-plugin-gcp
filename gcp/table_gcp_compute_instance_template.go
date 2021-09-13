@@ -156,6 +156,12 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Properties.Tags"),
 			},
+			{
+				Name:        "labels",
+				Description: "Labels associated with the instance template.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Properties.Labels"),
+			},
 
 			// common resource columns
 			{
