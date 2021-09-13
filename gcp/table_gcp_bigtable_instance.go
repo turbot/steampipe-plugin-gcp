@@ -47,8 +47,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getBigtableInstanceSelfLink,
-				Transform:   transform.FromValue(),
+				Transform:   transform.From(bigtableInstanceSelfLink),
 			},
 			{
 				Name:        "state",
@@ -220,4 +219,11 @@ func bigtableInstanceTurbotData(_ context.Context, d *transform.TransformData) (
 	}
 
 	return turbotData[param], nil
+}
+
+func bigtableInstanceSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*bigtableadmin.Instance)
+	selfLink := "https://bigtableadmin.googleapis.com/v2/" + data.Name
+
+	return selfLink, nil
 }

@@ -41,8 +41,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getcloudFunctionSelfLink,
-				Transform:   transform.FromValue(),
+				Transform:   transform.From(cloudFunctionSelfLink),
 			},
 			{
 				Name:        "description",
@@ -279,21 +278,6 @@ func getGcpCloudFunctionIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	return cloudfunctions.Policy{}, nil
 }
 
-func getcloudFunctionSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	data := h.Item.(*cloudfunctions.CloudFunction)
-
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
-	selfLink := "https://www.googleapis.com/cloudfunctions/v1/projects/" + project + "/cloudFunctions/" + data.Name
-
-	return selfLink, nil
-}
-
 //// TRANSFORM FUNCTIONS
 
 func gcpCloudFunctionTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
@@ -317,4 +301,11 @@ func locationFromFunctionName(_ context.Context, d *transform.TransformData) (in
 		return nil, fmt.Errorf("Transform locationFromFunctionName failed - unexpected name format: %s", functionName)
 	}
 	return parts[3], nil
+}
+
+func cloudFunctionSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*cloudfunctions.CloudFunction)
+	selfLink := "https://cloudfunctions.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }

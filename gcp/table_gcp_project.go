@@ -131,7 +131,7 @@ func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	data := d.HydrateItem.(*cloudresourcemanager.Project)
-	selfLink := "https://www.googleapis.com/cloudresourcemanager/v1/projects/" + data.Name
+	selfLink := "https://cloudresourcemanager.googleapis.com/v1/" + data.Name
 
 	return selfLink, nil
 }

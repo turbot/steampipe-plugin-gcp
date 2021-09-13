@@ -39,8 +39,7 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getPubsubTopicSelfLink,
-				Transform:   transform.FromValue(),
+				Transform:   transform.From(pubsubTopicSelfLink),
 			},
 			{
 				Name:        "message_storage_policy_allowed_persistence_regions",
@@ -183,20 +182,6 @@ func getPubSubTopicIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 	return req, nil
 }
 
-func getPubsubTopicSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	data := h.Item.(*pubsub.Topic)
-
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
-	selfLink := "https://www.googleapis.com/pubsub/v1/projects/" + project + "/topics/" + data.Name
-	return selfLink, nil
-}
-
 //// TRANSFORM FUNCTIONS
 
 func topicNameToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
@@ -212,4 +197,11 @@ func topicNameToTurbotData(_ context.Context, d *transform.TransformData) (inter
 	}
 
 	return turbotData[param], nil
+}
+
+func pubsubTopicSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*pubsub.Topic)
+	selfLink := "https://pubsub.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }
