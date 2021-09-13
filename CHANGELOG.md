@@ -1,3 +1,15 @@
+## v0.16.1 [2021-09-13]
+
+_What's new?_
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.5.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v151--2021-09-13) ([#303](https://github.com/turbot/steampipe-plugin-gcp/pull/303))
+
+_Bug fixes_
+
+- If the Google service API is disabled, then the corresponding table will return zero records ([#287](https://github.com/turbot/steampipe-plugin-gcp/pull/287))
+
 ## v0.16.0 [2021-08-26]
 
 _What's new?_
