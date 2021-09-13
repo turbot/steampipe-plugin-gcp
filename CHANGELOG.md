@@ -8,7 +8,7 @@ _Enhancements_
 
 _Bug fixes_
 
-- If the Google service API is disabled, then the corresponding table will return zero records ([#287](https://github.com/turbot/steampipe-plugin-gcp/pull/287))
+- If the Google service API is disabled, then the corresponding table will now return zero records ([#287](https://github.com/turbot/steampipe-plugin-gcp/pull/287))
 
 ## v0.16.0 [2021-08-26]
 
