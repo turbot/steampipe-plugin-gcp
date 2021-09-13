@@ -189,21 +189,6 @@ func getBigtableInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	return req, nil
 }
 
-func getBigtableInstanceSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	data := h.Item.(*bigtableadmin.Instance)
-
-	// Get project details
-	projectData, err := activeProject(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	project := projectData.Project
-
-	selfLink := "https://www.googleapis.com/bigtableadmin/v2/projects/" + project + "/instances/" + data.Name
-
-	return selfLink, nil
-}
-
 //// TRANSFORM FUNCTIONS
 
 func bigtableInstanceTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
