@@ -75,6 +75,11 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromValue(),
 			},
 			{
+				Name:        "labels",
+				Description: "Labels that apply to this kms key.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "primary",
 				Description: "A copy of the primary CryptoKeyVersion that will be used by Encrypt when this CryptoKey is given in EncryptRequest.name.",
 				Type:        proto.ColumnType_JSON,
