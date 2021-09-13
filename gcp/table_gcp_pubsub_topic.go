@@ -36,6 +36,13 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getPubsubTopicSelfLink,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "message_storage_policy_allowed_persistence_regions",
 				Description: "Policy constraining the set of Google Cloud Platform regions where messages published to the topic may be stored. If not present, then no constraints are in effect.",
 				Type:        proto.ColumnType_JSON,
@@ -174,6 +181,20 @@ func getPubSubTopicIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	return req, nil
+}
+
+func getPubsubTopicSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*pubsub.Topic)
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	selfLink := "https://www.googleapis.com/pubsub/v1/projects/" + project + "/topics/" + data.Name
+	return selfLink, nil
 }
 
 //// TRANSFORM FUNCTIONS

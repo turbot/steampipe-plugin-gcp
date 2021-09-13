@@ -44,6 +44,13 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Type"),
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getBigtableInstanceSelfLink,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "state",
 				Description: "Specifies the current state of the instance.",
 				Type:        proto.ColumnType_STRING,
@@ -181,6 +188,21 @@ func getBigtableInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	return req, nil
+}
+
+func getBigtableInstanceSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*bigtableadmin.Instance)
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	selfLink := "https://www.googleapis.com/bigtableadmin/v2/projects/" + project + "/instances/" + data.Name
+
+	return selfLink, nil
 }
 
 //// TRANSFORM FUNCTIONS

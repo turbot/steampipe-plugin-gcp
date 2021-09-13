@@ -38,6 +38,13 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getcloudFunctionSelfLink,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "description",
 				Description: "User-provided description of a function.",
 				Type:        proto.ColumnType_STRING,
@@ -270,6 +277,21 @@ func getGcpCloudFunctionIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	return cloudfunctions.Policy{}, nil
+}
+
+func getcloudFunctionSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*cloudfunctions.CloudFunction)
+
+	// Get project details
+	projectData, err := activeProject(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	project := projectData.Project
+
+	selfLink := "https://www.googleapis.com/cloudfunctions/v1/projects/" + project + "/cloudFunctions/" + data.Name
+
+	return selfLink, nil
 }
 
 //// TRANSFORM FUNCTIONS
