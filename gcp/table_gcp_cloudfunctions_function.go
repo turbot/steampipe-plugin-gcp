@@ -26,11 +26,11 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "The name of the function.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel().Transform(lastPathElement),
 			},
 			{
 				Name:        "status",
