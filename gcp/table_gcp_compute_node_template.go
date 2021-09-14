@@ -23,7 +23,8 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNodeTemplate,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeNodeTemplates,
+			Hydrate:           listComputeNodeTemplates,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

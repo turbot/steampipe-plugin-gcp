@@ -22,7 +22,8 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeFirewall,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeFirewalls,
+			Hydrate:           listComputeFirewalls,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

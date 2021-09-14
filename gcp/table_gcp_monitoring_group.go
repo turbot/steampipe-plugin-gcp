@@ -19,7 +19,8 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 			Hydrate:    getMonitoringGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listMonitoringGroup,
+			Hydrate:           listMonitoringGroup,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

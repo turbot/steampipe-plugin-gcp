@@ -17,8 +17,9 @@ func tableGcpComputeDiskMetricWriteOps(_ context.Context) *plugin.Table {
 		Name:        "gcp_compute_disk_metric_write_ops",
 		Description: "GCP Compute Disk Metrics - Write Ops",
 		List: &plugin.ListConfig{
-			ParentHydrate: listComputeDisk,
-			Hydrate:       listComputeDiskMetricWriteOps,
+			ParentHydrate:     listComputeDisk,
+			Hydrate:           listComputeDiskMetricWriteOps,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

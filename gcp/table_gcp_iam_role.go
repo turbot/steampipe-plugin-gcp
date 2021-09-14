@@ -23,7 +23,8 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 			Hydrate:    getIamRole,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listIamRoles,
+			Hydrate:           listIamRoles,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

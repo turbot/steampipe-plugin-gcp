@@ -22,7 +22,8 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeGlobalForwardingRule,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeGlobalForwardingRules,
+			Hydrate:           listComputeGlobalForwardingRules,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

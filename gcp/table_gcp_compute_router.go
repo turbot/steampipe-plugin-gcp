@@ -23,7 +23,8 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeRouter,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeRouters,
+			Hydrate:           listComputeRouters,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

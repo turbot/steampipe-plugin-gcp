@@ -24,7 +24,8 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeImage,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeImages,
+			Hydrate:           listComputeImages,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

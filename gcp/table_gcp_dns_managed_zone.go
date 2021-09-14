@@ -21,7 +21,8 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsManagedZone,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDnsManagedZones,
+			Hydrate:           listDnsManagedZones,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

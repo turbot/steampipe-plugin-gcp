@@ -20,7 +20,8 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listPubSubSnapshot,
+			Hydrate:           listPubSubSnapshot,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

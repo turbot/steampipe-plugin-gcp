@@ -19,7 +19,8 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNetwork,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeNetworks,
+			Hydrate:           listComputeNetworks,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns

@@ -22,7 +22,8 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigtableInstance,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBigtableInstances,
+			Hydrate:           listBigtableInstances,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -172,7 +173,7 @@ func getBigtableInstanceIamPolicy(ctx context.Context, d *plugin.QueryData, h *p
 	req, err := service.Projects.Instances.GetIamPolicy(instance.Name, &getIamPolicyRequest).Do()
 	if err != nil {
 		// Return nil, if the resource not present
-		result := isNotFoundError([]string{"404"})
+		result := isIgnorableError([]string{"404"})
 		if result != nil {
 			return nil, nil
 		}

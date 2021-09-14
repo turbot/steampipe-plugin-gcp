@@ -22,7 +22,8 @@ func tableGcpComputeTargetHttpsProxy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetHttpsProxy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeTargetHttpsProxies,
+			Hydrate:           listComputeTargetHttpsProxies,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

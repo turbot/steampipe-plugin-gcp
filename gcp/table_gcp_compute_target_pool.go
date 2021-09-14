@@ -21,7 +21,8 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetPool,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeTargetPools,
+			Hydrate:           listComputeTargetPools,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

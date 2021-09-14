@@ -16,7 +16,8 @@ func tableGcpComputeRegion(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_region",
 		Description: "GCP Compute Region",
 		List: &plugin.ListConfig{
-			Hydrate: listComputeRegions,
+			Hydrate:           listComputeRegions,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns

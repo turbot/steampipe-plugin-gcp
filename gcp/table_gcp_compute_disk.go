@@ -20,7 +20,8 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeDisk,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeDisk,
+			Hydrate:           listComputeDisk,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns

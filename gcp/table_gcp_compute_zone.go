@@ -16,7 +16,8 @@ func tableGcpComputeZone(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_zone",
 		Description: "GCP Compute Zone",
 		List: &plugin.ListConfig{
-			Hydrate: listComputeZones,
+			Hydrate:           listComputeZones,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns

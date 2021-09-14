@@ -22,7 +22,8 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeBackendBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeBackendBuckets,
+			Hydrate:           listComputeBackendBuckets,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{

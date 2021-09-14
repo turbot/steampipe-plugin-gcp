@@ -21,8 +21,9 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpServiceAccountKey,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listGcpServiceAccounts,
-			Hydrate:       listGcpServiceAccountKeys,
+			ParentHydrate:     listGcpServiceAccounts,
+			Hydrate:           listGcpServiceAccountKeys,
+			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -123,11 +124,14 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	result, err := service.Projects.ServiceAccounts.Keys.List(serviceAccount.Name).Do()
+	if err != nil {
+		return nil, err
+	}
 	for _, serviceAccountKey := range result.Keys {
 		d.StreamLeafListItem(ctx, serviceAccountKey)
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
