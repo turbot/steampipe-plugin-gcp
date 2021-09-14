@@ -76,7 +76,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "labels",
-				Description: "Labels that apply to this kms key.",
+				Description: "Labels are key-value pair that helps to organize KMS keys.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

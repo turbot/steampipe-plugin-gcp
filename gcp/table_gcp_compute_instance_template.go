@@ -158,7 +158,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "labels",
-				Description: "Labels associated with the instance template.",
+				Description: "Labels to apply to instances that are created from these properties.",
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Properties.Labels"),
 			},

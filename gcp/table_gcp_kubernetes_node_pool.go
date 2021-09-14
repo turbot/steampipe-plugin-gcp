@@ -32,7 +32,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "self_link",
+				Name:        "selfLink",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
 			},
