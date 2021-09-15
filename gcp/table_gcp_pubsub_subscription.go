@@ -43,6 +43,12 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Topic").Transform(lastPathElement),
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(pubsubSubscriptionSelfLink),
+			},
+			{
 				Name:        "filter",
 				Description: "An expression written in the Pub/Sub [filter language](https://cloud.google.com/pubsub/docs/filtering). If non-empty, then only `PubsubMessage`s whose `attributes` field matches the filter are delivered on this subscription. If empty, then no messages are filtered out.",
 				Type:        proto.ColumnType_STRING,
@@ -264,4 +270,11 @@ func subscriptionNameToTurbotData(_ context.Context, d *transform.TransformData)
 	}
 
 	return turbotData[param], nil
+}
+
+func pubsubSubscriptionSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*pubsub.Subscription)
+	selfLink := "https://pubsub.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }

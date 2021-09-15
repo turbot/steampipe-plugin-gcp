@@ -43,6 +43,12 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(notificationChannelSelfLink),
+			},
+			{
 				Name:        "type",
 				Description: "Specifies the type of the notification channel.",
 				Type:        proto.ColumnType_STRING,
@@ -187,4 +193,11 @@ func notificationChannelNameToTurbotData(_ context.Context, d *transform.Transfo
 		"Akas":    []string{"gcp://monitoring.googleapis.com/" + notificationChannel.Name},
 	}
 	return turbotData[param], nil
+}
+
+func notificationChannelSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*monitoring.NotificationChannel)
+	selfLink := "https://monitoring.googleapis.com/v3/" + data.Name
+
+	return selfLink, nil
 }
