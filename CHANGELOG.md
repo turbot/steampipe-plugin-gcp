@@ -1,20 +1,16 @@
 ## v0.17.0 [2021-09-23]
 
-_What's new?_
-
 _Enhancements_
 
-- Add `self_link` column to `gcp_bigtable_instance`, `gcp_cloudfunctions_function`, `gcp_monitoring_notification_channel`, `gcp_pubsub_snapshot`, `gcp_pubsub_subscription`, `gcp_pubsub_topic` and `gcp_project` table ([#304](https://github.com/turbot/steampipe-plugin-gcp/pull/304))
-- Add `labels` column to `gcp_compute_instance_template` and `gcp_kms_key` table ([#301](https://github.com/turbot/steampipe-plugin-gcp/pull/301))
+- Added `self_link` column to `gcp_bigtable_instance`, `gcp_cloudfunctions_function`, `gcp_monitoring_notification_channel`, `gcp_pubsub_snapshot`, `gcp_pubsub_subscription`, `gcp_pubsub_topic` and `gcp_project` tables ([#304](https://github.com/turbot/steampipe-plugin-gcp/pull/304))
+- Added `labels` column to `gcp_compute_instance_template` and `gcp_kms_key` tables ([#301](https://github.com/turbot/steampipe-plugin-gcp/pull/301))
 - Recompiled plugin with [steampipe-plugin-sdk v1.6.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v161--2021-09-21) ([#309](https://github.com/turbot/steampipe-plugin-gcp/pull/309))
 
 _Bug fixes_
 
-- Column name `selfLink` has been updated to `self_link` in `gcp_kubernetes_node_pool` table ([#308](https://github.com/turbot/steampipe-plugin-gcp/pull/308))
+- The column name `selfLink` has been updated to `self_link` in `gcp_kubernetes_node_pool` table ([#308](https://github.com/turbot/steampipe-plugin-gcp/pull/308))
 
 ## v0.16.1 [2021-09-13]
-
-_What's new?_
 
 _Enhancements_
 
