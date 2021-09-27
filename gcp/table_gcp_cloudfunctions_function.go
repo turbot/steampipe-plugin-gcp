@@ -26,16 +26,22 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "The name of the function.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel().Transform(lastPathElement),
 			},
 			{
 				Name:        "status",
 				Description: "Status of the function deployment (ACTIVE, OFFLINE, CLOUD_FUNCTION_STATUS_UNSPECIFIED,DEPLOY_IN_PROGRESS, DELETE_IN_PROGRESS, UNKNOWN).",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(cloudFunctionSelfLink),
 			},
 			{
 				Name:        "description",
@@ -296,4 +302,11 @@ func locationFromFunctionName(_ context.Context, d *transform.TransformData) (in
 		return nil, fmt.Errorf("Transform locationFromFunctionName failed - unexpected name format: %s", functionName)
 	}
 	return parts[3], nil
+}
+
+func cloudFunctionSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*cloudfunctions.CloudFunction)
+	selfLink := "https://cloudfunctions.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }

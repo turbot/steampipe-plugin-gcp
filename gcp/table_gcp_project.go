@@ -31,6 +31,12 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(projectSelfLink),
+			},
+			{
 				Name:        "project_number",
 				Description: "The number uniquely identifying the project.",
 				Type:        proto.ColumnType_INT,
@@ -122,4 +128,11 @@ func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project.ProjectId}
 
 	return akas, nil
+}
+
+func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*cloudresourcemanager.Project)
+	selfLink := "https://cloudresourcemanager.googleapis.com/v1/projects/" + data.Name
+
+	return selfLink, nil
 }

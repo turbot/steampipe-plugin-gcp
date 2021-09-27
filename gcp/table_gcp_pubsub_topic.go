@@ -36,6 +36,12 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(pubsubTopicSelfLink),
+			},
+			{
 				Name:        "message_storage_policy_allowed_persistence_regions",
 				Description: "Policy constraining the set of Google Cloud Platform regions where messages published to the topic may be stored. If not present, then no constraints are in effect.",
 				Type:        proto.ColumnType_JSON,
@@ -193,4 +199,11 @@ func topicNameToTurbotData(_ context.Context, d *transform.TransformData) (inter
 	}
 
 	return turbotData[param], nil
+}
+
+func pubsubTopicSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*pubsub.Topic)
+	selfLink := "https://pubsub.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }

@@ -20,7 +20,7 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listPubSubSnapshot,
+			Hydrate:           listPubSubSnapshots,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
@@ -41,6 +41,12 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 				Description: "The short name of the topic from which this snapshot is retaining messages.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Topic").Transform(lastPathElement),
+			},
+			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(pubsubSnapshotSelfLink),
 			},
 			{
 				Name:        "expire_time",
@@ -99,7 +105,7 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listPubSubSnapshots(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := PubsubService(ctx, d)
 	if err != nil {
@@ -187,4 +193,11 @@ func snapshotNameToTurbotData(_ context.Context, d *transform.TransformData) (in
 	}
 
 	return turbotData[param], nil
+}
+
+func pubsubSnapshotSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*pubsub.Snapshot)
+	selfLink := "https://pubsub.googleapis.com/v1/" + data.Name
+
+	return selfLink, nil
 }

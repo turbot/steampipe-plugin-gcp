@@ -1,3 +1,25 @@
+## v0.17.0 [2021-09-23]
+
+_Enhancements_
+
+- Added the `self_link` column to `gcp_bigtable_instance`, `gcp_cloudfunctions_function`, `gcp_monitoring_notification_channel`, `gcp_pubsub_snapshot`, `gcp_pubsub_subscription`, `gcp_pubsub_topic` and `gcp_project` tables ([#304](https://github.com/turbot/steampipe-plugin-gcp/pull/304))
+- Added the `labels` column to `gcp_compute_instance_template` and `gcp_kms_key` tables ([#301](https://github.com/turbot/steampipe-plugin-gcp/pull/301))
+- Recompiled plugin with [steampipe-plugin-sdk v1.6.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v161--2021-09-21) ([#309](https://github.com/turbot/steampipe-plugin-gcp/pull/309))
+
+_Bug fixes_
+
+- Column name `selfLink` has been correctly renamed to `self_link` in the `gcp_kubernetes_node_pool` table ([#308](https://github.com/turbot/steampipe-plugin-gcp/pull/308))
+
+## v0.16.1 [2021-09-13]
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.5.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v151--2021-09-13) ([#303](https://github.com/turbot/steampipe-plugin-gcp/pull/303))
+
+_Bug fixes_
+
+- If the Google service API is disabled, then the corresponding table will now return zero records ([#287](https://github.com/turbot/steampipe-plugin-gcp/pull/287))
+
 ## v0.16.0 [2021-08-26]
 
 _What's new?_
