@@ -176,7 +176,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 			for _, role := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{role, false})
 
-				// This will return zero if context has been cancelled (i.e due to manual cancellation) or
+				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
 				if d.QueryStatus.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
@@ -197,7 +197,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 			for _, managedRole := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{managedRole, true})
 
-				// This will return zero if context has been cancelled (i.e due to manual cancellation) or
+				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
 				if d.QueryStatus.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""

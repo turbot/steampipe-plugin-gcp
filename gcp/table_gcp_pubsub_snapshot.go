@@ -105,7 +105,7 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPubSubSnapshots(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listPubSubSnapshots(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := PubsubService(ctx, d)
 	if err != nil {
