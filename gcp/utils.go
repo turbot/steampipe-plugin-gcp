@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -145,14 +146,28 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	if gcpConfig.Project != nil {
-		os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
-	}
-	if gcpConfig.CredentialFile != nil {
-		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *gcpConfig.CredentialFile)
-	}
-	if gcpConfig.ImpersonateServiceAccount != nil {
-		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
+	if &gcpConfig != nil {
+		if gcpConfig.Project != nil {
+			os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
+		}
+		if gcpConfig.CredentialFile != nil {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return nil
+			}
+			var path string
+			if *gcpConfig.CredentialFile == "~" {
+				path = home
+			} else if strings.HasPrefix(*gcpConfig.CredentialFile, "~/") {
+				path = filepath.Join(home, (*gcpConfig.CredentialFile)[2:])
+			} else {
+				path = *gcpConfig.CredentialFile
+			}
+			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", path)
+		}
+		if gcpConfig.ImpersonateServiceAccount != nil {
+			opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
+		}
 	}
 	return opts
 }
