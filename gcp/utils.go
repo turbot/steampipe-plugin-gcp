@@ -131,7 +131,7 @@ func getProjectFromCLI() (*projectInfo, error) {
 
 	output, err := cliCmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("Invoking gcloud CLI failed with the following error: %v", stderr)
+		return nil, fmt.Errorf("invoking gcloud CLI failed with the following error: %v", stderr)
 	}
 
 	project := types.ToString(output)
@@ -146,28 +146,26 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	if &gcpConfig != nil {
-		if gcpConfig.Project != nil {
-			os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
+	if gcpConfig.Project != nil {
+		os.Setenv("CLOUDSDK_CORE_PROJECT", *gcpConfig.Project)
+	}
+	if gcpConfig.CredentialFile != nil {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil
 		}
-		if gcpConfig.CredentialFile != nil {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil
-			}
-			var path string
-			if *gcpConfig.CredentialFile == "~" {
-				path = home
-			} else if strings.HasPrefix(*gcpConfig.CredentialFile, "~/") {
-				path = filepath.Join(home, (*gcpConfig.CredentialFile)[2:])
-			} else {
-				path = *gcpConfig.CredentialFile
-			}
-			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", path)
+		var path string
+		if *gcpConfig.CredentialFile == "~" {
+			path = home
+		} else if strings.HasPrefix(*gcpConfig.CredentialFile, "~/") {
+			path = filepath.Join(home, (*gcpConfig.CredentialFile)[2:])
+		} else {
+			path = *gcpConfig.CredentialFile
 		}
-		if gcpConfig.ImpersonateServiceAccount != nil {
-			opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
-		}
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", path)
+	}
+	if gcpConfig.ImpersonateServiceAccount != nil {
+		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
 	}
 	return opts
 }
