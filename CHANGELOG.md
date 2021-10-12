@@ -3,7 +3,7 @@
 _Enhancements_
 
 - Recompiled plugin with [steampipe-plugin-sdk v1.6.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v162--2021-10-08) ([#313](https://github.com/turbot/steampipe-plugin-gcp/pull/313))
-- `credential_file` parameter in the configuration file now correctly evaluates tildes in the home directory of the user ([#312](https://github.com/turbot/steampipe-plugin-gcp/pull/312))
+- `credential_file`  parameter in the configuration file now extends tildes to the current users home directory ([#312](https://github.com/turbot/steampipe-plugin-gcp/pull/312))
 
 ## v0.17.0 [2021-09-23]
 
