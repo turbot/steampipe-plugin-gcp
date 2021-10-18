@@ -298,7 +298,7 @@ func locationFromFunctionName(_ context.Context, d *transform.TransformData) (in
 	functionName := types.SafeString(d.Value)
 	parts := strings.Split(functionName, "/")
 	if len(parts) != 6 {
-		return nil, fmt.Errorf("Transform locationFromFunctionName failed - unexpected name format: %s", functionName)
+		return nil, fmt.Errorf("transform locationFromFunctionName failed - unexpected name format: %s", functionName)
 	}
 	return parts[3], nil
 }
