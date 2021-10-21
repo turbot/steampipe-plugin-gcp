@@ -398,7 +398,7 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	// If image project is not same as the project where api is called
 	// do not make GetIamPolicy call as we might not have access to other project
-	if strings.EqualFold(imageProject, project) {
+	if !strings.EqualFold(imageProject, project) {
 		return nil, nil
 	}
 
