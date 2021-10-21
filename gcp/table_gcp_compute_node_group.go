@@ -153,7 +153,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeNodeGroups")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -162,11 +162,12 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.NodeGroups.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.NodeGroupAggregatedList) error {
@@ -193,11 +194,12 @@ func getComputeNodeGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var nodeGroup compute.NodeGroup
 	name := d.KeyColumnQuals["name"].GetStringValue()

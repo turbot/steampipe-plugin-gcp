@@ -94,11 +94,13 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
+
 	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListKeyRingsResponse) error {
 		for _, ring := range page.KeyRings {
@@ -114,7 +116,7 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKeyRingDetail")
 
 	var location string
@@ -130,11 +132,12 @@ func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	loc := d.KeyColumnQuals["location"].GetStringValue()

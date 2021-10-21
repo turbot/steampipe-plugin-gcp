@@ -184,7 +184,7 @@ func getIncrementalTimeAsPerGranularity(granularity string) time.Duration {
 	}
 }
 
-func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string, location string) (*monitoring.ListTimeSeriesResponse, error) {
+func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string, location string) (*monitoring.ListTimeSeriesResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitorMetricStatistics")
 
 	// Create Service Connection
@@ -194,11 +194,12 @@ func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, granu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	endTime := time.Now().Format(time.RFC3339)
 	startTime := getMonitoringStartDateForGranularity(granularity).Format(time.RFC3339)

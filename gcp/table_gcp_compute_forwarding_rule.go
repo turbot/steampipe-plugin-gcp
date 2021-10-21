@@ -199,7 +199,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Create Service Connection
 	service, err := ComputeBetaService(ctx, d)
@@ -208,11 +208,12 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.ForwardingRules.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleAggregatedList) error {
@@ -239,11 +240,12 @@ func getComputeForwardingRule(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var forwardingRule compute.ForwardingRule
 	name := d.KeyColumnQuals["name"].GetStringValue()

@@ -104,7 +104,7 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listLoggingBuckets")
 
 	// Create service connection
@@ -114,12 +114,12 @@ func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-
-	project := projectData.Project
+	project := projectId.(string)
 
 	// '-' for all locations...
 	resp := service.Projects.Locations.Buckets.List("projects/" + project + "/locations/-")
@@ -157,11 +157,15 @@ func getLoggingBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, nil
 	}
 
-	projectInfo, err := activeProject(ctx, d)
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	bucketNameWithLocation := "projects/" + projectInfo.Project + "/locations/" + locationId + "/buckets/" + bucketName
+	project := projectId.(string)
+
+	bucketNameWithLocation := "projects/" + project + "/locations/" + locationId + "/buckets/" + bucketName
 
 	op, err := service.Projects.Locations.Buckets.Get(bucketNameWithLocation).Do()
 	if err != nil {

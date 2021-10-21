@@ -124,7 +124,7 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -146,11 +146,12 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp, err := service.BackupRuns.List(project, instance.Name).Do()
 	if err != nil {
@@ -175,11 +176,12 @@ func getSQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	id := d.KeyColumnQuals["id"].GetInt64Value()
 	instanceName := d.KeyColumnQuals["instance_name"].GetStringValue()
@@ -196,11 +198,12 @@ func getSQLBackupAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	backup := h.Item.(*sqladmin.BackupRun)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://cloudsql.googleapis.com/projects/" + project + "/instances/" + backup.Instance + "/backupRuns/" + strconv.Itoa(int(backup.Id))}
 

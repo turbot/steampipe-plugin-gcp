@@ -102,7 +102,7 @@ func tableGcpComputeRegion(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeRegions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeRegions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeRegions")
 
 	// Create Service Connection
@@ -112,11 +112,12 @@ func listComputeRegions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Regions.List(project)
 	if err := resp.Pages(

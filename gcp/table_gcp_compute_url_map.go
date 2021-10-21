@@ -198,7 +198,7 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeURLMaps")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -207,11 +207,12 @@ func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.UrlMaps.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.UrlMapsAggregatedList) error {
@@ -238,11 +239,12 @@ func getComputeURLMap(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var urlMap compute.UrlMap
 	name := d.KeyColumnQuals["name"].GetStringValue()

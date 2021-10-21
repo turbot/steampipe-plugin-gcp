@@ -52,7 +52,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -61,18 +61,20 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	projectData, err := activeProject(ctx, d)
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
@@ -88,11 +90,14 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 func serviceNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	auditConfig := h.Item.(*cloudresourcemanager.AuditConfig)
-	projectData, err := activeProject(ctx, d)
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/services/" + auditConfig.Service}
 	return akas, nil

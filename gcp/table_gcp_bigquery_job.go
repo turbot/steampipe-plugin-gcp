@@ -241,7 +241,7 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listBigQueryJobs")
 
 	// Create Service Connection
@@ -251,11 +251,12 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Jobs.List(project)
 	if err := resp.Pages(ctx, func(page *bigquery.JobList) error {
@@ -280,11 +281,12 @@ func getBigQueryJob(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var id string
 	if h.Item != nil {

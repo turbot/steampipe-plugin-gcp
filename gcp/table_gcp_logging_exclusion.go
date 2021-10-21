@@ -82,7 +82,7 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -91,7 +91,7 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := LoggingService(ctx, d)
 	if err != nil {
@@ -99,11 +99,12 @@ func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, _ *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Exclusions.List("projects/" + project)
 	if err := resp.Pages(
@@ -133,11 +134,12 @@ func getGcpLoggingExclusion(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
@@ -159,11 +161,12 @@ func exclusionNameToAkas(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	exclusion := h.Item.(*logging.LogExclusion)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://logging.googleapis.com/projects/" + project + "/exclusions/" + exclusion.Name}
 	return akas, nil

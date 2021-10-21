@@ -119,7 +119,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := MonitoringService(ctx, d)
 	if err != nil {
@@ -127,11 +127,12 @@ func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.AlertPolicies.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
@@ -152,11 +153,12 @@ func getMonitoringAlertPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	plugin.Logger(ctx).Trace("getMonitoringAlertPolicy")
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Create Service Connection

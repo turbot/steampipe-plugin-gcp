@@ -63,7 +63,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -72,7 +72,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
@@ -80,11 +80,12 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	plugin.Logger(ctx).Trace("listGcpIamPolicies", "GCP_PROJECT: ", project)
 
 	rb := &cloudresourcemanager.GetIamPolicyRequest{}
@@ -99,11 +100,12 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func getIamPolicyTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	// Get the resource title
 	title := strings.ToUpper(project) + " IAM Policy"

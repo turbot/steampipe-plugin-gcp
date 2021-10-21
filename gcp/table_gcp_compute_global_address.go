@@ -140,7 +140,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
@@ -148,11 +148,12 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.GlobalAddresses.List(project)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
@@ -177,11 +178,12 @@ func getComputeGlobalAddress(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 

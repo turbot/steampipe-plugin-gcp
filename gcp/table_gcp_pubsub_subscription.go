@@ -179,7 +179,7 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := PubsubService(ctx, d)
 	if err != nil {
@@ -187,11 +187,12 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Subscriptions.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *pubsub.ListSubscriptionsResponse) error {
@@ -218,11 +219,12 @@ func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	req, err := service.Projects.Subscriptions.Get("projects/" + project + "/subscriptions/" + name).Do()

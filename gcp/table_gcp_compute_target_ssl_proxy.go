@@ -110,7 +110,7 @@ func tableGcpComputeTargetSslProxy(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeTargetSslProxies")
 
 	// Create Service Connection
@@ -120,11 +120,12 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.TargetSslProxies.List(project)
 	if err := resp.Pages(ctx, func(page *compute.TargetSslProxyList) error {
@@ -151,11 +152,12 @@ func getComputeTargetSslProxy(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	// Error: json: invalid use of ,string struct tag, trying to unmarshal "projects/<project_name>/global/targetSslProxies/" into uint64

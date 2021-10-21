@@ -39,5 +39,5 @@ func listComputeInstanceMetricCpuUtilizationHourly(ctx context.Context, d *plugi
 	location := getLastPathElement(instanceInfo.Zone)
 	dimensionValue := "\"" + instanceInfo.Name + "\""
 
-	return listMonitorMetricStatistics(ctx, d, "HOURLY", "\"compute.googleapis.com/instance/cpu/utilization\"", "metric.labels.instance_name = ", dimensionValue, instanceInfo.Name, location)
+	return listMonitorMetricStatistics(ctx, d, h, "HOURLY", "\"compute.googleapis.com/instance/cpu/utilization\"", "metric.labels.instance_name = ", dimensionValue, instanceInfo.Name, location)
 }

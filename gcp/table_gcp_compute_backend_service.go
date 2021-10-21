@@ -230,7 +230,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeBackendServices")
 
 	// Create Service Connection
@@ -240,11 +240,12 @@ func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.BackendServices.AggregatedList(project)
 	if err := resp.Pages(ctx, func(page *compute.BackendServiceAggregatedList) error {
@@ -271,11 +272,12 @@ func getComputeBackendService(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	var backendService compute.BackendService
 	name := d.KeyColumnQuals["name"].GetStringValue()

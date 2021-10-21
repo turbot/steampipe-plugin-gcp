@@ -124,7 +124,7 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeMachineTypes")
 
 	// Create Service Connection
@@ -134,11 +134,12 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, _ *plugin
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	zone := "us-central1-c"
 
 	resp := service.MachineTypes.List(project, zone)
@@ -156,7 +157,7 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 //// HYDRATE FUNCTIONS
 
-func getComputeMachineType(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getComputeMachineType(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getComputeMachineType")
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
@@ -165,11 +166,12 @@ func getComputeMachineType(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	zone := "us-central1-c"
 	machineTypeName := d.KeyColumnQuals["name"].GetStringValue()
 

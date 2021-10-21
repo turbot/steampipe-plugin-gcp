@@ -104,7 +104,7 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -125,12 +125,13 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	// Get Project details
-	projectData, err := activeProject(ctx, d)
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp, err := service.ResourceRecordSets.List(project, managedZone.Name).Do()
 	if err != nil {
@@ -146,7 +147,7 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 //// HYDRATE FUNCTIONS
 
-func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getDnsRecordSet")
 
 	// Create service connection
@@ -156,11 +157,12 @@ func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	rrset_type := d.KeyColumnQuals["type"].GetStringValue()
@@ -176,11 +178,12 @@ func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 func getDnsRecordSetAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	data := h.Item.(recordSetInfo)
 

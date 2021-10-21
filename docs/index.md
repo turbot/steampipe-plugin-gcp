@@ -14,7 +14,7 @@ og_image: "/images/plugins/turbot/gcp-social-graphic.png"
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
-[GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
+[GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
 For example:
 
@@ -74,8 +74,8 @@ connection "gcp" {
 
 ## Get involved
 
-* Open source: https://github.com/turbot/steampipe-plugin-gcp
-* Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
+- Open source: https://github.com/turbot/steampipe-plugin-gcp
+- Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 
 ## Advanced configuration options
 
@@ -95,7 +95,8 @@ connection "gcp_my_other_project" {
 }
 ```
 
-### Specify multiple projects 
+### Specify multiple projects
+
 A common configuration is to have multiple connections to different projects, using the same standard ADC Credentials for all connections:
 
 ```hcl
@@ -115,9 +116,9 @@ connection "gcp_project_ccc" {
 }
 ```
 
-### Specify static credentials using environment variables 
+### Specify static credentials using environment variables
 
 ```sh
 export CLOUDSDK_CORE_PROJECT=myproject  
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
-``` 
+```

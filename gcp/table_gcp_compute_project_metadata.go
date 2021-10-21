@@ -108,7 +108,7 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -117,7 +117,7 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeProjectMetadata(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listComputeProjectMetadata(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
@@ -125,11 +125,12 @@ func listComputeProjectMetadata(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	plugin.Logger(ctx).Trace("listComputeProjectMetadata", "GCP_PROJECT: ", project)
 
 	resp, err := service.Projects.Get(project).Do()
@@ -145,11 +146,12 @@ func listComputeProjectMetadata(ctx context.Context, d *plugin.QueryData, _ *plu
 
 func getComputeProjectMetadataTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	// Build resource aka
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project}

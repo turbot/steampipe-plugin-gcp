@@ -106,7 +106,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listBigtableInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listBigtableInstances(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listBigtableInstances")
 
 	// Create Service Connection
@@ -116,11 +116,12 @@ func listBigtableInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp := service.Projects.Instances.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *bigtableadmin.ListInstancesResponse) error {
@@ -145,11 +146,12 @@ func getBigtableInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 

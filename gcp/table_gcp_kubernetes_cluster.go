@@ -336,7 +336,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listKubernetesClusters")
 
 	// Create Service Connection
@@ -346,11 +346,12 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	resp, err := service.Projects.Locations.Clusters.List("projects/" + project + "/locations/-").Do()
 	if err != nil {
@@ -366,7 +367,7 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 /// HYDRATE FUNCTIONS
 
-func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKubernetesCluster")
 
 	// Create Service Connection
@@ -376,11 +377,12 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()

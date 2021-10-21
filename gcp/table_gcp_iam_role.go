@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -25,6 +26,9 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listIamRoles,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "is_gcp_managed", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -73,7 +77,6 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "included_permissions",
 				Description: "The names of the permissions this role grants when bound in an IAM policy",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getIamRole,
 				Transform:   transform.FromField("Role.IncludedPermissions"),
 			},
 
@@ -102,7 +105,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -116,7 +119,7 @@ type roleInfo struct {
 
 //// FETCH FUNCTIONS
 
-func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := IAMService(ctx, d)
 	if err != nil {
@@ -124,38 +127,89 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
-	// List all the project roles
-	customRoles := service.Projects.Roles.List("projects/" + project)
-	if err := customRoles.Pages(
-		ctx,
-		func(page *iam.ListRolesResponse) error {
-			for _, role := range page.Roles {
-				d.StreamListItem(ctx, &roleInfo{role, false})
-			}
-			return nil
-		},
-	); err != nil {
-		return nil, err
+	showDeleted := helpers.StringSliceContains(d.QueryContext.Columns, "deleted")
+	view := "BASIC"
+	if helpers.StringSliceContains(d.QueryContext.Columns, "included_permissions") {
+		view = "FULL"
 	}
 
-	// List all the pre-defined roles
-	managedRole := service.Roles.List()
-	if err := managedRole.Pages(
-		ctx,
-		func(page *iam.ListRolesResponse) error {
-			for _, managedRole := range page.Roles {
-				d.StreamListItem(ctx, &roleInfo{managedRole, true})
+	roleType := "ALL"
+	// Handling for non equal quals
+	if d.Quals["is_gcp_managed"] != nil {
+		for _, q := range d.Quals["is_gcp_managed"].Quals {
+			value := q.Value.GetBoolValue()
+			roleType = "CUSTOM"
+			switch q.Operator {
+			case "<>":
+				if !value {
+					roleType = "GCP"
+				}
+			case "=":
+				if value {
+					roleType = "GCP"
+				}
+			}
+		}
+	}
+
+	plugin.Logger(ctx).Error("listIamRoles", "roleType", roleType)
+
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
+	if roleType == "ALL" || roleType == "CUSTOM" {
+		// List all the custom project roles
+		customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
+		if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
+			for _, role := range page.Roles {
+				d.StreamListItem(ctx, &roleInfo{role, false})
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					break
+				}
 			}
 			return nil
 		},
-	); err != nil {
-		return nil, err
+		); err != nil {
+			return nil, err
+		}
+	}
+
+	if roleType == "ALL" || roleType == "GCP" {
+		// List all the pre-defined roles
+		managedRole := service.Roles.List().View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
+		if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
+			for _, managedRole := range page.Roles {
+				d.StreamListItem(ctx, &roleInfo{managedRole, true})
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					break
+				}
+			}
+
+			return nil
+		},
+		); err != nil {
+			return nil, err
+		}
 	}
 	return nil, err
 }

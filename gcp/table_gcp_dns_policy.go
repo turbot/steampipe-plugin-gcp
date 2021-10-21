@@ -92,7 +92,7 @@ func tableDnsPolicy(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -101,7 +101,7 @@ func tableDnsPolicy(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDnsPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listDnsPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listDnsPolicies")
 
 	// Create Service Connection
@@ -111,11 +111,12 @@ func listDnsPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	res := service.Policies.List(project)
 	if err := res.Pages(ctx, func(page *dns.PoliciesListResponse) error {
@@ -132,7 +133,7 @@ func listDnsPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 //// HYDRATE FUNCTIONS
 
-func getDnsPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getDnsPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getDnsPolicy")
 
 	// Create Service Connection
@@ -142,11 +143,12 @@ func getDnsPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 	name := d.KeyColumnQuals["name"].GetStringValue()
 
 	resp, err := service.Policies.Get(project, name).Do()
@@ -165,11 +167,12 @@ func getDnsPolicyAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	data := h.Item.(*dns.Policy)
 
 	// Get project details
-	projectData, err := activeProject(ctx, d)
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
-	project := projectData.Project
+	project := projectId.(string)
 
 	akas := []string{"gcp://dns.googleapis.com/projects/" + project + "/policies/" + data.Name}
 
