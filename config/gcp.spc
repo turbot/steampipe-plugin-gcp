@@ -9,8 +9,9 @@ connection "gcp" {
   #   - The current active project project, as returned by the `gcloud config get-value project` command
   #project  = "YOUR_PROJECT_NAME"
 
-  # `credential_file` (optional) -  - The path to a JSON credential file that contains
-  # Google application credentials.  If `credential_file` is not specified in a connection,
+  # [DEPRECATED] `credential_file` (optional) - This property is DEPRECATED, and will be removed in future release. Use `credentials` instead.
+  # `credentials` (optional) - Either the path to a JSON credential file that contains Google application credentials,
+  # or the contents of a service account key file in JSON format. If `credentials` is not specified in a connection,
   # credentials will be loaded from:
   #   - The path specified in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable, if set; otherwise
   #   - The standard location (`~/.config/gcloud/application_default_credentials.json`)

@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -150,13 +152,55 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	if gcpConfig.CredentialFile != nil {
+	// 'credential_file' in connection config is DEPRECATED, and will be removed in future release
+	// use `credentials` instead
+	if gcpConfig.Credentials != nil {
+		contents, err := pathOrContents(*gcpConfig.Credentials)
+		if err != nil {
+			panic(err)
+		}
+		opts = append(opts, option.WithCredentialsJSON([]byte(contents)))
+	} else if gcpConfig.CredentialFile != nil {
 		opts = append(opts, option.WithCredentialsFile(*gcpConfig.CredentialFile))
 	}
+
 	if gcpConfig.ImpersonateServiceAccount != nil {
 		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
 	}
 	return opts
+}
+
+// Returns the content of given file, or the inline JSON credential as it is
+func pathOrContents(poc string) (string, error) {
+	if len(poc) == 0 {
+		return poc, nil
+	}
+
+	path := poc
+	if path[0] == '~' {
+		var err error
+		path, err = homedir.Expand(path)
+		if err != nil {
+			return path, err
+		}
+	}
+
+	// Check for valid file path 
+	if _, err := os.Stat(path); err == nil {
+		contents, err := ioutil.ReadFile(path)
+		if err != nil {
+			return string(contents), err
+		}
+		return string(contents), nil
+	}
+
+	// Return error if content is a file path and the file doesn't exist
+	if len(path) > 1 && (path[0] == '/' || path[0] == '\\') {
+		return "", fmt.Errorf("%s: no such file or dir", path)
+	}
+
+	// Return the inline content
+	return poc, nil
 }
 
 // Get QualValueList as an list of items

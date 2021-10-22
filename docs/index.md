@@ -24,7 +24,7 @@ select
   location,
   versioning_enabled
 from
-  gcp_storage_bucket
+  gcp_storage_bucket;
 ```
 
 ```
@@ -58,7 +58,7 @@ steampipe plugin install gcp
 | Credentials | configure your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) |
 | Permissions | Grant the `ReadOnlyAccess` policy to your user or role. |
 | Radius | Each connection represents a single GCP project. |
-| Resolution |  1. Credentials from the json file specified by the `credential_file` paramater in your steampipe config.<br />2. Credentials from the json file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default json file location (~/.config/gcloud/application_default_credentials.json). |
+| Resolution |  1. Credentials from the json file specified by the `credentials` parameter in your steampipe config.<br />2. Credentials from the json file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default json file location (~/.config/gcloud/application_default_credentials.json). |
 
 ### Configuration
 
@@ -66,11 +66,26 @@ Installing the latest gcp plugin will create a config file (`~/.steampipe/config
 
 ```hcl
 connection "gcp" {
-  plugin    = "gcp"
-  project   = "my-project"
-  credential_file = "~/my-service-account-creds.json"
+  plugin      = "gcp"
+  
+  # `project` (optional) - The project ID to connect to. This is the project id (string), not the
+  # project number. If the `project` argument is not specified for a connection,
+  # the project will be determined in the following order:
+  #   - The standard gcloud SDK `CLOUDSDK_CORE_PROJECT` environment variable, if set; otherwise
+  #   - The `GCP_PROJECT` environment variable, if set (this is deprecated); otherwise
+  #   - The current active project project, as returned by the `gcloud config get-value project` command
+  project     = "my-project"
+
+  # `credentials` (optional) - Either the path to a JSON credential file that contains Google application credentials,
+  # or the contents of a service account key file in JSON format. If `credentials` is not specified in a connection,
+  # credentials will be loaded from:
+  #   - The path specified in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable, if set; otherwise
+  #   - The standard location (`~/.config/gcloud/application_default_credentials.json`)
+  credentials = "~/my-service-account-creds.json"
 }
 ```
+
+**NOTE:** `credential_file` property in connection config is **DEPRECATED**, use `credentials` instead.
 
 ## Get involved
 
@@ -79,7 +94,7 @@ connection "gcp" {
 
 ## Advanced configuration options
 
-By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run gcloud auth application-default login. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
+By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run `gcloud auth application-default login`. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
 
 For users with multiple GCP project and more complex authentication use cases, here are some examples of advanced configuration options:
 
@@ -89,9 +104,9 @@ Generate and download a JSON key for an existing service account using: [create 
 
 ```hcl
 connection "gcp_my_other_project" {
-  plugin             = "gcp"
-  project            = "my-other-project"
-  credential_file    = "/home/me/my-service-account-creds.json"
+  plugin      = "gcp"
+  project     = "my-other-project"
+  credentials = "/home/me/my-service-account-creds.json"
 }
 ```
 
@@ -101,24 +116,24 @@ A common configuration is to have multiple connections to different projects, us
 
 ```hcl
 connection "gcp_project_aaa" {
-  plugin    = "gcp"
-  project   = "project-aaa"
+  plugin  = "gcp"
+  project = "project-aaa"
 }
 
 connection "gcp_project_bbb" {
-  plugin    = "gcp"
-  project   = "project-bbb"
+  plugin  = "gcp"
+  project = "project-bbb"
 }
 
 connection "gcp_project_ccc" {
-  plugin    = "gcp"
-  project   = "project-ccc"
+  plugin  = "gcp"
+  project = "project-ccc"
 }
 ```
 
 ### Specify static credentials using environment variables
 
 ```sh
-export CLOUDSDK_CORE_PROJECT=myproject  
+export CLOUDSDK_CORE_PROJECT=myproject
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
 ```
