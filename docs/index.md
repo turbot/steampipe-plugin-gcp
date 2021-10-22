@@ -85,7 +85,7 @@ connection "gcp" {
 }
 ```
 
-**NOTE:** `credential_file` property in connection config is **DEPRECATED**, use `credentials` instead.
+**NOTE:** The `credential_file` property has been deprecated and will be removed in the next major version. Please use `credentials` instead.
 
 ## Get involved
 
