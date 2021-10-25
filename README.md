@@ -20,7 +20,11 @@ steampipe plugin install gcp
 Run a query:
 
 ```sql
-select name, role_id from gcp_iam_role;
+select
+  name,
+  role_id
+from
+  gcp_iam_role;
 ```
 
 ## Developing
@@ -39,20 +43,20 @@ cd steampipe-plugin-gcp
 
 Build, which automatically installs the new version to your `~/.steampipe/plugins` directory:
 
-```
+```sh
 make
 ```
 
 Configure the plugin:
 
-```
+```sh
 cp config/* ~/.steampipe/config
 vi ~/.steampipe/config/gcp.spc
 ```
 
 Try it!
 
-```
+```shell
 steampipe query
 > .inspect gcp
 ```
