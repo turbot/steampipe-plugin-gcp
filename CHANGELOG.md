@@ -1,3 +1,15 @@
+## v0.18.0 [2021-10-26]
+
+_What's new?_
+
+- Configuration file will now use `credentials` instead of `credential_file` as a config argument. We continue to support `credential_file`, however it is deprecated and the support for it will be removed in the near future  ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
+
+_Enhancements_
+
+- Updated: Recompiled plugin with [steampipe-plugin-sdk v1.7.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md) ([#317](https://github.com/turbot/steampipe-plugin-gcp/pull/317))
+- Updated: Add additional optional key quals to `gcp_iam_role`, `gcp_compute_image` and `gcp_compute_instance` tables ([#298](https://github.com/turbot/steampipe-plugin-gcp/pull/298))
+- Updated: Add `WithCache` functionality for hydrate functions across all the tables ([#298](https://github.com/turbot/steampipe-plugin-gcp/pull/298))
+
 ## v0.17.1 [2021-10-12]
   
 _Enhancements_
