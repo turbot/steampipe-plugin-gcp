@@ -12,7 +12,7 @@ _Enhancements_
 
 _Deprecated_
 
-- `credential_file` parameter in the configuration file is now deprecated. We recommend on using the `credentials` parameter instead, since the deprecated parameter will be removed in the next major version
+- `credential_file` parameter in the configuration file is now deprecated. We recommend on using the `credentials` parameter instead, since the deprecated parameter will be removed in the next major version. ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
 
 ## v0.17.1 [2021-10-12]
   
