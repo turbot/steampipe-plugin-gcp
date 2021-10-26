@@ -2,7 +2,7 @@
 
 _What's new?_
 
-- Configuration file will now use `credentials` config argument which allows to use either the path to a JSON credential file that contains Google application credentials, or the contents of a service account key file in JSON format ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
+- Added: The `credentials` argument can now be specified in the configuration file to pass in either the path to or the contents of a service account key file in JSON format ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
 
 _Enhancements_
 
@@ -12,7 +12,7 @@ _Enhancements_
 
 _Deprecated_
 
-- `credential_file` parameter in the configuration file is now deprecated. We recommend on using the `credentials` parameter instead, since the deprecated parameter will be removed in the next major version. ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
+- The `credential_file` argument in the configuration file is now deprecated and will be removed in the next major version. We recommend using the `credentials` argument instead, which can take the same file path as the `credential_file` argument. ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
 
 ## v0.17.1 [2021-10-12]
   
