@@ -3,6 +3,7 @@ package gcp
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -75,6 +76,7 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 
 	var err error
 	var projectData *projectInfo
+	gcpConfig := GetConfig(d.Connection)
 	gcpProject := os.Getenv("GCP_PROJECT")
 	sdkCoreProject := os.Getenv("CLOUDSDK_CORE_PROJECT")
 	projectFromConfig := getProjectFromConfig(d.Connection)
@@ -82,6 +84,25 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 	if projectFromConfig != "" {
 		projectData = &projectInfo{
 			Project: projectFromConfig,
+		}
+	} else if gcpConfig.Credentials != nil {
+		// Read credentials
+		contents, err := pathOrContents(*gcpConfig.Credentials)
+		if err != nil {
+			panic(err)
+		}
+		type creds struct {
+			ProjectId string `json:"project_id"`
+		}
+		
+		// Fetch projectID from given credential
+		var credInfo creds
+		err = json.Unmarshal([]byte(contents), &credInfo)
+		if err != nil {
+			panic(err)
+		}
+		projectData = &projectInfo{
+			Project: credInfo.ProjectId,
 		}
 	} else if sdkCoreProject != "" {
 		projectData = &projectInfo{
@@ -185,7 +206,7 @@ func pathOrContents(poc string) (string, error) {
 		}
 	}
 
-	// Check for valid file path 
+	// Check for valid file path
 	if _, err := os.Stat(path); err == nil {
 		contents, err := ioutil.ReadFile(path)
 		if err != nil {
