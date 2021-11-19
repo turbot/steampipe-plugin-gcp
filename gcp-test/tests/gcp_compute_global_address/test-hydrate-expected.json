@@ -1,6 +1,6 @@
 [
   {
-    "address_type": "EXTERNAL",
+    "address_type": "INTERNAL",
     "description": "Test global address to validate integration test.",
     "kind": "compute#address",
     "name": "{{resourceName}}",
