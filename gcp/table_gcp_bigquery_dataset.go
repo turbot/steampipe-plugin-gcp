@@ -216,6 +216,10 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 func bigQueryDatasetAka(ctx context.Context, h *transform.TransformData) (interface{}, error) {
 	data := datasetID(h.HydrateItem)
+	if len(data) == 0 {
+		return nil, nil
+	} 
+	
 	projectID := strings.Split(data, ":")[0]
 	id := strings.Split(data, ":")[1]
 
@@ -227,6 +231,10 @@ func bigQueryDatasetAka(ctx context.Context, h *transform.TransformData) (interf
 func bigQueryDatasetTitle(ctx context.Context, h *transform.TransformData) (interface{}, error) {
 	data := datasetID(h.HydrateItem)
 	name := datasetName(h.HydrateItem)
+
+	if len(name) == 0 {
+		return nil, nil
+	}
 
 	if len(name) > 0 {
 		return name, nil
