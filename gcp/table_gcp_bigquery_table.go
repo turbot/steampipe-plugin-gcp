@@ -314,8 +314,13 @@ func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 //// TRANSFORM FUNCTIONS
 
-func bigqueryTableAkas(ctx context.Context, h *transform.TransformData) (interface{}, error) {
+func bigqueryTableAkas(_ context.Context, h *transform.TransformData) (interface{}, error) {
 	data := tableID(h.HydrateItem)
+	
+	// Empty check
+	if len(data) == 0 {
+		return nil, nil
+	}
 
 	projectID := strings.Split(data, ":")[0]
 	id := strings.Split(data, ":")[1]
@@ -326,9 +331,14 @@ func bigqueryTableAkas(ctx context.Context, h *transform.TransformData) (interfa
 	return akas, nil
 }
 
-func bigQueryTableTitle(ctx context.Context, h *transform.TransformData) (interface{}, error) {
+func bigQueryTableTitle(_ context.Context, h *transform.TransformData) (interface{}, error) {
 	data := tableID(h.HydrateItem)
 	name := tableName(h.HydrateItem)
+
+	// Empty check
+	if len(name) == 0 {
+		return nil, nil
+	}
 
 	if len(name) > 0 {
 		return name, nil
