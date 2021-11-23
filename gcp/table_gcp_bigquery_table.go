@@ -306,7 +306,7 @@ func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 	
 	// Empty Check
-	if id == "" {
+	if id == "" || datasetID == ""{
 		return nil, nil
 	}
 
