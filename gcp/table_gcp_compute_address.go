@@ -61,6 +61,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				Name:        "creation_timestamp",
 				Description: "The creation timestamp of the resource.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromGo().NullIfZero(),
 			},
 			{
 				Name:        "kind",
@@ -190,6 +191,11 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
+	
+	// Empty check
+	if name == "" {
+		return nil, nil
+	}
 
 	resp := service.Addresses.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
