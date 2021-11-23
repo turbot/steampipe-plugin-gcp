@@ -36,10 +36,24 @@ data "null_data_source" "resource" {
   }
 }
 
-resource "google_compute_global_address" "named_test_resource" {
-  name        = var.resource_name
-  description = "Test global address to validate integration test."
+resource "google_compute_network" "network" {
+  project      = var.gcp_project
+  provider      = google-beta
+  name          = var.resource_name
+  auto_create_subnetworks = false
 }
+
+resource "google_compute_global_address" "named_test_resource" {
+  provider      = google-beta
+  project       = var.gcp_project
+  name          = var.resource_name
+  address_type  = "INTERNAL"
+  purpose       = "PRIVATE_SERVICE_CONNECT"
+  network       = google_compute_network.network.id
+  address       = "100.100.100.105"
+  description   = "Test global address to validate integration test."
+}
+
 
 output "resource_aka" {
   value = "gcp://compute.googleapis.com/${google_compute_global_address.named_test_resource.id}"

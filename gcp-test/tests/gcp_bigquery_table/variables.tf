@@ -41,7 +41,7 @@ resource "google_service_account" "named_test_resource" {
 
 resource "google_bigquery_dataset" "named_test_resource" {
   dataset_id                  = var.resource_name
-  friendly_name               = "turbot_${var.resource_name}"
+  friendly_name               = var.resource_name
   description                 = "This is a test dataset to validate the table outcome."
   location                    = var.gcp_region
   default_table_expiration_ms = 3600000
@@ -52,8 +52,9 @@ resource "google_bigquery_dataset" "named_test_resource" {
 }
 
 resource "google_bigquery_table" "named_test_resource" {
-  dataset_id = google_bigquery_dataset.named_test_resource.dataset_id
-  table_id   = var.resource_name
+  dataset_id      = google_bigquery_dataset.named_test_resource.dataset_id
+  table_id        = var.resource_name
+  friendly_name   = var.resource_name
 
   time_partitioning {
     type = "DAY"

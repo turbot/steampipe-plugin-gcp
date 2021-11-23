@@ -38,6 +38,7 @@ data "null_data_source" "resource" {
 
 resource "google_storage_bucket" "my_bucket_test" {
   name          = var.resource_name
+  location      = "US"
   force_destroy = true
 }
 

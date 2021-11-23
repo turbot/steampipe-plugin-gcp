@@ -5,7 +5,7 @@
     ],
     "auto_create_subnetworks": false,
     "description": "Test network to validate integration test.",
-    "gateway_ipv4": "",
+    "gateway_ipv4": null,
     "kind": "compute#network",
     "mtu": 1500,
     "name": "{{resourceName}}",

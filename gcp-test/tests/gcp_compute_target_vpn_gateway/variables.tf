@@ -36,7 +36,10 @@ data "null_data_source" "resource" {
 }
 
 resource "google_compute_network" "network_test" {
-  name = var.resource_name
+  name                    = var.resource_name
+  provider                = google-beta
+  project                 = var.gcp_project
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_vpn_gateway" "target_gateway" {
