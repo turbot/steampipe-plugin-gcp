@@ -191,6 +191,11 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
+	
+	// Empty check
+	if name == "" {
+		return nil, nil
+	}
 
 	resp := service.Addresses.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(
@@ -215,11 +220,6 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 func addressSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	address := d.HydrateItem.(*compute.Address)
 	param := d.Param.(string)
-
-	// Empty check
-	if len(address.SelfLink) == 0 {
-		return nil, nil
-	}
 
 	region := getLastPathElement(types.SafeString(address.Region))
 	project := strings.Split(address.SelfLink, "/")[6]
