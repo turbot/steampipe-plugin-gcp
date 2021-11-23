@@ -304,6 +304,11 @@ func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		datasetID = d.KeyColumnQuals["dataset_id"].GetStringValue()
 		id = d.KeyColumnQuals["table_id"].GetStringValue()
 	}
+	
+	// Empty Check
+	if id == "" {
+		return nil, nil
+	}
 
 	resp, err := service.Tables.Get(project, datasetID, id).Do()
 	if err != nil {
@@ -316,11 +321,6 @@ func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 func bigqueryTableAkas(_ context.Context, h *transform.TransformData) (interface{}, error) {
 	data := tableID(h.HydrateItem)
-	
-	// Empty check
-	if len(data) == 0 {
-		return nil, nil
-	}
 
 	projectID := strings.Split(data, ":")[0]
 	id := strings.Split(data, ":")[1]
@@ -334,11 +334,6 @@ func bigqueryTableAkas(_ context.Context, h *transform.TransformData) (interface
 func bigQueryTableTitle(_ context.Context, h *transform.TransformData) (interface{}, error) {
 	data := tableID(h.HydrateItem)
 	name := tableName(h.HydrateItem)
-
-	// Empty check
-	if len(name) == 0 {
-		return nil, nil
-	}
 
 	if len(name) > 0 {
 		return name, nil
