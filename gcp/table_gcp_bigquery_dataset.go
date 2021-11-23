@@ -204,6 +204,7 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		id = d.KeyColumnQuals["dataset_id"].GetStringValue()
 	}
 	
+	// check if id is empty
 	if id == "" {
 		return nil, nil
 	}
