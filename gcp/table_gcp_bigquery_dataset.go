@@ -203,6 +203,11 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	} else {
 		id = d.KeyColumnQuals["dataset_id"].GetStringValue()
 	}
+	
+	// check if id is empty
+	if id == "" {
+		return nil, nil
+	}
 
 	resp, err := service.Datasets.Get(project, id).Do()
 	if err != nil {
@@ -216,6 +221,7 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 func bigQueryDatasetAka(ctx context.Context, h *transform.TransformData) (interface{}, error) {
 	data := datasetID(h.HydrateItem)
+	
 	projectID := strings.Split(data, ":")[0]
 	id := strings.Split(data, ":")[1]
 
