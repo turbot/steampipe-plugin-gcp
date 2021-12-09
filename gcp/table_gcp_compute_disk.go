@@ -22,6 +22,10 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeDisk,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -266,6 +270,25 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
+	plugin.Logger(ctx).Trace("filterString", filterString)
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -274,11 +297,18 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 	project := projectId.(string)
 
-	resp := service.Disks.AggregatedList(project)
+	resp := service.Disks.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.DiskAggregatedList) error {
 		for _, item := range page.Items {
 			for _, disk := range item.Disks {
 				d.StreamListItem(ctx, disk)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil

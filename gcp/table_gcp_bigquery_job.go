@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -249,6 +250,14 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	if err != nil {
 		return nil, err
 	}
+	
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
@@ -258,10 +267,17 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 	project := projectId.(string)
 
-	resp := service.Jobs.List(project)
+	resp := service.Jobs.List(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *bigquery.JobList) error {
 		for _, job := range page.Jobs {
 			d.StreamListItem(ctx, job)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
 		}
 		return nil
 	}); err != nil {

@@ -124,6 +124,14 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -132,11 +140,18 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 	}
 	project := projectId.(string)
 
-	resp := service.TargetVpnGateways.AggregatedList(project)
+	resp := service.TargetVpnGateways.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetVpnGatewayAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetVpnGateway := range item.TargetVpnGateways {
 				d.StreamListItem(ctx, targetVpnGateway)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil

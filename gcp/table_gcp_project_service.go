@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -78,6 +79,14 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	pageSize := types.Int64(200)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -86,12 +95,19 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
-	result := service.Services.List("projects/" + project)
+	result := service.Services.List("projects/" + project).PageSize(*pageSize)
 	if err := result.Pages(
 		ctx,
 		func(page *serviceusage.ListServicesResponse) error {
 			for _, service := range page.Services {
 				d.StreamListItem(ctx, service)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 			return nil
 		},

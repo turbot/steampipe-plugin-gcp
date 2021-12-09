@@ -210,6 +210,14 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -220,12 +228,19 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	data := "projects/" + project + "/locations/-" // '-' for all locations...
 
-	resp := service.Projects.Locations.Functions.List(data)
+	resp := service.Projects.Locations.Functions.List(data).PageSize(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *cloudfunctions.ListFunctionsResponse) error {
 			for _, item := range page.Functions {
 				d.StreamListItem(ctx, item)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 			return nil
 		},

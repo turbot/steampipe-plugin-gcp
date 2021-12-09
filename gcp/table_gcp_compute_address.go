@@ -25,6 +25,13 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeAddresses,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "address_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "network_tier", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -150,6 +157,29 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	if err != nil {
 		return nil, err
 	}
+
+	filterQuals := []filterQualMap{
+		{"address_type", "addressType", "string"},
+		{"network_tier", "networkTier", "string"},
+		{"purpose", "purpose", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeAddresses", "filterString", filterString)
+
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -158,11 +188,18 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 	project := projectId.(string)
 
-	resp := service.Addresses.AggregatedList(project)
+	resp := service.Addresses.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
 		for _, item := range page.Items {
 			for _, address := range item.Addresses {
 				d.StreamListItem(ctx, address)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil
