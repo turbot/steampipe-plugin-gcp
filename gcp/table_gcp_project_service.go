@@ -25,6 +25,10 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listGcpProjectServices,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "state", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -79,6 +83,12 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["state"] != nil {
+		filterString = "state:" + d.KeyColumnQuals["state"].GetStringValue()
+	}
+	plugin.Logger(ctx).Trace("listGcpProjectServices", "filter string", filterString)
+
 	pageSize := types.Int64(200)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -95,7 +105,7 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
-	result := service.Services.List("projects/" + project).PageSize(*pageSize)
+	result := service.Services.List("projects/" + project).Filter(filterString).PageSize(*pageSize)
 	if err := result.Pages(
 		ctx,
 		func(page *serviceusage.ListServicesResponse) error {

@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,6 +26,14 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listSQLDatabaseInstances,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "instance_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "state", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "database_version", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "backend_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "gce_zone", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -371,6 +380,21 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"instance_type", "instanceType", "string"},
+		{"state", "state", "string"},
+		{"database_version", "databaseVersion", "string"},
+		{"backend_type", "backendType", "string"},
+		{"gce_zone", "gceZone", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listSQLDatabaseInstances", "filter string", filterString)
+
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -387,7 +411,7 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 	project := projectId.(string)
 
-	resp := service.Instances.List(project).MaxResults(*pageSize)
+	resp := service.Instances.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *sqladmin.InstancesListResponse) error {
 		for _, instance := range page.Items {
 			d.StreamListItem(ctx, instance)

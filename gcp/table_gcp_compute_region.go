@@ -19,6 +19,11 @@ func tableGcpComputeRegion(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeRegions,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -112,6 +117,18 @@ func listComputeRegions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeRegions", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -128,7 +145,7 @@ func listComputeRegions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 	project := projectId.(string)
 
-	resp := service.Regions.List(project).MaxResults(*pageSize)
+	resp := service.Regions.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.RegionList) error {

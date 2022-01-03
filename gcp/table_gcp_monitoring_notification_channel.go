@@ -25,6 +25,11 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listGcpMonitoringNotificationChannels,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "display_name", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -121,6 +126,18 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"type", "type", "string"},
+		{"display_name", "displayName", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listGcpMonitoringNotificationChannels", "filter string", filterString)
+
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -137,7 +154,7 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 	}
 	project := projectId.(string)
 
-	resp := service.Projects.NotificationChannels.List("projects/" + project).PageSize(*pageSize)
+	resp := service.Projects.NotificationChannels.List("projects/" + project).Filter(filterString).PageSize(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *monitoring.ListNotificationChannelsResponse) error {

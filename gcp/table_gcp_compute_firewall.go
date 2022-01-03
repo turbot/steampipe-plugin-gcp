@@ -25,6 +25,13 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeFirewalls,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "direction", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				
+				// Boolean columns
+				{Name: "disabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -177,6 +184,18 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"direction", "direction", "string"},
+		{"disabled", "disabled", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeFirewalls", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -193,7 +212,7 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 	project := projectId.(string)
 
-	resp := service.Firewalls.List(project).MaxResults(*pageSize)
+	resp := service.Firewalls.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.FirewallList) error {
 		for _, firewall := range page.Items {
 			d.StreamListItem(ctx, firewall)

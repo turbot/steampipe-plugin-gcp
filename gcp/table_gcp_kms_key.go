@@ -25,6 +25,11 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			Hydrate:           listKeyDetails,
 			ParentHydrate:     listKeyRingDetails,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "rotation_period", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
@@ -139,6 +144,18 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"purpose", "purpose", "string"},
+		{"rotation_period", "rotationPeriod", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listKeyDetails", "filter string", filterString)
+
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -149,7 +166,7 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	keyRing := h.Item.(*cloudkms.KeyRing)
 
-	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).PageSize(*pageSize)
+	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).Filter(filterString).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
 		for _, key := range page.CryptoKeys {
 			d.StreamListItem(ctx, key)

@@ -22,6 +22,13 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listMonitoringAlertPolicies,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "display_name", Require: plugin.Optional, Operators: []string{"<>", "="}},
+
+				// Boolean columns
+				{Name: "enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -127,6 +134,18 @@ func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"display_name", "displayName", "string"},
+		{"enabled", "enabled", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listMonitoringAlertPolicies", "filter string", filterString)
+
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -143,7 +162,7 @@ func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 	project := projectId.(string)
 
-	resp := service.Projects.AlertPolicies.List("projects/" + project).PageSize(*pageSize)
+	resp := service.Projects.AlertPolicies.List("projects/" + project).Filter(filterString).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
 		for _, alertPolicy := range page.AlertPolicies {
 			d.StreamListItem(ctx, alertPolicy)

@@ -19,6 +19,11 @@ func tableGcpComputeZone(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeZones,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -112,6 +117,18 @@ func listComputeZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeZones", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -128,7 +145,7 @@ func listComputeZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 	project := projectId.(string)
 
-	resp := service.Zones.List(project).MaxResults(*pageSize)
+	resp := service.Zones.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.ZoneList) error {
