@@ -25,6 +25,11 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeNodeGroups,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "maintenance_policy", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -161,6 +166,18 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"status", "status", "string"},
+		{"maintenance_policy", "maintenancePolicy", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeNodeGroups", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -177,7 +194,7 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	project := projectId.(string)
 
-	resp := service.NodeGroups.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.NodeGroups.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NodeGroupAggregatedList) error {
 		for _, item := range page.Items {
 			for _, nodeGroup := range item.NodeGroups {

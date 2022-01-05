@@ -24,6 +24,10 @@ func tableGcpComputeTargetHttpsProxy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetHttpsProxies,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// Boolean columns
+				{Name: "proxy_bind", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -146,6 +150,17 @@ func listComputeTargetHttpsProxies(ctx context.Context, d *plugin.QueryData, h *
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"proxy_bind", "proxyBind", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeTargetHttpsProxies", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -162,7 +177,7 @@ func listComputeTargetHttpsProxies(ctx context.Context, d *plugin.QueryData, h *
 	}
 	project := projectId.(string)
 
-	resp := service.TargetHttpsProxies.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.TargetHttpsProxies.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetHttpsProxyAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetHttpsProxy := range item.TargetHttpsProxies {

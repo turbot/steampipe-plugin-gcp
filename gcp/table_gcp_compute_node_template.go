@@ -25,6 +25,12 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeNodeTemplates,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "cpu_overcommit_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "node_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -161,6 +167,19 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"cpu_overcommit_type", "cpuOvercommitType", "string"},
+		{"node_type", "nodeType", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeNodeTemplates", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -177,7 +196,7 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 	project := projectId.(string)
 
-	resp := service.NodeTemplates.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.NodeTemplates.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NodeTemplateAggregatedList) error {
 		for _, item := range page.Items {
 			for _, nodeTemplate := range item.NodeTemplates {

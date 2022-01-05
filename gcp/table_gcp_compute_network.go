@@ -22,6 +22,10 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeNetworks,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// Boolean columns
+				{Name: "auto_create_subnetworks", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -135,6 +139,17 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"auto_create_subnetworks", "autoCreateSubnetworks", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeNetworks", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -151,7 +166,7 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	resp := service.Networks.List(project).MaxResults(*pageSize)
+	resp := service.Networks.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
 		for _, network := range page.Items {
 			d.StreamListItem(ctx, network)

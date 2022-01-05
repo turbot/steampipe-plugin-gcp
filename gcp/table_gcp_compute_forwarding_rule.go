@@ -25,6 +25,17 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeForwardingRules,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "ip_protocol", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "load_balancing_scheme", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "network_tier", Require: plugin.Optional, Operators: []string{"<>", "="}},
+
+				// Boolean columns
+				{Name: "allow_global_access", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "all_ports", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "is_mirroring_collector", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -207,6 +218,22 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, h *plu
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"ip_protocol", "ipProtocol", "string"},
+		{"load_balancing_scheme", "loadBalancingScheme", "string"},
+		{"network_tier", "networkTier", "string"},
+		{"allow_global_access", "allowGlobalAccess", "boolean"},
+		{"all_ports", "allPorts", "boolean"},
+		{"is_mirroring_collector", "isMirroringCollector", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeForwardingRules", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -223,7 +250,7 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 	project := projectId.(string)
 
-	resp := service.ForwardingRules.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.ForwardingRules.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleAggregatedList) error {
 		for _, item := range page.Items {
 			for _, forwardingRule := range item.ForwardingRules {

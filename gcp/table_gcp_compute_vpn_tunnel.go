@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -24,6 +25,11 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeVpnTunnels,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "vpn_gateway", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -187,6 +193,18 @@ func listComputeVpnTunnels(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"vpn_gateway", "vpnGateway", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeVpnTunnels", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -203,7 +221,7 @@ func listComputeVpnTunnels(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	project := projectId.(string)
 
-	resp := service.VpnTunnels.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.VpnTunnels.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.VpnTunnelAggregatedList) error {
 		for _, item := range page.Items {
 			for _, vpnTunnel := range item.VpnTunnels {

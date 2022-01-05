@@ -25,6 +25,10 @@ func tableGcpComputeResourcePolicy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeResourcePolicies,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -133,6 +137,12 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["status"] != nil {
+		filterString = "status=" + d.KeyColumnQuals["status"].GetStringValue()
+	}
+	plugin.Logger(ctx).Trace("listComputeResourcePolicies", "filter string", filterString)
+	
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -149,7 +159,7 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 	project := projectId.(string)
 
-	resp := service.ResourcePolicies.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.ResourcePolicies.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.ResourcePolicyAggregatedList) error {

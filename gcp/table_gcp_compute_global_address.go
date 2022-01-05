@@ -25,6 +25,13 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeGlobalAddresses,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "address_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "network_tier", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -148,6 +155,20 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plu
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"address_type", "addressType", "string"},
+		{"network_tier", "networkTier", "string"},
+		{"purpose", "purpose", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeGlobalAddresses", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -164,7 +185,7 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 	project := projectId.(string)
 
-	resp := service.GlobalAddresses.List(project).MaxResults(*pageSize)
+	resp := service.GlobalAddresses.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
 		for _, globalAddress := range page.Items {
 			d.StreamListItem(ctx, globalAddress)

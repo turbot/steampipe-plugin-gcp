@@ -23,6 +23,10 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetPools,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "session_affinity", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -124,6 +128,12 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["session_affinity"] != nil {
+		filterString = "sessionAffinity=" + d.KeyColumnQuals["session_affinity"].GetStringValue()
+	}
+	plugin.Logger(ctx).Trace("listComputeTargetPools", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -140,7 +150,7 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
-	resp := service.TargetPools.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.TargetPools.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetPoolAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetPool := range item.TargetPools {

@@ -25,6 +25,11 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeSslPolicies,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "min_tls_version", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "profile", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -132,6 +137,18 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"min_tls_version", "minTlsVersion", "string"},
+		{"profile", "profile", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeSslPolicies", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -148,7 +165,7 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
-	resp := service.SslPolicies.List(project).MaxResults(*pageSize)
+	resp := service.SslPolicies.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.SslPoliciesList) error {
 		for _, sslPolicy := range page.Items {
 			d.StreamListItem(ctx, sslPolicy)

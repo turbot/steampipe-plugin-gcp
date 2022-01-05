@@ -25,6 +25,13 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeBackendBuckets,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "bucket_name", Require: plugin.Optional, Operators: []string{"<>", "="}},
+
+				// Boolean columns
+				{Name: "enable_cdn", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -122,6 +129,18 @@ func listComputeBackendBuckets(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"bucket_name", "bucketName", "string"},
+		{"enable_cdn", "enableCdn", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+	plugin.Logger(ctx).Trace("listComputeBackendBuckets", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -138,7 +157,7 @@ func listComputeBackendBuckets(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 	project := projectId.(string)
 
-	resp := service.BackendBuckets.List(project).MaxResults(*pageSize)
+	resp := service.BackendBuckets.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.BackendBucketList) error {
 		for _, backendBucket := range page.Items {
 			d.StreamListItem(ctx, backendBucket)

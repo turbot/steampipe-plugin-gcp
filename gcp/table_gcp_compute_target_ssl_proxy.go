@@ -25,6 +25,10 @@ func tableGcpComputeTargetSslProxy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetSslProxies,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "proxy_header", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -120,6 +124,12 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["proxy_header"] != nil {
+		filterString = "proxyHeader=" + d.KeyColumnQuals["proxy_header"].GetStringValue()
+	}
+	plugin.Logger(ctx).Trace("listComputeTargetSslProxies", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -136,7 +146,7 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 	project := projectId.(string)
 
-	resp := service.TargetSslProxies.List(project).MaxResults(*pageSize)
+	resp := service.TargetSslProxies.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetSslProxyList) error {
 		for _, targetSslProxy := range page.Items {
 			d.StreamListItem(ctx, targetSslProxy)

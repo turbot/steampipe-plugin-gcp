@@ -25,6 +25,10 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetVpnGateways,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -124,6 +128,12 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["status"] != nil {
+		filterString = "status=" + d.KeyColumnQuals["status"].GetStringValue()
+	}
+	plugin.Logger(ctx).Trace("listComputeTargetVpnGateways", "filter string", filterString)
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -140,7 +150,7 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 	}
 	project := projectId.(string)
 
-	resp := service.TargetVpnGateways.AggregatedList(project).MaxResults(*pageSize)
+	resp := service.TargetVpnGateways.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetVpnGatewayAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetVpnGateway := range item.TargetVpnGateways {
