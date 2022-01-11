@@ -264,7 +264,11 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *maxResults {
-			maxResults = limit
+			if *limit < 1 {
+				maxResults = types.Int64(1)
+			} else {
+				maxResults = limit
+			}
 		}
 	}
 

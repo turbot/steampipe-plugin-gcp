@@ -147,7 +147,11 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
-			pageSize = limit
+			if *limit < 1 {
+				pageSize = types.Int64(1)
+			} else {
+				pageSize = limit
+			}
 		}
 	}
 

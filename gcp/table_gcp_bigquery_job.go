@@ -255,7 +255,11 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
-			pageSize = limit
+			if *limit < 1 {
+				pageSize = types.Int64(1)
+			} else {
+				pageSize = limit
+			}
 		}
 	}
 
@@ -267,7 +271,7 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 	project := projectId.(string)
 
-	resp := service.Jobs.List(project).MaxResults(*pageSize)
+	resp := service.Jobs.List(project).MaxResults(*pageSize).AllUsers(true)
 	if err := resp.Pages(ctx, func(page *bigquery.JobList) error {
 		for _, job := range page.Jobs {
 			d.StreamListItem(ctx, job)
