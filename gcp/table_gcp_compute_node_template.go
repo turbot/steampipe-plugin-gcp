@@ -180,15 +180,13 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 	plugin.Logger(ctx).Trace("listComputeNodeTemplates", "filter string", filterString)
 
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#NodeTemplatesAggregatedListCall.MaxResults
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
-			if *limit < 1 {
-				pageSize = types.Int64(1)
-			} else {
-				pageSize = limit
-			}
+			pageSize = limit
 		}
 	}
 

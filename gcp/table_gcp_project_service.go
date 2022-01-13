@@ -89,15 +89,13 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	plugin.Logger(ctx).Trace("listGcpProjectServices", "filter string", filterString)
 
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/serviceusage/v1?utm_source=gopls#ServicesListCall.PageSize
 	pageSize := types.Int64(200)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
-			if *limit < 1 {
-				pageSize = types.Int64(1)
-			} else {
-				pageSize = limit
-			}
+			pageSize = limit
 		}
 	}
 

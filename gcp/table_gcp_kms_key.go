@@ -156,15 +156,13 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 	plugin.Logger(ctx).Trace("listKeyDetails", "filter string", filterString)
 
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
-			if *limit < 1 {
-				pageSize = types.Int64(1)
-			} else {
-				pageSize = limit
-			}
+			pageSize = limit
 		}
 	}
 

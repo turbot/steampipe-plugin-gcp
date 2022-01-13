@@ -113,6 +113,8 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, h
 	}
 	project := projectId.(string)
 
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
 	rb := &cloudresourcemanager.ListOrgPoliciesRequest{
 		PageSize: *types.Int64(1000),
 	}
@@ -120,11 +122,7 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, h
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < rb.PageSize {
-			if *limit < 1 {
-				rb.PageSize = *types.Int64(1)
-			} else {
-				rb.PageSize = *limit
-			}
+			rb.PageSize = *limit
 		}
 	}
 

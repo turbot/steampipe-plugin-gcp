@@ -234,15 +234,13 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 	plugin.Logger(ctx).Trace("listComputeForwardingRules", "filter string", filterString)
 
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v0.beta?utm_source=gopls#ForwardingRulesAggregatedListCall.MaxResults
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
-			if *limit < 1 {
-				pageSize = types.Int64(1)
-			} else {
-				pageSize = limit
-			}
+			pageSize = limit
 		}
 	}
 

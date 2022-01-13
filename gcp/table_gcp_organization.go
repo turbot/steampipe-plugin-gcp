@@ -82,6 +82,8 @@ func listGCPOrganizations(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
 	rb := &cloudresourcemanager.SearchOrganizationsRequest{
 		PageSize: *types.Int64(1000),
 	}
@@ -89,11 +91,7 @@ func listGCPOrganizations(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < rb.PageSize {
-			if *limit < 1 {
-				rb.PageSize = *types.Int64(1)
-			} else {
-				rb.PageSize = *limit
-			}
+			rb.PageSize = *limit
 		}
 	}
 
