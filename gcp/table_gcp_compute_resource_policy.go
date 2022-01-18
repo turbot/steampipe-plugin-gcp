@@ -141,7 +141,6 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	if d.KeyColumnQuals["status"] != nil {
 		filterString = "status=" + d.KeyColumnQuals["status"].GetStringValue()
 	}
-	plugin.Logger(ctx).Trace("listComputeResourcePolicies", "filter string", filterString)
 	
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#ResourcePoliciesAggregatedListCall.MaxResults

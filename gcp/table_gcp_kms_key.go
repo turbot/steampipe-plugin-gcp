@@ -154,7 +154,6 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
 	}
-	plugin.Logger(ctx).Trace("listKeyDetails", "filter string", filterString)
 
 	// Max limit isn't mentioned in the documentation
 	// Default limit is set as 1000

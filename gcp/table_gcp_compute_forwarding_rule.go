@@ -232,7 +232,6 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, h *plu
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
 	}
-	plugin.Logger(ctx).Trace("listComputeForwardingRules", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v0.beta?utm_source=gopls#ForwardingRulesAggregatedListCall.MaxResults

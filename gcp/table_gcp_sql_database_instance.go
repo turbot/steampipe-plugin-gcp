@@ -393,7 +393,6 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, h *plugi
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
 	}
-	plugin.Logger(ctx).Trace("listSQLDatabaseInstances", "filter string", filterString)
 
 	// Max limit isn't mentioned in the documentation
 	// Default limit is set as 1000

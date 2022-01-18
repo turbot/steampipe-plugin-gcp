@@ -132,7 +132,6 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if d.KeyColumnQuals["session_affinity"] != nil {
 		filterString = "sessionAffinity=" + d.KeyColumnQuals["session_affinity"].GetStringValue()
 	}
-	plugin.Logger(ctx).Trace("listComputeTargetPools", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#TargetPoolsAggregatedListCall.MaxResults

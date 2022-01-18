@@ -87,7 +87,6 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if d.KeyColumnQuals["state"] != nil {
 		filterString = "state:" + d.KeyColumnQuals["state"].GetStringValue()
 	}
-	plugin.Logger(ctx).Trace("listGcpProjectServices", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/serviceusage/v1?utm_source=gopls#ServicesListCall.PageSize

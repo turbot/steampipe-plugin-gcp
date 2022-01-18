@@ -178,7 +178,6 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, h *plugi
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
 	}
-	plugin.Logger(ctx).Trace("listComputeNodeTemplates", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#NodeTemplatesAggregatedListCall.MaxResults

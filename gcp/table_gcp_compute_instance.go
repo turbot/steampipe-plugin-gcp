@@ -325,7 +325,6 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 	project := projectId.(string)
 
-	plugin.Logger(ctx).Info("listComputeInstances", "filter string", filterString)
 	resp := service.Instances.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.InstanceAggregatedList) error {
 		for _, item := range page.Items {

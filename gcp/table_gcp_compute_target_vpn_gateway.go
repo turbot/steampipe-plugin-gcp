@@ -132,7 +132,6 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 	if d.KeyColumnQuals["status"] != nil {
 		filterString = "status=" + d.KeyColumnQuals["status"].GetStringValue()
 	}
-	plugin.Logger(ctx).Trace("listComputeTargetVpnGateways", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#TargetVpnGatewaysAggregatedListCall.MaxResults

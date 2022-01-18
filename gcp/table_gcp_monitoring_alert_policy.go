@@ -144,7 +144,6 @@ func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
 	}
-	plugin.Logger(ctx).Trace("listMonitoringAlertPolicies", "filter string", filterString)
 
 	// Max limit isn't mentioned in the documentation
 	// Default limit is set as 1000

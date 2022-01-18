@@ -327,7 +327,6 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
-	plugin.Logger(ctx).Info("listImagesForProject", "Project Name", projectName, "filter string", filterString)
 	resp := service.Images.List(projectName).MaxResults(*pageSize).Filter(filterString)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {

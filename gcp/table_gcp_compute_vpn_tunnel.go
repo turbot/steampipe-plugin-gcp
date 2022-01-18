@@ -203,7 +203,6 @@ func listComputeVpnTunnels(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
 	}
-	plugin.Logger(ctx).Trace("listComputeVpnTunnels", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#VpnTunnelsAggregatedListCall.MaxResults

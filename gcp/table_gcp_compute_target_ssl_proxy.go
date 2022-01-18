@@ -128,7 +128,6 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 	if d.KeyColumnQuals["proxy_header"] != nil {
 		filterString = "proxyHeader=" + d.KeyColumnQuals["proxy_header"].GetStringValue()
 	}
-	plugin.Logger(ctx).Trace("listComputeTargetSslProxies", "filter string", filterString)
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#TargetSslProxiesListCall.MaxResults
