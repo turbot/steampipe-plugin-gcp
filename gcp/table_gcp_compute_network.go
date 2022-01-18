@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -21,6 +22,10 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeNetworks,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// Boolean columns
+				{Name: "auto_create_subnetworks", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -134,6 +139,26 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"auto_create_subnetworks", "autoCreateSubnetworks", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#NetworksListCall.MaxResults
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -142,10 +167,17 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	resp := service.Networks.List(project)
+	resp := service.Networks.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
 		for _, network := range page.Items {
 			d.StreamListItem(ctx, network)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
 		}
 		return nil
 	}); err != nil {

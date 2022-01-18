@@ -24,6 +24,10 @@ func tableGcpComputeTargetHttpsProxy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetHttpsProxies,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// Boolean columns
+				{Name: "proxy_bind", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -146,6 +150,26 @@ func listComputeTargetHttpsProxies(ctx context.Context, d *plugin.QueryData, h *
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"proxy_bind", "proxyBind", "boolean"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#TargetHttpsProxiesAggregatedListCall.MaxResults
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -154,11 +178,18 @@ func listComputeTargetHttpsProxies(ctx context.Context, d *plugin.QueryData, h *
 	}
 	project := projectId.(string)
 
-	resp := service.TargetHttpsProxies.AggregatedList(project)
+	resp := service.TargetHttpsProxies.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetHttpsProxyAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetHttpsProxy := range item.TargetHttpsProxies {
 				d.StreamListItem(ctx, targetHttpsProxy)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil

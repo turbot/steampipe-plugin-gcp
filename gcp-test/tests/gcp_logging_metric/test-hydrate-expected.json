@@ -9,13 +9,13 @@
     "metric_descriptor_display_name": "{{resourceName}}",
     "metric_descriptor_labels": [
       {
-        "description": "amount of matter",
-        "key": "mass"
-      },
-      {
         "description": "Identifying number for item",
         "key": "sku",
         "valueType": "INT64"
+      },
+      {
+        "description": "amount of matter",
+        "key": "mass"
       }
     ],
     "metric_descriptor_metric_kind": "DELTA",

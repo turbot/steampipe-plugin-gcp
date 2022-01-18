@@ -25,6 +25,10 @@ func tableGcpComputeTargetVpnGateway(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetVpnGateways,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -124,6 +128,21 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["status"] != nil {
+		filterString = "status=" + d.KeyColumnQuals["status"].GetStringValue()
+	}
+
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#TargetVpnGatewaysAggregatedListCall.MaxResults
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -132,11 +151,18 @@ func listComputeTargetVpnGateways(ctx context.Context, d *plugin.QueryData, h *p
 	}
 	project := projectId.(string)
 
-	resp := service.TargetVpnGateways.AggregatedList(project)
+	resp := service.TargetVpnGateways.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetVpnGatewayAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetVpnGateway := range item.TargetVpnGateways {
 				d.StreamListItem(ctx, targetVpnGateway)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil

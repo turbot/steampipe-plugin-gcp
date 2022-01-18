@@ -161,6 +161,8 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 
 	plugin.Logger(ctx).Error("listIamRoles", "roleType", roleType)
 
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/iam/v1#ProjectsRolesListCall.PageSize
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {

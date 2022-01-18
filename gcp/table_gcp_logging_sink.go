@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -128,6 +129,16 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -136,12 +147,19 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	resp := service.Projects.Sinks.List("projects/" + project)
+	resp := service.Projects.Sinks.List("projects/" + project).PageSize(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *logging.ListSinksResponse) error {
 			for _, sink := range page.Sinks {
 				d.StreamListItem(ctx, sink)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 			return nil
 		},

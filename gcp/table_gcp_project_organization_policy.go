@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -112,12 +113,30 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, h
 	}
 	project := projectId.(string)
 
-	rb := &cloudresourcemanager.ListOrgPoliciesRequest{}
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
+	rb := &cloudresourcemanager.ListOrgPoliciesRequest{
+		PageSize: *types.Int64(1000),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < rb.PageSize {
+			rb.PageSize = *limit
+		}
+	}
 
 	resp := service.Projects.ListOrgPolicies("projects/"+project, rb)
 	if err := resp.Pages(ctx, func(page *cloudresourcemanager.ListOrgPoliciesResponse) error {
 		for _, orgPolicy := range page.Policies {
 			d.StreamListItem(ctx, orgPolicy)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
 		}
 		return nil
 	}); err != nil {

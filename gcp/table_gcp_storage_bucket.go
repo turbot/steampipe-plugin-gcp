@@ -260,6 +260,8 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		projection = "full"
 	}
 
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
 	maxResults := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {

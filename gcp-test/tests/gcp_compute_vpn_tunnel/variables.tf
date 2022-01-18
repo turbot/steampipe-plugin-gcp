@@ -47,6 +47,7 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 
 resource "google_compute_address" "test_address" {
   name = var.resource_name
+  network_tier = "PREMIUM"
 }
 
 resource "google_compute_forwarding_rule" "fr_esp" {
@@ -54,6 +55,7 @@ resource "google_compute_forwarding_rule" "fr_esp" {
   ip_protocol = "ESP"
   ip_address  = google_compute_address.test_address.address
   target      = google_compute_vpn_gateway.target_gateway.id
+  network_tier = "PREMIUM"
 }
 
 resource "google_compute_forwarding_rule" "fr_udp500" {
@@ -62,6 +64,7 @@ resource "google_compute_forwarding_rule" "fr_udp500" {
   port_range  = "500"
   ip_address  = google_compute_address.test_address.address
   target      = google_compute_vpn_gateway.target_gateway.id
+  network_tier = "PREMIUM"
 }
 
 resource "google_compute_forwarding_rule" "fr_udp4500" {
@@ -70,6 +73,7 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
   port_range  = "4500"
   ip_address  = google_compute_address.test_address.address
   target      = google_compute_vpn_gateway.target_gateway.id
+  network_tier = "PREMIUM"
 }
 
 resource "google_compute_vpn_tunnel" "named_test_resource" {

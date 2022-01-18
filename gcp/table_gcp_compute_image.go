@@ -316,6 +316,8 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		filterString = strings.Join(filters, " ")
 	}
 
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#ImagesListCall.MaxResults
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -325,7 +327,6 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
-	plugin.Logger(ctx).Info("listImagesForProject", "Project Name", projectName, "filter string", filterString)
 	resp := service.Images.List(projectName).MaxResults(*pageSize).Filter(filterString)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
 		for _, image := range page.Items {

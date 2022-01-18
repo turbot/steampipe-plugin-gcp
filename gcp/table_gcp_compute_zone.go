@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -18,6 +19,11 @@ func tableGcpComputeZone(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeZones,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -111,6 +117,27 @@ func listComputeZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#ZonesListCall.MaxResults
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -119,12 +146,19 @@ func listComputeZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 	project := projectId.(string)
 
-	resp := service.Zones.List(project)
+	resp := service.Zones.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.ZoneList) error {
 			for _, zone := range page.Items {
 				d.StreamListItem(ctx, zone)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 			return nil
 		},

@@ -23,6 +23,10 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeTargetPools,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "session_affinity", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -124,6 +128,21 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	filterString := ""
+	if d.KeyColumnQuals["session_affinity"] != nil {
+		filterString = "sessionAffinity=" + d.KeyColumnQuals["session_affinity"].GetStringValue()
+	}
+
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#TargetPoolsAggregatedListCall.MaxResults
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -132,11 +151,18 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
-	resp := service.TargetPools.AggregatedList(project)
+	resp := service.TargetPools.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetPoolAggregatedList) error {
 		for _, item := range page.Items {
 			for _, targetPool := range item.TargetPools {
 				d.StreamListItem(ctx, targetPool)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil

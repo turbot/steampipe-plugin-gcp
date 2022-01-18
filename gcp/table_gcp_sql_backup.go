@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -145,6 +146,16 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -153,12 +164,21 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 	project := projectId.(string)
 
-	resp, err := service.BackupRuns.List(project, instance.Name).Do()
-	if err != nil {
+	resp := service.BackupRuns.List(project, instance.Name).MaxResults(*pageSize)
+	if err := resp.Pages(ctx, func(page *sqladmin.BackupRunsListResponse) error {
+		for _, backup := range page.Items {
+			d.StreamListItem(ctx, backup)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
+		}
+		return nil
+	}); err != nil {
 		return nil, err
-	}
-	for _, backup := range resp.Items {
-		d.StreamLeafListItem(ctx, backup)
 	}
 
 	return nil, nil

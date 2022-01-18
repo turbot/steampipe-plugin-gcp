@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -110,6 +111,16 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/iam/v1?utm_source=gopls#ProjectsServiceAccountsListCall.PageSize
+	pageSize := types.Int64(100)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -118,12 +129,19 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
-	resp := service.Projects.ServiceAccounts.List("projects/" + project)
+	resp := service.Projects.ServiceAccounts.List("projects/" + project).PageSize(*pageSize)
 	if err := resp.Pages(
 		ctx,
 		func(page *iam.ListServiceAccountsResponse) error {
 			for _, account := range page.Accounts {
 				d.StreamListItem(ctx, account)
+
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 			return nil
 		},

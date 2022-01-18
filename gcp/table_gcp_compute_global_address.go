@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -24,6 +25,13 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeGlobalAddresses,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns: plugin.KeyColumnSlice{
+				// String columns
+				{Name: "address_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "network_tier", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
+				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -147,6 +155,29 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plu
 		return nil, err
 	}
 
+	filterQuals := []filterQualMap{
+		{"address_type", "addressType", "string"},
+		{"network_tier", "networkTier", "string"},
+		{"purpose", "purpose", "string"},
+		{"status", "status", "string"},
+	}
+
+	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
+	filterString := ""
+	if len(filters) > 0 {
+		filterString = strings.Join(filters, " ")
+	}
+
+	// Max limit is set as per documentation
+	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#GlobalAddressesListCall.MaxResults
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
@@ -155,10 +186,17 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 	project := projectId.(string)
 
-	resp := service.GlobalAddresses.List(project)
+	resp := service.GlobalAddresses.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
 		for _, globalAddress := range page.Items {
 			d.StreamListItem(ctx, globalAddress)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
 		}
 		return nil
 	}); err != nil {

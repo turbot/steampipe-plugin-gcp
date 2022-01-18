@@ -55,6 +55,7 @@ resource "google_bigquery_job" "named_test_resource" {
 }
 
 output "resource_aka" {
+  depends_on = [google_bigquery_job.named_test_resource]
   value = "gcp://bigquery.googleapis.com/${google_bigquery_job.named_test_resource.id}"
 }
 
@@ -63,6 +64,7 @@ output "resource_name" {
 }
 
 output "resource_id" {
+  depends_on = [google_bigquery_job.named_test_resource]
   value = "${var.gcp_project}:${google_bigquery_job.named_test_resource.location}.${var.resource_name}"
 }
 
@@ -71,5 +73,6 @@ output "project_id" {
 }
 
 output "region_id" {
+  depends_on = [google_bigquery_job.named_test_resource]
   value = google_bigquery_job.named_test_resource.location
 }
