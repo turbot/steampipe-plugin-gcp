@@ -290,7 +290,6 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 	}
 
-	plugin.Logger(ctx).Trace("filterString", filterString)
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
