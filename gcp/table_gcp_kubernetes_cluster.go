@@ -47,6 +47,12 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "autopilot_enabled",
+				Description: "Autopilot configuration for the cluster.",
+				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("Autopilot.Enabled"),
+			},
+			{
 				Name:        "description",
 				Description: "An optional description of this cluster.",
 				Type:        proto.ColumnType_STRING,
@@ -200,11 +206,6 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "autoscaling",
 				Description: "Cluster-level autoscaling configuration.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "autopilot",
-				Description: "Autopilot configuration for the cluster.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
