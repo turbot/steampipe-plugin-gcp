@@ -203,6 +203,11 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
+				Name:        "autopilot",
+				Description: "Autopilot configuration for the cluster.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "conditions",
 				Description: "Which conditions caused the current cluster state.",
 				Type:        proto.ColumnType_JSON,
