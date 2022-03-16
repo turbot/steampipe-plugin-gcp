@@ -48,7 +48,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "autopilot_enabled",
-				Description: "Autopilot configuration for the cluster.",
+				Description: "Denotes whether autopilot configuration is enabled for the cluster.",
 				Type:        proto.ColumnType_BOOL,
 				Transform:   transform.FromField("Autopilot.Enabled"),
 			},
