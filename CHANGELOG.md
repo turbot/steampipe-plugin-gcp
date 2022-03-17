@@ -1,3 +1,13 @@
+## v0.21.0 [2022-03-17]
+
+_Enhancements_
+
+- Added the `autopilot_enabled` column to the `gcp_kubernetes_cluster` table ([#344](https://github.com/turbot/steampipe-plugin-gcp/pull/344))
+
+_Bug fixes_
+
+- The `gcp_project` table now correctly returns projects that have a project name different from their project ID
+
 ## v0.20.0 [2022-01-19]
 
 _Enhancements_
@@ -28,7 +38,7 @@ _Deprecated_
 - The `credential_file` argument in the configuration file is now deprecated and will be removed in the next major version. We recommend using the `credentials` argument instead, which can take the same file path as the `credential_file` argument. ([#318](https://github.com/turbot/steampipe-plugin-gcp/pull/318))
 
 ## v0.17.1 [2021-10-12]
-  
+
 _Enhancements_
 
 - Recompiled plugin with [steampipe-plugin-sdk v1.6.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v162--2021-10-08) ([#313](https://github.com/turbot/steampipe-plugin-gcp/pull/313))
