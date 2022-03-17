@@ -2,7 +2,9 @@ package gcp
 
 import (
 	"context"
+	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -17,19 +19,14 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_kms_key_version",
 		Description: "GCP KMS Key Version",
-		// Get: &plugin.GetConfig{
-		// 	KeyColumns: plugin.AllColumns([]string{"name", "location", "key_ring_name", "crypto_key_versions"}),
-		// 	Hydrate:    getKeyVersionDetail,
-		// },
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.AllColumns([]string{"name", "key_ring_name", "location", "crypto_key_versions"}),
+			Hydrate:    getKeyVersionDetail,
+		},
 		List: &plugin.ListConfig{
 			Hydrate:           listKeyVersionDetails,
-			ParentHydrate:     listKeyDetails,
+			ParentHydrate:     listKeyRingDetails,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			// KeyColumns: plugin.KeyColumnSlice{
-			// 	// String columns
-			// 	{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
-			// 	{Name: "rotation_period", Require: plugin.Optional, Operators: []string{"<>", "="}},
-			// },
 		},
 		GetMatrixItem: BuildLocationList,
 		Columns: []*plugin.Column{
@@ -42,7 +39,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 			{
 				Name:        "crypto_key_versions",
 				Description: "The CryptoKeyVersion of the resource.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromP(kmsKeyVersionTurbotData, "CryptoKeyVersions"),
 			},
 			{
@@ -63,11 +60,6 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "create_time",
-				Description: "The time at which this CryptoKeyVersion was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-			},
-			{
 				Name:        "algorithm",
 				Description: "The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.",
 				Type:        proto.ColumnType_STRING,
@@ -78,14 +70,21 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
+				Name:        "create_time",
+				Description: "The time at which this CryptoKeyVersion was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+			},
+			{
 				Name:        "destroy_event_time",
 				Description: "The time this CryptoKeyVersion's key material was destroyed.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("DestroyEventTime").NullIfZero(),
 			},
 			{
 				Name:        "destroy_time",
 				Description: "The time this CryptoKeyVersion's key material is scheduled for destruction.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("DestroyTime").NullIfZero(),
 			},
 			{
 				Name:        "external_key_uri",
@@ -120,12 +119,6 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(kmsKeyVersionTurbotData, "ResourceName"),
 			},
-			// {
-			// 	Name:        "tags",
-			// 	Description: ColumnDescriptionTags,
-			// 	Type:        proto.ColumnType_JSON,
-			// 	Transform:   transform.FromField("Labels"),
-			// },
 			{
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
@@ -153,7 +146,8 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listKeyVersionDetails")
+	logger := plugin.Logger(ctx)
+	logger.Trace("listKeyVersionDetails")
 
 	// Create Service Connection
 	service, err := KMSService(ctx, d)
@@ -161,19 +155,6 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	// filterQuals := []filterQualMap{
-	// 	{"purpose", "purpose", "string"},
-	// 	{"rotation_period", "rotationPeriod", "string"},
-	// }
-
-	// filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
-	// filterString := ""
-	// if len(filters) > 0 {
-	// 	filterString = strings.Join(filters, " ")
-	// }
-
-	// Max limit isn't mentioned in the documentation
-	// Default limit is set as 1000
 	pageSize := types.Int64(1000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -182,34 +163,79 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		}
 	}
 
-	key := h.Item.(*cloudkms.CryptoKey)
+	cryptoKeys, err := listKeyDetailsX(ctx, d, h)
 
-	resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
-	// Filter(filterString).
+	chunkCryptoKeys := chunkSlice(cryptoKeys, 50)
+	var wg sync.WaitGroup
+	wg.Add(len(chunkCryptoKeys))
+	for i := 1; i <= len(chunkCryptoKeys); i++ {
+		cryptoKeysSlice := chunkCryptoKeys[i-1]
 
-	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
-		for _, key := range page.CryptoKeyVersions {
-			d.StreamListItem(ctx, key)
+		for _, key := range cryptoKeysSlice {
+			resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
+			// Filter(filterString).
 
-			// Check if context has been cancelled or if the limit has been hit (if specified)
-			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
-				page.NextPageToken = ""
+			if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
+				for _, key := range page.CryptoKeyVersions {
+					d.StreamListItem(ctx, key)
+
+					// Check if context has been cancelled or if the limit has been hit (if specified)
+					// if there is a limit, it will return the number of rows required to reach this limit
+					if d.QueryStatus.RowsRemaining(ctx) == 0 {
+						page.NextPageToken = ""
+						return nil
+					}
+				}
 				return nil
+			}); err != nil {
+				return nil, err
 			}
 		}
-		return nil
-	}); err != nil {
-		return nil, err
+		wg.Done()
+
 	}
+	wg.Wait()
 
 	return nil, nil
 }
 
+func listKeyDetailsX(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) ([]*cloudkms.CryptoKey, error) {
+
+	service, err := KMSService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	pageSize := types.Int64(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
+	}
+
+	keyRing := h.Item.(*cloudkms.KeyRing)
+
+	var cryptoKeys []*cloudkms.CryptoKey
+	respKey := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).PageSize(*pageSize)
+	if errKey := respKey.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
+		for _, key := range page.CryptoKeys {
+
+			cryptoKeys = append(cryptoKeys, key)
+
+		}
+		return nil
+	}); errKey != nil {
+		return nil, errKey
+	}
+	return cryptoKeys, nil
+}
+
 //// HYDRATE FUNCTIONS
 
-/* func getKeyVersionDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getKeyVersionDetail")
+func getKeyVersionDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	logger.Trace("getKeyVersionDetail")
 
 	// Create Service Connection
 	service, err := KMSService(ctx, d)
@@ -228,28 +254,10 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	name := d.KeyColumnQuals["name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()
 	ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
-	version := d.KeyColumnQuals["crypto_key_versions"].GetInt64Value()
-
+	version := d.KeyColumnQuals["crypto_key_version"].GetInt64Value()
+	logger.Trace("projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name + "/cryptoKeyVersions/" + strconv.FormatInt(version, 10))
 	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.
 		Get("projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name + "/cryptoKeyVersions/" + strconv.FormatInt(version, 10)).Do()
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-} */
-
-func getKeyVersionPublicKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getKeyVersionPublicKey")
-
-	// Create Service Connection
-	service, err := KMSService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	param := h.Item.(*cloudkms.CryptoKeyVersion).Name
-
-	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.GetPublicKey(param).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -286,4 +294,24 @@ func kmsKeyVersionSelfLink(_ context.Context, d *transform.TransformData) (inter
 	selfLink := "https://cloudkms.googleapis.com/v1/" + data.Name
 
 	return selfLink, nil
+}
+
+func chunkSlice(slice []*cloudkms.CryptoKey, chunkSize int) [][]*cloudkms.CryptoKey {
+	var chunks [][]*cloudkms.CryptoKey
+	for {
+		if len(slice) == 0 {
+			break
+		}
+
+		// necessary check to avoid slicing beyond
+		// slice capacity
+		if len(slice) < chunkSize {
+			chunkSize = len(slice)
+		}
+
+		chunks = append(chunks, slice[0:chunkSize])
+		slice = slice[chunkSize:]
+	}
+
+	return chunks
 }
