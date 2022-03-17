@@ -1,8 +1,8 @@
 connection "gcp" {
   plugin    = "gcp"
 
-  # `project` (optional) - The project ID to connect to. This is the project id (string), not the
-  # project number. If the `project` argument is not specified for a connection,
+  # `project` (optional) - The project ID to connect to. This is the project ID (string), not the
+  # project name or number. If the `project` argument is not specified for a connection,
   # the project will be determined in the following order:
   #   - The standard gcloud SDK `CLOUDSDK_CORE_PROJECT` environment variable, if set; otherwise
   #   - The `GCP_PROJECT` environment variable, if set (this is deprecated); otherwise

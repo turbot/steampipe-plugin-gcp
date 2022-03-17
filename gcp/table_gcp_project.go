@@ -105,7 +105,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 	project := projectId.(string)
 
-	resp, err := service.Projects.List().Filter("name=" + project).Do()
+	resp, err := service.Projects.List().Filter("id=" + project).Do()
 	for _, project := range resp.Projects {
 		d.StreamListItem(ctx, project)
 	}
