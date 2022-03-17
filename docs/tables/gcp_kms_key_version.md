@@ -12,7 +12,7 @@ select
   crypto_key_version,
   state
 from
-  gcp_kms_key_table;
+  gcp_kms_key_version;
 ```
 
 ### List key versions older than 30 days
