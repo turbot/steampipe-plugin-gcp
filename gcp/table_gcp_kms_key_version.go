@@ -154,6 +154,7 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
+	// Fetch list of Key Details from KeyRings
 	cryptoKeys, err := listKeyDetailsForRings(ctx, d, h)
 	if err != nil {
 		return nil, err
@@ -167,6 +168,7 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		}
 	}
 
+	// Split CryptoKeys in chunks of 50 for concurrent fetching of CryptoKeyVersions
 	chunksCryptoKeys := chunkSlice(cryptoKeys, 50)
 	var wg sync.WaitGroup
 	wg.Add(len(chunksCryptoKeys))
@@ -174,7 +176,6 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 		for _, key := range cryptoKeysSlice {
 			resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
-			// Filter(filterString).
 
 			if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
 				for _, keyVersion := range page.CryptoKeyVersions {
@@ -221,11 +222,7 @@ func listKeyDetailsForRings(ctx context.Context, d *plugin.QueryData, h *plugin.
 	var cryptoKeys []*cloudkms.CryptoKey
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
-		for _, key := range page.CryptoKeys {
-
-			cryptoKeys = append(cryptoKeys, key)
-
-		}
+		cryptoKeys = append(cryptoKeys, page.CryptoKeys...)
 		return nil
 	}); err != nil {
 		return nil, err
