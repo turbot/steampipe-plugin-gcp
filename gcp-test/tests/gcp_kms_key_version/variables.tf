@@ -59,7 +59,7 @@ output "resource_aka" {
 }
 
 output "resource_id" {
-  value = data.google_kms_crypto_key_version.named_test_resource.id
+  value = "${data.google_kms_crypto_key_version.named_test_resource.id}"
 }
 
 output "self_link" {

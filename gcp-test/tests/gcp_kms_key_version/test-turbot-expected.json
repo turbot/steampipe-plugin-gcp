@@ -1,6 +1,6 @@
 [
   {
-    "crypto_key_versions": 1,
+    "crypto_key_version": 1,
     "name": "{{ resourceName }}",
     "self_link": "{{ output.self_link.value }}"
   }
