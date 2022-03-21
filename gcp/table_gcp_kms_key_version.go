@@ -183,12 +183,12 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	return nil, nil
 }
 
-func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service, wg *sync.WaitGroup) {
+func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
 
-	resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
+	err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
 		for _, keyVersion := range page.CryptoKeyVersions {
 			d.StreamListItem(ctx, keyVersion)
 
@@ -201,6 +201,10 @@ func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //// HYDRATE FUNCTIONS
