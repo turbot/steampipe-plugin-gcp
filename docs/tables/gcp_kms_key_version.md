@@ -62,7 +62,7 @@ where
 order by
   create_time;
 ```
-### List latest key versions that are enabled for crypto keys
+### List key versions that are enabled
 
 ```sql
 select 
