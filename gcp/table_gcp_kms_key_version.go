@@ -163,16 +163,27 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	keyRing := h.Item.(*cloudkms.KeyRing)
-	var wg sync.WaitGroup
 
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).PageSize(*pageSize)
+
+	var wg sync.WaitGroup
+	errorCh := make(chan error, int(*pageSize))
+
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
 
 		for _, key := range page.CryptoKeys {
 			wg.Add(1)
-			go getCryptoKeyVersionDetailsAsync(ctx, d, h, key, pageSize, service, &wg)
+			go getCryptoKeyVersionDetailsAsync(ctx, d, h, key, pageSize, service, errorCh, &wg)
 		}
 		wg.Wait()
+
+		// NOTE: close channel before ranging over results
+		close(errorCh)
+
+		for err := range errorCh {
+			// return the first error
+			return err
+		}
 
 		return nil
 
@@ -183,9 +194,17 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	return nil, nil
 }
 
-func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service, wg *sync.WaitGroup) error {
+func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service, errorCh chan error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	err := getCryptoKeyVersionDetails(ctx, d, h, key, pageSize, service)
+	if err != nil {
+		errorCh <- err
+	}
+
+}
+
+func getCryptoKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service) error {
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
 
 	err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
