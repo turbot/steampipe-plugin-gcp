@@ -3,7 +3,7 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/cloudfunctions/v1"
