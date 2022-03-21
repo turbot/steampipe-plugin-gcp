@@ -40,7 +40,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Name:        "crypto_key_version",
 				Description: "The CryptoKeyVersion of the resource.",
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromP(kmsKeyVersionTurbotData, "CryptoKeyVersions"),
+				Transform:   transform.FromP(kmsKeyVersionTurbotData, "CryptoKeyVersion"),
 			},
 			{
 				Name:        "key_ring_name",
@@ -163,14 +163,11 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	keyRing := h.Item.(*cloudkms.KeyRing)
-
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).PageSize(*pageSize)
 
 	var wg sync.WaitGroup
 	errorCh := make(chan error, int(*pageSize))
-
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
-
 		for _, key := range page.CryptoKeys {
 			wg.Add(1)
 			go getCryptoKeyVersionDetailsAsync(ctx, d, h, key, pageSize, service, errorCh, &wg)
@@ -179,18 +176,16 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 		// NOTE: close channel before ranging over results
 		close(errorCh)
-
 		for err := range errorCh {
+
 			// return the first error
 			return err
 		}
-
 		return nil
 
 	}); err != nil {
 		return nil, err
 	}
-
 	return nil, nil
 }
 
@@ -201,7 +196,6 @@ func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h
 	if err != nil {
 		errorCh <- err
 	}
-
 }
 
 func getCryptoKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service) error {
@@ -271,12 +265,12 @@ func kmsKeyVersionTurbotData(_ context.Context, d *transform.TransformData) (int
 	crypto_key_version := strings.Split(key.Name, "/")[9]
 
 	turbotData := map[string]interface{}{
-		"Project":           project,
-		"Location":          location,
-		"KeyRing":           key_ring_name,
-		"ResourceName":      resource_name,
-		"CryptoKeyVersions": crypto_key_version,
-		"Akas":              []string{"gcp://cloudkms.googleapis.com/" + key.Name},
+		"Project":          project,
+		"Location":         location,
+		"KeyRing":          key_ring_name,
+		"ResourceName":     resource_name,
+		"CryptoKeyVersion": crypto_key_version,
+		"Akas":             []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
 
 	return turbotData[param], nil

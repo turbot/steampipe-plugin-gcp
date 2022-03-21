@@ -1,6 +1,6 @@
 # Table: gcp_kms_key_version
 
-Each version of a key contains key material used for encryption or signing. A key's version is represented by an integer, starting at 1.
+In Cloud KMS, the cryptographic key material that you use to encrypt, decrypt, sign, and verify data is stored in a key version. A key has zero or more key versions. When you rotate a key, you create a new key version.
 
 ## Examples
 
@@ -31,22 +31,6 @@ order by
   create_time;
 ```
 
-### List key versions that are enabled
-
-```sql
-select
-  name,
-  create_time,
-  crypto_key_version,
-  state
-from
-  gcp_kms_key_version
-where
-  state like 'ENABLED'
-order by
-  create_time;
-```
-
 ### List key versions using google symmetric encryption algorithm
 
 ```sql
@@ -62,7 +46,7 @@ where
 order by
   create_time;
 ```
-### List key versions that are enabled
+### List disabled keys
 
 ```sql
 select 
@@ -72,7 +56,7 @@ select
 from 
   gcp_kms_key_version 
 where 
-  state like 'ENABLED' 
+  state like 'DISABLED' 
 group by 
   name,
   state;
