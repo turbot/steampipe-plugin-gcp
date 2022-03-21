@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 
 	"google.golang.org/api/bigquery/v2"
 )
@@ -221,7 +221,7 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	} else {
 		id = d.KeyColumnQuals["dataset_id"].GetStringValue()
 	}
-	
+
 	// check if id is empty
 	if id == "" {
 		return nil, nil
@@ -239,7 +239,7 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 func bigQueryDatasetAka(ctx context.Context, h *transform.TransformData) (interface{}, error) {
 	data := datasetID(h.HydrateItem)
-	
+
 	projectID := strings.Split(data, ":")[0]
 	id := strings.Split(data, ":")[1]
 

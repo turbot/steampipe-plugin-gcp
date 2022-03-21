@@ -1,8 +1,8 @@
 package gcp
 
 import (
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/schema"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/schema"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
 )
 
 type gcpConfig struct {

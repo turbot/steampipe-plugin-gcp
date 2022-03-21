@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -41,8 +41,8 @@ data "google_compute_default_service_account" "default" {
 
 resource "google_compute_project_metadata" "named_test_resource" {
   metadata = {
-    oslogin  = "TRUE"
-    fizz = "buzz"
+    oslogin = "TRUE"
+    fizz    = "buzz"
   }
 }
 

@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -37,12 +37,12 @@ resource "google_compute_node_template" "named_test_resource" {
 }
 
 resource "google_compute_node_group" "named_test_resource" {
-  name        = var.resource_name
-  zone        = "us-central1-a"
-  description = "example google_compute_node_group for Terraform Google Provider"
+  name               = var.resource_name
+  zone               = "us-central1-a"
+  description        = "example google_compute_node_group for Terraform Google Provider"
   maintenance_policy = "RESTART_IN_PLACE"
-  size          = 1
-  node_template = google_compute_node_template.named_test_resource.id
+  size               = 1
+  node_template      = google_compute_node_template.named_test_resource.id
   autoscaling_policy {
     mode      = "ONLY_SCALE_OUT"
     min_nodes = 1

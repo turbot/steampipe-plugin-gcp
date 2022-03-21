@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -37,21 +37,21 @@ data "null_data_source" "resource" {
 }
 
 resource "google_compute_network" "network" {
-  project      = var.gcp_project
-  provider      = google-beta
-  name          = var.resource_name
+  project                 = var.gcp_project
+  provider                = google-beta
+  name                    = var.resource_name
   auto_create_subnetworks = false
 }
 
 resource "google_compute_global_address" "named_test_resource" {
-  provider      = google-beta
-  project       = var.gcp_project
-  name          = var.resource_name
-  address_type  = "INTERNAL"
-  purpose       = "PRIVATE_SERVICE_CONNECT"
-  network       = google_compute_network.network.id
-  address       = "100.100.100.105"
-  description   = "Test global address to validate integration test."
+  provider     = google-beta
+  project      = var.gcp_project
+  name         = var.resource_name
+  address_type = "INTERNAL"
+  purpose      = "PRIVATE_SERVICE_CONNECT"
+  network      = google_compute_network.network.id
+  address      = "100.100.100.105"
+  description  = "Test global address to validate integration test."
 }
 
 

@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 	"google.golang.org/api/bigquery/v2"
 )
 
@@ -250,7 +250,7 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Max limit isn't mentioned in the documentation
 	// Default limit is set as 1000
 	pageSize := types.Int64(1000)

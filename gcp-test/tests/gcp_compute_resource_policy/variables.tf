@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -37,8 +37,8 @@ data "null_data_source" "resource" {
 }
 
 resource "google_compute_resource_policy" "named_test_resource" {
-  name   = var.resource_name
-  region = var.gcp_region
+  name        = var.resource_name
+  region      = var.gcp_region
   description = "Start and stop instances"
   instance_schedule_policy {
     vm_start_schedule {

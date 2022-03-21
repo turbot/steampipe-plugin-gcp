@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -49,7 +49,7 @@ resource "google_compute_subnetwork" "named_test_resource" {
 
 resource "google_compute_address" "named_test_resource" {
   name         = var.resource_name
-  description = "Test address to validate integration test."
+  description  = "Test address to validate integration test."
   subnetwork   = google_compute_subnetwork.named_test_resource.id
   address_type = "INTERNAL"
   address      = "10.0.42.42"

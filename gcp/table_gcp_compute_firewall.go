@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -28,7 +28,7 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "direction", Require: plugin.Optional, Operators: []string{"<>", "="}},
-				
+
 				// Boolean columns
 				{Name: "disabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
@@ -204,7 +204,7 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			pageSize = limit
 		}
 	}
-	
+
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
