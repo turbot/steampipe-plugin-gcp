@@ -62,3 +62,18 @@ where
 order by
   create_time;
 ```
+### List latest key versions that are enabled for crypto keys
+
+```sql
+select 
+  name,
+  max(crypto_key_version) crypto_key_version, 
+  state 
+from 
+  gcp_kms_key_version 
+where 
+  state like 'ENABLED' 
+group by 
+  name,
+  state;
+```

@@ -65,11 +65,6 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "attestation",
-				Description: "Statement that was generated and signed by the HSM at key creation time.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "create_time",
 				Description: "The time at which this CryptoKeyVersion was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -112,6 +107,11 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Description: "The ProtectionLevel describing how crypto operations are performed with this CryptoKeyVersion.",
 				Type:        proto.ColumnType_STRING,
 			},
+			{
+				Name:        "attestation",
+				Description: "Statement that was generated and signed by the HSM at key creation time.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// Steampipe standard columns
 			{
@@ -149,62 +149,6 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listKeyVersionDetails")
 
-	// Create Service Connection
-	service, err := KMSService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch list of Key Details from KeyRings
-	cryptoKeys, err := listKeyDetailsForRings(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-
-	pageSize := types.Int64(1000)
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < *pageSize {
-			pageSize = limit
-		}
-	}
-
-	// Split CryptoKeys in chunks of 50 for concurrent fetching of CryptoKeyVersions
-	chunksCryptoKeys := chunkSlice(cryptoKeys, 50)
-	var wg sync.WaitGroup
-	wg.Add(len(chunksCryptoKeys))
-	for _, cryptoKeysSlice := range chunksCryptoKeys {
-
-		for _, key := range cryptoKeysSlice {
-			resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
-
-			if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
-				for _, keyVersion := range page.CryptoKeyVersions {
-					d.StreamListItem(ctx, keyVersion)
-
-					// Check if context has been cancelled or if the limit has been hit (if specified)
-					// if there is a limit, it will return the number of rows required to reach this limit
-					if d.QueryStatus.RowsRemaining(ctx) == 0 {
-						page.NextPageToken = ""
-						return nil
-					}
-				}
-				return nil
-			}); err != nil {
-				return nil, err
-			}
-		}
-		wg.Done()
-	}
-	wg.Wait()
-
-	return nil, nil
-}
-
-func listKeyDetailsForRings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) ([]*cloudkms.CryptoKey, error) {
-
-	plugin.Logger(ctx).Trace("listKeyDetailsForRings")
-
 	service, err := KMSService(ctx, d)
 	if err != nil {
 		return nil, err
@@ -219,16 +163,47 @@ func listKeyDetailsForRings(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	keyRing := h.Item.(*cloudkms.KeyRing)
+	var wg sync.WaitGroup
 
-	var cryptoKeys []*cloudkms.CryptoKey
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
-		cryptoKeys = append(cryptoKeys, page.CryptoKeys...)
+
+		for _, key := range page.CryptoKeys {
+			wg.Add(1)
+			go getCryptoKeyVersionDetailsAsync(ctx, d, h, key, pageSize, service, &wg)
+		}
+		wg.Wait()
+
+		return nil
+
+	}); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func getCryptoKeyVersionDetailsAsync(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, key *cloudkms.CryptoKey, pageSize *int64, service *cloudkms.Service, wg *sync.WaitGroup) (interface{}, error) {
+	defer wg.Done()
+
+	resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
+
+	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
+		for _, keyVersion := range page.CryptoKeyVersions {
+			d.StreamListItem(ctx, keyVersion)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
+		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
-	return cryptoKeys, nil
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -292,24 +267,4 @@ func kmsKeyVersionSelfLink(_ context.Context, d *transform.TransformData) (inter
 	selfLink := "https://cloudkms.googleapis.com/v1/" + data.Name
 
 	return selfLink, nil
-}
-
-func chunkSlice(slice []*cloudkms.CryptoKey, chunkSize int) [][]*cloudkms.CryptoKey {
-	var chunks [][]*cloudkms.CryptoKey
-	for {
-		if len(slice) == 0 {
-			break
-		}
-
-		// necessary check to avoid slicing beyond
-		// slice capacity
-		if len(slice) < chunkSize {
-			chunkSize = len(slice)
-		}
-
-		chunks = append(chunks, slice[0:chunkSize])
-		slice = slice[chunkSize:]
-	}
-
-	return chunks
 }
