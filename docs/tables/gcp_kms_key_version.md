@@ -12,7 +12,9 @@ select
   crypto_key_version,
   state
 from
-  gcp_kms_key_version;
+  gcp_kms_key_version
+where
+  state <> 'DESTROYED';
 ```
 
 ### List key versions older than 30 days
@@ -26,7 +28,8 @@ select
 from
   gcp_kms_key_version
 where
-  create_time <= (current_date - interval '30' day)
+  create_time <= (current_date - interval '30' day) and
+  state <> 'DESTROYED'
 order by
   create_time;
 ```
