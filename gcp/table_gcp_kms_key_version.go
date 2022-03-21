@@ -112,6 +112,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Description: "The ProtectionLevel describing how crypto operations are performed with this CryptoKeyVersion.",
 				Type:        proto.ColumnType_STRING,
 			},
+
 			// Steampipe standard columns
 			{
 				Name:        "title",
