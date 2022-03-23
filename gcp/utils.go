@@ -12,9 +12,9 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 	"google.golang.org/api/option"
 )
 
