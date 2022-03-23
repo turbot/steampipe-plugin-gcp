@@ -20,7 +20,6 @@ func tableGcpComputeResourcePolicy(ctx context.Context) *plugin.Table {
 		Description: "GCP Compute Resource Policy",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			// ShouldIgnoreError: isIgnorableError([]string{"403", "503"}),
 			Hydrate:    getComputeResourcePolicy,
 		},
 		List: &plugin.ListConfig{
