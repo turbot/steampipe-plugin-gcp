@@ -49,18 +49,19 @@ where
 order by
   create_time;
 ```
+
 ### List disabled keys
 
 ```sql
-select 
+select
   name,
-  max(crypto_key_version) crypto_key_version, 
-  state 
-from 
-  gcp_kms_key_version 
-where 
-  state like 'DISABLED' 
-group by 
+  max(crypto_key_version) crypto_key_version,
+  state
+from
+  gcp_kms_key_version
+where
+  state like 'DISABLED'
+group by
   name,
   state;
 ```
