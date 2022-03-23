@@ -1,3 +1,14 @@
+## v0.22.0 [2022-03-23]
+
+_What's new?_
+
+- New tables added
+  - [gcp_kms_key_version](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_kms_key_version) ([#345](https://github.com/turbot/steampipe-plugin-gcp/pull/345))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v2.1.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v211--2022-03-10) ([#347](https://github.com/turbot/steampipe-plugin-gcp/pull/347))
+
 ## v0.21.0 [2022-03-17]
 
 _Enhancements_
