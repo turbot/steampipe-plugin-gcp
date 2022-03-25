@@ -1,3 +1,9 @@
+## v0.22.1 [2022-03-25]
+
+_Bug fixes_
+
+- Fixed the `gcp_compute_resource_policy` table to correctly return the compute resource policies instead of an error ([#352](https://github.com/turbot/steampipe-plugin-gcp/pull/352))
+
 ## v0.22.0 [2022-03-23]
 
 _What's new?_
