@@ -159,8 +159,12 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 	project := projectId.(string)
-
-	resp := service.ResourcePolicies.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
+	var resp *compute.ResourcePoliciesAggregatedListCall
+	if filterString == "" {
+		resp = service.ResourcePolicies.AggregatedList(project).MaxResults(*pageSize)
+	} else {
+		resp = service.ResourcePolicies.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
+	}
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.ResourcePolicyAggregatedList) error {
