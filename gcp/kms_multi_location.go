@@ -3,8 +3,8 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
 
 var pluginQueryData *plugin.QueryData

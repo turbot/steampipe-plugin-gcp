@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -141,7 +141,7 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	if d.KeyColumnQuals["status"] != nil {
 		filterString = "status=" + d.KeyColumnQuals["status"].GetStringValue()
 	}
-	
+
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#ResourcePoliciesAggregatedListCall.MaxResults
 	pageSize := types.Int64(500)
