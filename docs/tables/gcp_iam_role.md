@@ -1,6 +1,6 @@
 # Table: gcp_iam_role
 
-An IAM role is an IAM entity that defines a set of permissions for making AWS service requests.
+An IAM role is an IAM entity that defines a set of permissions for making GCP service requests.
 
 ## Examples
 
