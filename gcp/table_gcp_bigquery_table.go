@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
 	"google.golang.org/api/bigquery/v2"
 )
 
@@ -322,9 +322,9 @@ func getBigqueryTable(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		datasetID = d.KeyColumnQuals["dataset_id"].GetStringValue()
 		id = d.KeyColumnQuals["table_id"].GetStringValue()
 	}
-	
+
 	// Empty Check
-	if id == "" || datasetID == ""{
+	if id == "" || datasetID == "" {
 		return nil, nil
 	}
 

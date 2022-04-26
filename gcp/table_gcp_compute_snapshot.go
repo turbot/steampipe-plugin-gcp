@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -233,7 +233,7 @@ func listComputeSnapshots(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
-			page.NextPageToken = ""
+				page.NextPageToken = ""
 				return nil
 			}
 		}

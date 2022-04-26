@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -229,7 +229,7 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	var address compute.Address
 	name := d.KeyColumnQuals["name"].GetStringValue()
-	
+
 	// Empty check
 	if name == "" {
 		return nil, nil
