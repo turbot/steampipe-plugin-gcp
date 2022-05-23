@@ -1,3 +1,9 @@
+## v0.23.1 [2022-05-23]
+
+_Bug fixes_
+
+- Fixed the Slack community links in README and docs/index.md files. ([#363](https://github.com/turbot/steampipe-plugin-gcp/pull/363))
+
 ## v0.23.0 [2022-04-27]
 
 _Enhancements_
