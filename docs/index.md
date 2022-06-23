@@ -87,7 +87,6 @@ connection "gcp" {
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
 }
-}
 ```
 
 **NOTE:** The `credential_file` property has been deprecated and will be removed in the next major version. Please use `credentials` instead.
