@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 	"google.golang.org/api/googleapi"
@@ -20,7 +19,14 @@ func isIgnorableError(notFoundErrors []string) plugin.ErrorPredicate {
 				regexExp := regexp.MustCompile(`googleapi: Error 403: [^\.]+ API has not been used in project [0-9]+ before or it is disabled\.`)
 				return regexExp.MatchString(err.Error())
 			}
-			return helpers.StringSliceContains(notFoundErrors, types.ToString(gerr.Code))
+			
+			for _, pattern := range notFoundErrors {
+				if strings.Contains(err.Error(), pattern) {
+					return true
+				}
+			}
+			// return strings.(notFoundErrors, types.ToString(gerr.Code))
+
 		}
 		return false
 	}
