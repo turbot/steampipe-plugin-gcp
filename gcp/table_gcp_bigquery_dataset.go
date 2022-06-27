@@ -235,7 +235,7 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	if resp == nil {
+	if resp.Id == "" {
 		return nil, nil
 	}
 
