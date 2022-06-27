@@ -23,7 +23,9 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listGcpLoggingMetrics,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 		},
 		Columns: []*plugin.Column{
 			{

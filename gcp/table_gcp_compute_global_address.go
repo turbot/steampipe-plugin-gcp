@@ -24,7 +24,9 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeGlobalAddresses,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "address_type", Require: plugin.Optional, Operators: []string{"<>", "="}},

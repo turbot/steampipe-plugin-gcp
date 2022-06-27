@@ -21,7 +21,9 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeNetworks,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 			KeyColumns: plugin.KeyColumnSlice{
 				// Boolean columns
 				{Name: "auto_create_subnetworks", Require: plugin.Optional, Operators: []string{"<>", "="}},

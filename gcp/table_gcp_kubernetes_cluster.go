@@ -18,7 +18,9 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 		Description: "GCP Kubernetes Cluster",
 		List: &plugin.ListConfig{
 			Hydrate:           listKubernetesClusters,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),

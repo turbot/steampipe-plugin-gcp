@@ -19,7 +19,9 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:           listKubernetesNodePools,
 			ParentHydrate:     listKubernetesClusters,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location", "cluster_name"}),

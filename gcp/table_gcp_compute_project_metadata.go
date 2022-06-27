@@ -14,7 +14,9 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 		Description: "GCP Compute Project Metadata",
 		List: &plugin.ListConfig{
 			Hydrate:           listComputeProjectMetadata,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 		},
 		Columns: []*plugin.Column{
 			{

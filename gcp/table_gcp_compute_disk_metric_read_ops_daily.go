@@ -19,7 +19,9 @@ func tableGcpComputeDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate:     listComputeDisk,
 			Hydrate:           listComputeDiskMetricReadOpsDaily,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"403"}),
+			},
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
