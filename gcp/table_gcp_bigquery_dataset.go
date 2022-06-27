@@ -24,7 +24,7 @@ func tableGcpBigQueryDataset(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listBigQueryDatasets,
-			ShouldIgnoreError: isIgnorableError([]string{"403", "404"}),
+			ShouldIgnoreError: isIgnorableError([]string{"403", " Not found"}),
 			// IgnoreConfig: &plugin.IgnoreConfig{
 			// 	ShouldIgnoreErrorFunc: isNotFoundError([]string{"403", "404"}),
 			// },

@@ -19,13 +19,12 @@ func isIgnorableError(notFoundErrors []string) plugin.ErrorPredicate {
 				regexExp := regexp.MustCompile(`googleapi: Error 403: [^\.]+ API has not been used in project [0-9]+ before or it is disabled\.`)
 				return regexExp.MatchString(err.Error())
 			}
-			
+
 			for _, pattern := range notFoundErrors {
 				if strings.Contains(err.Error(), pattern) {
 					return true
 				}
 			}
-			// return strings.(notFoundErrors, types.ToString(gerr.Code))
 
 		}
 		return false
