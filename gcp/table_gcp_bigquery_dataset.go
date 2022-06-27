@@ -232,11 +232,11 @@ func getBigQueryDataset(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp, err := service.Datasets.Get(project, id).Do()
 	if err != nil {
-		return nil, err
-	}
+		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
 
-	if resp.Id == "" {
-		return nil, nil
+		return nil, err
 	}
 
 	return resp, nil
