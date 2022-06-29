@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/turbot/go-kit v0.3.0
-	github.com/turbot/steampipe-plugin-sdk/v3 v3.3.0-rc.2
+	github.com/turbot/go-kit v0.4.0
+	github.com/turbot/steampipe-plugin-sdk/v3 v3.3.1-rc.0
 	google.golang.org/api v0.48.0
 )
 
