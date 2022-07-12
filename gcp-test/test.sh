@@ -29,36 +29,36 @@ run_test () {
  date >> failed_tests.txt
  date >> passed_tests.txt
 
-run_test gcp_bigquery_dataset
-run_test gcp_bigquery_job
-run_test gcp_bigquery_table
-run_test gcp_bigtable_instance
-run_test gcp_compute_address
-run_test gcp_compute_backend_bucket
-run_test gcp_compute_backend_service
-run_test gcp_compute_disk
-run_test gcp_compute_firewall
-run_test gcp_compute_forwarding_rule
-run_test gcp_compute_global_address
-run_test gcp_compute_global_forwarding_rule
-run_test gcp_compute_image
-run_test gcp_compute_instance
-run_test gcp_compute_instance_template
-run_test gcp_compute_machine_type
-run_test gcp_compute_network
-run_test gcp_compute_node_group
-run_test gcp_compute_node_template
-run_test gcp_compute_project_metadata
-run_test gcp_compute_resource_policy
-run_test gcp_compute_route
-run_test gcp_compute_router
-run_test gcp_compute_snapshot
-run_test gcp_compute_ssl_policy
-run_test gcp_compute_subnetwork
-run_test gcp_compute_target_https_proxy
-run_test gcp_compute_target_pool
-run_test gcp_compute_target_ssl_proxy
-run_test gcp_compute_target_vpn_gateway
+# run_test gcp_bigquery_dataset
+# run_test gcp_bigquery_job
+# run_test gcp_bigquery_table
+# run_test gcp_bigtable_instance
+# run_test gcp_compute_address
+# run_test gcp_compute_backend_bucket
+# run_test gcp_compute_backend_service
+# run_test gcp_compute_disk
+# run_test gcp_compute_firewall
+# run_test gcp_compute_forwarding_rule
+# run_test gcp_compute_global_address
+# run_test gcp_compute_global_forwarding_rule
+# run_test gcp_compute_image
+# run_test gcp_compute_instance
+# run_test gcp_compute_instance_template
+# run_test gcp_compute_machine_type
+# run_test gcp_compute_network
+# run_test gcp_compute_node_group
+# run_test gcp_compute_node_template
+# run_test gcp_compute_project_metadata
+# run_test gcp_compute_resource_policy
+# run_test gcp_compute_route
+# run_test gcp_compute_router
+# run_test gcp_compute_snapshot
+# run_test gcp_compute_ssl_policy
+# run_test gcp_compute_subnetwork
+# run_test gcp_compute_target_https_proxy
+# run_test gcp_compute_target_pool
+# run_test gcp_compute_target_ssl_proxy
+# run_test gcp_compute_target_vpn_gateway
 run_test gcp_compute_url_map
 run_test gcp_compute_vpn_tunnel
 run_test gcp_dns_managed_zone
