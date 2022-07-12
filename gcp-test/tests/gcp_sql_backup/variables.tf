@@ -8,7 +8,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
