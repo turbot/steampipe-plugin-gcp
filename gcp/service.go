@@ -12,6 +12,7 @@ import (
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
 	"google.golang.org/api/dns/v1"
+	"google.golang.org/api/essentialcontacts/v1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/monitoring/v3"
@@ -78,6 +79,27 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 
 	// so it was not in cache - create service
 	svc, err := cloudresourcemanager.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// EssentialContactService returns the service connection for GCP Cloud Organization Essential Contacts
+func EssentialContactService(ctx context.Context, d *plugin.QueryData) (*essentialcontacts.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "EssentialContactService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*essentialcontacts.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := essentialcontacts.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

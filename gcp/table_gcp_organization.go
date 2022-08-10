@@ -2,12 +2,14 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/essentialcontacts/v1"
 )
 
 //// TABLE DEFINITION
@@ -52,6 +54,13 @@ func tableGcpOrganization(_ context.Context) *plugin.Table {
 				Description: "The G Suite customer id used in the Directory API.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Owner.DirectoryCustomerId"),
+			},
+			{
+				Name:        "essential_contacts",
+				Description: "The contacts for the specified resource.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getOrganizationContacts,
+				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns
@@ -113,6 +122,31 @@ func listGCPOrganizations(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	return nil, nil
+}
+
+func getOrganizationContacts(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	organizationName := h.Item.(*cloudresourcemanager.Organization).Name
+	pathItems := strings.Split(organizationName, "/")
+	organizationId := pathItems[len(pathItems)-1]
+
+	// Create Service Connection
+	service, err := EssentialContactService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_organization.getOrganizationContacts", "connection_error", err)
+		return nil, err
+	}
+
+	var contacts []*essentialcontacts.GoogleCloudEssentialcontactsV1Contact
+	resp := service.Organizations.Contacts.List("organizations/" + organizationId)
+	if err := resp.Pages(ctx, func(page *essentialcontacts.GoogleCloudEssentialcontactsV1ListContactsResponse) error {
+		contacts = append(contacts, page.Contacts...)
+		return nil
+	}); err != nil {
+		plugin.Logger(ctx).Error("gcp_organization.getOrganizationContacts", "api_error", err)
+		return nil, err
+	}
+
+	return contacts, nil
 }
 
 //// TRANSFORM FUNCTIONS
