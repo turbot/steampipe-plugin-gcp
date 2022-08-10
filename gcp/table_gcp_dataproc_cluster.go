@@ -118,7 +118,6 @@ type ClusterInfo struct {
 //// LIST FUNCTION
 
 func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listComputeZones")
 
 	var location string
 	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
@@ -130,6 +129,7 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	// Create Service Connection
 	service, err := DataprocService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_dataproc_cluster.listDataprocClusters", "connection_error", err)
 		return nil, err
 	}
 
@@ -178,6 +178,7 @@ var filters []string
 		}
 		return nil
 	}); err != nil {
+		plugin.Logger(ctx).Error("gcp_dataproc_cluster.listDataprocClusters", "api_error", err)
 		return nil, err
 	}
 
@@ -204,6 +205,7 @@ func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	// Create Service Connection
 	service, err := DataprocService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_dataproc_cluster.getDataprocCluster", "connection_error", err)
 		return nil, err
 	}
 
@@ -217,6 +219,7 @@ func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp, err := service.Projects.Regions.Clusters.Get(project, location, clusterName).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_dataproc_cluster.getDataprocCluster", "api_error", err)
 		return nil, err
 	}
 
