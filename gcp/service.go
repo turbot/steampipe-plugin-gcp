@@ -24,10 +24,10 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-// AccessApprovalService returns the service connection for GCP Project AccessApprovalService service
+// AccessApprovalService returns the service connection for GCP Project AccessApproval service
 func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapproval.Service, error) {
 	// have we already created and cached the service?
-	serviceCacheKey := "BigQueryService"
+	serviceCacheKey := "AccessApprovalService"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*accessapproval.Service), nil
 	}
