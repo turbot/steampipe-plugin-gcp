@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
@@ -155,8 +156,11 @@ func getProjectAccessapproval(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 	project := projectId.(string)
 
-	resp, err := service.Projects.GetAccessApprovalSettings(project).Do()
+	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + project + "/accessApprovalSettings").Do()
 	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
 		plugin.Logger(ctx).Error("gcp_project.getProjectAccessapproval", "api_err", err)
 		return nil, err
 	}
