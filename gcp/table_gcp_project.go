@@ -61,6 +61,11 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Description: "A list of labels attached to this project.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "access_approval",
+				Description: "Gets the settings associated with a project.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// Steampipe standard columns
 			{
@@ -128,6 +133,32 @@ func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project.ProjectId}
 
 	return akas, nil
+}
+
+func getProjectAccessapproval(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getProjectAccessapproval")
+
+	// Create Service Connection
+	service, err := AccessApprovalService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.getProjectAccessapproval", "connection_error", err)
+		return nil, err
+	}
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	resp, err := service.Projects.GetAccessApprovalSettings(project).Do()
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.getProjectAccessapproval", "api_err", err)
+		return nil, err
+	}
+	return resp, nil
 }
 
 func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
