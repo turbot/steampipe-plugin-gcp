@@ -65,6 +65,8 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Name:        "access_approvals",
 				Description: "Gets the settings associated with a project.",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     getProjectAccessapproval,
+				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns
