@@ -30,13 +30,6 @@ data "null_data_source" "resource" {
   }
 }
 
-# resource "google_compute_network" "named_test_resource" {
-#   name                    = var.resource_name
-#   mtu                     = 1500
-#   auto_create_subnetworks = true
-#   description             = "Test network to validate integration test."
-# }
-
 resource "google_dataproc_cluster" "named_test_resource" {
   name   = var.resource_name
   region = var.gcp_region
