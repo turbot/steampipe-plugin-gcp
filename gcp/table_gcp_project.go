@@ -64,7 +64,7 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "access_approval_settings",
-				Description: "Gets the settings associated with a project.",
+				Description: "The access approval settings associated with this project.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getProjectAccessApprovalSettings,
 				Transform:   transform.FromValue(),
