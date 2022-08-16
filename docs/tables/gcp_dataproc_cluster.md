@@ -10,7 +10,9 @@ Dataproc is a fully managed and highly scalable service for running Apache Spark
 select
   cluster_name,
   cluster_uuid,
-  state
+  config,
+  state,
+  tags
 from
   gcp_dataproc_cluster;
 ```
