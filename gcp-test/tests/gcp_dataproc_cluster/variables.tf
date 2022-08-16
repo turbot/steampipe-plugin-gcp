@@ -17,9 +17,15 @@ variable "gcp_region" {
   description = "GCP region used for the test."
 }
 
+variable "gcp_zone" {
+  type    = string
+  default = "us-east1-b"
+}
+
 provider "google" {
   project = var.gcp_project
   region  = var.gcp_region
+  zone    = var.gcp_zone
 }
 
 data "google_client_config" "current" {}
@@ -30,25 +36,38 @@ data "null_data_source" "resource" {
   }
 }
 
-# resource "google_compute_network" "named_test_resource" {
-#   name                    = var.resource_name
-#   mtu                     = 1500
-#   auto_create_subnetworks = true
-#   description             = "Test network to validate integration test."
-# }
+resource "google_compute_network" "named_test_resource" {
+  name = var.resource_name
+}
+
 
 resource "google_dataproc_cluster" "named_test_resource" {
-  name   = var.resource_name
+  name = var.resource_name
   region = var.gcp_region
   cluster_config {
     gce_cluster_config {
-      zone = "us-east1-b"
-
-      # One of the below to hook into a custom network / subnetwork
-      # network    = google_compute_network.named_test_resource.name
-      subnetwork = "projects/parker-aaa/regions/us-east1/subnetworks/test21"
-
-      tags = ["foo", "bar"]
+      zone = var.gcp_zone
+      network = google_compute_network.named_test_resource.name
+    }
+    master_config {
+      num_instances = 1
+      machine_type = "n1-standard-1"
+      disk_config {
+        boot_disk_type = "pd-ssd"
+        boot_disk_size_gb = 15
+      }
+    }
+    worker_config {
+      num_instances = 0
+    }
+    preemptible_worker_config {
+      num_instances = 0
+    }
+    software_config {
+      image_version = "1.4-debian10"
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
     }
   }
 }
