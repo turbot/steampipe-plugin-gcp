@@ -17,7 +17,7 @@ from
   gcp_project;
 ```
 
-### Get approval setting details
+### Get access approval settings for all projects
 
 ```sql
 select
