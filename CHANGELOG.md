@@ -1,3 +1,15 @@
+## v0.26.0 [2022-08-16]
+
+_What's new?_
+
+- New tables added
+  - [gcp_dataproc_cluster](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataproc_cluster) ([#379](https://github.com/turbot/steampipe-plugin-gcp/pull/379))
+
+_Enhancements_
+
+- Added column `access_approval_settings` to `gcp_project` table. ([#381](https://github.com/turbot/steampipe-plugin-gcp/pull/381))
+- Added column `essential_contacts` to `gcp_organization` table. ([#380](https://github.com/turbot/steampipe-plugin-gcp/pull/380))
+
 ## v0.25.0 [2022-07-13]
 
 _Dependencies_
