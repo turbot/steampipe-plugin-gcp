@@ -41,16 +41,16 @@ resource "google_compute_network" "named_test_resource" {
 }
 
 resource "google_dataproc_cluster" "named_test_resource" {
-  name = var.resource_name
+  name   = var.resource_name
   region = var.gcp_region
   cluster_config {
     gce_cluster_config {
-      zone = var.gcp_zone
+      zone    = var.gcp_zone
       network = google_compute_network.named_test_resource.name
     }
     master_config {
       num_instances = 1
-      machine_type = "n1-standard-1"
+      machine_type  = "n1-standard-1"
       disk_config {
         boot_disk_type = "pd-ssd"
         boot_disk_size_gb = 15
