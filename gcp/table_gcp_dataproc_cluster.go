@@ -226,6 +226,7 @@ func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 //// TRANSFORM FUNCTION
 
 func gcpDataprocClusterTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+
 	cluster := d.HydrateItem.(*dataproc.Cluster)
 	param := d.Param.(string)
 
