@@ -40,7 +40,6 @@ resource "google_compute_network" "named_test_resource" {
   name = var.resource_name
 }
 
-
 resource "google_dataproc_cluster" "named_test_resource" {
   name = var.resource_name
   region = var.gcp_region

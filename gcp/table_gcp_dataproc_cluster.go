@@ -112,13 +112,9 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 	}
 }
 
-type ClusterInfo struct {
-}
-
 //// LIST FUNCTION
 
 func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	var location string
 	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
 	// Since, when the service API is disabled, matrixLocation value will be nil
@@ -188,7 +184,6 @@ var filters []string
 //// HYDRATE FUNCTIONS
 
 func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	var location string
 	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
 	// Since, when the service API is disabled, matrixLocation value will be nil
