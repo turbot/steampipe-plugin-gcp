@@ -18,7 +18,7 @@ from
   gcp_organization;
 ```
 
-### Get essential contact details for organizations
+### Get essential contacts for organizations
 
 ```sql
 Select
