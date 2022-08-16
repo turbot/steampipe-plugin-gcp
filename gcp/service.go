@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/cloudfunctions/v1"
@@ -23,6 +24,27 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
+
+// AccessApprovalService returns the service connection for GCP Project AccessApproval service
+func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapproval.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "AccessApprovalService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*accessapproval.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := accessapproval.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
 
 // BigQueryService returns the service connection for GCP BigQueryService service
 func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Service, error) {

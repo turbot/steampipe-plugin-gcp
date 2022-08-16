@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
@@ -60,6 +61,13 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Name:        "labels",
 				Description: "A list of labels attached to this project.",
 				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "access_approval_settings",
+				Description: "The access approval settings associated with this project.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getProjectAccessApprovalSettings,
+				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns
@@ -128,6 +136,35 @@ func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project.ProjectId}
 
 	return akas, nil
+}
+
+func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getProjectAccessApprovalSettings")
+
+	// Create Service Connection
+	service, err := AccessApprovalService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.getProjectAccessApprovalSettings", "connection_error", err)
+		return nil, err
+	}
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + project + "/accessApprovalSettings").Do()
+	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
+		plugin.Logger(ctx).Error("gcp_project.getProjectAccessApprovalSettings", "api_err", err)
+		return nil, err
+	}
+	return resp, nil
 }
 
 func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {

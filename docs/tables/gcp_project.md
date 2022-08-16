@@ -16,3 +16,13 @@ select
 from
   gcp_project;
 ```
+
+### Get access approval settings for all projects
+
+```sql
+select
+  name,
+  jsonb_pretty(access_approval_settings) as access_approval_settings
+from
+  gcp_project;
+```
