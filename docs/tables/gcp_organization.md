@@ -21,7 +21,7 @@ from
 ### Get essential contacts for organizations
 
 ```sql
-Select
+select
   organization_id,
   jsonb_pretty(essential_contacts) as essential_contacts
 from
