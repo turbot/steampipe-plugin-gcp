@@ -17,3 +17,13 @@ select
 from
   gcp_organization;
 ```
+
+### Get essential contact details for organizations
+
+```sql
+Select
+  organization_id,
+  jsonb_pretty(essential_contacts) as essential_contacts
+from
+  gcp_organization;
+```
