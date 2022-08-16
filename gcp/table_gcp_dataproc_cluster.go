@@ -112,9 +112,6 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 	}
 }
 
-type ClusterInfo struct {
-}
-
 //// LIST FUNCTION
 
 func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
