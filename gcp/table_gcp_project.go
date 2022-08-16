@@ -63,10 +63,10 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "access_approval",
+				Name:        "access_approval_settings",
 				Description: "Gets the settings associated with a project.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getProjectAccessapproval,
+				Hydrate:     getProjectAccessApprovalSettings,
 				Transform:   transform.FromValue(),
 			},
 
@@ -138,13 +138,13 @@ func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	return akas, nil
 }
 
-func getProjectAccessapproval(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getProjectAccessapproval")
+func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getProjectAccessApprovalSettings")
 
 	// Create Service Connection
 	service, err := AccessApprovalService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_project.getProjectAccessapproval", "connection_error", err)
+		plugin.Logger(ctx).Error("gcp_project.getProjectAccessApprovalSettings", "connection_error", err)
 		return nil, err
 	}
 
@@ -161,7 +161,7 @@ func getProjectAccessapproval(ctx context.Context, d *plugin.QueryData, h *plugi
 		if strings.Contains(err.Error(), "404") {
 			return nil, nil
 		}
-		plugin.Logger(ctx).Error("gcp_project.getProjectAccessapproval", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_project.getProjectAccessApprovalSettings", "api_err", err)
 		return nil, err
 	}
 	return resp, nil
