@@ -7,9 +7,9 @@ import (
 	"sync"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -28,7 +28,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 			ParentHydrate:     listKeyRingDetails,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
-		GetMatrixItem: BuildLocationList,
+		GetMatrixItemFunc: BuildLocationList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
