@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
@@ -187,7 +186,7 @@ func pathOrContents(poc string) (string, error) {
 
 	// Check for valid file path
 	if _, err := os.Stat(path); err == nil {
-		contents, err := ioutil.ReadFile(path)
+		contents, err := os.ReadFile(path)
 		if err != nil {
 			return string(contents), err
 		}
