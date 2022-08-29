@@ -1,6 +1,6 @@
 [
   {
-    "default_network_tier": "STANDARD",
+    "default_network_tier": "PREMIUM",
     "default_service_account": "{{ output.service_account.value }}",
     "enabled_features": null,
     "kind": "compute#project",

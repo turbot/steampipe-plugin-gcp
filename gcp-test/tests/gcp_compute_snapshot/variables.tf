@@ -36,28 +36,35 @@ data "null_data_source" "resource" {
   }
 }
 
+resource "google_compute_image" "named_test_resource" {
+  name = var.resource_name
+
+  raw_disk {
+    source = "https://storage.googleapis.com/bosh-gce-raw-stemcells/bosh-stemcell-97.98-google-kvm-ubuntu-xenial-go_agent-raw-1557960142.tar.gz"
+  }
+}
+
+data "google_compute_image" "named_test_resource" {
+  depends_on = [
+    google_compute_image.named_test_resource
+  ]
+  name = var.resource_name
+}
+
 resource "google_compute_snapshot" "named_test_resource" {
   name        = var.resource_name
   description = "Test compute snapshot to verify table."
   source_disk = google_compute_disk.named_test_resource.name
-  zone        = "us-central1-a"
+  zone        = var.gcp_zone
   labels = {
     my_label = "value"
   }
-  storage_locations = ["us-central1"]
-}
-
-data "google_compute_image" "named_test_resource" {
-  family  = "debian-9"
-  project = "debian-cloud"
+  storage_locations = ["us-east1"]
 }
 
 resource "google_compute_disk" "named_test_resource" {
   name  = var.resource_name
   image = data.google_compute_image.named_test_resource.self_link
-  size  = 10
-  type  = "pd-ssd"
-  zone  = "us-central1-a"
 }
 
 output "project_id" {

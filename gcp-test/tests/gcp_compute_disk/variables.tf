@@ -36,9 +36,19 @@ data "null_data_source" "resource" {
   }
 }
 
+resource "google_compute_image" "named_test_resource" {
+  name = var.resource_name
+
+  raw_disk {
+    source = "https://storage.googleapis.com/bosh-gce-raw-stemcells/bosh-stemcell-97.98-google-kvm-ubuntu-xenial-go_agent-raw-1557960142.tar.gz"
+  }
+}
+
 data "google_compute_image" "my_image" {
-  family  = "debian-9"
-  project = "debian-cloud"
+  depends_on = [
+    google_compute_image.named_test_resource
+  ]
+  name = var.resource_name
 }
 
 resource "google_compute_resource_policy" "policy" {

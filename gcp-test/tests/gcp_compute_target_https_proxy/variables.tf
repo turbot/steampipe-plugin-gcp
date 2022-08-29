@@ -48,7 +48,6 @@ resource "tls_private_key" "private_key" {
 }
 
 resource "tls_self_signed_cert" "self_signed_certificate" {
-  key_algorithm   = "RSA"
   private_key_pem = tls_private_key.private_key.private_key_pem
 
   subject {
