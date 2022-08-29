@@ -45,6 +45,21 @@ resource "google_service_account" "named_test_resource" {
   display_name = var.resource_name
 }
 
+resource "google_compute_image" "named_test_resource" {
+  name = var.resource_name
+
+  raw_disk {
+    source = "https://storage.googleapis.com/bosh-gce-raw-stemcells/bosh-stemcell-97.98-google-kvm-ubuntu-xenial-go_agent-raw-1557960142.tar.gz"
+  }
+}
+
+data "google_compute_image" "named_test_resource" {
+  depends_on = [
+    google_compute_image.named_test_resource
+  ]
+  name = var.resource_name
+}
+
 resource "google_compute_instance" "named_test_resource" {
   name         = var.resource_name
   machine_type = "f1-micro"
@@ -55,7 +70,7 @@ resource "google_compute_instance" "named_test_resource" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = data.google_compute_image.named_test_resource.name
     }
   }
 

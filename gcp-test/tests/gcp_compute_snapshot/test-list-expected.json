@@ -4,7 +4,7 @@
       "{{ output.resource_aka.value }}"
       ],
     "description": "Test compute snapshot to verify table.",
-    "disk_size_gb": 10,
+    "disk_size_gb": 3,
     "labels": {
       "my_label": "value"
     },
@@ -13,7 +13,7 @@
     "self_link": "{{ output.self_link.value }}",
     "source_disk": "{{output.source_disk.value}}",
     "storage_locations": [
-      "us-central1"
+      "us-east1"
     ],
     "tags": {
       "my_label": "value"

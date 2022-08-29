@@ -5,7 +5,7 @@
     ],
     "auto_created": false,
     "description": "Test compute snapshot to verify table.",
-    "disk_size_gb": 10,
+    "disk_size_gb": 3,
     "name": "{{resourceName}}",
     "project": "{{ output.project_id.value }}",
     "source_disk": "{{output.source_disk.value}}",

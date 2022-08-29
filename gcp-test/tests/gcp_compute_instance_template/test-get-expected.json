@@ -10,7 +10,7 @@
 				"deviceName": "persistent-disk-0",
 				"initializeParams": {
 					"diskType": "pd-standard",
-					"sourceImage": "projects/debian-cloud/global/images/family/debian-9"
+					"sourceImage": "global/images/{{ resourceName }}"
 				},
 				"interface": "SCSI",
 				"kind": "compute#attachedDisk",
