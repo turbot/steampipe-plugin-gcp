@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -46,33 +46,33 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 }
 
 resource "google_compute_address" "test_address" {
-  name = var.resource_name
+  name         = var.resource_name
   network_tier = "PREMIUM"
 }
 
 resource "google_compute_forwarding_rule" "fr_esp" {
-  name        = "fr-esp"
-  ip_protocol = "ESP"
-  ip_address  = google_compute_address.test_address.address
-  target      = google_compute_vpn_gateway.target_gateway.id
+  name         = "fr-esp"
+  ip_protocol  = "ESP"
+  ip_address   = google_compute_address.test_address.address
+  target       = google_compute_vpn_gateway.target_gateway.id
   network_tier = "PREMIUM"
 }
 
 resource "google_compute_forwarding_rule" "fr_udp500" {
-  name        = "fr-udp500"
-  ip_protocol = "UDP"
-  port_range  = "500"
-  ip_address  = google_compute_address.test_address.address
-  target      = google_compute_vpn_gateway.target_gateway.id
+  name         = "fr-udp500"
+  ip_protocol  = "UDP"
+  port_range   = "500"
+  ip_address   = google_compute_address.test_address.address
+  target       = google_compute_vpn_gateway.target_gateway.id
   network_tier = "PREMIUM"
 }
 
 resource "google_compute_forwarding_rule" "fr_udp4500" {
-  name        = "fr-udp4500"
-  ip_protocol = "UDP"
-  port_range  = "4500"
-  ip_address  = google_compute_address.test_address.address
-  target      = google_compute_vpn_gateway.target_gateway.id
+  name         = "fr-udp4500"
+  ip_protocol  = "UDP"
+  port_range   = "4500"
+  ip_address   = google_compute_address.test_address.address
+  target       = google_compute_vpn_gateway.target_gateway.id
   network_tier = "PREMIUM"
 }
 

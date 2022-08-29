@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -52,9 +52,9 @@ resource "google_bigquery_dataset" "named_test_resource" {
 }
 
 resource "google_bigquery_table" "named_test_resource" {
-  dataset_id      = google_bigquery_dataset.named_test_resource.dataset_id
-  table_id        = var.resource_name
-  friendly_name   = var.resource_name
+  dataset_id    = google_bigquery_dataset.named_test_resource.dataset_id
+  table_id      = var.resource_name
+  friendly_name = var.resource_name
 
   time_partitioning {
     type = "DAY"

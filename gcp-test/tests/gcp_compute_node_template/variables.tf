@@ -7,7 +7,7 @@ variable "resource_name" {
 
 variable "gcp_project" {
   type        = string
-  default     = "niteowl-aaa"
+  default     = "parker-aaa"
   description = "GCP project used for the test."
 }
 
@@ -39,10 +39,10 @@ data "null_data_source" "resource" {
 resource "google_compute_node_template" "named_test_resource" {
   provider = google-beta
 
-  name      = var.resource_name
+  name        = var.resource_name
   description = "Test Node Template resource to verify the table."
-  region    = var.gcp_region
-  node_type = "c2-node-60-240"
+  region      = var.gcp_region
+  node_type   = "c2-node-60-240"
 
   node_affinity_labels = {
     name = var.resource_name
