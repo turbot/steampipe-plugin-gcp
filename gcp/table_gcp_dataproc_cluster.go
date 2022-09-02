@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dataproc/v1"
@@ -30,7 +30,7 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
 			},
 		},
-		GetMatrixItem: BuildComputeLocationList,
+		GetMatrixItemFunc: BuildComputeLocationList,
 		Columns: []*plugin.Column{
 			// commonly used columns
 			{

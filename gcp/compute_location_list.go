@@ -3,38 +3,36 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v3/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
-func init() {
-	pluginQueryData = &plugin.QueryData{
-		ConnectionManager: connection.NewManager(),
-	}
-}
+// func init() {
+// 	pluginQueryData = &plugin.QueryData{
+// 		ConnectionManager: connection.NewManager(),
+// 	}
+// }
 
 
 // BuildregionList :: return a list of matrix items, one per region specified
 // https://cloud.google.com/dataproc/docs/concepts/regional-endpoints
-func BuildComputeLocationList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+func BuildComputeLocationList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 
-	pluginQueryData.Connection = connection
 
 	// have we already created and cached the locations?
 	locationCacheKey := "Compute"
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(locationCacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(locationCacheKey); ok {
 		plugin.Logger(ctx).Trace("listlocationDetails:", cachedData.([]map[string]interface{}))
 		return cachedData.([]map[string]interface{})
 	}
 
 	// Create Service Connection
-	service, err := ComputeService(ctx, pluginQueryData)
+	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil
 	}
 
 	// Get project details
-	projectData, err := activeProject(ctx, pluginQueryData)
+	projectData, err := activeProject(ctx, d)
 	if err != nil {
 		return nil
 	}
@@ -50,6 +48,6 @@ func BuildComputeLocationList(ctx context.Context, connection *plugin.Connection
 	for i, location := range resp.Items {
 		matrix[i] = map[string]interface{}{matrixKeyLocation: location}
 	}
-	pluginQueryData.ConnectionManager.Cache.Set(locationCacheKey, matrix)
+	d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
 	return matrix
 }
