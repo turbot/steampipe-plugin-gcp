@@ -74,6 +74,12 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Description: "The previous cluster status.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(dataprocClusterSelfLink),
+			},
 
 			// Steampipe standard columns
 			{
@@ -242,4 +248,19 @@ func gcpDataprocClusterTurbotData(ctx context.Context, d *transform.TransformDat
 	}
 
 	return turbotData[param], nil
+}
+
+func dataprocClusterSelfLink(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*dataproc.Cluster)
+
+	var location string
+	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	// Since, when the service API is disabled, matrixLocation value will be nil
+	if matrixLocation != nil {
+		location = matrixLocation.(*compute.Region).Name
+	}
+
+	selfLink := "https://dataproc.googleapis.com/v1/projects/" + data.ProjectId + "/regions/" + location + "/clusters/" + data.ClusterName
+
+	return selfLink, nil
 }
