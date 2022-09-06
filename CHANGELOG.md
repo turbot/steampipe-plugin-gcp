@@ -1,3 +1,14 @@
+## v0.27.0 [2022-09-06]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.6](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v416-2022-09-02) which includes several caching and memory management improvements. ([#387](https://github.com/turbot/steampipe-plugin-gcp/pull/387))
+- Recompiled plugin with Go version `1.19`. ([#383](https://github.com/turbot/steampipe-plugin-gcp/pull/383))
+
+_Enhancements_
+
+- Added column `self_link` to `gcp_dataproc_cluster table`. ([#386](https://github.com/turbot/steampipe-plugin-gcp/pull/386))
+
 ## v0.26.0 [2022-08-16]
 
 _What's new?_
