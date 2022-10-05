@@ -55,10 +55,10 @@ steampipe plugin install gcp
 
 | Item | Description |
 | - | - |
-| Credentials | configure your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) |
+| Credentials | When running locally, you must configure your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default). If you are running in Cloud Shell, Cloud Code: *"[the tool uses the credentials you provided when you logged in, and manages any authorizations required.](https://cloud.google.com/docs/authentication/provide-credentials-adc#cloud-based-dev)"* |
 | Permissions | Grant the `ReadOnlyAccess` policy to your user or role. |
 | Radius | Each connection represents a single GCP project. |
-| Resolution |  1. Credentials from the json file specified by the `credentials` parameter in your steampipe config.<br />2. Credentials from the json file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default json file location (~/.config/gcloud/application_default_credentials.json). |
+| Resolution |  1. Credentials from the json file specified by the `credentials` parameter in your steampipe config.<br />2. Credentials from the json file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default json file location (~/.config/gcloud/application_default_credentials.json). <br />4. Credentials from [the metadata server](https://cloud.google.com/docs/authentication/application-default-credentials#attached-sa)|
 
 ### Configuration
 
