@@ -19,7 +19,6 @@ func tableGcpSQLDatabaseInstanceMetricCpuUtilization(_ context.Context) *plugin.
 			ParentHydrate:     listSQLDatabaseInstances,
 			Hydrate:           listSQLDatabaseInstanceMetricCpuUtilization,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			KeyColumns:        plugin.OptionalColumns([]string{"instance_id"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
