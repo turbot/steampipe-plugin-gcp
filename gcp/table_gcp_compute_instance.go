@@ -293,6 +293,7 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"cpu_platform", "cpuPlatform", "string"},
 		{"hostname", "hostname", "string"},
 		{"status", "status", "string"},

@@ -20,6 +20,7 @@ func tableGcpComputeDiskMetricWriteOpsHourly(_ context.Context) *plugin.Table {
 			ParentHydrate:     listComputeDisk,
 			Hydrate:           listComputeDiskMetricWriteOpsHourly,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

@@ -19,6 +19,7 @@ func tableGcpSQLDatabaseInstanceMetricConnections(_ context.Context) *plugin.Tab
 			ParentHydrate:     listSQLDatabaseInstances,
 			Hydrate:           listSQLDatabaseInstanceMetricConnections,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns:        plugin.OptionalColumns([]string{"instance_id"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
