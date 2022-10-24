@@ -24,6 +24,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
 		},
@@ -271,6 +272,7 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"status", "status", "string"},
 	}
 
