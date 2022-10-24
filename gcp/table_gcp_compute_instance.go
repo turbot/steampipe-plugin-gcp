@@ -26,6 +26,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "cpu_platform", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "hostname", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
