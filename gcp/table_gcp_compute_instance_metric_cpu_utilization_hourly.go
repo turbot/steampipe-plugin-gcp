@@ -19,6 +19,7 @@ func tableGcpComputeInstanceMetricCpuUtilizationHourly(_ context.Context) *plugi
 			ParentHydrate:     listComputeInstances,
 			Hydrate:           listComputeInstanceMetricCpuUtilizationHourly,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{
