@@ -1,3 +1,14 @@
+## v0.28.0 [2022-10-24]
+
+_Enhancements_
+
+- Added `name` as optional ListConfig key column to `gcp_compute_disk_metric_*` and `gcp_compute_instance_metric_*` tables to improve query performance when filtering on disk or instance name respectively. ([#397](https://github.com/turbot/steampipe-plugin-gcp/pull/397)) (Thanks to [@JoshRosen](https://github.com/JoshRosen) for the improvements!)
+- Updated examples for `project` config argument to use `PROJECT_ID` instead of `PROJECT_NAME` to better reflect the expected value. ([#398](https://github.com/turbot/steampipe-plugin-gcp/pull/398)) (Thanks to [@ashishsecdev](https://github.com/ashishsecdev) for the updates!)
+
+_Bug fixes_
+
+- Fixed `gcp_compute_disk` table queries panicking when querying the `iam_policy` column for a disk name that doesn't exist.
+
 ## v0.27.0 [2022-09-06]
 
 _Dependencies_
