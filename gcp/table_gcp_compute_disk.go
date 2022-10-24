@@ -357,6 +357,11 @@ func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
+	// If the specified resource is not present, API does not return any not found errors
+	if len(disk.Name) < 1 {
+		return nil, nil
+	}
+
 	return &disk, nil
 }
 
