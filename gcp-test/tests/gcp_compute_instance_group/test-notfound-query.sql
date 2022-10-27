@@ -10,4 +10,4 @@ select
 from 
   gcp_compute_instance_group
 where 
-  name = '{{resourceName}}-dummy'
+  name = '{{resourceName}}-dummy';

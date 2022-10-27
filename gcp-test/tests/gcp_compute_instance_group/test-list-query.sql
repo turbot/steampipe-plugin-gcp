@@ -10,4 +10,4 @@ select
 from 
   gcp_compute_instance_group
 where 
-  akas::text = '["{{ output.resource_aka.value }}"]'
+  akas::text = '["{{ output.resource_aka.value }}"]';
