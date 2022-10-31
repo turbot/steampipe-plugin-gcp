@@ -1,6 +1,6 @@
 [
   {
-    "acl": {},
+    "acl": null,
     "billing_requester_pays": false,
     "cors": [
       {
