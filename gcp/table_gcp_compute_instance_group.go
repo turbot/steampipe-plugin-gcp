@@ -150,15 +150,6 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	filterQuals := []filterQualMap{
-		{"name", "name", "string"},
-	}
-
-	filters := buildQueryFilterFromQuals(filterQuals, d.Quals)
-	filterString := ""
-	if len(filters) > 0 {
-		filterString = strings.Join(filters, " ")
-	}
 
 	// Max limit is set as per documentation
 	pageSize := types.Int64(500)
@@ -184,7 +175,7 @@ func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
-	resp := service.InstanceGroups.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
+	resp := service.InstanceGroups.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.InstanceGroupAggregatedList) error {
 		for _, item := range page.Items {
 			for _, group := range item.InstanceGroups {
