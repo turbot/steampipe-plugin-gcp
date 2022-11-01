@@ -48,6 +48,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_forwarding_rule":                             tableGcpComputeForwardingRule(ctx),
 			"gcp_compute_global_address":                              tableGcpComputeGlobalAddress(ctx),
 			"gcp_compute_global_forwarding_rule":                      tableGcpComputeGlobalForwardingRule(ctx),
+			"gcp_compute_health_check":                                tableGcpComputeHealthCheck(ctx),
 			"gcp_compute_image":                                       tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                                    tableGcpComputeInstance(ctx),
 			"gcp_compute_instance_metric_cpu_utilization":             tableGcpComputeInstanceMetricCpuUtilization(ctx),
