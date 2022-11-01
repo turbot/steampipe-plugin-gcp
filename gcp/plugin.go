@@ -52,6 +52,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_health_check":                                tableGcpComputeHealthCheck(ctx),
 			"gcp_compute_image":                                       tableGcpComputeImage(ctx),
 			"gcp_compute_instance":                                    tableGcpComputeInstance(ctx),
+			"gcp_compute_instance_group":                              tableGcpComputeInstanceGroup(ctx),
 			"gcp_compute_instance_metric_cpu_utilization":             tableGcpComputeInstanceMetricCpuUtilization(ctx),
 			"gcp_compute_instance_metric_cpu_utilization_daily":       tableGcpComputeInstanceMetricCpuUtilizationDaily(ctx),
 			"gcp_compute_instance_metric_cpu_utilization_hourly":      tableGcpComputeInstanceMetricCpuUtilizationHourly(ctx),
