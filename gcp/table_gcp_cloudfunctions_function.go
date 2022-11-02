@@ -18,7 +18,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 		Name:        "gcp_cloudfunctions_function",
 		Description: "GCP Cloud Function",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
+			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getCloudFunction,
 		},
 		List: &plugin.ListConfig{
@@ -263,12 +263,23 @@ func getCloudFunction(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-
-	cloudFunction, err := service.Projects.Locations.Functions.Get(name).Do()
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
+	project := projectId.(string)
+
+	name := d.KeyColumnQuals["name"].GetStringValue()
+	location := d.KeyColumnQuals["location"].GetStringValue()
+
+	// API https://cloud.google.com/functions/docs/reference/rest/v1/projects.locations.functions/get
+	cloudFunction, err := service.Projects.Locations.Functions.Get("projects/" + project + "/locations/" + location + "/functions/" + name).Do()
+	if err != nil {
+		return nil, err
+	}
+
 	return cloudFunction, nil
 }
 
