@@ -72,8 +72,9 @@ func tableGcpComputeVpnGateway(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "status",
-				Description: "Specifies the current status of the vpn gateway.",
+				Name:        "vpn_connections",
+				Description: "List of VPN connection for this VpnGateway.",
+				Hydrate:     getComputeVpnGatewayVpnConnections,
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -219,6 +220,33 @@ func getComputeVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	return &vpnGateway, nil
+}
+
+func getComputeVpnGatewayVpnConnections(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	vpnGateway := h.Item.(*compute.VpnGateway)
+	region := getLastPathElement(types.SafeString(vpnGateway.Region))
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	// Create Service Connection
+	service, err := ComputeService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getComputeVpnGatewayStatus", "service_creation_err", err)
+		return nil, err
+	}
+
+	resp, err := service.VpnGateways.GetStatus(project, region, vpnGateway.Name).Do()
+	if err != nil {
+		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getComputeVpnGatewayStatus", "api_err", err)
+		return nil, err
+	}
+	return resp.Result.VpnConnections, nil
 }
 
 func getVpnGatewayAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
