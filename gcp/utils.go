@@ -165,7 +165,6 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 	}
 
 	if gcpConfig.ImpersonateServiceAccount != nil {
-		// opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
 		ts, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
 			TargetPrincipal: *gcpConfig.ImpersonateServiceAccount,
 			Scopes:          []string{"https://www.googleapis.com/auth/cloud-platform"},
