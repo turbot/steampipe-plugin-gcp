@@ -57,7 +57,7 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 			{
 				Name:        "ip_address",
 				Description: "Specifies the IP address that this forwarding rule serves.",
-				Type:        proto.ColumnType_IPADDR,
+				Type:        proto.ColumnType_INET,
 				Transform:   transform.FromField("IPAddress"),
 			},
 			{
