@@ -20,6 +20,7 @@ from
 ```
 
 ### Get number of instances per instance group
+
 ```sql
 select
   name,
@@ -29,6 +30,7 @@ from
 ```
 
 ### Get instance details of each instance group
+
 ```sql
 select
   g.name,

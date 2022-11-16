@@ -24,7 +24,6 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
-			// commonly used columns
 			{
 				Name:        "name",
 				Description: "Name of the instance group.",
@@ -171,7 +170,7 @@ func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugi
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_instance_group.listComputeInstanceGroup", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_instance_group.listComputeInstanceGroup", "service_creation_err", err)
 		return nil, err
 	}
 
@@ -191,7 +190,7 @@ func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugi
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_instance_group.listComputeInstanceGroup", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_instance_group.listComputeInstanceGroup", "api_err", err)
 		return nil, err
 	}
 
@@ -217,7 +216,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_instance_group.getComputeInstanceGroup", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroup", "service_creation_err", err)
 		return nil, err
 	}
 
@@ -231,7 +230,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil
 	},
 	); err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_instance_group.getComputeInstanceGroup", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroup", "api_err", err)
 		return nil, err
 	}
 
@@ -257,14 +256,14 @@ func getComputeInstanceGroupInstances(ctx context.Context, d *plugin.QueryData, 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_instance_group.getComputeInstanceGroupInstances", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "service_creation_err", err)
 		return nil, err
 	}
 
 	resp, err := service.InstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Zone)), instanceGroup.Name, &compute.InstanceGroupsListInstancesRequest{}).Do()
 
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
 		return nil, err
 	}
 
@@ -281,10 +280,11 @@ func instanceGroupAka(_ context.Context, d *transform.TransformData) (interface{
 	project := strings.Split(i.SelfLink, "/")[6]
 	instanceGroupName := types.SafeString(i.Name)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zoneName + "/instanceGroups/" + instanceGroupName}
-
+	var akas []string
 	if zoneName == "" {
 		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + regionName + "/instanceGroups/" + instanceGroupName}
+	} else {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zoneName + "/instanceGroups/" + instanceGroupName}
 	}
 
 	return akas, nil
