@@ -168,7 +168,7 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_autoscaler.listComputeAutoscaler", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_autoscaler.listComputeAutoscaler", "service_creation_err", err)
 		return nil, err
 	}
 
@@ -188,7 +188,7 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_autoscaler.listComputeAutoscaler", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_autoscaler.listComputeAutoscaler", "api_err", err)
 		return nil, err
 	}
 
@@ -214,7 +214,7 @@ func getComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_autoscaler.getComputeAutoscaler", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_autoscaler.getComputeAutoscaler", "service_creation_err", err)
 		return nil, err
 	}
 
@@ -228,7 +228,7 @@ func getComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil
 	},
 	); err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_autoscaler.getComputeAutoscaler", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_autoscaler.getComputeAutoscaler", "api_err", err)
 		return nil, err
 	}
 
@@ -250,10 +250,11 @@ func autoscalerAka(_ context.Context, d *transform.TransformData) (interface{}, 
 	project := strings.Split(i.SelfLink, "/")[6]
 	autoscalerName := types.SafeString(i.Name)
 
-	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zoneName + "/autoscalers/" + autoscalerName}
-
+	var akas []string
 	if zoneName == "" {
 		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + regionName + "/autoscalers/" + autoscalerName}
+	} else {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/zones/" + zoneName + "/autoscalers/" + autoscalerName}
 	}
 
 	return akas, nil

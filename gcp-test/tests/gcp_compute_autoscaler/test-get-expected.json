@@ -1,0 +1,12 @@
+[
+  {
+    "description": "{{resourceName}}",
+    "kind": "compute#autoscaler",
+    "location": "us-central1-f",
+    "name": "{{resourceName}}",
+    "project": "{{ output.project_id.value }}",
+    "recommended_size": 0,
+    "self_link": "{{ output.self_link.value }}",
+    "status": "ACTIVE"
+  }
+]
