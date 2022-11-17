@@ -13,16 +13,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpComputeVpnGateway(ctx context.Context) *plugin.Table {
+func tableGcpComputeHaVpnGateway(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_compute_vpn_gateway",
+		Name:        "gcp_compute_ha_vpn_gateway",
 		Description: "GCP Compute VPN Gateway",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeVpnGateway,
+			Hydrate:    getComputeHaVpnGateway,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeVpnGateways,
+			Hydrate:           listComputeHaVpnGateways,
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 		},
 		Columns: []*plugin.Column{
@@ -66,6 +66,14 @@ func tableGcpComputeVpnGateway(ctx context.Context) *plugin.Table {
 				Description: "The URL of the region where the VPN gateway resides.",
 				Type:        proto.ColumnType_STRING,
 			},
+
+			// region_name is a simpler view of the region, without the full path
+			{
+				Name:        "region_name",
+				Description: "Name of the region where the VPN gateway resides. Only applicable for regional resources.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Region").Transform(lastPathElement),
+			},
 			{
 				Name:        "self_link",
 				Description: "The server-defined URL for the resource.",
@@ -74,7 +82,7 @@ func tableGcpComputeVpnGateway(ctx context.Context) *plugin.Table {
 			{
 				Name:        "vpn_connections",
 				Description: "List of VPN connection for this VpnGateway.",
-				Hydrate:     getComputeVpnGatewayVpnConnections,
+				Hydrate:     getComputeHaVpnGatewayVpnConnections,
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -129,7 +137,7 @@ func tableGcpComputeVpnGateway(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listComputeHaVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -149,7 +157,7 @@ func listComputeVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugin.
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.listComputeVpnGateways", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.listComputeHaVpnGateways", "service_creation_err", err)
 		return nil, err
 	}
 
@@ -169,7 +177,7 @@ func listComputeVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugin.
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.listComputeVpnGateways", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.listComputeHaVpnGateways", "api_err", err)
 		return nil, err
 	}
 
@@ -178,7 +186,7 @@ func listComputeVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 //// HYDRATE FUNCTIONS
 
-func getComputeVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getComputeHaVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
@@ -194,7 +202,7 @@ func getComputeVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getComputeVpnGateway", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.getComputeHaVpnGateway", "service_creation_err", err)
 		return nil, err
 	}
 
@@ -210,7 +218,7 @@ func getComputeVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			return nil
 		},
 	); err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getComputeVpnGateway", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.getComputeHaVpnGateway", "api_err", err)
 		return nil, err
 	}
 
@@ -222,7 +230,7 @@ func getComputeVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	return &vpnGateway, nil
 }
 
-func getComputeVpnGatewayVpnConnections(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getComputeHaVpnGatewayVpnConnections(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	vpnGateway := h.Item.(*compute.VpnGateway)
 	region := getLastPathElement(types.SafeString(vpnGateway.Region))
 
@@ -237,13 +245,13 @@ func getComputeVpnGatewayVpnConnections(ctx context.Context, d *plugin.QueryData
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getComputeVpnGatewayStatus", "service_creation_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.getComputeHaVpnGatewayStatus", "service_creation_err", err)
 		return nil, err
 	}
 
 	resp, err := service.VpnGateways.GetStatus(project, region, vpnGateway.Name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getComputeVpnGatewayStatus", "api_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.getComputeHaVpnGatewayStatus", "api_err", err)
 		return nil, err
 	}
 	return resp.Result.VpnConnections, nil
@@ -257,7 +265,7 @@ func getVpnGatewayAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		plugin.Logger(ctx).Debug("gcp_compute_vpn_gateway.getVpnGatewayAka", "cache_err", err)
+		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.getVpnGatewayAka", "cache_err", err)
 		return nil, err
 	}
 	project := projectId.(string)
