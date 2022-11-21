@@ -91,11 +91,6 @@ connection "gcp" {
 
 **NOTE:** The `credential_file` property has been deprecated and will be removed in the next major version. Please use `credentials` instead.
 
-## Get involved
-
-- Open source: https://github.com/turbot/steampipe-plugin-gcp
-- Community: [Slack Channel](https://steampipe.io/community/join)
-
 ## Advanced configuration options
 
 By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run `gcloud auth application-default login`. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
@@ -114,11 +109,17 @@ connection "gcp_my_other_project" {
 }
 ```
 
-### Specify multiple projects
+## Multi-Project Connections
 
-A common configuration is to have multiple connections to different projects, using the same standard ADC Credentials for all connections:
+You may create multiple gcp connections:
 
 ```hcl
+connection "gcp_all" {
+  type        = "aggregator"
+  plugin      = "gcp"
+  connections = ["gcp_project_*"]
+}
+
 connection "gcp_project_aaa" {
   plugin  = "gcp"
   project = "project-aaa"
@@ -135,9 +136,80 @@ connection "gcp_project_ccc" {
 }
 ```
 
+Depending on the mode of authentication, a multi-project configuration can also look like:
+
+```hcl
+connection "gcp_all" {
+  type        = "aggregator"
+  plugin      = "gcp"
+  connections = ["gcp_project_*"]
+}
+
+connection "gcp_project_aaa" {
+  plugin      = "gcp"
+  project     = "project-aaa"
+  credentials = "/home/me/my-service-account-creds-for-project-aaa.json"
+}
+
+connection "gcp_project_bbb" {
+  plugin      = "gcp"
+  project     = "project-bbb"
+  credentials = "/home/me/my-service-account-creds-for-project-bbb.json"
+}
+
+connection "gcp_project_ccc" {
+  plugin      = "gcp"
+  project     = "project-ccc"
+  credentials = "/home/me/my-service-account-creds-for-project-ccc.json"
+}
+```
+
+Each connection is implemented as a distinct [Postgres schema](https://www.postgresql.org/docs/current/ddl-schemas.html). As such, you can use qualified table names to query a specific connection:
+
+```sql
+select * from gcp_project_aaa.gcp_project
+```
+
+Alternatively, you can use an unqualified name and it will be resolved according to the [Search Path](https://steampipe.io/docs/using-steampipe/managing-connections#setting-the-search-path):
+
+```sql
+select * from gcp_project
+```
+
+You can create multi-project connections by using an [**aggregator** connection](https://steampipe.io/docs/using-steampipe/managing-connections#using-aggregators). Aggregators allow you to query data from multiple connections for a plugin as if they are a single connection:
+
+```hcl
+connection "gcp_all" {
+  plugin      = "gcp"
+  type        = "aggregator"
+  connections = ["gcp_project_aaa", "gcp_project_bbb", "gcp_project_ccc"]
+}
+```
+
+Querying tables from this connection will return results from the `gcp_project_aaa`, `gcp_project_bbb`, and `gcp_project_ccc` connections:
+
+```sql
+select * from gcp_all.gcp_project
+```
+
+Steampipe supports the `*` wildcard in the connection names. For example, to aggregate all the GCP plugin connections whose names begin with `gcp_`:
+
+```hcl
+connection "gcp_all" {
+  type        = "aggregator"
+  plugin      = "gcp"
+  connections = ["gcp_*"]
+}
+```
+
 ### Specify static credentials using environment variables
 
 ```sh
 export CLOUDSDK_CORE_PROJECT=myproject
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
 ```
+
+## Get involved
+
+- Open source: https://github.com/turbot/steampipe-plugin-gcp
+- Community: [Slack Channel](https://steampipe.io/community/join)
