@@ -1,3 +1,9 @@
+## v0.29.0 [2022-11-23]
+
+_Dependencies_
+
+- Recompiled plugin with [google-api-go-client v0.101.0](https://github.com/googleapis/google-api-go-client). ([#399](https://github.com/turbot/steampipe-plugin-gcp/pull/399))
+
 ## v0.28.1 [2022-11-11]
 
 _Bug fixes_
