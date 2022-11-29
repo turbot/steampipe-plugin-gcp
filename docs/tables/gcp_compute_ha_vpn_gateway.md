@@ -2,6 +2,8 @@
 
 Represents a VPN gateway running in GCP. This virtual device is managed by Google, but used only by you. This type of VPN Gateway allows for the creation of VPN solutions with higher availability than classic Target VPN Gateways.
 
+## Examples
+
 ### Basic info
 
 ```sql
