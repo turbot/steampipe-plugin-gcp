@@ -1,3 +1,21 @@
+## v0.29.0 [2022-11-23]
+
+_Dependencies_
+
+- Recompiled plugin with [google-api-go-client v0.101.0](https://github.com/googleapis/google-api-go-client). ([#399](https://github.com/turbot/steampipe-plugin-gcp/pull/399))
+
+## v0.28.1 [2022-11-11]
+
+_Bug fixes_
+
+- Fixed the `ip_address` column in `gcp_compute_forwarding_rule` and `gcp_compute_global_forwarding_rule` tables to be of `INET` data type instead of `IPADDR` data type. ([#409](https://github.com/turbot/steampipe-plugin-gcp/pull/409))
+- Fixed the `gcp_cloudfunctions_function` table to correctly return data instead of an error when specifying the `name` column in the where clause. ([#403](https://github.com/turbot/steampipe-plugin-gcp/pull/403))
+- Fixed the `Credentials` section of the `docs/index.md` to include the correct permission scope for querying the tables.
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.8](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v418-2022-09-08) which increases the default open file limit. ([#410](https://github.com/turbot/steampipe-plugin-gcp/pull/410))
+
 ## v0.28.0 [2022-10-24]
 
 _Enhancements_
