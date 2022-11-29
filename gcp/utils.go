@@ -14,6 +14,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 )
 
@@ -53,7 +54,7 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		projectData = cachedData.(*projectInfo)
 	} else {
 		// To set the config argument for the connection in a project
-		setSessionConfig(d.Connection)
+		setSessionConfig(ctx, d.Connection)
 		projectData, err = activeProject(ctx, d)
 		if err != nil {
 			return nil, err
@@ -147,7 +148,7 @@ func getProjectFromConfig(connection *plugin.Connection) string {
 }
 
 // Set project values from config and return client options
-func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
+func setSessionConfig(ctx context.Context, connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
@@ -164,7 +165,15 @@ func setSessionConfig(connection *plugin.Connection) []option.ClientOption {
 	}
 
 	if gcpConfig.ImpersonateServiceAccount != nil {
-		opts = append(opts, option.ImpersonateCredentials(*gcpConfig.ImpersonateServiceAccount))
+		ts, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
+			TargetPrincipal: *gcpConfig.ImpersonateServiceAccount,
+			Scopes:          []string{"https://www.googleapis.com/auth/cloud-platform"},
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		opts = append(opts, option.WithTokenSource(ts))
 	}
 	return opts
 }

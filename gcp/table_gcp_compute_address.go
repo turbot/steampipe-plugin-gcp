@@ -250,15 +250,20 @@ func getComputeAddress(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
+	// If the specified resource is not present, API does not return any not found errors
+	if len(address.Name) < 1 {
+		return nil, nil
+	}
+
 	return &address, nil
 }
 
 //// TRANSFORM FUNCTIONS
 
-func addressSelfLinkToTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func addressSelfLinkToTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	address := d.HydrateItem.(*compute.Address)
+	
 	param := d.Param.(string)
-
 	region := getLastPathElement(types.SafeString(address.Region))
 	project := strings.Split(address.SelfLink, "/")[6]
 

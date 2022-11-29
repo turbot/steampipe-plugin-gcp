@@ -35,7 +35,7 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := accessapproval.NewService(ctx, opts...)
@@ -56,7 +56,7 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := bigquery.NewService(ctx, opts...)
@@ -77,7 +77,7 @@ func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtablead
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := bigtableadmin.NewService(ctx, opts...)
@@ -98,7 +98,7 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := cloudresourcemanager.NewService(ctx, opts...)
@@ -119,7 +119,7 @@ func EssentialContactService(ctx context.Context, d *plugin.QueryData) (*essenti
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := essentialcontacts.NewService(ctx, opts...)
@@ -140,7 +140,7 @@ func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sqladmin.S
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := sqladmin.NewService(ctx, opts...)
@@ -161,7 +161,7 @@ func ComputeBetaService(ctx context.Context, d *plugin.QueryData) (*computeBeta.
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := computeBeta.NewService(ctx, opts...)
@@ -182,7 +182,7 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := compute.NewService(ctx, opts...)
@@ -203,7 +203,7 @@ func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Servic
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := dataproc.NewService(ctx, opts...)
@@ -224,7 +224,7 @@ func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Serv
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(d.Connection)
+	setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := container.NewService(ctx)
@@ -245,7 +245,7 @@ func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunc
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := cloudfunctions.NewService(ctx, opts...)
@@ -266,7 +266,7 @@ func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) 
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := dns.NewService(ctx, opts...)
@@ -287,7 +287,7 @@ func IAMService(ctx context.Context, d *plugin.QueryData) (*iam.Service, error) 
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := iam.NewService(ctx, opts...)
@@ -308,7 +308,7 @@ func LoggingService(ctx context.Context, d *plugin.QueryData) (*logging.Service,
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := logging.NewService(ctx, opts...)
@@ -329,7 +329,7 @@ func MonitoringService(ctx context.Context, d *plugin.QueryData) (*monitoring.Se
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := monitoring.NewService(ctx, opts...)
@@ -350,7 +350,7 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := pubsub.NewService(ctx, opts...)
@@ -371,7 +371,7 @@ func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusag
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := serviceusage.NewService(ctx, opts...)
@@ -392,7 +392,7 @@ func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service,
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := storage.NewService(ctx, opts...)
@@ -413,7 +413,7 @@ func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, er
 	}
 
 	// To get config arguments from plugin config file
-	opts := setSessionConfig(d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
 	svc, err := cloudkms.NewService(ctx, opts...)
