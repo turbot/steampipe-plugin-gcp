@@ -1,4 +1,4 @@
-# Table:  gcp_compute_autoscaler
+# Table: gcp_compute_autoscaler
 
 Autoscalers automatically add or delete instances from a managed instance group according to your defined autoscaling policy.
 
@@ -47,7 +47,8 @@ select
   recommended_size
 from 
   gcp_compute_autoscaler
-where status = 'ERROR';
+where 
+  status = 'ERROR';
 ```
 
 ### Get instance groups having autoscaling enabled
