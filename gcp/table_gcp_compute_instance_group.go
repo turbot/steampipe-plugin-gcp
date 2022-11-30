@@ -20,8 +20,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeInstanceGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeInstanceGroup,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeInstanceGroup,
 		},
 		Columns: []*plugin.Column{
 			{
