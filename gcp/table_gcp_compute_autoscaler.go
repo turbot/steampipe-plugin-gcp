@@ -127,7 +127,7 @@ func tableGcpComputeAutoscaler(ctx context.Context) *plugin.Table {
 				Transform:   transform.From(autoscalerAka),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
