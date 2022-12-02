@@ -9,7 +9,7 @@ _What's new?_
 
 _Bug fixes_
 
-- Fixed `gcp_compute_instance_metric_cpu_utilization_*` table docs to use the correct value of average in queries checking for CPU utilization . ([#416](https://github.com/turbot/steampipe-plugin-gcp/pull/416))
+- Fixed `gcp_compute_instance_metric_cpu_utilization_*` table docs to use the correct value of average in queries checking for CPU utilization. ([#416](https://github.com/turbot/steampipe-plugin-gcp/pull/416))
 
 ## v0.29.0 [2022-11-23]
 
