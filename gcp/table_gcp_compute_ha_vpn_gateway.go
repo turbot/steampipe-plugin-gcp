@@ -198,6 +198,10 @@ func getComputeHaVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	var vpnGateway compute.VpnGateway
 	name := d.KeyColumnQuals["name"].GetStringValue()
+	// Empty check
+	if name == "" {
+	  return nil, nil
+	}
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
