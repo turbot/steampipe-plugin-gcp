@@ -198,7 +198,6 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 //// HYDRATE FUNCTIONS
 
 func getComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getComputeAutoscaler")
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
