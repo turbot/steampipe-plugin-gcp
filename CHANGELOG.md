@@ -1,3 +1,16 @@
+## v0.30.0 [2022-12-02]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_autoscaler](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_autoscaler) ([#412](https://github.com/turbot/steampipe-plugin-gcp/pull/412))
+  - [gcp_compute_ha_vpn_gateway](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_ha_vpn_gateway) ([#413](https://github.com/turbot/steampipe-plugin-gcp/pull/413))
+  - [gcp_compute_instance_group](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_group) ([#401](https://github.com/turbot/steampipe-plugin-gcp/pull/401))
+
+_Bug fixes_
+
+- Fixed `gcp_compute_instance_metric_cpu_utilization_*` table docs to use the correct value of average in queries checking for CPU utilization. ([#416](https://github.com/turbot/steampipe-plugin-gcp/pull/416))
+
 ## v0.29.0 [2022-11-23]
 
 _Dependencies_
