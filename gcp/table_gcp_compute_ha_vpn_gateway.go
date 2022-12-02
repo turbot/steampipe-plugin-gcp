@@ -117,7 +117,7 @@ func tableGcpComputeHaVpnGateway(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromValue(),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
