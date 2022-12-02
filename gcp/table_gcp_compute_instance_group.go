@@ -114,7 +114,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Zone").Transform(lastPathElement),
 			},
 
-			// standard steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
