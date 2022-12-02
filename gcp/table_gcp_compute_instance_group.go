@@ -128,7 +128,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 				Transform:   transform.From(instanceGroupAka),
 			},
 
-			// standard gcp columns
+			// GCP standard columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
