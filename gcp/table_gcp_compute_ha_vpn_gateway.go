@@ -96,7 +96,7 @@ func tableGcpComputeHaVpnGateway(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			//  Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
