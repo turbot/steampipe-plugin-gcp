@@ -209,6 +209,9 @@ func getComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	var autoscaler compute.Autoscaler
 	name := d.KeyColumnQuals["name"].GetStringValue()
+	if name == "" {
+		return nil, nil
+	}
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
