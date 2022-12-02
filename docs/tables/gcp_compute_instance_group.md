@@ -1,4 +1,4 @@
-# Table:  gcp_compute_instance_group
+# Table: gcp_compute_instance_group
 
 An instance group is a collection of virtual machine (VM) instances that you can manage as a single entity.
 
@@ -7,15 +7,15 @@ An instance group is a collection of virtual machine (VM) instances that you can
 ### Basic Info
 
 ```sql
-select 
+select
   name,
   description,
-  self_link, 
+  self_link,
   size,
-  location, 
-  akas, 
+  location,
+  akas,
   project
-from 
+from
   gcp_compute_instance_group;
 ```
 
