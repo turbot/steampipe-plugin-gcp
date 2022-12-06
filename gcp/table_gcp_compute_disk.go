@@ -24,6 +24,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
 		},
@@ -271,6 +272,7 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"status", "status", "string"},
 	}
 
@@ -353,6 +355,11 @@ func getComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	},
 	); err != nil {
 		return nil, err
+	}
+
+	// If the specified resource is not present, API does not return any not found errors
+	if len(disk.Name) < 1 {
+		return nil, nil
 	}
 
 	return &disk, nil

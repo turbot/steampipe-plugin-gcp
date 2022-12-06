@@ -192,6 +192,9 @@ func getComputeTargetVpnGateway(ctx context.Context, d *plugin.QueryData, h *plu
 
 	var targetVpnGateway compute.TargetVpnGateway
 	name := d.KeyColumnQuals["name"].GetStringValue()
+	if name != "" {
+		return nil, nil
+	}
 
 	resp := service.TargetVpnGateways.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(

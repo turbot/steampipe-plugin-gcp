@@ -56,7 +56,7 @@ steampipe plugin install gcp
 | Item | Description |
 | - | - |
 | Credentials | When running locally, you must configure your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default). If you are running in Cloud Shell or Cloud Code, [the tool uses the credentials you provided when you logged in, and manages any authorizations required](https://cloud.google.com/docs/authentication/provide-credentials-adc#cloud-based-dev). |
-| Permissions | Grant the `ReadOnlyAccess` policy to your user or role. |
+| Permissions | Assign the `Viewer` role to your user or service account. |
 | Radius | Each connection represents a single GCP project. |
 | Resolution |  1. Credentials from the json file specified by the `credentials` parameter in your steampipe config.<br />2. Credentials from the json file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default json file location (~/.config/gcloud/application_default_credentials.json). <br />4. Credentials from [the metadata server](https://cloud.google.com/docs/authentication/application-default-credentials#attached-sa)|
 
@@ -74,7 +74,7 @@ connection "gcp" {
   #   - The standard gcloud SDK `CLOUDSDK_CORE_PROJECT` environment variable, if set; otherwise
   #   - The `GCP_PROJECT` environment variable, if set (this is deprecated); otherwise
   #   - The current active project project, as returned by the `gcloud config get-value project` command
-  #project = "YOUR_PROJECT_NAME"
+  #project = "YOUR_PROJECT_ID"
 
   # `credentials` (optional) - Either the path to a JSON credential file that contains Google application credentials,
   # or the contents of a service account key file in JSON format. If `credentials` is not specified in a connection,

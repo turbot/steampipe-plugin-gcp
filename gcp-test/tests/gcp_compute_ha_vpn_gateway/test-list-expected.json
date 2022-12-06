@@ -1,0 +1,9 @@
+[
+  {
+    "description": "Test VPN Gateway to validate integration test.",
+    "kind": "compute#vpnGateway",
+    "location": "us-east1",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]

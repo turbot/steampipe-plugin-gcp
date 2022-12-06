@@ -26,6 +26,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isIgnorableError([]string{"403"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "cpu_platform", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "hostname", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
@@ -293,6 +294,7 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"cpu_platform", "cpuPlatform", "string"},
 		{"hostname", "hostname", "string"},
 		{"status", "status", "string"},

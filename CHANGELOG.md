@@ -1,3 +1,45 @@
+## v0.30.0 [2022-12-02]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_autoscaler](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_autoscaler) ([#412](https://github.com/turbot/steampipe-plugin-gcp/pull/412))
+  - [gcp_compute_ha_vpn_gateway](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_ha_vpn_gateway) ([#413](https://github.com/turbot/steampipe-plugin-gcp/pull/413))
+  - [gcp_compute_instance_group](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_group) ([#401](https://github.com/turbot/steampipe-plugin-gcp/pull/401))
+
+_Bug fixes_
+
+- Fixed `gcp_compute_instance_metric_cpu_utilization_*` table docs to use the correct value of average in queries checking for CPU utilization. ([#416](https://github.com/turbot/steampipe-plugin-gcp/pull/416))
+
+## v0.29.0 [2022-11-23]
+
+_Dependencies_
+
+- Recompiled plugin with [google-api-go-client v0.101.0](https://github.com/googleapis/google-api-go-client). ([#399](https://github.com/turbot/steampipe-plugin-gcp/pull/399))
+
+## v0.28.1 [2022-11-11]
+
+_Bug fixes_
+
+- Fixed the `ip_address` column in `gcp_compute_forwarding_rule` and `gcp_compute_global_forwarding_rule` tables to be of `INET` data type instead of `IPADDR` data type. ([#409](https://github.com/turbot/steampipe-plugin-gcp/pull/409))
+- Fixed the `gcp_cloudfunctions_function` table to correctly return data instead of an error when specifying the `name` column in the where clause. ([#403](https://github.com/turbot/steampipe-plugin-gcp/pull/403))
+- Fixed the `Credentials` section of the `docs/index.md` to include the correct permission scope for querying the tables.
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.8](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v418-2022-09-08) which increases the default open file limit. ([#410](https://github.com/turbot/steampipe-plugin-gcp/pull/410))
+
+## v0.28.0 [2022-10-24]
+
+_Enhancements_
+
+- Added `name` as optional ListConfig key column to `gcp_compute_disk_metric_*` and `gcp_compute_instance_metric_*` tables to improve query performance when filtering on disk or instance name respectively. ([#397](https://github.com/turbot/steampipe-plugin-gcp/pull/397)) (Thanks to [@JoshRosen](https://github.com/JoshRosen) for the improvements!)
+- Updated examples for `project` config argument to use `PROJECT_ID` instead of `PROJECT_NAME` to better reflect the expected value. ([#398](https://github.com/turbot/steampipe-plugin-gcp/pull/398)) (Thanks to [@ashishsecdev](https://github.com/ashishsecdev) for the updates!)
+
+_Bug fixes_
+
+- Fixed `gcp_compute_disk` table queries panicking when querying the `iam_policy` column for a disk name that doesn't exist.
+
 ## v0.27.0 [2022-09-06]
 
 _Dependencies_
