@@ -1,3 +1,10 @@
+## v0.31.0 [2022-12-06]
+
+_Enhancements_
+
+- Updated `docs/index.md` to include better and more detailed multi-project configuration examples. ([#414](https://github.com/turbot/steampipe-plugin-gcp/pull/414))
+- Updated the `Credentials` section of `docs/index.md` to include information about authenticating with Cloud Shell and Cloud Code. ([#395](https://github.com/turbot/steampipe-plugin-gcp/pull/395))
+
 ## v0.30.0 [2022-12-02]
 
 _What's new?_
