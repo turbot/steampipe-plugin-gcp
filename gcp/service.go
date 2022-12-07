@@ -224,10 +224,10 @@ func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Serv
 	}
 
 	// To get config arguments from plugin config file
-	setSessionConfig(ctx, d.Connection)
+	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := container.NewService(ctx)
+	svc, err := container.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
