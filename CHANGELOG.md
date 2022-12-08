@@ -1,3 +1,9 @@
+## v0.31.1 [2022-12-08]
+
+_Bug fixes_
+
+- Fixed `gcp_kubernetes_cluster` and `gcp_kubernetes_node_pool` tables always using application default credentials instead of user configured credentials. ([#420](https://github.com/turbot/steampipe-plugin-gcp/pull/420))
+
 ## v0.31.0 [2022-12-06]
 
 _Enhancements_
