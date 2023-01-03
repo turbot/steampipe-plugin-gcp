@@ -26,6 +26,11 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 		},
 		Columns: []*plugin.Column{
 			{
+				Name:        "id",
+				Description: "Unique id for the cluster.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "name",
 				Description: "The name of this cluster.",
 				Type:        proto.ColumnType_STRING,

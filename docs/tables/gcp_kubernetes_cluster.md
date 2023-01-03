@@ -8,6 +8,7 @@ A cluster is the foundation of Google Kubernetes Engine (GKE): the Kubernetes ob
 
 ```sql
 select
+  id,
   name,
   location_type,
   status,
