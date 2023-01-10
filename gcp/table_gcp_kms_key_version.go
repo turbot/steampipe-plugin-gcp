@@ -118,7 +118,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(kmsKeyVersionTurbotData, "ResourceName"),
+				Transform:   transform.FromP(kmsKeyVersionTurbotData, "KeyVersionName"),
 			},
 			{
 				Name:        "akas",
@@ -261,15 +261,15 @@ func kmsKeyVersionTurbotData(_ context.Context, d *transform.TransformData) (int
 	project := strings.Split(key.Name, "/")[1]
 	location := strings.Split(key.Name, "/")[3]
 	key_ring_name := strings.Split(key.Name, "/")[5]
-	resource_name := strings.Split(key.Name, "/")[7]
+	key_name := strings.Split(key.Name, "/")[7]
 	crypto_key_version := strings.Split(key.Name, "/")[9]
 
 	turbotData := map[string]interface{}{
 		"Project":          project,
 		"Location":         location,
 		"KeyRing":          key_ring_name,
-		"KeyName":          resource_name,
-		"ResourceName":     resource_name + "/" + crypto_key_version,
+		"KeyName":          key_name,
+		"KeyVersionName":   key_name + "/" + crypto_key_version,
 		"CryptoKeyVersion": crypto_key_version,
 		"Akas":             []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
