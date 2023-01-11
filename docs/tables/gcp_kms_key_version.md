@@ -8,8 +8,9 @@ In Cloud KMS, the cryptographic key material that you use to encrypt, decrypt, s
 
 ```sql
 select
-  name,
+  key_name,
   crypto_key_version,
+  title,
   state
 from
   gcp_kms_key_version
@@ -21,7 +22,7 @@ where
 
 ```sql
 select
-  name,
+  key_name,
   create_time,
   crypto_key_version,
   state
@@ -38,7 +39,7 @@ order by
 
 ```sql
 select
-  name,
+  key_name,
   create_time,
   crypto_key_version,
   algorithm
@@ -54,7 +55,7 @@ order by
 
 ```sql
 select
-  name,
+  key_name,
   max(crypto_key_version) crypto_key_version,
   state
 from
@@ -62,6 +63,6 @@ from
 where
   state like 'DISABLED'
 group by
-  name,
+  key_name,
   state;
 ```

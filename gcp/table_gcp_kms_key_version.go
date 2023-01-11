@@ -20,7 +20,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 		Name:        "gcp_kms_key_version",
 		Description: "GCP KMS Key Version",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"name", "key_ring_name", "location", "crypto_key_version"}),
+			KeyColumns: plugin.AllColumns([]string{"key_name", "key_ring_name", "location", "crypto_key_version"}),
 			Hydrate:    getKeyVersionDetail,
 		},
 		List: &plugin.ListConfig{
@@ -31,10 +31,10 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildLocationList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "name",
+				Name:        "key_name",
 				Description: "The resource name for the CryptoKeyVersion.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(kmsKeyVersionTurbotData, "ResourceName"),
+				Transform:   transform.FromP(kmsKeyVersionTurbotData, "KeyName"),
 			},
 			{
 				Name:        "crypto_key_version",
@@ -118,7 +118,7 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(kmsKeyVersionTurbotData, "ResourceName"),
+				Transform:   transform.FromP(kmsKeyVersionTurbotData, "KeyVersionName"),
 			},
 			{
 				Name:        "akas",
@@ -239,7 +239,7 @@ func getKeyVersionDetail(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.KeyColumnQuals["key_name"].GetStringValue()
 	location := d.KeyColumnQuals["location"].GetStringValue()
 	ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
 	version := d.KeyColumnQuals["crypto_key_version"].GetInt64Value()
@@ -261,14 +261,15 @@ func kmsKeyVersionTurbotData(_ context.Context, d *transform.TransformData) (int
 	project := strings.Split(key.Name, "/")[1]
 	location := strings.Split(key.Name, "/")[3]
 	key_ring_name := strings.Split(key.Name, "/")[5]
-	resource_name := strings.Split(key.Name, "/")[7]
+	key_name := strings.Split(key.Name, "/")[7]
 	crypto_key_version := strings.Split(key.Name, "/")[9]
 
 	turbotData := map[string]interface{}{
 		"Project":          project,
 		"Location":         location,
 		"KeyRing":          key_ring_name,
-		"ResourceName":     resource_name,
+		"KeyName":          key_name,
+		"KeyVersionName":   key_name + "/" + crypto_key_version,
 		"CryptoKeyVersion": crypto_key_version,
 		"Akas":             []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
