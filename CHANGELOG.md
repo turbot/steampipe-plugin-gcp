@@ -2,7 +2,7 @@
 
 _Breaking changes_
 
-- Renamed column `name` to `key_name` in `gcp_kms_key_version` table, since, the column returned the associated KMS key name instead of the KMS crypto key version. ([#424](https://github.com/turbot/steampipe-plugin-gcp/pull/424))
+- Renamed column `name` to `key_name` in `gcp_kms_key_version` table to reflect that it displays the name of the KMS key rather than the name of the crypto key version. ([#424](https://github.com/turbot/steampipe-plugin-gcp/pull/424))
 
 _Enhancements_
 
