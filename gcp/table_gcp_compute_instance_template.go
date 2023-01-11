@@ -33,7 +33,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "A unique identifier for this instance template. The server defines this identifier.",
-				Type:        proto.ColumnType_DOUBLE,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "creation_timestamp",
