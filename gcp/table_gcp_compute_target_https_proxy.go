@@ -38,7 +38,7 @@ func tableGcpComputeTargetHttpsProxy(ctx context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "A server-defined unique identifier for the resource.",
-				Type:        proto.ColumnType_DOUBLE,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "creation_timestamp",

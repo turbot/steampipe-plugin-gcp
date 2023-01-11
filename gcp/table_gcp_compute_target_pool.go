@@ -37,7 +37,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "The unique identifier for the resource.",
-				Type:        proto.ColumnType_DOUBLE,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "description",
