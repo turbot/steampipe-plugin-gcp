@@ -1,3 +1,18 @@
+## v0.32.0 [2023-01-11]
+
+_Breaking changes_
+
+- Renamed column `name` to `key_name` in `gcp_kms_key_version` table, since, the column returned the associated KMS key name instead of the KMS crypto key version. ([#424](https://github.com/turbot/steampipe-plugin-gcp/pull/424))
+
+_Enhancements_
+
+- Added column `id` to `gcp_kubernetes_cluster` table. ([#422](https://github.com/turbot/steampipe-plugin-gcp/pull/422))
+
+_Bug fixes_
+
+- Fixed the `id` column in `gcp_compute_instance_template`, `gcp_compute_network`, `gcp_compute_target_https_proxy` and `gcp_compute_target_pool` tables to be of `INT` datatype instead of `DOUBLE`. ([#426](https://github.com/turbot/steampipe-plugin-gcp/pull/426))
+- Fixed the `title` column of `gcp_kms_key_version` table to return the KMS crypto key version appended to the KMS key name (for e.g. `my-key-name/1`) instead of returning only the key name (`my-key-name`). ([#424](https://github.com/turbot/steampipe-plugin-gcp/pull/424))
+
 ## v0.31.1 [2022-12-08]
 
 _Bug fixes_
