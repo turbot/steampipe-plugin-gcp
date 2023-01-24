@@ -20,6 +20,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name:             pluginName,
 		DefaultTransform: transform.FromCamel(),
+		DefaultGetConfig: &plugin.GetConfig{
+			ShouldIgnoreError: isIgnorableError([]string{"404", "400"}),
+		},
 		// Default ignore config for the plugin
 		DefaultIgnoreConfig: &plugin.IgnoreConfig{
 			ShouldIgnoreErrorFunc: shouldIgnoreErrorPluginDefault(),
