@@ -23,8 +23,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNodeGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeNodeGroups,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeNodeGroups,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},

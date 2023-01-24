@@ -22,8 +22,7 @@ func tableGcpComputeHaVpnGateway(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeHaVpnGateway,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: 					 listComputeHaVpnGateways,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeHaVpnGateways,
 		},
 		Columns: []*plugin.Column{
 			{

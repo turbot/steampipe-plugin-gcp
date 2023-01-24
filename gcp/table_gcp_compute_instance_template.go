@@ -21,8 +21,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeInstanceTemplate,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeInstanceTemplate,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeInstanceTemplate,
 		},
 		Columns: []*plugin.Column{
 			{

@@ -24,8 +24,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 			Hydrate:    getIamRole,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listIamRoles,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listIamRoles,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "is_gcp_managed", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},

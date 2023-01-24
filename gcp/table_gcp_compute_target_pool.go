@@ -21,8 +21,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetPool,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeTargetPools,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeTargetPools,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "session_affinity", Require: plugin.Optional, Operators: []string{"<>", "="}},

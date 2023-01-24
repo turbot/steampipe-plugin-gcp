@@ -16,10 +16,9 @@ func tableGcpComputeInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin
 		Name:        "gcp_compute_instance_metric_cpu_utilization_daily",
 		Description: "GCP Compute Instance Metrics - CPU Utilization (Daily)",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listComputeInstances,
-			Hydrate:           listComputeInstanceMetricCpuUtilizationDaily,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
+			ParentHydrate: listComputeInstances,
+			Hydrate:       listComputeInstanceMetricCpuUtilizationDaily,
+			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

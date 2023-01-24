@@ -20,8 +20,7 @@ func tableGcpComputeAutoscaler(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeAutoscaler,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeAutoscaler,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeAutoscaler,
 		},
 		Columns: []*plugin.Column{
 			{

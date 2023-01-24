@@ -21,8 +21,7 @@ func tableDnsPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listDnsPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listDnsPolicies,
 		},
 		Columns: []*plugin.Column{
 			{

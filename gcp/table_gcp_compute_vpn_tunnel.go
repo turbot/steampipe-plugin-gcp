@@ -23,8 +23,7 @@ func tableGcpComputeVpnTunnel(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeVpnTunnel,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeVpnTunnels,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeVpnTunnels,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "vpn_gateway", Require: plugin.Optional, Operators: []string{"<>", "="}},

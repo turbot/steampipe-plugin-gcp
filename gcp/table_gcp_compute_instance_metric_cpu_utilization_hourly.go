@@ -16,10 +16,9 @@ func tableGcpComputeInstanceMetricCpuUtilizationHourly(_ context.Context) *plugi
 		Name:        "gcp_compute_instance_metric_cpu_utilization_hourly",
 		Description: "GCP Compute Instance Metrics - CPU Utilization (Hourly)",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listComputeInstances,
-			Hydrate:           listComputeInstanceMetricCpuUtilizationHourly,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
+			ParentHydrate: listComputeInstances,
+			Hydrate:       listComputeInstanceMetricCpuUtilizationHourly,
+			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

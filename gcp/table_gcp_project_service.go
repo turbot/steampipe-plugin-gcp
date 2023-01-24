@@ -20,11 +20,10 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("name"),
 			Hydrate:           getGcpProjectService,
-			ShouldIgnoreError: isIgnorableError([]string{"404", "403"}),
+			ShouldIgnoreError: isIgnorableError([]string{"404"}),
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpProjectServices,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpProjectServices,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "state", Require: plugin.Optional, Operators: []string{"<>", "="}},

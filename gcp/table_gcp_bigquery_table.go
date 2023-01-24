@@ -22,9 +22,8 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigqueryTable,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate:     listBigQueryDatasets,
-			Hydrate:           listBigqueryTables,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			ParentHydrate: listBigQueryDatasets,
+			Hydrate:       listBigqueryTables,
 		},
 		Columns: []*plugin.Column{
 			{

@@ -16,9 +16,8 @@ func tableGcpSQLDatabaseInstanceMetricConnections(_ context.Context) *plugin.Tab
 		Name:        "gcp_sql_database_instance_metric_connections",
 		Description: "GCP SQL Database Instance Metrics Connections",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listSQLDatabaseInstances,
-			Hydrate:           listSQLDatabaseInstanceMetricConnections,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			ParentHydrate: listSQLDatabaseInstances,
+			Hydrate:       listSQLDatabaseInstanceMetricConnections,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

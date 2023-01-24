@@ -20,8 +20,7 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeSnapshots,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeSnapshots,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},

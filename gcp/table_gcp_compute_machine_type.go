@@ -22,8 +22,7 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeMachineType,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeMachineTypes,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeMachineTypes,
 		},
 		Columns: []*plugin.Column{
 			{

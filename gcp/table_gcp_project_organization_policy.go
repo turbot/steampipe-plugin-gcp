@@ -22,8 +22,7 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getProjectOrganizationPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listProjectOrganizationPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listProjectOrganizationPolicies,
 		},
 		Columns: []*plugin.Column{
 			{

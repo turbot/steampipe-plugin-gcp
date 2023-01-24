@@ -17,8 +17,7 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 		Name:        "gcp_project",
 		Description: "GCP Project",
 		List: &plugin.ListConfig{
-			Hydrate:           listGCPProjects,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGCPProjects,
 		},
 		Columns: []*plugin.Column{
 			{

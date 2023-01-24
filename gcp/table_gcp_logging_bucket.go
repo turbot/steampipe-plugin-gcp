@@ -23,8 +23,7 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 			Hydrate:    getLoggingBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listLoggingBuckets,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listLoggingBuckets,
 		},
 		Columns: []*plugin.Column{
 			{
