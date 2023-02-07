@@ -106,21 +106,20 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	//getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	//projectId, err := getProjectCached(ctx, d, h)
+	//if err != nil {
+	//	return nil, err
+	//}
+	// project := projectId.(string)
+
+	resp, err := service.Projects.List().Do()
 	if err != nil {
 		return nil, err
 	}
-	project := projectId.(string)
-
-	resp, err := service.Projects.List().Filter("id=" + project).Do()
 	for _, project := range resp.Projects {
 		d.StreamListItem(ctx, project)
 	}
-	if err != nil {
-		return nil, err
-	}
-
 	return nil, nil
 }
 
@@ -159,6 +158,9 @@ func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, 
 	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + project + "/accessApprovalSettings").Do()
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
+		if strings.Contains(err.Error(), "403") {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("gcp_project.getProjectAccessApprovalSettings", "api_err", err)
