@@ -89,7 +89,8 @@ connection "gcp" {
 
   # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
   # By default, the common not found error codes are ignored and will still be ignored even if this argument is not set.
-  #ignore_error_codes = ["400", "401", "403"]
+  # Refer https://cloud.google.com/resource-manager/docs/core_errors#Global_Errors for more information on GCP error codes
+  #ignore_error_codes = ["401", "403"]
 }
 ```
 
