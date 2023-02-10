@@ -23,8 +23,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeBackendService,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeBackendServices,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeBackendServices,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "load_balancing_scheme", Require: plugin.Optional, Operators: []string{"<>", "="}},

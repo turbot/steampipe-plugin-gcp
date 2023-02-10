@@ -22,9 +22,8 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 			Hydrate:    getKeyDetail,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listKeyDetails,
-			ParentHydrate:     listKeyRingDetails,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate:       listKeyDetails,
+			ParentHydrate: listKeyRingDetails,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},

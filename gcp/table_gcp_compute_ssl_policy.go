@@ -23,8 +23,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSslPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeSslPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeSslPolicies,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "min_tls_version", Require: plugin.Optional, Operators: []string{"<>", "="}},

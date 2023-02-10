@@ -13,8 +13,7 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_project_metadata",
 		Description: "GCP Compute Project Metadata",
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeProjectMetadata,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeProjectMetadata,
 		},
 		Columns: []*plugin.Column{
 			{

@@ -22,8 +22,7 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpServiceAccount,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpServiceAccounts,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpServiceAccounts,
 		},
 		Columns: []*plugin.Column{
 			{

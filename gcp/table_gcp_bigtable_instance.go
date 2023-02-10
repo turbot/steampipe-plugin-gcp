@@ -22,8 +22,7 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 			Hydrate:    getBigtableInstance,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listBigtableInstances,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listBigtableInstances,
 		},
 		Columns: []*plugin.Column{
 			{

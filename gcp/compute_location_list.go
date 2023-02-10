@@ -12,11 +12,9 @@ import (
 // 	}
 // }
 
-
 // BuildregionList :: return a list of matrix items, one per region specified
 // https://cloud.google.com/dataproc/docs/concepts/regional-endpoints
 func BuildComputeLocationList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
-
 
 	// have we already created and cached the locations?
 	locationCacheKey := "Compute"

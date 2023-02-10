@@ -21,8 +21,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSubnetwork,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeSubnetworks,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeSubnetworks,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "state", Require: plugin.Optional, Operators: []string{"<>", "="}},

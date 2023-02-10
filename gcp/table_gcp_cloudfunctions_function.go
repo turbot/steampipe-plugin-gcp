@@ -22,8 +22,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 			Hydrate:    getCloudFunction,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listCloudFunctions,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listCloudFunctions,
 		},
 		Columns: []*plugin.Column{
 			{

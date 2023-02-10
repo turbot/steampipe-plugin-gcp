@@ -26,9 +26,8 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 			Hydrate:    getDnsRecordSet,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listDnsRecordSets,
-			ParentHydrate:     listDnsManagedZones,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate:       listDnsRecordSets,
+			ParentHydrate: listDnsManagedZones,
 		},
 		Columns: []*plugin.Column{
 			{

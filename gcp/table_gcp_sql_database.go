@@ -27,9 +27,8 @@ func tableGcpSQLDatabase(ctx context.Context) *plugin.Table {
 			Hydrate:    getSQLDatabase,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listSQLDatabases,
-			ParentHydrate:     listSQLDatabaseInstances,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate:       listSQLDatabases,
+			ParentHydrate: listSQLDatabaseInstances,
 		},
 		Columns: []*plugin.Column{
 			{

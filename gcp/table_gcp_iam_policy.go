@@ -18,8 +18,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		Name:        "gcp_iam_policy",
 		Description: "GCP IAM Policy",
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpIamPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpIamPolicies,
 		},
 		Columns: []*plugin.Column{
 			{

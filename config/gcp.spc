@@ -19,4 +19,8 @@ connection "gcp" {
   # `impersonate_service_account` (optional) - The GCP service account (string) which should be impersonated.
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
+
+  # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
+  # By default, common not found error codes are ignored and will still be ignored even if this argument is not set.
+  #ignore_error_codes = ["400", "401", "403"]
 }

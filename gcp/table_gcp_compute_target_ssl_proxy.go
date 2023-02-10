@@ -23,8 +23,7 @@ func tableGcpComputeTargetSslProxy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetSslProxy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeTargetSslProxies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeTargetSslProxies,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "proxy_header", Require: plugin.Optional, Operators: []string{"<>", "="}},

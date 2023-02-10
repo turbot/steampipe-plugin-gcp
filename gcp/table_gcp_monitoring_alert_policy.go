@@ -20,8 +20,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 			Hydrate:    getMonitoringAlertPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listMonitoringAlertPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listMonitoringAlertPolicies,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"<>", "="}},

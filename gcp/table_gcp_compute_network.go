@@ -20,8 +20,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNetwork,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeNetworks,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeNetworks,
 			KeyColumns: plugin.KeyColumnSlice{
 				// Boolean columns
 				{Name: "auto_create_subnetworks", Require: plugin.Optional, Operators: []string{"<>", "="}},

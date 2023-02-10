@@ -24,9 +24,8 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 			Hydrate:    getKeyVersionDetail,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listKeyVersionDetails,
-			ParentHydrate:     listKeyRingDetails,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate:       listKeyVersionDetails,
+			ParentHydrate: listKeyRingDetails,
 		},
 		GetMatrixItemFunc: BuildLocationList,
 		Columns: []*plugin.Column{

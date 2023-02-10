@@ -17,10 +17,9 @@ func tableGcpComputeDiskMetricReadOpsDaily(_ context.Context) *plugin.Table {
 		Name:        "gcp_compute_disk_metric_read_ops_daily",
 		Description: "GCP Compute Disk Metrics - Read Ops (Daily)",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listComputeDisk,
-			Hydrate:           listComputeDiskMetricReadOpsDaily,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
+			ParentHydrate: listComputeDisk,
+			Hydrate:       listComputeDiskMetricReadOpsDaily,
+			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

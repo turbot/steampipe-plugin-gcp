@@ -21,8 +21,7 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubSubscription,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listPubSubSubscription,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listPubSubSubscription,
 		},
 		Columns: []*plugin.Column{
 			{

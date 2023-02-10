@@ -22,8 +22,7 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpLoggingExclusion,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpLoggingExclusions,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpLoggingExclusions,
 		},
 		Columns: []*plugin.Column{
 			{

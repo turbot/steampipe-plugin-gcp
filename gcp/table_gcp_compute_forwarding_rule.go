@@ -23,8 +23,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeForwardingRule,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeForwardingRules,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeForwardingRules,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "ip_protocol", Require: plugin.Optional, Operators: []string{"<>", "="}},

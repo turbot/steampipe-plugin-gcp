@@ -21,8 +21,7 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubTopic,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listPubSubTopics,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listPubSubTopics,
 		},
 		Columns: []*plugin.Column{
 			{

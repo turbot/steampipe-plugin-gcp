@@ -135,7 +135,7 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil, err
 	}
 
-var filters []string
+	var filters []string
 	if d.KeyColumnQualString("cluster_name") != "" {
 		filters = append(filters, fmt.Sprint("clusterName = ", d.KeyColumnQualString("cluster_name")))
 	}

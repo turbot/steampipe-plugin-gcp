@@ -23,8 +23,7 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeNodeTemplate,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeNodeTemplates,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeNodeTemplates,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "cpu_overcommit_type", Require: plugin.Optional, Operators: []string{"<>", "="}},

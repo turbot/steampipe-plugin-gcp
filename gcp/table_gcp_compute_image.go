@@ -26,7 +26,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate:     listComputeImageProjects,
 			Hydrate:           listImagesForProject,
-			ShouldIgnoreError: isIgnorableError([]string{"403", "404"}),
+			ShouldIgnoreError: isIgnorableError([]string{"404"}),
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "deprecation_state", Require: plugin.Optional},
 				{Name: "family", Require: plugin.Optional},
