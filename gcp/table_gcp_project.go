@@ -96,8 +96,6 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listGCPProjects")
-
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
@@ -111,13 +109,15 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		return nil, err
 	}
 	project := projectId.(string)
+	plugin.Logger(ctx).Debug("gcp_project.listGCPProjects", "project_id", project)
 
 	resp, err := service.Projects.List().Filter("id=" + project).Do()
-	for _, project := range resp.Projects {
-		d.StreamListItem(ctx, project)
-	}
 	if err != nil {
 		return nil, err
+	}
+
+	for _, project := range resp.Projects {
+		d.StreamListItem(ctx, project)
 	}
 
 	return nil, nil
@@ -126,8 +126,6 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 //// HYDRATE FUNCTIONS
 
 func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getProjectAka")
-
 	// Get project details
 	project := h.Item.(*cloudresourcemanager.Project)
 
@@ -138,8 +136,6 @@ func getProjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 }
 
 func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getProjectAccessApprovalSettings")
-
 	// Create Service Connection
 	service, err := AccessApprovalService(ctx, d)
 	if err != nil {

@@ -6,7 +6,7 @@ connection "gcp" {
   # the project will be determined in the following order:
   #   - The standard gcloud SDK `CLOUDSDK_CORE_PROJECT` environment variable, if set; otherwise
   #   - The `GCP_PROJECT` environment variable, if set (this is deprecated); otherwise
-  #   - The current active project project, as returned by the `gcloud config get-value project` command
+  #   - The current active project, as returned by the `gcloud config get-value project` command
   #project = "YOUR_PROJECT_ID"
 
   # `credentials` (optional) - Either the path to a JSON credential file that contains Google application credentials,
