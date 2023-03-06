@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/container/v1"
 )
 
@@ -193,9 +193,9 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	location := d.KeyColumnQuals["location"].GetStringValue()
-	clusterName := d.KeyColumnQuals["cluster_name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	location := d.EqualsQuals["location"].GetStringValue()
+	clusterName := d.EqualsQuals["cluster_name"].GetStringValue()
 
 	// Empty check
 	if name == "" || location == "" || clusterName == "" {

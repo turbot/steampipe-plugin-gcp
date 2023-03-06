@@ -7,9 +7,9 @@ import (
 	"sync"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -206,7 +206,7 @@ func getCryptoKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plu
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -238,10 +238,10 @@ func getKeyVersionDetail(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["key_name"].GetStringValue()
-	location := d.KeyColumnQuals["location"].GetStringValue()
-	ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
-	version := d.KeyColumnQuals["crypto_key_version"].GetInt64Value()
+	name := d.EqualsQuals["key_name"].GetStringValue()
+	location := d.EqualsQuals["location"].GetStringValue()
+	ringName := d.EqualsQuals["key_ring_name"].GetStringValue()
+	version := d.EqualsQuals["crypto_key_version"].GetInt64Value()
 	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.
 		Get("projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name + "/cryptoKeyVersions/" + strconv.FormatInt(version, 10)).Do()
 	if err != nil {

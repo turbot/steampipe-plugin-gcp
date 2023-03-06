@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -174,9 +174,9 @@ func getDnsRecordSet(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	rrset_type := d.KeyColumnQuals["type"].GetStringValue()
-	managedZoneName := d.KeyColumnQuals["managedzone_name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	rrset_type := d.EqualsQuals["type"].GetStringValue()
+	managedZoneName := d.EqualsQuals["managedzone_name"].GetStringValue()
 
 	resp, err := service.ResourceRecordSets.List(project, managedZoneName).Name(name).Type(rrset_type).Do()
 	if err != nil {

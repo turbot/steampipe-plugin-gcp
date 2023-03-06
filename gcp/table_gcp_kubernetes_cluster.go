@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/container/v1"
 )
 
@@ -394,8 +394,8 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	location := d.KeyColumnQuals["location"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	location := d.EqualsQuals["location"].GetStringValue()
 
 	// Return nil, if no input provided
 	if name == "" || location == "" {

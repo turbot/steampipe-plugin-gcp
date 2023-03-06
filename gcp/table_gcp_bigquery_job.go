@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/bigquery/v2"
 )
 
@@ -275,7 +275,7 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -310,7 +310,7 @@ func getBigQueryJob(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		data := jobID(h.Item)
 		id = strings.Split(data, ".")[1]
 	} else {
-		id = d.KeyColumnQuals["job_id"].GetStringValue()
+		id = d.EqualsQuals["job_id"].GetStringValue()
 	}
 
 	// handle empty id in get call
