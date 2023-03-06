@@ -1,3 +1,9 @@
+## v0.33.1 [2023-03-06]
+
+_Bug fixes_
+
+- Fixed the plugin failing to detect when an active project is not set in the connection config, environment variables, or the gcloud CLI.
+
 ## v0.33.0 [2023-02-10]
 
 _What's new?_
