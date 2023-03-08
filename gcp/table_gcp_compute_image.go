@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
@@ -249,8 +249,8 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	qualProjects := []string{}
 
-	if d.KeyColumnQuals["source_project"] != nil {
-		value := d.KeyColumnQuals["source_project"]
+	if d.EqualsQuals["source_project"] != nil {
+		value := d.EqualsQuals["source_project"]
 		if value.GetStringValue() != "" {
 			qualProjects = []string{value.GetStringValue()}
 		} else if value.GetListValue() != nil {
@@ -287,7 +287,7 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 
 		// Check if context has been cancelled or if the limit has been hit (if specified)
 		// if there is a limit, it will return the number of rows required to reach this limit
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
 	}
@@ -310,7 +310,7 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		{"source_type", "sourceType", "string"},
 	}
 
-	filters := buildQueryFilter(filterQuals, d.KeyColumnQuals)
+	filters := buildQueryFilter(filterQuals, d.EqualsQuals)
 	filterString := ""
 	if len(filters) > 0 {
 		filterString = strings.Join(filters, " ")
@@ -334,7 +334,7 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				break
 			}
@@ -361,8 +361,8 @@ func getComputeImage(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		return nil, err
 	}
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	project := d.KeyColumnQuals["source_project"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	project := d.EqualsQuals["source_project"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/images/" into uint64

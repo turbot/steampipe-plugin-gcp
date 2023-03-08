@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/serviceusage/v1"
 )
@@ -83,8 +83,8 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	filterString := ""
-	if d.KeyColumnQuals["state"] != nil {
-		filterString = "state:" + d.KeyColumnQuals["state"].GetStringValue()
+	if d.EqualsQuals["state"] != nil {
+		filterString = "state:" + d.EqualsQuals["state"].GetStringValue()
 	}
 
 	// Max limit is set as per documentation
@@ -114,7 +114,7 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					return nil
 				}
@@ -146,7 +146,7 @@ func getGcpProjectService(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil, err
 	}
 	project := projectId.(string)
-	quals := d.KeyColumnQuals
+	quals := d.EqualsQuals
 	name := quals["name"].GetStringValue()
 	op, err := service.Services.Get("projects/" + project + "/services/" + name).Do()
 	if err != nil {

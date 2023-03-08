@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -173,7 +173,7 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -205,9 +205,9 @@ func getKeyDetail(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	location := d.KeyColumnQuals["location"].GetStringValue()
-	ringName := d.KeyColumnQuals["key_ring_name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	location := d.EqualsQuals["location"].GetStringValue()
+	ringName := d.EqualsQuals["key_ring_name"].GetStringValue()
 
 	resp, err := service.Projects.Locations.KeyRings.CryptoKeys.Get("projects/" + project + "/locations/" + location + "/keyRings/" + ringName + "/cryptoKeys/" + name).Do()
 	if err != nil {

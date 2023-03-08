@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/bigtableadmin/v2"
 )
@@ -152,7 +152,7 @@ func getBigtableInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 
 	resp, err := service.Projects.Instances.Get("projects/" + project + "/instances/" + name).Do()
 	if err != nil {

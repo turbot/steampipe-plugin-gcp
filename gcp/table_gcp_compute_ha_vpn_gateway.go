@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -168,7 +168,7 @@ func listComputeHaVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugi
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					return nil
 				}
@@ -196,7 +196,7 @@ func getComputeHaVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.
 	project := projectId.(string)
 
 	var vpnGateway compute.VpnGateway
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 	// Empty check
 	if name != "" {
 		return nil, nil
