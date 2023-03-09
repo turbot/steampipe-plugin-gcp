@@ -44,7 +44,7 @@ func BuildComputeLocationList(ctx context.Context, d *plugin.QueryData) []map[st
 	// validate location list
 	matrix := make([]map[string]interface{}, len(resp.Items))
 	for i, location := range resp.Items {
-		matrix[i] = map[string]interface{}{matrixKeyLocation: location}
+		matrix[i] = map[string]interface{}{matrixKeyLocation: location.Name}
 	}
 	d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
 	return matrix

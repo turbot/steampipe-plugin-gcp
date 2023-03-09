@@ -10,7 +10,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dataproc/v1"
 )
 
@@ -78,7 +77,8 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(dataprocClusterSelfLink),
+				Hydrate:     dataprocClusterSelfLink,
+				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns
@@ -98,7 +98,8 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpDataprocClusterTurbotData, "Akas"),
+				Hydrate:     gcpDataprocClusterTurbotData,
+				Transform:   transform.FromField("Akas"),
 			},
 
 			// Standard GCP columns
@@ -106,7 +107,8 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpDataprocClusterTurbotData, "Location"),
+				Hydrate:     gcpDataprocClusterTurbotData,
+				Transform:   transform.FromField("Location"),
 			},
 			{
 				Name:        "project",
@@ -122,10 +124,10 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 
 func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	// Create Service Connection
@@ -191,10 +193,10 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	clusterName := d.EqualsQuals["cluster_name"].GetStringValue()
@@ -229,16 +231,15 @@ func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 //// TRANSFORM FUNCTION
 
-func gcpDataprocClusterTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	cluster := d.HydrateItem.(*dataproc.Cluster)
-	param := d.Param.(string)
+func gcpDataprocClusterTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	cluster := h.Item.(*dataproc.Cluster)
 
 	project := cluster.ProjectId
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	turbotData := map[string]interface{}{
@@ -247,17 +248,17 @@ func gcpDataprocClusterTurbotData(ctx context.Context, d *transform.TransformDat
 		"Akas":     []string{"gcp://dataproc.googleapis.com/projects/" + project + "/regions/" + location + "/clusters/" + cluster.ClusterName},
 	}
 
-	return turbotData[param], nil
+	return turbotData, nil
 }
 
-func dataprocClusterSelfLink(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*dataproc.Cluster)
+func dataprocClusterSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*dataproc.Cluster)
 
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	selfLink := "https://dataproc.googleapis.com/v1/projects/" + data.ProjectId + "/regions/" + location + "/clusters/" + data.ClusterName

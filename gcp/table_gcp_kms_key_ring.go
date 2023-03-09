@@ -56,7 +56,8 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Akas"),
+				Hydrate: 		 gcpKmsKeyRingTurbotData,
+				Transform:   transform.FromField("Akas"),
 			},
 
 			// GCP standard columns
@@ -64,13 +65,15 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Location"),
+				Hydrate: 		 gcpKmsKeyRingTurbotData,
+				Transform:   transform.FromField("Location"),
 			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpKmsKeyRingTurbotData, "Project"),
+				Hydrate: 		 gcpKmsKeyRingTurbotData,
+				Transform:   transform.FromField("Project"),
 			},
 		},
 	}
@@ -81,10 +84,10 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	plugin.Logger(ctx).Trace("listKeyRingDetails")
 
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(string)
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	// Create Service Connection
@@ -137,11 +140,11 @@ func getKeyRingDetail(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	plugin.Logger(ctx).Trace("getKeyRingDetail")
 
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
-	if matrixLocation != nil {
-		location = matrixLocation.(string)
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
+	// Since, when the service API is disabled, matrixLocation value will be nil
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
-
 	// Create Service Connection
 	service, err := KMSService(ctx, d)
 	if err != nil {
@@ -192,9 +195,8 @@ func getKmsKeyRingIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 //// TRANSFORM FUNCTIONS
 
-func gcpKmsKeyRingTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	key := d.HydrateItem.(*cloudkms.KeyRing)
-	param := d.Param.(string)
+func gcpKmsKeyRingTurbotData(_ context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	key := h.Item.(*cloudkms.KeyRing)
 
 	data := strings.Split(key.Name, "/")
 
@@ -204,5 +206,5 @@ func gcpKmsKeyRingTurbotData(_ context.Context, d *transform.TransformData) (int
 		"Akas":     []string{"gcp://cloudkms.googleapis.com/" + key.Name},
 	}
 
-	return turbotData[param], nil
+	return turbotData, nil
 }
