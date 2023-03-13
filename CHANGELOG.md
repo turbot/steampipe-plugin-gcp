@@ -1,3 +1,9 @@
+## v0.34.0 [2023-03-13]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.2.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v520-2023-03-02) which includes fixes for query cache pending item mechanism and aggregator connections not working for dynamic tables. ([#438](https://github.com/turbot/steampipe-plugin-gcp/pull/438))
+
 ## v0.33.1 [2023-03-06]
 
 _Bug fixes_
