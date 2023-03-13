@@ -192,7 +192,7 @@ package gcp
 // 	}
 // 	project := projectData.Project
 
-// 	name := d.KeyColumnQuals["name"].GetStringValue()
+// 	name := d.EqualsQuals["name"].GetStringValue()
 
 // 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 // 	// trying to unmarshal "projects/project/global/routes/" into uint64

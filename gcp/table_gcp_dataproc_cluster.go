@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dataproc/v1"
 )
 
@@ -78,7 +77,8 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(dataprocClusterSelfLink),
+				Hydrate:     dataprocClusterSelfLink,
+				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns
@@ -98,7 +98,8 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpDataprocClusterTurbotData, "Akas"),
+				Hydrate:     gcpDataprocClusterTurbotData,
+				Transform:   transform.FromField("Akas"),
 			},
 
 			// Standard GCP columns
@@ -106,7 +107,8 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpDataprocClusterTurbotData, "Location"),
+				Hydrate:     gcpDataprocClusterTurbotData,
+				Transform:   transform.FromField("Location"),
 			},
 			{
 				Name:        "project",
@@ -122,10 +124,10 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 
 func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	// Create Service Connection
@@ -136,12 +138,12 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	var filters []string
-	if d.KeyColumnQualString("cluster_name") != "" {
-		filters = append(filters, fmt.Sprint("clusterName = ", d.KeyColumnQualString("cluster_name")))
+	if d.EqualsQualString("cluster_name") != "" {
+		filters = append(filters, fmt.Sprint("clusterName = ", d.EqualsQualString("cluster_name")))
 	}
 
-	if d.KeyColumnQualString("state") != "" {
-		filters = append(filters, fmt.Sprint("status.state = ", d.KeyColumnQualString("state")))
+	if d.EqualsQualString("state") != "" {
+		filters = append(filters, fmt.Sprint("status.state = ", d.EqualsQualString("state")))
 	}
 
 	filterString := ""
@@ -173,7 +175,7 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -191,13 +193,13 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
-	clusterName := d.KeyColumnQuals["cluster_name"].GetStringValue()
+	clusterName := d.EqualsQuals["cluster_name"].GetStringValue()
 
 	if len(clusterName) < 1 {
 		return nil, nil
@@ -229,16 +231,15 @@ func getDataprocCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 //// TRANSFORM FUNCTION
 
-func gcpDataprocClusterTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	cluster := d.HydrateItem.(*dataproc.Cluster)
-	param := d.Param.(string)
+func gcpDataprocClusterTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	cluster := h.Item.(*dataproc.Cluster)
 
 	project := cluster.ProjectId
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	turbotData := map[string]interface{}{
@@ -247,17 +248,17 @@ func gcpDataprocClusterTurbotData(ctx context.Context, d *transform.TransformDat
 		"Akas":     []string{"gcp://dataproc.googleapis.com/projects/" + project + "/regions/" + location + "/clusters/" + cluster.ClusterName},
 	}
 
-	return turbotData[param], nil
+	return turbotData, nil
 }
 
-func dataprocClusterSelfLink(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(*dataproc.Cluster)
+func dataprocClusterSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*dataproc.Cluster)
 
 	var location string
-	matrixLocation := plugin.GetMatrixItem(ctx)[matrixKeyLocation]
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != nil {
-		location = matrixLocation.(*compute.Region).Name
+	if matrixLocation != "" {
+		location = matrixLocation
 	}
 
 	selfLink := "https://dataproc.googleapis.com/v1/projects/" + data.ProjectId + "/regions/" + location + "/clusters/" + data.ClusterName

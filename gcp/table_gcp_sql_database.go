@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -169,8 +169,8 @@ func getSQLDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	instanceName := d.KeyColumnQuals["instance_name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	instanceName := d.EqualsQuals["instance_name"].GetStringValue()
 
 	// Return nil, if no input provided
 	if name == "" || instanceName == "" {

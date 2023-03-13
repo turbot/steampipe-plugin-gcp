@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -263,7 +263,7 @@ func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					return nil
 				}
@@ -298,7 +298,7 @@ func getComputeSubnetwork(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	project := projectId.(string)
 
 	var subnetwork compute.Subnetwork
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 
 	resp := service.Subnetworks.AggregatedList(project).Filter("name=" + name)
 	if err := resp.Pages(ctx, func(page *compute.SubnetworkAggregatedList) error {
