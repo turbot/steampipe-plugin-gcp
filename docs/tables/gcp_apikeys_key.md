@@ -71,20 +71,6 @@ where
   restrictions is not null;
 ```
 
-### Get ip restrictions associated with each key
-
-```sql
-select
-  uid,
-  display_name,
-  a as allowed_ip
-from
-  gcp_apikeys_key,
-  jsonb_array_elements_text(restrictions -> 'serverKeyRestrictions' -> 'allowedIps') as a
-where
-  restrictions is not null;
-```
-
 ### Get iOS app restrictions associated with each key
 
 ```sql

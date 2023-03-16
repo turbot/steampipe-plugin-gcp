@@ -16,7 +16,7 @@ import (
 func tableGcpApikeysKey(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_apikeys_key",
-		Description: "GCP Apikeys Key",
+		Description: "GCP API Keys Key",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getApikeysKey,
@@ -130,7 +130,7 @@ func listApikeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Create Service Connection
-	service, err := APIService(ctx, d)
+	service, err := APIKeysService(ctx, d)
 	if err != nil {
 		logger.Error("gcp_api_key.listApikeysKeys", "service_error", err)
 		return nil, err
@@ -184,7 +184,7 @@ func getApikeysKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	}
 
 	// Create Service Connection
-	service, err := APIService(ctx, d)
+	service, err := APIKeysService(ctx, d)
 	if err != nil {
 		logger.Error("gcp_api_key.getApikeysKey", "service_error", err)
 		return nil, err

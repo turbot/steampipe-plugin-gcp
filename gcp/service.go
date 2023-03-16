@@ -48,9 +48,9 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 	return svc, nil
 }
 
-func APIService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service, error) {
+func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service, error) {
 	// have we already created and cached the service?
-	serviceCacheKey := "APIService"
+	serviceCacheKey := "APIKeysService"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*apikeys.Service), nil
 	}
