@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -17,10 +17,9 @@ func tableGcpComputeDiskMetricWriteOpsHourly(_ context.Context) *plugin.Table {
 		Name:        "gcp_compute_disk_metric_write_ops_hourly",
 		Description: "GCP Compute Disk Metrics - Write Ops (Hourly)",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listComputeDisk,
-			Hydrate:           listComputeDiskMetricWriteOpsHourly,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
+			ParentHydrate: listComputeDisk,
+			Hydrate:       listComputeDiskMetricWriteOpsHourly,
+			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

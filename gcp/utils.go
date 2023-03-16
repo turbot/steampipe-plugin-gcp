@@ -11,9 +11,9 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 )
@@ -53,8 +53,6 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		projectData = cachedData.(*projectInfo)
 	} else {
-		// To set the config argument for the connection in a project
-		setSessionConfig(ctx, d.Connection)
 		projectData, err = activeProject(ctx, d)
 		if err != nil {
 			return nil, err
@@ -67,7 +65,7 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 
 func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, error) {
 	// have we already created and cached the session?
-	serviceCacheKey := "gcp_project_name"
+	serviceCacheKey := "gcp_project_id"
 
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*projectInfo), nil
@@ -78,6 +76,10 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 	gcpProject := os.Getenv("GCP_PROJECT")
 	sdkCoreProject := os.Getenv("CLOUDSDK_CORE_PROJECT")
 	projectFromConfig := getProjectFromConfig(d.Connection)
+
+	plugin.Logger(ctx).Debug("activeProject", "gcp_project_env_var", gcpProject)
+	plugin.Logger(ctx).Debug("activeProject", "cloudsdk_core_project_env_var", sdkCoreProject)
+	plugin.Logger(ctx).Debug("activeProject", "config_project", projectFromConfig)
 
 	if projectFromConfig != "" {
 		projectData = &projectInfo{
@@ -92,19 +94,25 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 			Project: gcpProject,
 		}
 	} else {
-		projectData, err = getProjectFromCLI()
+		projectData, err = getProjectFromCLI(ctx)
 		if err != nil {
-			panic("\n\n'project' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+			return nil, err
 		}
 	}
 
+	plugin.Logger(ctx).Debug("activeProject", "project_data", projectData)
+
+	// No active project is set
+	if projectData == nil {
+		return nil, fmt.Errorf("an active project must be set")
+	}
+
 	d.ConnectionManager.Cache.Set(serviceCacheKey, projectData)
-	plugin.Logger(ctx).Info("activeProject", "Project", projectData.Project)
 
 	return projectData, nil
 }
 
-func getProjectFromCLI() (*projectInfo, error) {
+func getProjectFromCLI(ctx context.Context) (*projectInfo, error) {
 	// The default install paths are used to find Google cloud CLI.
 	// This is for security, so that any path in the calling program's Path environment is not used to execute Google Cloud CLI.
 	// https://stackoverflow.com/questions/62949119/how-to-use-google-cloud-shell-with-the-new-windows-terminal
@@ -131,7 +139,15 @@ func getProjectFromCLI() (*projectInfo, error) {
 		return nil, fmt.Errorf("invoking gcloud CLI failed with the following error: %v", stderr)
 	}
 
+	plugin.Logger(ctx).Debug("getProjectFromCLI", "cmd_output", output)
+
+	// Output will be '[]' if no project is set
+	if len(output) < 1 {
+		return nil, nil
+	}
+
 	project := types.ToString(output)
+	plugin.Logger(ctx).Debug("getProjectFromCLI", "project", project)
 
 	return &projectInfo{
 		Project: project,

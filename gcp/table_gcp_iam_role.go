@@ -6,11 +6,11 @@ import (
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/iam/v1"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 //// TABLE DEFINITION
@@ -24,8 +24,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 			Hydrate:    getIamRole,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listIamRoles,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listIamRoles,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "is_gcp_managed", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
@@ -180,7 +179,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					break
 				}
@@ -201,7 +200,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					break
 				}
@@ -225,7 +224,7 @@ func getIamRole(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	if h.Item != nil {
 		name = h.Item.(*roleInfo).Role.Name
 	} else {
-		quals := d.KeyColumnQuals
+		quals := d.EqualsQuals
 		name = quals["name"].GetStringValue()
 	}
 

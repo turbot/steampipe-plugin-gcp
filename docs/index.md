@@ -6,7 +6,7 @@ brand_color: "#ea4335"
 display_name: "GCP"
 name: "gcp"
 description: "Steampipe plugin for querying buckets, instances, functions and more from GCP."
-og_description: Query GCP with SQL! Open source CLI. No DB required. 
+og_description: Query GCP with SQL! Open source CLI. No DB required.
 og_image: "/images/plugins/turbot/gcp-social-graphic.png"
 ---
 
@@ -73,7 +73,7 @@ connection "gcp" {
   # the project will be determined in the following order:
   #   - The standard gcloud SDK `CLOUDSDK_CORE_PROJECT` environment variable, if set; otherwise
   #   - The `GCP_PROJECT` environment variable, if set (this is deprecated); otherwise
-  #   - The current active project project, as returned by the `gcloud config get-value project` command
+  #   - The current active project, as returned by the `gcloud config get-value project` command
   #project = "YOUR_PROJECT_ID"
 
   # `credentials` (optional) - Either the path to a JSON credential file that contains Google application credentials,
@@ -86,6 +86,11 @@ connection "gcp" {
   # `impersonate_service_account` (optional) - The GCP service account (string) which should be impersonated.
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
+
+  # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
+  # By default, the common not found error codes are ignored and will still be ignored even if this argument is not set.
+  # Refer https://cloud.google.com/resource-manager/docs/core_errors#Global_Errors for more information on GCP error codes
+  #ignore_error_codes = ["401", "403"]
 }
 ```
 

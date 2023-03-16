@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -17,8 +17,7 @@ func tableGcpComputeZone(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_zone",
 		Description: "GCP Compute Zone",
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeZones,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeZones,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
@@ -155,7 +154,7 @@ func listComputeZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					return nil
 				}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/container/v1"
 )
 
@@ -17,9 +17,8 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 		Name:        "gcp_kubernetes_node_pool",
 		Description: "GCP Kubernetes Node Pool",
 		List: &plugin.ListConfig{
-			Hydrate:           listKubernetesNodePools,
-			ParentHydrate:     listKubernetesClusters,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate:       listKubernetesNodePools,
+			ParentHydrate: listKubernetesClusters,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location", "cluster_name"}),
@@ -194,9 +193,9 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	location := d.KeyColumnQuals["location"].GetStringValue()
-	clusterName := d.KeyColumnQuals["cluster_name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	location := d.EqualsQuals["location"].GetStringValue()
+	clusterName := d.EqualsQuals["cluster_name"].GetStringValue()
 
 	// Empty check
 	if name == "" || location == "" || clusterName == "" {

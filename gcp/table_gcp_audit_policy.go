@@ -3,9 +3,9 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -17,8 +17,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 		Name:        "gcp_audit_policy",
 		Description: "GCP Audit Policy",
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpAuditPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpAuditPolicies,
 		},
 		Columns: []*plugin.Column{
 			{

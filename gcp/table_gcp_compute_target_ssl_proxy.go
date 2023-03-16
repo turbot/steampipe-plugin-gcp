@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -23,8 +23,7 @@ func tableGcpComputeTargetSslProxy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeTargetSslProxy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeTargetSslProxies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeTargetSslProxies,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "proxy_header", Require: plugin.Optional, Operators: []string{"<>", "="}},
@@ -125,8 +124,8 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	filterString := ""
-	if d.KeyColumnQuals["proxy_header"] != nil {
-		filterString = "proxyHeader=" + d.KeyColumnQuals["proxy_header"].GetStringValue()
+	if d.EqualsQuals["proxy_header"] != nil {
+		filterString = "proxyHeader=" + d.EqualsQuals["proxy_header"].GetStringValue()
 	}
 
 	// Max limit is set as per documentation
@@ -154,7 +153,7 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -185,7 +184,7 @@ func getComputeTargetSslProxy(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 	project := projectId.(string)
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 
 	// Error: json: invalid use of ,string struct tag, trying to unmarshal "projects/<project_name>/global/targetSslProxies/" into uint64
 	if len(name) < 1 {

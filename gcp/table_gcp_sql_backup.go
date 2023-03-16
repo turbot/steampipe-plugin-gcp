@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -23,9 +23,8 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 			Hydrate:    getSQLBackup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listSQLBackups,
-			ParentHydrate:     listSQLDatabaseInstances,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate:       listSQLBackups,
+			ParentHydrate: listSQLDatabaseInstances,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -171,7 +170,7 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -203,8 +202,8 @@ func getSQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 	project := projectId.(string)
 
-	id := d.KeyColumnQuals["id"].GetInt64Value()
-	instanceName := d.KeyColumnQuals["instance_name"].GetStringValue()
+	id := d.EqualsQuals["id"].GetInt64Value()
+	instanceName := d.EqualsQuals["instance_name"].GetStringValue()
 
 	resp, err := service.BackupRuns.Get(project, instanceName, id).Do()
 	if err != nil {

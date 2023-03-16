@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -21,9 +21,8 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpServiceAccountKey,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate:     listGcpServiceAccounts,
-			Hydrate:           listGcpServiceAccountKeys,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			ParentHydrate: listGcpServiceAccounts,
+			Hydrate:       listGcpServiceAccountKeys,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -153,8 +152,8 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
-	serviceAccountName := d.KeyColumnQuals["service_account_name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
+	serviceAccountName := d.EqualsQuals["service_account_name"].GetStringValue()
 	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
 
 	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do()

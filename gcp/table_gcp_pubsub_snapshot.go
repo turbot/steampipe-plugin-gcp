@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/pubsub/v1"
 )
@@ -21,8 +21,7 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 			Hydrate:    getPubSubSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listPubSubSnapshots,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listPubSubSnapshots,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -138,7 +137,7 @@ func listPubSubSnapshots(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -169,7 +168,7 @@ func getPubSubSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 	project := projectId.(string)
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 
 	req, err := service.Projects.Snapshots.Get("projects/" + project + "/snapshots/" + name).Do()
 	if err != nil {

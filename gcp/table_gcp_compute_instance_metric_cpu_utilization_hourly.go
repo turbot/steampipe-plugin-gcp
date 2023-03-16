@@ -3,9 +3,9 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -16,10 +16,9 @@ func tableGcpComputeInstanceMetricCpuUtilizationHourly(_ context.Context) *plugi
 		Name:        "gcp_compute_instance_metric_cpu_utilization_hourly",
 		Description: "GCP Compute Instance Metrics - CPU Utilization (Hourly)",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listComputeInstances,
-			Hydrate:           listComputeInstanceMetricCpuUtilizationHourly,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
-			KeyColumns:        plugin.OptionalColumns([]string{"name"}),
+			ParentHydrate: listComputeInstances,
+			Hydrate:       listComputeInstanceMetricCpuUtilizationHourly,
+			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

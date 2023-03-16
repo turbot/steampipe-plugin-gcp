@@ -5,9 +5,9 @@ import (
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -20,8 +20,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			Hydrate:    getGcpStorageBucket,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpStorageBuckets,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpStorageBuckets,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -277,7 +276,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				break
 			}
@@ -292,7 +291,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// project := projectName
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 
 	// Create Service Connection
 	service, err := StorageService(ctx, d)

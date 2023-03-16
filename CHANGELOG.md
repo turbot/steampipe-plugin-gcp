@@ -1,3 +1,25 @@
+## v0.34.0 [2023-03-13]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.2.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v520-2023-03-02) which includes fixes for query cache pending item mechanism and aggregator connections not working for dynamic tables. ([#438](https://github.com/turbot/steampipe-plugin-gcp/pull/438))
+
+## v0.33.1 [2023-03-06]
+
+_Bug fixes_
+
+- Fixed the plugin failing to detect when an active project is not set in the connection config, environment variables, or the gcloud CLI.
+
+## v0.33.0 [2023-02-10]
+
+_What's new?_
+
+- Added `ignore_error_codes` config arg to provide users the ability to set a list of additional GCP error codes to ignore while running queries. For instance, to ignore some common access denied errors, which is helpful when running with limited permissions, set the argument `ignore_error_codes = ["401", 403"]`. With the addition of this config argument, it must be noted that the plugin will no longer return an empty row, when querying for services that have their APIs disabled, instead an error will be returned mentioning that the API has been disabled. To ignore this error, set the argument `ignore_error_codes = ["403"]`. For more information, please see [GCP plugin configuration](https://hub.steampipe.io/plugins/turbot/gcp#configuration). ([#432](https://github.com/turbot/steampipe-plugin-gcp/pull/432))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.12](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v4112-2023-02-09) which fixes the query caching functionality. ([#434](https://github.com/turbot/steampipe-plugin-gcp/pull/434))
+
 ## v0.32.0 [2023-01-11]
 
 _Breaking changes_

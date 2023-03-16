@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -20,8 +20,7 @@ func tableGcpComputeAutoscaler(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeAutoscaler,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeAutoscaler,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeAutoscaler,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -180,7 +179,7 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 				// Check if context has been cancelled or if the limit has been hit (if specified)
 				// if there is a limit, it will return the number of rows required to reach this limit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					page.NextPageToken = ""
 					return nil
 				}
@@ -208,7 +207,7 @@ func getComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	project := projectId.(string)
 
 	var autoscaler compute.Autoscaler
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 	if name == "" {
 		return nil, nil
 	}

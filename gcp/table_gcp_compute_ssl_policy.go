@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -23,8 +23,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeSslPolicy,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeSslPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeSslPolicies,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "min_tls_version", Require: plugin.Optional, Operators: []string{"<>", "="}},
@@ -173,7 +172,7 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -209,7 +208,7 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	if h.Item != nil {
 		name = h.Item.(*compute.SslPolicy).Name
 	} else {
-		name = d.KeyColumnQuals["name"].GetStringValue()
+		name = d.EqualsQuals["name"].GetStringValue()
 	}
 
 	// Error: json: invalid use of ,string struct tag, trying to unmarshal "projects/<project_name>/global/sslPolicies/" into uint64

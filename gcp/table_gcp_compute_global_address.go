@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -23,8 +23,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 			Hydrate:    getComputeGlobalAddress,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeGlobalAddresses,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeGlobalAddresses,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "address_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
@@ -193,7 +192,7 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plu
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				page.NextPageToken = ""
 				return nil
 			}
@@ -223,7 +222,7 @@ func getComputeGlobalAddress(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 	project := projectId.(string)
 
-	name := d.KeyColumnQuals["name"].GetStringValue()
+	name := d.EqualsQuals["name"].GetStringValue()
 
 	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
 	// trying to unmarshal "projects/project/global/addresses/" into uint64

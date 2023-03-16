@@ -3,9 +3,9 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -16,9 +16,8 @@ func tableGcpSQLDatabaseInstanceMetricCpuUtilizationHourly(_ context.Context) *p
 		Name:        "gcp_sql_database_instance_metric_cpu_utilization_hourly",
 		Description: "GCP SQL Database Instance Metrics - CPU Utilization (Hourly)",
 		List: &plugin.ListConfig{
-			ParentHydrate:     listSQLDatabaseInstances,
-			Hydrate:           listSQLDatabaseInstanceMetricCpuUtilizationHourly,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			ParentHydrate: listSQLDatabaseInstances,
+			Hydrate:       listSQLDatabaseInstanceMetricCpuUtilizationHourly,
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

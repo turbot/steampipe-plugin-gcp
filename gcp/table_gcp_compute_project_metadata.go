@@ -3,9 +3,9 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
@@ -13,8 +13,7 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_project_metadata",
 		Description: "GCP Compute Project Metadata",
 		List: &plugin.ListConfig{
-			Hydrate:           listComputeProjectMetadata,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listComputeProjectMetadata,
 		},
 		Columns: []*plugin.Column{
 			{

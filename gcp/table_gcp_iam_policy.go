@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -18,8 +18,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		Name:        "gcp_iam_policy",
 		Description: "GCP IAM Policy",
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpIamPolicies,
-			ShouldIgnoreError: isIgnorableError([]string{"403"}),
+			Hydrate: listGcpIamPolicies,
 		},
 		Columns: []*plugin.Column{
 			{
