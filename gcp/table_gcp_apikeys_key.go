@@ -13,7 +13,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpApikeysKey(_ context.Context) *plugin.Table {
+func tableGcpApiKeysKey(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_apikeys_key",
 		Description: "GCP API Keys Key",
