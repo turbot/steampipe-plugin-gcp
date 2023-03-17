@@ -19,10 +19,10 @@ func tableGcpApiKeysKey(_ context.Context) *plugin.Table {
 		Description: "GCP API Keys Key",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getApikeysKey,
+			Hydrate:    getApiKeysKey,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listApikeysKeys,
+			Hydrate: listApiKeysKeys,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -109,13 +109,13 @@ func tableGcpApiKeysKey(_ context.Context) *plugin.Table {
 
 //// FETCH FUNCTIONS
 
-func listApikeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listApiKeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		logger.Error("gcp_api_key.listApikeysKeys", "cache_error", err)
+		logger.Error("gcp_api_key.listApiKeysKeys", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -132,7 +132,7 @@ func listApikeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create Service Connection
 	service, err := APIKeysService(ctx, d)
 	if err != nil {
-		logger.Error("gcp_api_key.listApikeysKeys", "service_error", err)
+		logger.Error("gcp_api_key.listApiKeysKeys", "service_error", err)
 		return nil, err
 	}
 
@@ -155,7 +155,7 @@ func listApikeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 			return nil
 		},
 	); err != nil {
-		logger.Error("gcp_api_key.listApikeysKeys", "api_error", err)
+		logger.Error("gcp_api_key.listApiKeysKeys", "api_error", err)
 		return nil, err
 	}
 
@@ -164,14 +164,14 @@ func listApikeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 //// HYDRATE FUNCTIONS
 
-func getApikeysKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getApiKeysKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		logger.Error("gcp_api_key.getApikeysKey", "cache_error", err)
+		logger.Error("gcp_api_key.getApiKeysKey", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -186,14 +186,14 @@ func getApikeysKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	// Create Service Connection
 	service, err := APIKeysService(ctx, d)
 	if err != nil {
-		logger.Error("gcp_api_key.getApikeysKey", "service_error", err)
+		logger.Error("gcp_api_key.getApiKeysKey", "service_error", err)
 		return nil, err
 	}
 
 	// NOTE: Key is a global resource; hence the only supported value for location is `global`.
 	op, err := service.Projects.Locations.Keys.Get("projects/" + project + "/locations/global/keys/" + name).Do()
 	if err != nil {
-		logger.Error("gcp_api_key.getApikeysKey", "api_error", err)
+		logger.Error("gcp_api_key.getApiKeysKey", "api_error", err)
 		return nil, err
 	}
 	return op, nil
