@@ -16,7 +16,8 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 		Name:        "gcp_billing_account",
 		Description: "GCP Billing Account",
 		List: &plugin.ListConfig{
-			Hydrate: getBillingAccount,
+			KeyColumns: plugin.OptionalColumns([]string{"name"}),
+			Hydrate:    getBillingAccount,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -41,8 +42,8 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
-				Name:        "policy",
-				Description: "Whether the billing account is open, and will therefore be charged for any usage on associated projects.",
+				Name:        "iam_policy",
+				Description: "An IAM policy, which specifies access controls for the billing account.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getBillingAccountIamPolicy,
 				Transform:   transform.FromValue(),
@@ -54,6 +55,13 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DisplayName"),
+			},
+			{
+				Name:        "akas",
+				Description: ColumnDescriptionAkas,
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getBillingAccountAka,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard gcp columns
@@ -78,37 +86,48 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 
 func getBillingAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
-	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "cache_err", err)
-		return nil, err
-	}
-	project := projectId.(string)
+	var accountName string
 
 	// Create Service Connection
 	service, err := BillingService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getGcpBillingAccount."+project, "service_err", err)
+		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "service_err", err)
 		return nil, err
 	}
 
-	resp, err := service.Projects.GetBillingInfo("projects/" + project).Do()
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getGcpBillingAccount."+project, "api_err", err)
-		return nil, err
-	}
+	// Validate whether a user has provided any input, then skip the `GetBillingInfo` api
+	if d.EqualsQualString("name") != "" {
+		accountName = "billingAccounts/" + d.EqualsQualString("name")
+	} else {
 
-	if resp != nil && resp.BillingAccountName != "" {
-		accResponse, err := service.BillingAccounts.Get(resp.BillingAccountName).Do()
+		// Fetch BillingInfo for the project, to get the billing account name
+		// Get project details
+		getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+		projectId, err := getProjectCached(ctx, d, h)
 		if err != nil {
-			plugin.Logger(ctx).Error("gcp_billing_account.getGcpBillingAccount."+project, "api_err", err)
+			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "cache_err", err)
+			return nil, err
+		}
+		project := projectId.(string)
+
+		resp, err := service.Projects.GetBillingInfo("projects/" + project).Do()
+		if err != nil {
+			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount.GetBillingInfo", "api_err", err)
 			return nil, err
 		}
 
-		d.StreamListItem(ctx, accResponse)
+		if resp != nil && resp.BillingAccountName != "" {
+			accountName = resp.BillingAccountName
+		}
 	}
+
+	accResponse, err := service.BillingAccounts.Get(accountName).Do()
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "api_err", err)
+		return nil, err
+	}
+
+	d.StreamListItem(ctx, accResponse)
 
 	return nil, nil
 }
@@ -116,27 +135,34 @@ func getBillingAccount(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 func getBillingAccountIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	acc := h.Item.(*cloudbilling.BillingAccount)
 
-	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccountIamPolicy", "cache_err", err)
-		return nil, err
-	}
-	project := projectId.(string)
-
 	// Create Service Connection
 	service, err := BillingService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccountIamPolicy."+project, "service_err", err)
+		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccountIamPolicy", "service_err", err)
 		return nil, err
 	}
 
 	policy, err := service.BillingAccounts.GetIamPolicy(acc.Name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccountIamPolicy."+project, "api_err", err)
+		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccountIamPolicy", "api_err", err)
 		return nil, err
 	}
 
 	return policy, nil
+}
+
+func getBillingAccountAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	project := projectId.(string)
+	acc := h.Item.(*cloudbilling.BillingAccount)
+	akas := []string{"gcp://cloudbilling.googleapis.com/projects/" + project + "/" + acc.Name}
+
+	return akas, nil
 }

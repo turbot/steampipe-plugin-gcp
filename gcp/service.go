@@ -49,6 +49,48 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 	return svc, nil
 }
 
+// BillingBudgetsService returns the service connection for GCP Billing Budgets service
+func BillingBudgetsService(ctx context.Context, d *plugin.QueryData) (*billingbudgets.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BillingBudgetsService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*billingbudgets.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := billingbudgets.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// BillingService returns the service connection for GCP Billing service
+func BillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BillingService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudbilling.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudbilling.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
 // BigQueryService returns the service connection for GCP BigQueryService service
 func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Service, error) {
 	// have we already created and cached the service?
@@ -272,46 +314,6 @@ func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) 
 
 	// so it was not in cache - create service
 	svc, err := dns.NewService(ctx, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
-	return svc, nil
-}
-
-func BillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.APIService, error) {
-	// have we already created and cached the service?
-	serviceCacheKey := "BillingService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*cloudbilling.APIService), nil
-	}
-
-	// To get config arguments from plugin config file
-	opts := setSessionConfig(ctx, d.Connection)
-
-	// so it was not in cache - create service
-	svc, err := cloudbilling.NewService(ctx, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
-	return svc, nil
-}
-
-func BillingBudgetsService(ctx context.Context, d *plugin.QueryData) (*billingbudgets.Service, error) {
-	// have we already created and cached the service?
-	serviceCacheKey := "BillingBudgetService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*billingbudgets.Service), nil
-	}
-
-	// To get config arguments from plugin config file
-	opts := setSessionConfig(ctx, d.Connection)
-
-	// so it was not in cache - create service
-	svc, err := billingbudgets.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

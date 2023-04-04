@@ -22,6 +22,7 @@ func tableGcpBillingBudget(_ context.Context) *plugin.Table {
 			Hydrate:    getBillingBudget,
 		},
 		List: &plugin.ListConfig{
+			KeyColumns:    plugin.OptionalColumns([]string{"billing_account"}),
 			ParentHydrate: getBillingAccount,
 			Hydrate:       listBillingBudgets,
 		},
@@ -36,6 +37,7 @@ func tableGcpBillingBudget(_ context.Context) *plugin.Table {
 				Name:        "billing_account",
 				Description: "The name given to the associated billing account.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("BillingAccount").Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
@@ -82,6 +84,13 @@ func tableGcpBillingBudget(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Budget.DisplayName"),
 			},
+			{
+				Name:        "akas",
+				Description: ColumnDescriptionAkas,
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getBillingBudgetAka,
+				Transform:   transform.FromValue(),
+			},
 
 			// standard gcp columns
 			{
@@ -111,20 +120,9 @@ type budgetInfo = struct {
 func listBillingBudgets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	acc := h.Item.(*cloudbilling.BillingAccount)
 
-	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_budget.listBillingBudgets", "cache_err", err)
-		return nil, err
-	}
-	project := projectId.(string)
-
-	// Create Service Connection
-	service, err := BillingBudgetsService(ctx, d)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_budget.listBillingBudgets."+project, "service_err", err)
-		return nil, err
+	// Validate - User input(if any) should match with the hydrated billing account
+	if d.EqualsQualString("billing_account") != "" && "billingAccounts/"+d.EqualsQualString("billing_account") != acc.Name {
+		return nil, nil
 	}
 
 	pageSize := types.Int64(100)
@@ -133,6 +131,13 @@ func listBillingBudgets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		if *limit < *pageSize {
 			pageSize = limit
 		}
+	}
+
+	// Create Service Connection
+	service, err := BillingBudgetsService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_billing_budget.listBillingBudgets", "service_err", err)
+		return nil, err
 	}
 
 	response := service.BillingAccounts.Budgets.List(acc.Name).PageSize(*pageSize)
@@ -152,7 +157,7 @@ func listBillingBudgets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 			return nil
 		},
 	); err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_budget.listBillingBudgets."+project, "api_err", err)
+		plugin.Logger(ctx).Error("gcp_billing_budget.listBillingBudgets", "api_err", err)
 		return nil, err
 	}
 
@@ -165,27 +170,35 @@ func getBillingBudget(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	name := d.EqualsQuals["name"].GetStringValue()
 	acc := d.EqualsQuals["billing_account"].GetStringValue()
 
-	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_budget.getBillingBudget", "cache_err", err)
-		return nil, err
-	}
-	project := projectId.(string)
-
 	// Create Service Connection
 	service, err := BillingBudgetsService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_budget.getBillingBudget."+project, "service_err", err)
+		plugin.Logger(ctx).Error("gcp_billing_budget.getBillingBudget", "service_err", err)
 		return nil, err
 	}
 
 	budget, err := service.BillingAccounts.Budgets.Get("billingAccounts/" + acc + "/budgets/" + name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_budget.getBillingBudget."+project, "api_err", err)
+		plugin.Logger(ctx).Error("gcp_billing_budget.getBillingBudget", "api_err", err)
 		return nil, err
 	}
 
 	return budgetInfo{acc, budget}, nil
+}
+
+func getBillingBudgetAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_billing_budget.getBillingBudgetAka", "cache_err", err)
+		return nil, err
+	}
+
+	project := projectId.(string)
+	data := h.Item.(budgetInfo)
+	akas := []string{"gcp://billingbudgets.googleapis.com/projects/" + project + "/" + data.Budget.Name}
+
+	return akas, nil
 }
