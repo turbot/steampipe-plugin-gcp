@@ -141,6 +141,11 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 		serviceAccountName = d.EqualsQuals["service_account_name"].GetStringValue()
 	}
 
+	// Empty check for the input param
+	if name == "" || serviceAccountName == "" {
+		return nil, nil
+	}
+
 	// Create Service Connection
 	service, err := IAMService(ctx, d)
 	if err != nil {
