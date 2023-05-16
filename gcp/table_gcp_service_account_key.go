@@ -28,53 +28,43 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			{
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
-				Description: "The friendly name that identifies the service account key",
+				Description: "The friendly name that identifies the service account key.",
 				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "service_account_name",
 				Type:        proto.ColumnType_STRING,
-				Description: "Service account in which the key is located",
+				Description: "Service account in which the key is located.",
 				Transform:   transform.FromP(getGcpServiceAccountKeyTurbotData, "ServiceAccountName"),
 			},
 			{
 				Name:        "key_type",
-				Description: "The type of the service account key",
+				Description: "The type of the service account key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "key_algorithm",
-				Description: "Specifies the algorithm (and possibly key size) for the key",
+				Description: "Specifies the algorithm (and possibly key size) for the key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "key_origin",
-				Description: "Specifies the origin of the key",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "private_key_data",
-				Description: "Specifies the private key data, which allows the assertion of the service account identity",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "private_key_type",
-				Description: "Specifies the output format for the private key",
+				Description: "Specifies the origin of the key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "public_key_data",
-				Description: "Specifies the public key data",
+				Description: "Specifies the public key data.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "valid_after_time",
-				Description: "Specifies the timestamp, after which the key can be used",
+				Description: "Specifies the timestamp, after which the key can be used.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "valid_before_time",
-				Description: "Specifies the timestamp, after which the key gets invalid",
+				Description: "Specifies the timestamp, after which the key gets invalid.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 
