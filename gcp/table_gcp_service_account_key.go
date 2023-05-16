@@ -56,6 +56,8 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Name:        "public_key_data",
 				Description: "Specifies the public key data.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getGcpServiceAccountKey,
+				Transform:   transform.FromField("PublicKeyData"),
 			},
 			{
 				Name:        "valid_after_time",
@@ -128,6 +130,17 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpServiceAccountKey")
 
+	var name, serviceAccountName string
+	if h.Item != nil {
+		data := h.Item.(*iam.ServiceAccountKey)
+		name = data.Name
+		splitName := strings.Split(data.Name, "/")
+		serviceAccountName = splitName[3]
+	} else {
+		name = d.EqualsQuals["name"].GetStringValue()
+		serviceAccountName = d.EqualsQuals["service_account_name"].GetStringValue()
+	}
+
 	// Create Service Connection
 	service, err := IAMService(ctx, d)
 	if err != nil {
@@ -142,8 +155,6 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 	project := projectId.(string)
 
-	name := d.EqualsQuals["name"].GetStringValue()
-	serviceAccountName := d.EqualsQuals["service_account_name"].GetStringValue()
 	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
 
 	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do()
