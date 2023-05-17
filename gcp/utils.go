@@ -3,11 +3,13 @@ package gcp
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
@@ -163,6 +165,17 @@ func getProjectFromConfig(connection *plugin.Connection) string {
 	return ""
 }
 
+func base64DecodedData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data, err := base64.StdEncoding.DecodeString(types.SafeString(d.Value))
+	// check if CorruptInputError or invalid UTF-8
+	if err != nil {
+		return nil, nil
+	} else if !utf8.Valid(data) {
+		return types.SafeString(d.Value), nil
+	}
+	return data, nil
+}
+
 // Set project values from config and return client options
 func setSessionConfig(ctx context.Context, connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
@@ -281,26 +294,41 @@ func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEq
 	return filters
 }
 
-/**
- * buildQueryFilter: To build gcp query filter from equal quals
- * Sample for gcp_compute_instance table
- * select name, id, machine_type_name, status, can_ip_forward, cpu_platform, deletion_protection, start_restricted, hostname
- * from gcp_morales_aaa.gcp_compute_instance
- * where
- *	status in ('TERMINATED', 'RUNNING') and
- *	cpu_platform = 'Intel Haswell' and
- *  not deletion_protection
+/*
+*
 
- *  -----------------------STEAMPIPE QUAL INFO-----------------------------------------
- *  	Column: deletion_protection, Operator: '<>', Value: 'true'
- *  	Column: status, Operator: '=', Value: '[TERMINATED RUNNING]'
- *  	Column: cpu_platform, Operator: '=', Value: 'Intel Haswell'
- *  ----------------------------------------------------------------
- *
- * Output: []string{"(cpuPlatform = \"Intel Haswell\")", "((status = \"TERMINATED\") OR (status = \"RUNNING\"))", "(deletionProtection = false)"}
- *
- * This can be used for almost all the API's in GCP if it supports filter option
- */
+  - buildQueryFilter: To build gcp query filter from equal quals
+
+  - Sample for gcp_compute_instance table
+
+  - select name, id, machine_type_name, status, can_ip_forward, cpu_platform, deletion_protection, start_restricted, hostname
+
+  - from gcp_morales_aaa.gcp_compute_instance
+
+  - where
+
+  - status in ('TERMINATED', 'RUNNING') and
+
+  - cpu_platform = 'Intel Haswell' and
+
+  - not deletion_protection
+
+  - -----------------------STEAMPIPE QUAL INFO-----------------------------------------
+
+  - Column: deletion_protection, Operator: '<>', Value: 'true'
+
+  - Column: status, Operator: '=', Value: '[TERMINATED RUNNING]'
+
+  - Column: cpu_platform, Operator: '=', Value: 'Intel Haswell'
+
+  - ----------------------------------------------------------------
+    *
+
+  - Output: []string{"(cpuPlatform = \"Intel Haswell\")", "((status = \"TERMINATED\") OR (status = \"RUNNING\"))", "(deletionProtection = false)"}
+    *
+
+  - This can be used for almost all the API's in GCP if it supports filter option
+*/
 func buildQueryFilterFromQuals(filterQuals []filterQualMap, equalQuals plugin.KeyColumnQualMap) []string {
 	filters := []string{}
 

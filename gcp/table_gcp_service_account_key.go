@@ -54,10 +54,18 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "public_key_data",
-				Description: "Specifies the public key data.",
+				Name:        "public_key_data_raw",
+				Description: "Specifies the raw public key data.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getGcpServiceAccountKeyPublicKeyDataWithRawFormat,
+				Transform:   transform.FromValue(),
+			},
+			{
+				Name:        "public_key_data_pem",
+				Description: "Specifies the public key data with PEM format.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getGcpServiceAccountKey,
+				Transform:   transform.FromField("PublicKeyData").Transform(base64DecodedData),
 			},
 			{
 				Name:        "valid_after_time",
@@ -166,7 +174,7 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	// we can pass three value for the query parameter publicKeyType that are TYPE_RAW_PUBLIC_KEY or TYPE_X509_PEM_FILE or TYPE_NONE.
 	// TYPE_NONE has excluded here from the query parameter value because if we pass that then it do not return the public key.
 	// We are getting the public key data in raw format here.
-	queryParameter := googleapi.QueryParameter("publicKeyType", "TYPE_RAW_PUBLIC_KEY")
+	queryParameter := googleapi.QueryParameter("publicKeyType", "TYPE_X509_PEM_FILE")
 
 	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do(queryParameter)
 	if err != nil {
@@ -174,6 +182,49 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	return op, nil
+}
+
+func getGcpServiceAccountKeyPublicKeyDataWithRawFormat(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	var name, serviceAccountName string
+	data := h.Item.(*iam.ServiceAccountKey)
+	name = strings.Split(data.Name, "/")[5]
+	splitName := strings.Split(data.Name, "/")
+	serviceAccountName = splitName[3]
+
+	// Empty check for the input param
+	if name == "" || serviceAccountName == "" {
+		return nil, nil
+	}
+
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
+
+	// We should pass the supported public key output formats as an query parameter to get the public key data for a service account key as mentioned in the doc https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts.keys/get#ServiceAccountPublicKeyType,
+	// we can pass three value for the query parameter publicKeyType that are TYPE_RAW_PUBLIC_KEY or TYPE_X509_PEM_FILE or TYPE_NONE.
+	// TYPE_NONE has excluded here from the query parameter value because if we pass that then it do not return the public key.
+	// We are getting the public key data in raw format here.
+	queryParameter := googleapi.QueryParameter("publicKeyType", "TYPE_RAW_PUBLIC_KEY")
+
+	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do(queryParameter)
+	if err != nil {
+		return nil, err
+	}
+
+	return op.PublicKeyData, nil
 }
 
 /// TRANSFORM FUNCTIONS
