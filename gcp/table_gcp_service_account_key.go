@@ -192,11 +192,6 @@ func getGcpServiceAccountKeyPublicKeyDataWithRawFormat(ctx context.Context, d *p
 	splitName := strings.Split(data.Name, "/")
 	serviceAccountName = splitName[3]
 
-	// Empty check for the input param
-	if name == "" || serviceAccountName == "" {
-		return nil, nil
-	}
-
 	// Create Service Connection
 	service, err := IAMService(ctx, d)
 	if err != nil {
