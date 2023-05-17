@@ -58,7 +58,7 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Description: "Specifies the raw public key data.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getGcpServiceAccountKeyPublicKeyDataWithRawFormat,
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromField("PublicKeyData"),
 			},
 			{
 				Name:        "public_key_data_pem",
