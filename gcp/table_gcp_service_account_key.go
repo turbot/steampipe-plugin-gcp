@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -132,7 +133,7 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	var name, serviceAccountName string
 	if h.Item != nil {
 		data := h.Item.(*iam.ServiceAccountKey)
-		name = data.Name
+		name = strings.Split(data.Name, "/")[5]
 		splitName := strings.Split(data.Name, "/")
 		serviceAccountName = splitName[3]
 	} else {
@@ -161,7 +162,9 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
 
-	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do()
+	queryParameter := googleapi.QueryParameter("publicKeyType", "TYPE_RAW_PUBLIC_KEY", "TYPE_X509_PEM_FILE")
+
+	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do(queryParameter)
 	if err != nil {
 		return nil, err
 	}
