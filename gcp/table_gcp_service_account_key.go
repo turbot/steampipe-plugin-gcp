@@ -57,7 +57,6 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 				Description: "Specifies the public key data.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getGcpServiceAccountKey,
-				Transform:   transform.FromField("PublicKeyData"),
 			},
 			{
 				Name:        "valid_after_time",
