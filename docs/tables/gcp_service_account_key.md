@@ -41,5 +41,5 @@ select
 from
   gcp_service_account_key
 where
-  service_account_name = 'testa@myproject.iam.gserviceaccount.com';
+  service_account_name = 'test@myproject.iam.gserviceaccount.com';
 ```
