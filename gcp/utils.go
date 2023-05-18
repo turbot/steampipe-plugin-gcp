@@ -294,41 +294,25 @@ func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEq
 	return filters
 }
 
-/*
-*
-
-  - buildQueryFilter: To build gcp query filter from equal quals
-
-  - Sample for gcp_compute_instance table
-
-  - select name, id, machine_type_name, status, can_ip_forward, cpu_platform, deletion_protection, start_restricted, hostname
-
-  - from gcp_morales_aaa.gcp_compute_instance
-
-  - where
-
-  - status in ('TERMINATED', 'RUNNING') and
-
-  - cpu_platform = 'Intel Haswell' and
-
-  - not deletion_protection
-
-  - -----------------------STEAMPIPE QUAL INFO-----------------------------------------
-
-  - Column: deletion_protection, Operator: '<>', Value: 'true'
-
-  - Column: status, Operator: '=', Value: '[TERMINATED RUNNING]'
-
-  - Column: cpu_platform, Operator: '=', Value: 'Intel Haswell'
-
-  - ----------------------------------------------------------------
-    *
-
-  - Output: []string{"(cpuPlatform = \"Intel Haswell\")", "((status = \"TERMINATED\") OR (status = \"RUNNING\"))", "(deletionProtection = false)"}
-    *
-
-  - This can be used for almost all the API's in GCP if it supports filter option
-*/
+/**
+ * buildQueryFilter: To build gcp query filter from equal quals
+ * Sample for gcp_compute_instance table
+ * select name, id, machine_type_name, status, can_ip_forward, cpu_platform, deletion_protection, start_restricted, hostname
+ * from gcp_morales_aaa.gcp_compute_instance
+ * where
+ *	status in ('TERMINATED', 'RUNNING') and
+ *	cpu_platform = 'Intel Haswell' and
+ *  not deletion_protection
+ *  -----------------------STEAMPIPE QUAL INFO-----------------------------------------
+ *  	Column: deletion_protection, Operator: '<>', Value: 'true'
+ *  	Column: status, Operator: '=', Value: '[TERMINATED RUNNING]'
+ *  	Column: cpu_platform, Operator: '=', Value: 'Intel Haswell'
+ *  ----------------------------------------------------------------
+ *
+ * Output: []string{"(cpuPlatform = \"Intel Haswell\")", "((status = \"TERMINATED\") OR (status = \"RUNNING\"))", "(deletionProtection = false)"}
+ *
+ * This can be used for almost all the API's in GCP if it supports filter option
+ */
 func buildQueryFilterFromQuals(filterQuals []filterQualMap, equalQuals plugin.KeyColumnQualMap) []string {
 	filters := []string{}
 
