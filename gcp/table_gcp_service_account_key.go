@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -28,53 +29,52 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 			{
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
-				Description: "The friendly name that identifies the service account key",
+				Description: "The friendly name that identifies the service account key.",
 				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "service_account_name",
 				Type:        proto.ColumnType_STRING,
-				Description: "Service account in which the key is located",
+				Description: "Service account in which the key is located.",
 				Transform:   transform.FromP(getGcpServiceAccountKeyTurbotData, "ServiceAccountName"),
 			},
 			{
 				Name:        "key_type",
-				Description: "The type of the service account key",
+				Description: "The type of the service account key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "key_algorithm",
-				Description: "Specifies the algorithm (and possibly key size) for the key",
+				Description: "Specifies the algorithm (and possibly key size) for the key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "key_origin",
-				Description: "Specifies the origin of the key",
+				Description: "Specifies the origin of the key.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "private_key_data",
-				Description: "Specifies the private key data, which allows the assertion of the service account identity",
+				Name:        "public_key_data_pem",
+				Description: "Specifies the public key data in PEM format.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getGcpServiceAccountKey,
+				Transform:   transform.FromField("PublicKeyData").Transform(base64DecodedData),
 			},
 			{
-				Name:        "private_key_type",
-				Description: "Specifies the output format for the private key",
+				Name:        "public_key_data_raw",
+				Description: "Specifies the public key data in raw format.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "public_key_data",
-				Description: "Specifies the public key data",
-				Type:        proto.ColumnType_STRING,
+				Hydrate:     getGcpServiceAccountKeyPublicKeyDataWithRawFormat,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "valid_after_time",
-				Description: "Specifies the timestamp, after which the key can be used",
+				Description: "Specifies the timestamp, after which the key can be used.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "valid_before_time",
-				Description: "Specifies the timestamp, after which the key gets invalid",
+				Description: "Specifies the timestamp, after which the key gets invalid.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 
@@ -138,6 +138,22 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getGcpServiceAccountKey")
 
+	var name, serviceAccountName string
+	if h.Item != nil {
+		data := h.Item.(*iam.ServiceAccountKey)
+		name = strings.Split(data.Name, "/")[5]
+		splitName := strings.Split(data.Name, "/")
+		serviceAccountName = splitName[3]
+	} else {
+		name = d.EqualsQuals["name"].GetStringValue()
+		serviceAccountName = d.EqualsQuals["service_account_name"].GetStringValue()
+	}
+
+	// Empty check for the input param
+	if name == "" || serviceAccountName == "" {
+		return nil, nil
+	}
+
 	// Create Service Connection
 	service, err := IAMService(ctx, d)
 	if err != nil {
@@ -152,16 +168,50 @@ func getGcpServiceAccountKey(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 	project := projectId.(string)
 
-	name := d.EqualsQuals["name"].GetStringValue()
-	serviceAccountName := d.EqualsQuals["service_account_name"].GetStringValue()
 	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
 
-	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do()
+	queryParameter := googleapi.QueryParameter("publicKeyType", "TYPE_X509_PEM_FILE")
+
+	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do(queryParameter)
 	if err != nil {
 		return nil, err
 	}
 
 	return op, nil
+}
+
+func getGcpServiceAccountKeyPublicKeyDataWithRawFormat(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	var name, serviceAccountName string
+	data := h.Item.(*iam.ServiceAccountKey)
+	name = strings.Split(data.Name, "/")[5]
+	splitName := strings.Split(data.Name, "/")
+	serviceAccountName = splitName[3]
+
+	// Create Service Connection
+	service, err := IAMService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	keyName := "projects/" + project + "/serviceAccounts/" + serviceAccountName + "/keys/" + name
+
+	queryParameter := googleapi.QueryParameter("publicKeyType", "TYPE_RAW_PUBLIC_KEY")
+
+	op, err := service.Projects.ServiceAccounts.Keys.Get(keyName).Do(queryParameter)
+	if err != nil {
+		return nil, err
+	}
+
+	return op.PublicKeyData, nil
 }
 
 /// TRANSFORM FUNCTIONS

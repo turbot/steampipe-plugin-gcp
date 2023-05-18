@@ -3,11 +3,13 @@ package gcp
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
@@ -163,6 +165,17 @@ func getProjectFromConfig(connection *plugin.Connection) string {
 	return ""
 }
 
+func base64DecodedData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data, err := base64.StdEncoding.DecodeString(types.SafeString(d.Value))
+	// check if CorruptInputError or invalid UTF-8
+	if err != nil {
+		return nil, nil
+	} else if !utf8.Valid(data) {
+		return types.SafeString(d.Value), nil
+	}
+	return data, nil
+}
+
 // Set project values from config and return client options
 func setSessionConfig(ctx context.Context, connection *plugin.Connection) []option.ClientOption {
 	gcpConfig := GetConfig(connection)
@@ -290,7 +303,6 @@ func buildQueryFilter(filterQuals []filterQualMap, equalQuals plugin.KeyColumnEq
  *	status in ('TERMINATED', 'RUNNING') and
  *	cpu_platform = 'Intel Haswell' and
  *  not deletion_protection
-
  *  -----------------------STEAMPIPE QUAL INFO-----------------------------------------
  *  	Column: deletion_protection, Operator: '<>', Value: 'true'
  *  	Column: status, Operator: '=', Value: '[TERMINATED RUNNING]'
