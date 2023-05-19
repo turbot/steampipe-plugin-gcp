@@ -2,7 +2,7 @@
 
 _Breaking changes_
 
-- Removed columns `private_key_data`, `private_key_type` and `public_key_data` from `gcp_service_account_key` table. ([#449](https://github.com/turbot/steampipe-plugin-gcp/pull/449))
+- Removed columns `private_key_data`, `private_key_type` and `public_key_data` from `gcp_service_account_key` table as they consistently returned `null`. ([#449](https://github.com/turbot/steampipe-plugin-gcp/pull/449))
 
 _Enhancements_
 
