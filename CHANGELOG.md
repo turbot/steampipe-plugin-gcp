@@ -1,3 +1,9 @@
+## v0.37.0 [2023-05-19]
+
+_Breaking changes_
+
+- Removed columns `private_key_data`, `private_key_type`, `public_key_data` and added columns `public_key_data_pem` and `public_key_data_raw` to `gcp_service_account_key` table. ([#449](https://github.com/turbot/steampipe-plugin-gcp/pull/449))
+
 ## v0.36.0 [2023-05-11]
 
 _Dependencies_
