@@ -4,9 +4,9 @@
       "bindings": [
         {
           "members": [
-            "user:lalit@turbot.com"
+            "serviceAccount:979620418102-compute@developer.gserviceaccount.com"
           ],
-          "role": "roles/viewer"
+          "role": "roles/compute.instanceAdmin"
         }
       ],
       "etag": "{{ output.etag.value }}",

@@ -84,9 +84,9 @@ resource "google_compute_disk_resource_policy_attachment" "attachment" {
 
 data "google_iam_policy" "admin" {
   binding {
-    role = "roles/viewer"
+    role = "roles/compute.instanceAdmin"
     members = [
-      "user:lalit@turbot.com",
+      "serviceAccount:979620418102-compute@developer.gserviceaccount.com",
     ]
   }
 }

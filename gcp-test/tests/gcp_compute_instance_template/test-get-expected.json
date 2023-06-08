@@ -38,7 +38,8 @@
 		],
 		"instance_scheduling": {
 			"automaticRestart": true,
-			"onHostMaintenance": "MIGRATE"
+			"onHostMaintenance": "MIGRATE",
+			"provisioningModel": "STANDARD"
 		},
 		"instance_service_accounts": [
 			{
