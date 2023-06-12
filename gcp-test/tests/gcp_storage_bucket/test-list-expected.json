@@ -21,7 +21,7 @@
       }
     ],
     "default_kms_key_name": null,
-    "default_object_acl": {},
+    "default_object_acl": null,
     "iam_policy": {
       "bindings": [
         {
