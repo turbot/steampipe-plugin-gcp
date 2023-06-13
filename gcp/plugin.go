@@ -33,6 +33,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_audit_policy":                                        tableGcpAuditPolicy(ctx),
+			"gcp_apikeys_key":                                         tableGcpApiKeysKey(ctx),
 			"gcp_bigquery_dataset":                                    tableGcpBigQueryDataset(ctx),
 			"gcp_bigquery_job":                                        tableGcpBigQueryJob(ctx),
 			"gcp_bigquery_table":                                      tableGcpBigqueryTable(ctx),

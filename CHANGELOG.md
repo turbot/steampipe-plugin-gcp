@@ -1,3 +1,30 @@
+## v0.37.0 [2023-05-19]
+
+_Breaking changes_
+
+- Removed columns `private_key_data`, `private_key_type` and `public_key_data` from `gcp_service_account_key` table as they consistently returned `null`. ([#449](https://github.com/turbot/steampipe-plugin-gcp/pull/449))
+
+_Enhancements_
+
+- Added columns `public_key_data_pem` and `public_key_data_raw` to `gcp_service_account_key` table. ([#449](https://github.com/turbot/steampipe-plugin-gcp/pull/449))
+
+## v0.36.0 [2023-05-11]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.4.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v541-2023-05-05) which fixes increased plugin initialization time due to multiple connections causing the schema to be loaded repeatedly. ([#446](https://github.com/turbot/steampipe-plugin-gcp/pull/446))
+
+## v0.35.0 [2023-04-05]
+
+_What's new?_
+
+- New tables added
+  - [gcp_apikeys_key](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_apikeys_key) ([#440](https://github.com/turbot/steampipe-plugin-gcp/pull/440))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.3.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v530-2023-03-16) which adds go-getter support to dynamic tables. ([#444](https://github.com/turbot/steampipe-plugin-gcp/pull/444))
+
 ## v0.34.0 [2023-03-13]
 
 _Dependencies_

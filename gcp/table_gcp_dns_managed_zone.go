@@ -81,7 +81,7 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 				Name:        "service_directory_config_namespace_deletion_time",
 				Description: "The time that the namespace backing this zone was deleted.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("ServiceDirectoryConfig.Namespace.DeletionTime"),
+				Transform:   transform.FromField("ServiceDirectoryConfig.Namespace.DeletionTime").Transform(transform.NullIfZeroValue),
 			},
 			{
 				Name:        "self_link",
