@@ -2,6 +2,8 @@
 
 Cloud Billing budgets monitors all your Google Cloud charges in one place. A budget enables you to track your actual Google Cloud costs against your planned costs. After you've set a budget amount, you set budget alert threshold rules that are used to trigger email notifications
 
+**_Please note_**: This table requires the `billing.viewer` permission to retrieve billing budget details.
+
 ## Examples
 
 ### Basic info

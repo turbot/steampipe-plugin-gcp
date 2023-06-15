@@ -2,6 +2,8 @@
 
 Cloud Billing accounts pay for usage costs in Google Cloud projects and Google Maps Platform projects.To use Google Cloud resources in a project, billing must be enabled on the project. Billing is enabled when the project is linked to an active Cloud Billing account.
 
+**_Please note_**: This table requires the `billing.viewer` permission to retrieve billing account details.
+
 ## Examples
 
 ### Basic info
