@@ -8,6 +8,8 @@ import (
 	"google.golang.org/api/apikeys/v2"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
+	"google.golang.org/api/billingbudgets/v1"
+	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -60,6 +62,48 @@ func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service,
 
 	// so it was not in cache - create service
 	svc, err := apikeys.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// BillingBudgetsService returns the service connection for GCP Billing Budgets service
+func BillingBudgetsService(ctx context.Context, d *plugin.QueryData) (*billingbudgets.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BillingBudgetsService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*billingbudgets.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := billingbudgets.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// BillingService returns the service connection for GCP Billing service
+func BillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BillingService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudbilling.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudbilling.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
