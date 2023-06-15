@@ -18,7 +18,7 @@ from
   gcp_billing_account;
 ```
 
-### Get members and their associated IAM roles for each account
+### Get the billing account members and their associated IAM roles
 
 ```sql
 select

@@ -22,13 +22,13 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The resource name for project billing account.",
+				Description: "The resource name of the billing account.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel().Transform(lastPathElement),
 			},
 			{
 				Name:        "display_name",
-				Description: "The display name given to the billing account.",
+				Description: "The display name given to the billing account. This name is displayed in the Google Cloud Console.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

@@ -29,7 +29,7 @@ func tableGcpBillingBudget(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "The resource name for budget.",
+				Description: "The resource name of the budget.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Budget.Name").Transform(lastPathElement),
 			},
