@@ -1,3 +1,11 @@
+## v0.38.0 [2023-06-15]
+
+_What's new?_
+
+- New tables added
+  - [gcp_billing_account](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_billing_account) ([#443](https://github.com/turbot/steampipe-plugin-gcp/pull/443))
+  - [gcp_billing_budget](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_billing_budget) ([#443](https://github.com/turbot/steampipe-plugin-gcp/pull/443))
+
 ## v0.37.0 [2023-05-19]
 
 _Breaking changes_
