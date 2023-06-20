@@ -1,3 +1,9 @@
+## v0.39.0 [2023-06-20]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.5.0](https://github.com/turbot/steampipe-plugin-sdk/blob/v5.5.0/CHANGELOG.md#v550-2023-06-16) which significantly reduces API calls and boosts query performance, resulting in faster data retrieval. ([#453](https://github.com/turbot/steampipe-plugin-gcp/pull/453))
+
 ## v0.38.0 [2023-06-15]
 
 _What's new?_
