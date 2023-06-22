@@ -2,12 +2,14 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -318,6 +320,11 @@ func getStorageObjectIAMPolicy(ctx context.Context, d *plugin.QueryData, h *plug
 
 	resp, err := service.Objects.GetIamPolicy(object.Bucket, object.Name).Do()
 	if err != nil {
+
+		// Return nil, if uniform bucket-level access is enabled
+		if strings.Contains(err.(*googleapi.Error).Message, "Object policies are disabled for bucket") {
+			return nil, nil
+		}
 		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "api_error", err)
 		return nil, err
 	}
