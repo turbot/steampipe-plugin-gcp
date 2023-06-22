@@ -1,6 +1,6 @@
-# Table: gcp_storage_object
+# Table: gcp_storage_bucket_object
 
-Storage buckets are the basic containers that hold data. Everything that you store in cloud Storage must be contained in a bucket.
+The Objects resource represents an object within Cloud Storage. Objects are pieces of data that you have uploaded to Cloud Storage.
 
 ## Examples
 
@@ -11,14 +11,11 @@ select
   id,
   name,
   bucket,
-  content_type,
-  generation,
   size,
   storage_class,
-  time_created,
-  owner
+  time_created
 from
-  gcp_storage_object;
+  gcp_storage_bucket_object;
 ```
 
 ### List storage objects encrypted with customer managed keys
@@ -27,11 +24,12 @@ from
 select
   id,
   name,
-  bucket
+  bucket,
+  kms_key_name
 from
-  gcp_storage_object
+  gcp_storage_bucket_object
 where
-  not kms_key_name is not null;
+  kms_key_name != '';
 ```
 
 ### Get total objects and size of each bucket
@@ -42,7 +40,7 @@ select
   count(*) as total_objects,
   sum(size) as total_size_bytes
 from
-  gcp_storage_object
+  gcp_storage_bucket_object
 group by
   bucket;
 ```
@@ -57,7 +55,7 @@ select
   p ->> 'role' as role,
   p ->> 'version' as version
 from
-  gcp_storage_object,
+  gcp_storage_bucket_object,
   jsonb_array_elements(iam_policy -> 'bindings') as p;
 ```
 
@@ -69,7 +67,7 @@ select
   name,
   extract(epoch from (retention_expiration_time - current_timestamp)) as retention_period_secs
 from
-  gcp_storage_object
+  gcp_storage_bucket_object
 where
   extract(epoch from (retention_expiration_time - current_timestamp)) < 604800;
 ```
