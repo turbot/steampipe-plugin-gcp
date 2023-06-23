@@ -13,18 +13,17 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func tableGcpBucketStorageObject(_ context.Context) *plugin.Table {
+func tableGcpStorageObject(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_storage_bucket_object",
+		Name:        "gcp_storage_object",
 		Description: "GCP Storage Object",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"bucket", "name"}),
-			Hydrate:    getBucketStorageObject,
+			Hydrate:    getStorageObject,
 		},
 		List: &plugin.ListConfig{
-			KeyColumns:    plugin.OptionalColumns([]string{"bucket"}),
-			ParentHydrate: listGcpStorageBuckets,
-			Hydrate:       listBucketStorageObjects,
+			KeyColumns: plugin.SingleColumn("bucket"),
+			Hydrate:    listStorageObjects,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -199,7 +198,7 @@ func tableGcpBucketStorageObject(_ context.Context) *plugin.Table {
 			{
 				Name:        "iam_policy",
 				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
-				Hydrate:     getBucketStorageObjectIAMPolicy,
+				Hydrate:     getStorageObjectIAMPolicy,
 				Transform:   transform.FromValue(),
 				Type:        proto.ColumnType_JSON,
 			},
@@ -233,16 +232,17 @@ func tableGcpBucketStorageObject(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listBucketStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	bucket := h.Item.(*storage.Bucket).Name
+func listStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	bucket := d.EqualsQualString("bucket")
 
-	if d.EqualsQuals["bucket"] != nil && d.EqualsQualString("bucket") != bucket {
+	// The bucket name should not be empty
+	if bucket == "" {
 		return nil, nil
 	}
 
 	service, err := StorageService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.listBucketStorageObjects", "connection_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.listStorageObjects", "connection_error", err)
 		return nil, err
 	}
 
@@ -275,7 +275,7 @@ func listBucketStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugi
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.listBucketStorageObjects", "api_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.listStorageObjects", "api_error", err)
 		return nil, err
 	}
 
@@ -284,7 +284,7 @@ func listBucketStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugi
 
 //// HYDRATE FUNCTIONS
 
-func getBucketStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	bucket := d.EqualsQuals["bucket"].GetStringValue()
 	name := d.EqualsQuals["name"].GetStringValue()
 
@@ -295,26 +295,26 @@ func getBucketStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	service, err := StorageService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.getBucketStorageObject", "connection_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObject", "connection_error", err)
 		return nil, err
 	}
 
 	req, err := service.Objects.Get(bucket, name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.getBucketStorageObject", "api_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObject", "api_error", err)
 		return nil, err
 	}
 
 	return req, nil
 }
 
-func getBucketStorageObjectIAMPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getStorageObjectIAMPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	object := h.Item.(*storage.Object)
 
 	// Create Session
 	service, err := StorageService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.getBucketStorageObjectIAMPolicy", "connection_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "connection_error", err)
 		return nil, err
 	}
 
@@ -325,7 +325,7 @@ func getBucketStorageObjectIAMPolicy(ctx context.Context, d *plugin.QueryData, h
 		if strings.Contains(err.(*googleapi.Error).Message, "Object policies are disabled for bucket") {
 			return nil, nil
 		}
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.getBucketStorageObjectIAMPolicy", "api_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "api_error", err)
 		return nil, err
 	}
 
@@ -339,7 +339,7 @@ func getObjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_bucket_object.getObjectAka", "cache_error", err)
+		plugin.Logger(ctx).Trace("gcp_storage_object.getObjectAka", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
