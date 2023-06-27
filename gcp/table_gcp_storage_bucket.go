@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -254,11 +253,6 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	projection := "noAcl"
-	if helpers.StringSliceContains(d.QueryContext.Columns, "acl") || helpers.StringSliceContains(d.QueryContext.Columns, "default_object_acl") {
-		projection = "full"
-	}
-
 	// Max limit isn't mentioned in the documentation
 	// Default limit is set as 1000
 	maxResults := types.Int64(1000)
@@ -269,7 +263,7 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		}
 	}
 
-	resp := service.Buckets.List(project).Projection(projection).MaxResults(*maxResults)
+	resp := service.Buckets.List(project).Projection("full").MaxResults(*maxResults)
 	if err := resp.Pages(ctx, func(page *storage.Buckets) error {
 		for _, bucket := range page.Items {
 			d.StreamListItem(ctx, bucket)
