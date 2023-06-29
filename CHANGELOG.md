@@ -3,7 +3,7 @@
 _What's new?_
 
 - New tables added
-  - [gcp_storage_object`](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_storage_object`) ([#460](https://github.com/turbot/steampipe-plugin-gcp/pull/460))
+  - [gcp_storage_object](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_storage_object) ([#460](https://github.com/turbot/steampipe-plugin-gcp/pull/460))
 
 ## v0.39.0 [2023-06-20]
 
