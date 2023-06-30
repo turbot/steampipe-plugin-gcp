@@ -17,13 +17,16 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_logging_log_entry",
 		Description: "GCP Logging Log Entry",
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.SingleColumn("insert_id"),
+			Hydrate:    getGcpLoggingLogEntry,
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingLogEntries,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "resource_type", Require: plugin.Optional},
 				{Name: "severity", Require: plugin.Optional},
 				{Name: "log_name", Require: plugin.Optional},
-				{Name: "insert_id", Require: plugin.Optional},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -193,7 +196,6 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	resourceType := d.EqualsQualString("resource_type")
 	severity := d.EqualsQualString("severity")
 	logName := d.EqualsQualString("log_name")
-	insertId := d.EqualsQualString("insert_id")
 	filter := ""
 
 	if resourceType != "" {
@@ -213,14 +215,6 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 			filter = filter + " AND logName" + " = \"" + logName + "\""
 		} else {
 			filter = "logName" + " = \"" + logName + "\""
-		}
-	}
-
-	if insertId != "" {
-		if filter != "" {
-			filter = filter + " AND insertId" + " = \"" + insertId + "\""
-		} else {
-			filter = "insertId" + " = \"" + insertId + "\""
 		}
 	}
 
@@ -250,4 +244,46 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	return nil, err
+}
+
+//// HYDRATE FUNCTION
+
+func getGcpLoggingLogEntry(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
+	service, err := LoggingService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	param := &logging.ListLogEntriesRequest{
+		ProjectIds: []string{project},
+	}
+
+	insertId := d.EqualsQualString("insert_id")
+	filter := ""
+
+	if insertId != "" {
+		filter = "insertId" + " = \"" + insertId + "\""
+	}
+		param.Filter = filter
+
+	op, err := service.Entries.List(param).Do()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(op.Entries) > 0 {
+		return op.Entries[0], nil
+	}
+
+	return nil, nil
 }
