@@ -135,12 +135,12 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// // standard steampipe columns
+			// standard steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("LogName"),
+				Transform:   transform.FromField("InsertId"),
 			},
 
 			// standard gcp columns
