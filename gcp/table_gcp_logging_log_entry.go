@@ -19,6 +19,11 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 		Description: "GCP Logging Log Entry",
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingLogEntries,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "resource_type", Require: plugin.Optional},
+				{Name: "severity", Require: plugin.Optional},
+				{Name: "log_name", Require: plugin.Optional},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -182,6 +187,35 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	param := &logging.ListLogEntriesRequest{
 		PageSize:   *pageSize,
 		ProjectIds: []string{project},
+	}
+
+	resourceType := d.EqualsQualString("resource_type")
+	severity := d.EqualsQualString("severity")
+	logName := d.EqualsQualString("log_name")
+	filter := ""
+
+	if resourceType != "" {
+		filter = "resource.type" + " = \"" + resourceType + "\""
+	}
+
+	if severity != "" {
+		if filter != "" {
+			filter = filter + " AND severity" + " = \"" + severity + "\""
+		} else {
+			filter = "severity" + " = \"" + severity + "\""
+		}
+	}
+
+	if logName != "" {
+		if filter != "" {
+			filter = filter + " AND logName" + " = \"" + logName + "\""
+		} else {
+			filter = "logName" + " = \"" + logName + "\""
+		}
+	}
+
+	if filter != "" {
+		param.Filter = filter
 	}
 
 	op := service.Entries.List(param)
