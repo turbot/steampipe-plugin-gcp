@@ -17,10 +17,6 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_logging_log_entry",
 		Description: "GCP Logging Log Entry",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getGcpLoggingExclusion,
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingLogEntries,
 		},
