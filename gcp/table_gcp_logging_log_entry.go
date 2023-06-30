@@ -23,6 +23,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "resource_type", Require: plugin.Optional},
 				{Name: "severity", Require: plugin.Optional},
 				{Name: "log_name", Require: plugin.Optional},
+				{Name: "insert_id", Require: plugin.Optional},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -192,6 +193,7 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	resourceType := d.EqualsQualString("resource_type")
 	severity := d.EqualsQualString("severity")
 	logName := d.EqualsQualString("log_name")
+	insertId := d.EqualsQualString("insert_id")
 	filter := ""
 
 	if resourceType != "" {
@@ -211,6 +213,14 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 			filter = filter + " AND logName" + " = \"" + logName + "\""
 		} else {
 			filter = "logName" + " = \"" + logName + "\""
+		}
+	}
+
+	if insertId != "" {
+		if filter != "" {
+			filter = filter + " AND insertId" + " = \"" + insertId + "\""
+		} else {
+			filter = "insertId" + " = \"" + insertId + "\""
 		}
 	}
 
