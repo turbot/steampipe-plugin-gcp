@@ -135,7 +135,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// Standard steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -143,7 +143,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("InsertId"),
 			},
 
-			// standard gcp columns
+			// Standard gcp columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -167,6 +167,7 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	// Create Service Connection
 	service, err := LoggingService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.listGcpLoggingLogEntries", "service_error", err)
 		return nil, err
 	}
 
@@ -240,6 +241,7 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 			return nil
 		},
 	); err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.listGcpLoggingLogEntries", "api_error", err)
 		return nil, err
 	}
 
@@ -252,6 +254,7 @@ func getGcpLoggingLogEntry(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Create Service Connection
 	service, err := LoggingService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.getGcpLoggingLogEntry", "service_error", err)
 		return nil, err
 	}
 
@@ -278,6 +281,7 @@ func getGcpLoggingLogEntry(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	op, err := service.Entries.List(param).Do()
 
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.getGcpLoggingLogEntry", "api_error", err)
 		return nil, err
 	}
 
