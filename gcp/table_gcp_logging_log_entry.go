@@ -124,7 +124,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Split.Uid"),
 			},
 			{
-				Name:        "resource_lebels",
+				Name:        "resource_labels",
 				Description: "Values for all of the labels listed in the associated monitored resource descriptor.",
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Resource.Labels"),

@@ -1,7 +1,6 @@
-
 # Table: gcp_logging_log_entry
 
-AWS Logging Log Entry refers to a single log event or entry in a log stream within an AWS service's logging system. It contains information about a specific occurrence or activity that is being logged. Log entries typically include details such as timestamp, log message, log level, request ID, and other relevant metadata.
+In Google Cloud Platform (GCP), a logging log entry represents a single log event captured by GCP's logging service. It contains information about a specific occurrence or action that took place within a GCP resource or service. Each log entry contains various metadata and data fields that provide details about the event, such as the log severity, timestamp, log message, log name, resource information, and any additional structured data associated with the event.
 
 ## Examples
 
