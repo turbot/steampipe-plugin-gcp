@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"time"
 
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -27,6 +28,11 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "resource_type", Require: plugin.Optional},
 				{Name: "severity", Require: plugin.Optional},
 				{Name: "log_name", Require: plugin.Optional},
+				{Name: "span_id", Require: plugin.Optional},
+				{Name: "text_payload", Require: plugin.Optional},
+				{Name: "receive_timestamp", Require: plugin.Optional},
+				{Name: "timestamp", Require: plugin.Optional},
+				{Name: "trace", Require: plugin.Optional},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -194,30 +200,7 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 		ProjectIds: []string{project},
 	}
 
-	resourceType := d.EqualsQualString("resource_type")
-	severity := d.EqualsQualString("severity")
-	logName := d.EqualsQualString("log_name")
-	filter := ""
-
-	if resourceType != "" {
-		filter = "resource.type" + " = \"" + resourceType + "\""
-	}
-
-	if severity != "" {
-		if filter != "" {
-			filter = filter + " AND severity" + " = \"" + severity + "\""
-		} else {
-			filter = "severity" + " = \"" + severity + "\""
-		}
-	}
-
-	if logName != "" {
-		if filter != "" {
-			filter = filter + " AND logName" + " = \"" + logName + "\""
-		} else {
-			filter = "logName" + " = \"" + logName + "\""
-		}
-	}
+	filter := buildLoggingLogEntryFilterParam(d.Quals)
 
 	if filter != "" {
 		param.Filter = filter
@@ -276,7 +259,7 @@ func getGcpLoggingLogEntry(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	if insertId != "" {
 		filter = "insertId" + " = \"" + insertId + "\""
 	}
-		param.Filter = filter
+	param.Filter = filter
 
 	op, err := service.Entries.List(param).Do()
 
@@ -290,4 +273,56 @@ func getGcpLoggingLogEntry(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	return nil, nil
+}
+
+//// UTILITY FUNCTION
+
+func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string {
+	filter := ""
+
+	filterQuals := []filterQualMap{
+		{"resource_type", "resource.type", "string"},
+		{"severity", "severity", "string"},
+		{"log_name", "logName", "string"},
+		{"span_id", "spanId", "string"},
+		{"text_payload", "textPayload", "string"},
+		{"trace", "trace", "string"},
+		{"receive_timestamp", "receiveTimestamp", "timestamp"},
+		{"timestamp", "timestamp", "timestamp"},
+	}
+
+	for _, filterQualItem := range filterQuals {
+		filterQual := equalQuals[filterQualItem.ColumnName]
+		if filterQual == nil {
+			continue
+		}
+
+		// Check only if filter qual map matches with optional column name
+		if filterQual.Name == filterQualItem.ColumnName {
+			if filterQual.Quals == nil {
+				continue
+			}
+		}
+
+		for _, qual := range filterQual.Quals {
+			if qual.Value != nil {
+				value := qual.Value
+				switch filterQualItem.Type {
+				case "string":
+					if filter == "" {
+						filter = filterQualItem.PropertyPath + " = \"" + value.GetStringValue() + "\""
+					} else {
+						filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetStringValue() + "\""
+					}
+				case "timestamp":
+					if filter == "" {
+						filter = filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+					} else {
+						filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+					}
+				}
+			}
+		}
+	}
+	return filter
 }
