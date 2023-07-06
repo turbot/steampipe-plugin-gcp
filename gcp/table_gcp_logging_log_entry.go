@@ -33,6 +33,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "receive_timestamp", Require: plugin.Optional},
 				{Name: "timestamp", Require: plugin.Optional},
 				{Name: "trace", Require: plugin.Optional},
+				{Name: "log_entry_operation_id", Require: plugin.Optional},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -287,6 +288,7 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 		{"span_id", "spanId", "string"},
 		{"text_payload", "textPayload", "string"},
 		{"trace", "trace", "string"},
+		{"log_entry_operation_id", "operation.id", "string"},
 		{"receive_timestamp", "receiveTimestamp", "timestamp"},
 		{"timestamp", "timestamp", "timestamp"},
 	}
