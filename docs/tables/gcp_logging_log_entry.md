@@ -116,6 +116,7 @@ from
   gcp_logging_log_entry
 where log_entry_operation_last;
 ```
+
 ### Filter log entries by log name
 
 ```sql
