@@ -150,7 +150,7 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 	project := projectId.(string)
-	zone := "us-central1-c"
+	zone := "us-central1-f"
 
 	resp := service.MachineTypes.List(project, zone).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.MachineTypeList) error {
@@ -189,7 +189,7 @@ func getComputeMachineType(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 	project := projectId.(string)
-	zone := "us-central1-c"
+	zone := "us-central1-f"
 	machineTypeName := d.EqualsQuals["name"].GetStringValue()
 
 	// Return nil, if no input provided
