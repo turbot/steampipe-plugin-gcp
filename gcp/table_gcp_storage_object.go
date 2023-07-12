@@ -117,7 +117,7 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "md5",
+				Name:        "md5_hash",
 				Description: "MD5 hash of the data; encoded using base64",
 				Transform:   transform.FromField("MD5"),
 				Type:        proto.ColumnType_STRING,
