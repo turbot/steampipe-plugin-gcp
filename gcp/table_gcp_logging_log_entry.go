@@ -34,6 +34,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "timestamp", Require: plugin.Optional},
 				{Name: "trace", Require: plugin.Optional},
 				{Name: "log_entry_operation_id", Require: plugin.Optional},
+				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -58,6 +59,12 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Description: "Set this to True if this is the last log entry in the operation.",
 				Type:        proto.ColumnType_BOOL,
 				Transform:   transform.FromField("Operation.Last"),
+			},
+			{
+				Name:        "filter",
+				Type:        proto.ColumnType_STRING,
+				Description: "The filter pattern for the search.",
+				Transform:   transform.FromQual("filter"),
 			},
 			{
 				Name:        "log_entry_operation_id",
@@ -150,7 +157,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("InsertId"),
 			},
 
-			// Standard gcp columns
+			// Standard GCP columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
@@ -201,7 +208,13 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 		ProjectIds: []string{project},
 	}
 
-	filter := buildLoggingLogEntryFilterParam(d.Quals)
+	filter := ""
+
+	if d.EqualsQualString("filter") != "" {
+		filter = d.EqualsQualString("filter")
+	} else {
+		filter = buildLoggingLogEntryFilterParam(d.Quals)
+	}
 
 	if filter != "" {
 		param.Filter = filter
