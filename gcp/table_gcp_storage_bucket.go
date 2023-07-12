@@ -3,11 +3,12 @@ package gcp
 import (
 	"context"
 
+	"cloud.google.com/go/storage"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"google.golang.org/api/storage/v1"
+	"google.golang.org/api/iterator"
 )
 
 func tableGcpStorageBucket(_ context.Context) *plugin.Table {
@@ -30,16 +31,19 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "The ID of the bucket. For buckets, the id and name properties are the same.",
+				Transform:   transform.FromField("Name"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "kind",
 				Description: "The kind of item this is. For buckets, this is always storage#bucket.",
+				Transform:   transform.FromConstant("storage#bucket"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
 				Description: "The creation time of the bucket in RFC 3339 format.",
+				Transform:   transform.FromField("Created"),
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
@@ -57,7 +61,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Description: "When set to true, Requester Pays is enabled for this bucket.",
 				Default:     false,
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("Billing.RequesterPays"),
+				Transform:   transform.FromField("RequesterPays"),
 			},
 			{
 				Name:        "default_event_based_hold",
@@ -81,13 +85,13 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Description: "The bucket's uniform bucket-level access configuration. The feature was formerly known as Bucket Policy Only. For backward compatibility, this field will be populated with identical information as the uniformBucketLevelAccess field.",
 				Type:        proto.ColumnType_BOOL,
 				Default:     false,
-				Transform:   transform.FromField("IamConfiguration.BucketPolicyOnly.Enabled"),
+				Transform:   transform.FromField("BucketPolicyOnly.Enabled"),
 			},
 			{
 				Name:        "iam_configuration_public_access_prevention",
 				Description: "The bucket's Public Access Prevention configuration. Currently, 'unspecified' and 'enforced' are supported.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("IamConfiguration.PublicAccessPrevention"),
+				Transform:   transform.FromField("PublicAccessPrevention"),
 			},
 			{
 				Name:        "iam_configuration_uniform_bucket_level_access_enabled",
@@ -116,6 +120,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			{
 				Name:        "metageneration",
 				Description: "The metadata generation of this bucket.",
+				Transform:   transform.FromField("MetaGeneration"),
 				Type:        proto.ColumnType_INT,
 			},
 			{
@@ -167,16 +172,19 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 			{
 				Name:        "acl",
 				Description: "An access-control list",
+				Transform:   transform.FromField("ACL"),
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "default_object_acl",
 				Description: "Lists of object access control entries",
+				Transform:   transform.FromField("DefaultObjectACL"),
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "cors",
 				Description: "The bucket's Cross-Origin Resource Sharing (CORS) configuration.",
+				Transform:   transform.FromField("CORS"),
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -190,7 +198,7 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_rules",
 				Description: "The bucket's lifecycle configuration. See lifecycle management for more information.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Lifecycle.Rule"),
+				Transform:   transform.FromField("Lifecycle.Rules"),
 			},
 			{
 				Name:        "retention_policy",
@@ -263,24 +271,32 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		}
 	}
 
-	resp := service.Buckets.List(project).Projection("full").MaxResults(*maxResults)
-	if err := resp.Pages(ctx, func(page *storage.Buckets) error {
-		for _, bucket := range page.Items {
-			d.StreamListItem(ctx, bucket)
+	it := service.Buckets(ctx, project)
+	pager := iterator.NewPager(it, int(*maxResults), "")
+
+	for {
+		var buckets []*storage.BucketAttrs
+		nextPageToken, err := pager.NextPage(&buckets)
+		if err != nil {
+			plugin.Logger(ctx).Trace("gcp_storage_object.listStorageObjects", "api_error", err)
+			return nil, err
+		}
+
+		for _, item := range buckets {
+			d.StreamListItem(ctx, item)
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
 			if d.RowsRemaining(ctx) == 0 {
-				page.NextPageToken = ""
-				break
+				return nil, nil
 			}
 		}
-		return nil
-	}); err != nil {
-		return nil, err
+		if nextPageToken == "" {
+			break
+		}
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -290,12 +306,13 @@ func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// Create Service Connection
 	service, err := StorageService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_storage_bucket.getGcpStorageBucket", "connection_error", err)
 		return nil, err
 	}
 
-	req, err := service.Buckets.Get(name).Do()
+	req, err := service.Bucket(name).Attrs(ctx)
 	if err != nil {
-		plugin.Logger(ctx).Trace("getGcpStorageBucket", "Error", err)
+		plugin.Logger(ctx).Error("gcp_storage_bucket.getGcpStorageBucket", "api_error", err)
 		return nil, err
 	}
 
@@ -305,17 +322,18 @@ func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 //// HYDRATE FUNCTIONS
 
 func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGcpStorageBucketIAMPolicy")
-	bucket := h.Item.(*storage.Bucket)
+	bucket := h.Item.(*storage.BucketAttrs)
 
 	// Create Session
 	service, err := StorageService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_storage_bucket.getGcpStorageBucketIAMPolicy", "connection_error", err)
 		return nil, err
 	}
 
-	resp, err := service.Buckets.GetIamPolicy(bucket.Name).Do()
+	resp, err := service.Bucket(bucket.Name).IAM().Policy(ctx)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_storage_bucket.getGcpStorageBucketIAMPolicy", "query_error", err, "resp", resp)
 		return nil, err
 	}
 
@@ -323,12 +341,13 @@ func getGcpStorageBucketIAMPolicy(ctx context.Context, d *plugin.QueryData, h *p
 }
 
 func getBucketAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	bucket := h.Item.(*storage.Bucket)
+	bucket := h.Item.(*storage.BucketAttrs)
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_storage_bucket.getBucketAka", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)

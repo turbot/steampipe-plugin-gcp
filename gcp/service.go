@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 
+	"cloud.google.com/go/storage"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/apikeys/v2"
@@ -23,7 +24,8 @@ import (
 	"google.golang.org/api/monitoring/v3"
 	"google.golang.org/api/pubsub/v1"
 	"google.golang.org/api/serviceusage/v1"
-	"google.golang.org/api/storage/v1"
+
+	// "google.golang.org/api/storage/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -448,25 +450,52 @@ func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusag
 	return svc, nil
 }
 
+// // StorageService returns the service connection for GCP Storage service
+// func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service, error) {
+// 	// have we already created and cached the service?
+// 	serviceCacheKey := "StorageService"
+// 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+// 		return cachedData.(*storage.Service), nil
+// 	}
+
+// 	// To get config arguments from plugin config file
+// 	opts := setSessionConfig(ctx, d.Connection)
+
+// 	// so it was not in cache - create service
+// 	svc, err := storage.NewService(ctx, opts...)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+// 	return svc, nil
+// }
+
 // StorageService returns the service connection for GCP Storage service
-func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service, error) {
+func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Client, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "StorageService"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*storage.Service), nil
+		return cachedData.(*storage.Client), nil
 	}
 
 	// To get config arguments from plugin config file
 	opts := setSessionConfig(ctx, d.Connection)
 
 	// so it was not in cache - create service
-	svc, err := storage.NewService(ctx, opts...)
+
+	client, err := storage.NewClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
-	return svc, nil
+	// svc, err := storage.NewService(ctx, opts...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, client)
+	return client, nil
 }
 
 // KMSService returns the service connection for GCP KMS service

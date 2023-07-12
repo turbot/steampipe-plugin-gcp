@@ -2,14 +2,14 @@ package gcp
 
 import (
 	"context"
-	"strings"
+	"strconv"
 
+	"cloud.google.com/go/storage"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/storage/v1"
+	"google.golang.org/api/iterator"
 )
 
 func tableGcpStorageObject(_ context.Context) *plugin.Table {
@@ -33,6 +33,7 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "The ID of the object, including the bucket name, object name, and generation number.",
+				Transform:   transform.From(getObjectId),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -73,7 +74,7 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 			{
 				Name:        "crc32c",
 				Description: "CRC32c checksum, as described in RFC 4960, Appendix B; encoded using base64 in big-endian byte order.",
-				Transform:   transform.FromField("Crc32c"),
+				Transform:   transform.FromField("CRC32C"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -81,6 +82,12 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 				Description: "A timestamp in RFC 3339 format specified by the user for an object",
 				Transform:   transform.FromGo().NullIfZero(),
 				Type:        proto.ColumnType_TIMESTAMP,
+			},
+			{
+				Name:        "customer_encryption",
+				Description: "Metadata of customer-supplied encryption key, if the object is encrypted by such a key",
+				Transform:   transform.FromField("CustomerKeySHA256"),
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "etag",
@@ -100,17 +107,19 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 			{
 				Name:        "kind",
 				Description: "The kind of item this is.",
+				Transform:   transform.FromConstant("storage#object"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "kms_key_name",
 				Description: "Cloud KMS Key used to encrypt this object, if the object is encrypted by such a key.",
+				Transform:   transform.FromField("KMSKeyName"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "md5_hash",
+				Name:        "md5",
 				Description: "MD5 hash of the data; encoded using base64",
-				Transform:   transform.FromField("Md5Hash"),
+				Transform:   transform.FromField("MD5"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -127,6 +136,11 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 				Name:        "metageneration",
 				Description: "The version of the metadata for this object at this generation.",
 				Type:        proto.ColumnType_INT,
+			},
+			{
+				Name:        "owner",
+				Description: "The owner of the object. This will always be the uploader of the object.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "retention_expiration_time",
@@ -157,12 +171,13 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "The creation time of the object.",
+				Transform:   transform.FromField("Created").NullIfZero(),
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "time_deleted",
 				Description: "The deletion time of the object.",
-				Transform:   transform.FromGo().NullIfZero(),
+				Transform:   transform.FromField("Deleted").NullIfZero(),
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
@@ -182,25 +197,16 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 			{
 				Name:        "acl",
 				Description: "Access controls on the object.",
+				Transform:   transform.FromField("ACL"),
 				Type:        proto.ColumnType_JSON,
 			},
-			{
-				Name:        "customer_encryption",
-				Description: "Metadata of customer-supplied encryption key, if the object is encrypted by such a key",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "owner",
-				Description: "The owner of the object. This will always be the uploader of the object.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "iam_policy",
-				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
-				Hydrate:     getStorageObjectIAMPolicy,
-				Transform:   transform.FromValue(),
-				Type:        proto.ColumnType_JSON,
-			},
+			// {
+			// 	Name:        "iam_policy",
+			// 	Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to a resource only if the expression evaluates to `true`.",
+			// 	Hydrate:     getStorageObjectIAMPolicy,
+			// 	Transform:   transform.FromValue(),
+			// 	Type:        proto.ColumnType_JSON,
+			// },
 
 			// standard steampipe columns
 			{
@@ -255,25 +261,35 @@ func listStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		}
 	}
 
-	resp := service.Objects.List(bucket).Projection("full").MaxResults(*maxResults)
-	if err := resp.Pages(ctx, func(page *storage.Objects) error {
-		for _, object := range page.Items {
-			d.StreamListItem(ctx, object)
+	query := &storage.Query{
+		Projection: storage.ProjectionFull,
+	}
+
+	it := service.Bucket(bucket).Objects(ctx, query)
+	pager := iterator.NewPager(it, int(*maxResults), "")
+
+	for {
+		var objects []*storage.ObjectAttrs
+		nextPageToken, err := pager.NextPage(&objects)
+		if err != nil {
+			plugin.Logger(ctx).Trace("gcp_storage_object.listStorageObjects", "api_error", err)
+			return nil, err
+		}
+		for _, item := range objects {
+			d.StreamListItem(ctx, item)
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
 			if d.RowsRemaining(ctx) == 0 {
-				page.NextPageToken = ""
-				break
+				return nil, nil
 			}
 		}
-		return nil
-	}); err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_object.listStorageObjects", "api_error", err)
-		return nil, err
+		if nextPageToken == "" {
+			break
+		}
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -293,41 +309,41 @@ func getStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	req, err := service.Objects.Get(bucket, name).Do()
+	object, err := service.Bucket(bucket).Object(name).Attrs(ctx)
 	if err != nil {
 		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObject", "api_error", err)
 		return nil, err
 	}
 
-	return req, nil
+	return object, nil
 }
 
-func getStorageObjectIAMPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	object := h.Item.(*storage.Object)
+// func getStorageObjectIAMPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+// 	object := h.Item.(*storage.ObjectAttrs)
 
-	// Create Session
-	service, err := StorageService(ctx, d)
-	if err != nil {
-		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "connection_error", err)
-		return nil, err
-	}
+// 	// Create Session
+// 	service, err := StorageService(ctx, d)
+// 	if err != nil {
+// 		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "connection_error", err)
+// 		return nil, err
+// 	}
 
-	resp, err := service.Objects.GetIamPolicy(object.Bucket, object.Name).Do()
-	if err != nil {
+// 	resp, err := service.Bucket(object.Bucket).Object(object.Name).
+// 	if err != nil {
 
-		// Return nil, if uniform bucket-level access is enabled
-		if strings.Contains(err.(*googleapi.Error).Message, "Object policies are disabled for bucket") {
-			return nil, nil
-		}
-		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "api_error", err)
-		return nil, err
-	}
+// 		// Return nil, if uniform bucket-level access is enabled
+// 		if strings.Contains(err.(*googleapi.Error).Message, "Object policies are disabled for bucket") {
+// 			return nil, nil
+// 		}
+// 		plugin.Logger(ctx).Trace("gcp_storage_object.getStorageObjectIAMPolicy", "api_error", err)
+// 		return nil, err
+// 	}
 
-	return resp, nil
-}
+// 	return resp, nil
+// }
 
 func getObjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	object := h.Item.(*storage.Object)
+	object := h.Item.(*storage.ObjectAttrs)
 
 	// Get project details
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
@@ -340,4 +356,11 @@ func getObjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 
 	akas := []string{"gcp://storage.googleapis.com/projects/" + project + "/buckets/" + object.Bucket + "/objects/" + object.Name}
 	return akas, nil
+}
+
+//// TRANSFORM FUNCTIONS
+
+func getObjectId(ctx context.Context, h *transform.TransformData) (interface{}, error) {
+	object := h.HydrateItem.(*storage.ObjectAttrs)
+	return object.Bucket + "/" + object.Name + "/" + strconv.Itoa(int(object.Generation)), nil
 }
