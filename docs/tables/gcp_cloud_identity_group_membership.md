@@ -16,7 +16,7 @@ select
 from
   gcp_cloud_identity_group_membership
 where
-  group_name = '030j0zll4288gm3';
+  group_name = '123j0zll4288gmz';
 ```
 
 ### Get details of all google managed members in a group
@@ -30,7 +30,7 @@ select
 from
   gcp_cloud_identity_group_membership
 where
-  group_name = '030j0zll4288gm3'
+  group_name = '123j0zll4288gmz'
   and preferred_member_key ->> 'namespace' is null;
 ```
 
@@ -45,7 +45,7 @@ select
 from
   gcp_cloud_identity_group_membership
 where
-  group_name = '030j0zll4288gm3'
+  group_name = '123j0zll4288gmz'
   and type = 'GROUP';
 ```
 
@@ -64,7 +64,7 @@ from
   gcp_cloud_identity_group_membership,
   jsonb_array_elements(roles) as role
 where
-  group_name = '030j0zll4288gm3';
+  group_name = '123j0zll4288gmz';
 ```
 
 ### Get details of a specific member of a group
@@ -82,6 +82,6 @@ from
   gcp_cloud_identity_group_membership,
   jsonb_array_elements(roles) as role
 where
-  group_name = '030j0zll4288gm3'
-  and name = '104454620869324818189';
+  group_name = '123j0zll4288gmz'
+  and name = '123454620869324818189';
 ```
