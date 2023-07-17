@@ -41,6 +41,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_billing_account":                                     tableGcpBillingAccount(ctx),
 			"gcp_billing_budget":                                      tableGcpBillingBudget(ctx),
 			"gcp_cloudfunctions_function":                             tableGcpCloudfunctionFunction(ctx),
+			"gcp_cloud_identity_group_membership":                     tableGcpCloudIdentityGroupMembership(ctx),
 			"gcp_compute_address":                                     tableGcpComputeAddress(ctx),
 			"gcp_compute_autoscaler":                                  tableGcpComputeAutoscaler(ctx),
 			"gcp_compute_backend_bucket":                              tableGcpComputeBackendBucket(ctx),

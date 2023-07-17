@@ -11,6 +11,7 @@ import (
 	"google.golang.org/api/billingbudgets/v1"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudfunctions/v1"
+	"google.golang.org/api/cloudidentity/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
@@ -314,6 +315,27 @@ func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunc
 
 	// so it was not in cache - create service
 	svc, err := cloudfunctions.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudIdentityService returns the service connection for GCP Identity service
+func CloudIdentityService(ctx context.Context, d *plugin.QueryData) (*cloudidentity.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudIdentityService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudidentity.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudidentity.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
