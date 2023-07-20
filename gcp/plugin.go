@@ -95,6 +95,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_kubernetes_node_pool":                                tableGcpKubernetesNodePool(ctx),
 			"gcp_logging_bucket":                                      tableGcpLoggingBucket(ctx),
 			"gcp_logging_exclusion":                                   tableGcpLoggingExclusion(ctx),
+			"gcp_logging_log_entry":                                   tableGcpLoggingLogEntry(ctx),
 			"gcp_logging_metric":                                      tableGcpLoggingMetric(ctx),
 			"gcp_logging_sink":                                        tableGcpLoggingSink(ctx),
 			"gcp_monitoring_alert_policy":                             tableGcpMonitoringAlert(ctx),
