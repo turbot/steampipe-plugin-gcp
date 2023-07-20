@@ -1,3 +1,10 @@
+## v0.41.0 [2023-07-20]
+
+_What's new?_
+
+- New tables added
+  - [gcp_logging_log_entry](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_logging_log_entry) ([#463](https://github.com/turbot/steampipe-plugin-gcp/pull/463))
+
 ## v0.40.0 [2023-06-29]
 
 _What's new?_
