@@ -217,4 +217,4 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
 ## Get involved
 
 - Open source: https://github.com/turbot/steampipe-plugin-gcp
-- Community: [Slack Channel](https://steampipe.io/community/join)
+- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
