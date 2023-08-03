@@ -21,14 +21,23 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 			Hydrate:    getStorageObject,
 		},
 		List: &plugin.ListConfig{
-			KeyColumns: plugin.SingleColumn("bucket"),
-			Hydrate:    listStorageObjects,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "bucket", Require: plugin.Required, CacheMatch: "exact"},
+				{Name: "prefix", Require: plugin.Optional},
+			},
+			Hydrate: listStorageObjects,
 		},
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the object.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "prefix",
+				Description: "The prefix of the key of the object.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("prefix"),
 			},
 			{
 				Name:        "id",
@@ -233,6 +242,7 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 
 func listStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	bucket := d.EqualsQualString("bucket")
+	prefix := d.EqualsQualString("prefix")
 
 	// The bucket name should not be empty
 	if bucket == "" {
@@ -255,7 +265,7 @@ func listStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		}
 	}
 
-	resp := service.Objects.List(bucket).Projection("full").MaxResults(*maxResults)
+	resp := service.Objects.List(bucket).Prefix(prefix).Projection("full").MaxResults(*maxResults)
 	if err := resp.Pages(ctx, func(page *storage.Objects) error {
 		for _, object := range page.Items {
 			d.StreamListItem(ctx, object)
