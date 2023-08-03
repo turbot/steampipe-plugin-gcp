@@ -37,6 +37,23 @@ where
   and name = 'test/logs/2021/03/01/12/abc.txt';
 ```
 
+### List storage objects with a prefix in a bucket
+
+```sql
+select
+  id,
+  name,
+  bucket,
+  size,
+  storage_class,
+  time_created
+from
+  gcp_storage_object
+where
+  bucket = 'steampipe-test'
+  and prefix = 'test/logs/2021/03/01/12';
+```
+
 ### List storage objects encrypted with customer managed keys
 
 ```sql
