@@ -22,8 +22,9 @@ func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 			Hydrate:    getCloudIdentityGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:    listCloudIdentityGroups,
-			KeyColumns: plugin.SingleColumn("parent"),
+			Hydrate:           listCloudIdentityGroups,
+			ShouldIgnoreError: isIgnorableError([]string{"400"}),
+			KeyColumns:        plugin.SingleColumn("parent"),
 		},
 		Columns: []*plugin.Column{
 			{

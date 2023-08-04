@@ -23,8 +23,9 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 			Hydrate:    getCloudIdentityGroupMembership,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:    listCloudIdentityGroupMemberships,
-			KeyColumns: plugin.AllColumns([]string{"group_name"}),
+			Hydrate:           listCloudIdentityGroupMemberships,
+			ShouldIgnoreError: isIgnorableError([]string{"400"}),
+			KeyColumns:        plugin.AllColumns([]string{"group_name"}),
 		},
 		Columns: []*plugin.Column{
 			{

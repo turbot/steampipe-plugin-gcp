@@ -22,34 +22,20 @@ where
   parent = 'C046psxkn';
 ```
 
-### Get members in each group
+### Get details for a specific group
 
 ```sql
 select
-  m.group_name,
-  m.name as member_name
+  name,
+  display_name,
+  description,
+  create_time,
+  location,
+  project
 from
-  gcp_cloud_identity_group_membership m,
-  gcp_cloud_identity_group g
+  gcp_cloud_identity_group
 where
-  m.group_name = g.name
-  and g.parent = 'C046psxkn';
-```
-
-### Get total number of members in each group
-
-```sql
-select
-  m.group_name,
-  count(m.*) as total_members
-from
-  gcp_cloud_identity_group_membership m,
-  gcp_cloud_identity_group g
-where
-  m.group_name = g.name
-  and g.parent = 'C046psxkn'
-group by
-  m.group_name;
+  name = 'group_name';
 ```
 
 ### Get dynamic group settings
