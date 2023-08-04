@@ -36,24 +36,24 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "group_name",
-				Description: "The group in which the membership belongs to",
+				Description: "The group in which the membership belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name").Transform(gcpCloudIdentityGroupName),
 			},
 			{
 				Name:        "create_time",
-				Description: "The time when the membership was created",
+				Description: "The time when the membership was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromGo().NullIfZero(),
 			},
 			{
 				Name:        "type",
-				Description: "The type of the membership",
+				Description: "The type of the membership.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "update_time",
-				Description: "The time when the membership was last updated",
+				Description: "The time when the membership was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromGo().NullIfZero(),
 			},
@@ -61,12 +61,12 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 			// JSON Columns
 			{
 				Name:        "preferred_member_key",
-				Description: "The `EntityKey` of the member",
+				Description: "The `EntityKey` of the member.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "roles",
-				Description: "The membership roles that apply to the membership",
+				Description: "The membership roles that apply to the membership.",
 				Type:        proto.ColumnType_JSON,
 			},
 

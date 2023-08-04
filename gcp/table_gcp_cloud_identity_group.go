@@ -30,34 +30,34 @@ func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 			{
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
-				Description: "The friendly name that identifies the group",
+				Description: "The friendly name that identifies the group.",
 				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "create_time",
-				Description: "The time when the group was created",
+				Description: "The time when the group was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromGo().NullIfZero(),
 			},
 			{
 				Name:        "description",
-				Description: "A human-readable description for the group",
+				Description: "A human-readable description for the group.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "display_name",
-				Description: "A human-readable name for the group",
+				Description: "A human-readable name for the group.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "parent",
-				Description: "The resource name of the entity under which this `Group` resides in the Cloud Identity resource hierarchy",
+				Description: "The resource name of the entity under which this `Group` resides in the Cloud Identity resource hierarchy.",
 				Transform:   transform.FromQual("parent"),
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "update_time",
-				Description: "The time when the group was last updated",
+				Description: "The time when the group was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromGo().NullIfZero(),
 			},
@@ -65,17 +65,17 @@ func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 			// JSON Columns
 			{
 				Name:        "dynamic_group_metadata",
-				Description: "Dynamic group metadata like queries and status",
+				Description: "Dynamic group metadata like queries and status.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "group_key",
-				Description: "The `EntityKey` of the `Group`",
+				Description: "The `EntityKey` of the `Group`.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "labels",
-				Description: "The labels that apply to the group",
+				Description: "The labels that apply to the group.",
 				Type:        proto.ColumnType_JSON,
 			},
 
