@@ -2,6 +2,8 @@
 
 A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
 
+**You must specify the identity group name** in the `where` clause (`where group_name=''`) to list the identity group memberships.
+
 ## Examples
 
 ### Basic info

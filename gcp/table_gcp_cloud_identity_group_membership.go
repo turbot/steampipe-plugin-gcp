@@ -69,7 +69,7 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// standard Steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -83,7 +83,7 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 				Transform:   transform.FromP(gcpCloudIdentityGroupMembershipTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
+			// standard GCP columns
 			{
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
