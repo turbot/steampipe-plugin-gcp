@@ -17,7 +17,7 @@ import (
 func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_cloud_identity_group_membership",
-		Description: "GCP Cloud Identity Group Membership",
+		Description: "GCP Cloud Identity Group Membership.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "group_name"}),
 			Hydrate:    getCloudIdentityGroupMembership,
@@ -105,6 +105,7 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listCloudIdentityGroupMemberships(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	groupName := d.EqualsQualString("group_name")
 
 	// Return nil, if no input provided
@@ -125,7 +126,7 @@ func listCloudIdentityGroupMemberships(ctx context.Context, d *plugin.QueryData,
 	// Create Service Connection
 	service, err := CloudIdentityService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_identity_group_membership.listCloudIdentityGroupMemberships", "connection_error", err)
+		logger.Error("gcp_cloud_identity_group_membership.listCloudIdentityGroupMemberships", "connection_error", err)
 		return nil, err
 	}
 
@@ -142,7 +143,7 @@ func listCloudIdentityGroupMemberships(ctx context.Context, d *plugin.QueryData,
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_identity_group_membership.listCloudIdentityGroupMemberships", "api_error", err)
+		logger.Error("gcp_cloud_identity_group_membership.listCloudIdentityGroupMemberships", "api_error", err)
 		return nil, err
 	}
 
@@ -152,6 +153,7 @@ func listCloudIdentityGroupMemberships(ctx context.Context, d *plugin.QueryData,
 //// HYDRATE FUNCTIONS
 
 func getCloudIdentityGroupMembership(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	name := d.EqualsQualString("name")
 	groupName := d.EqualsQualString("group_name")
 
@@ -163,13 +165,13 @@ func getCloudIdentityGroupMembership(ctx context.Context, d *plugin.QueryData, h
 	// Create Service Connection
 	service, err := CloudIdentityService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_identity_group_membership.getCloudIdentityGroupMembership", "connection_error", err)
+		logger.Error("gcp_cloud_identity_group_membership.getCloudIdentityGroupMembership", "connection_error", err)
 		return nil, err
 	}
 
 	membership, err := service.Groups.Memberships.Get("groups/" + groupName + "/memberships/" + name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_identity_group_membership.getCloudIdentityGroupMembership", "api_error", err)
+		logger.Error("gcp_cloud_identity_group_membership.getCloudIdentityGroupMembership", "api_error", err)
 		return nil, err
 	}
 

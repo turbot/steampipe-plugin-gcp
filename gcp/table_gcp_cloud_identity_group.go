@@ -16,7 +16,7 @@ import (
 func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_cloud_identity_group",
-		Description: "GCP Cloud Identity Group",
+		Description: "GCP Cloud Identity Group.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getCloudIdentityGroup,
@@ -122,6 +122,11 @@ func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 func listCloudIdentityGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	parent := d.EqualsQualString("parent")
+
+	// The parent should not be empty
+	if parent == "" {
+		return nil, nil
+	}
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api/cloudidentity/v1#GroupsListCall.PageSize
