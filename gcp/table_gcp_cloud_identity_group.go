@@ -16,7 +16,7 @@ import (
 func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_cloud_identity_group",
-		Description: "GCP Cloud Identity Group.",
+		Description: "GCP Cloud Identity Group",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getCloudIdentityGroup,

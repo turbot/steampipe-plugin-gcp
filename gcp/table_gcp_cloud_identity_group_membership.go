@@ -17,7 +17,7 @@ import (
 func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_cloud_identity_group_membership",
-		Description: "GCP Cloud Identity Group Membership.",
+		Description: "GCP Cloud Identity Group Membership",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "group_name"}),
 			Hydrate:    getCloudIdentityGroupMembership,
@@ -31,7 +31,7 @@ func tableGcpCloudIdentityGroupMembership(_ context.Context) *plugin.Table {
 			{
 				Name:        "name",
 				Type:        proto.ColumnType_STRING,
-				Description: "The friendly name that identifies the membership",
+				Description: "The friendly name that identifies the membership.",
 				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
