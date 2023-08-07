@@ -1,3 +1,15 @@
+## v0.42.0 [2023-08-07]
+
+_What's new?_
+
+- New tables added
+  - [gcp_cloud_identity_group](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_identity_group) ([#468](https://github.com/turbot/steampipe-plugin-gcp/pull/468))
+  - [gcp_cloud_identity_group_membership](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_identity_group_membership) ([#468](https://github.com/turbot/steampipe-plugin-gcp/pull/468))
+
+_Enhancements_
+
+- Added the `prefix` column as key column to `gcp_storage_object` table. ([#475](https://github.com/turbot/steampipe-plugin-gcp/pull/475)) (Thanks to [@villers](https://github.com/villers) for the contribution!)
+
 ## v0.41.0 [2023-07-20]
 
 _What's new?_
