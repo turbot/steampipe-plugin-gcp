@@ -2,7 +2,7 @@
 
 A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
 
-**You must specify the parent resource** under which to list all the `Group` resources. Must be of the form `identitysources/{identity_source}` for external-identity-mapped groups or `customers/{customer}` for Google Groups in the `where` clause (`where parent='C046psxkn'`) to list the identity group memberships.
+**You must specify the parent resource** in the `where` clause (`where parent='C046psxkn'`) to list the identity group.
 
 ## Examples
 
