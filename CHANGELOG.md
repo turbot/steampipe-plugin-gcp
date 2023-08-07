@@ -8,7 +8,7 @@ _What's new?_
 
 _Enhancements_
 
-- Added the `prefix` as optional list key column in `gcp_storage_object` table. ([#475](https://github.com/turbot/steampipe-plugin-gcp/pull/475)) (Thanks to [@villers](https://github.com/villers) for the contribution!)
+- Added the `prefix` as an optional list key column in `gcp_storage_object` table. ([#475](https://github.com/turbot/steampipe-plugin-gcp/pull/475)) (Thanks to [@villers](https://github.com/villers) for the contribution!)
 
 ## v0.41.0 [2023-07-20]
 
