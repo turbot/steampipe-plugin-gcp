@@ -6,11 +6,12 @@ import (
 )
 
 type gcpConfig struct {
-	Project                   *string  `cty:"project"`
-	Credentials               *string  `cty:"credentials"`
-	CredentialFile            *string  `cty:"credential_file"`
-	ImpersonateServiceAccount *string  `cty:"impersonate_service_account"`
-	IgnoreErrorCodes          []string `cty:"ignore_error_codes"`
+	Project                     *string  `cty:"project"`
+	Credentials                 *string  `cty:"credentials"`
+	CredentialFile              *string  `cty:"credential_file"`
+	ImpersonateServiceAccount   *string  `cty:"impersonate_service_account"`
+	IgnoreServiceDisabledErrors *bool    `cty:"ignore_service_disabled_errors"`
+	IgnoreErrorCodes            []string `cty:"ignore_error_codes"`
 }
 
 var ConfigSchema = map[string]*schema.Attribute{
@@ -25,6 +26,9 @@ var ConfigSchema = map[string]*schema.Attribute{
 	},
 	"impersonate_service_account": {
 		Type: schema.TypeString,
+	},
+	"ignore_service_disabled_errors": {
+		Type: schema.TypeBool,
 	},
 	"ignore_error_codes": {
 		Type: schema.TypeList,

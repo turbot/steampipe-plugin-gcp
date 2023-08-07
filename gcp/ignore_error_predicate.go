@@ -23,12 +23,24 @@ func isIgnorableError(notFoundErrors []string) plugin.ErrorPredicate {
 // shouldIgnoreErrorPluginDefault:: Plugin level default function to ignore a set errors for hydrate functions based on "ignore_error_codes" config argument
 func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 	return func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, err error) bool {
-		if !hasIgnoredErrorCodes(d.Connection) {
-			return false
-		}
-
 		gcpConfig := GetConfig(d.Connection)
+
 		if gerr, ok := err.(*googleapi.Error); ok {
+			if gcpConfig.IgnoreServiceDisabledErrors == nil || *gcpConfig.IgnoreServiceDisabledErrors {
+				for _, reason := range gerr.Details {
+					data := reason.(map[string]interface{})
+					if data["reason"] != nil {
+						if ok, _ := path.Match("SERVICE_DISABLED", types.ToString(data["reason"])); ok {
+							return true
+						}
+					}
+				}
+			}
+
+			if !hasIgnoredErrorCodes(d.Connection) {
+				return false
+			}
+
 			// Added to support regex in not found errors
 			for _, pattern := range gcpConfig.IgnoreErrorCodes {
 				if ok, _ := path.Match(pattern, types.ToString(gerr.Code)); ok {
