@@ -2,7 +2,7 @@
 
 A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
 
-**You must specify the parent resource** in the `where` clause (`where parent='C046psxkn'`) to list the identity group.
+**You must specify the parent resource** in the `where` clause (`where parent='C046psxkn'`) to list the identity groups.
 
 ## Examples
 
