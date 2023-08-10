@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"path"
+	"regexp"
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
@@ -26,14 +27,11 @@ func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 		gcpConfig := GetConfig(d.Connection)
 
 		if gerr, ok := err.(*googleapi.Error); ok {
-			if gcpConfig.IgnoreServiceDisabledErrors == nil || *gcpConfig.IgnoreServiceDisabledErrors {
-				for _, reason := range gerr.Details {
-					data := reason.(map[string]interface{})
-					if data["reason"] != nil {
-						if ok, _ := path.Match("SERVICE_DISABLED", types.ToString(data["reason"])); ok {
-							return true
-						}
-					}
+			for _, pattern := range gcpConfig.IgnoreErrorMessages {
+				re := regexp.MustCompile(pattern)
+				result := re.FindString(types.ToString(gerr.Message))
+				if result != "" {
+					return true
 				}
 			}
 

@@ -20,8 +20,8 @@ connection "gcp" {
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
 
-  # `ignore_service_disabled_errors` (optional) - can be set to true or false, the default value is true.
-  # ignore_service_disabled_errors = true
+  # `ignore_error_messages` (optional) - List of additional GCP error message pattern to ignore for all queries.
+  #  ignore_error_messages = ["API has not been used", "other regex"]
 
   # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
   # By default, common not found error codes are ignored and will still be ignored even if this argument is not set.
