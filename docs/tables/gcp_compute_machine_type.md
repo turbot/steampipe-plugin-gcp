@@ -69,7 +69,7 @@ from
 select
   name,
   zone,
-  count(name) as number_of_machine_type
+  count(name) as numbers_of_machine_type
 from
   gcp_compute_machine_type
 group by
