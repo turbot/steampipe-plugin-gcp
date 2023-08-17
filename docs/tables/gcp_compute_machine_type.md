@@ -62,3 +62,17 @@ from
   gcp_compute_machine_type,
   jsonb_array_elements(accelerators) as a;
 ```
+
+### Display the categorization of machine types by zone
+
+```sql
+select
+  name,
+  zone,
+  count(name) as numbers_of_machine_type
+from
+  gcp_compute_machine_type
+group by
+  name,
+  zone;
+```
