@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Fixed the `gcp_compute_machine_type` table to correctly return the machine types for the specified zone instead of an empty row. ([#480](https://github.com/turbot/steampipe-plugin-gcp/pull/480))
+- Fixed the `gcp_compute_machine_type` table to correctly return the supported machine types of all the zones. ([#480](https://github.com/turbot/steampipe-plugin-gcp/pull/480))
 
 ## v0.42.0 [2023-08-07]
 
