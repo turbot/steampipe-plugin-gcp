@@ -18,13 +18,13 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 		Name:        "gcp_redis_instance",
 		Description: "GCP Redis Instance",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"name", "location_id"}),
+			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getGcpRedisInstance,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpRedisInstances,
 			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "location_id", Require: plugin.Optional},
+				{Name: "location", Require: plugin.Optional},
 			},
 		},
 		GetMatrixItemFunc: BuildRedisLocationList,
@@ -223,6 +223,12 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 
 			// Standard gcp columns
 			{
+				Name:        "location",
+				Description: ColumnDescriptionLocation,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpRedisInstanceTurbotData, "location"),
+			},
+			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
@@ -245,11 +251,11 @@ func listGcpRedisInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	var location string
+	location := d.EqualsQualString("location")
 	matrixLocation := d.EqualsQualString(matrixKeyRedisLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != "" {
-		location = matrixLocation
+	if location != "" && location != matrixLocation {
+		return nil, nil
 	}
 
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
@@ -260,7 +266,7 @@ func listGcpRedisInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	project := projectId.(string)
 
-	parent := "projects/" + project + "/locations/" + location
+	parent := "projects/" + project + "/locations/" + matrixLocation
 	req := &redispb.ListInstancesRequest{
 		Parent: parent,
 	}
@@ -292,7 +298,6 @@ func listGcpRedisInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 func getGcpRedisInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	instanceName := d.EqualsQualString("name")
-	instanceLocationId := d.EqualsQualString("location_id")
 
 	// Create Service Connection
 	service, err := RedisService(ctx, d)
@@ -301,11 +306,11 @@ func getGcpRedisInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
-	var location string
+	location := d.EqualsQualString("location")
 	matrixLocation := d.EqualsQualString(matrixKeyRedisLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != "" {
-		location = matrixLocation
+	if location != "" && location != matrixLocation {
+		return nil, nil
 	}
 
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
@@ -316,11 +321,7 @@ func getGcpRedisInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	project := projectId.(string)
 
-	if !strings.Contains(instanceLocationId, location) {
-		return nil, nil
-	}
-
-	name := "projects/" + project + "/locations/" + location + "/instances/" + instanceName
+	name := "projects/" + project + "/locations/" + matrixLocation + "/instances/" + instanceName
 
 	req := &redispb.GetInstanceRequest{
 		Name: name,
@@ -339,9 +340,15 @@ func getGcpRedisInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 func gcpRedisInstanceTurbotData(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	instance := d.HydrateItem.(*redispb.Instance)
+	param := d.Param.(string)
 	akas := []string{"gcp://redis.googleapis.com/" + instance.Name}
+	locationId := strings.Split(instance.LocationId, "-")
+	location := strings.Join(locationId[:len(locationId)-1], "-")
+	data := make(map[string]interface{}, 0)
+	data["akas"] = akas
+	data["location"] = location
 
-	return akas, nil
+	return data[param], nil
 }
 
 func gcpRedisInstanceCreateTime(_ context.Context, d *transform.TransformData) (interface{}, error) {
@@ -351,3 +358,4 @@ func gcpRedisInstanceCreateTime(_ context.Context, d *transform.TransformData) (
 	}
 	return instanceCreateTime.AsTime(), nil
 }
+
