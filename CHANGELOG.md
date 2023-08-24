@@ -1,3 +1,10 @@
+## v0.43.0 [2023-08-24]
+
+_What's new?_
+
+- New tables added
+  - [gcp_redis_instance](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_redis_instance) ([#482](https://github.com/turbot/steampipe-plugin-gcp/pull/482))
+
 ## v0.42.1 [2023-08-17]
 
 _Bug fixes_
