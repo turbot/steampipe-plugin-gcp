@@ -23,6 +23,7 @@ import (
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/monitoring/v3"
 	"google.golang.org/api/pubsub/v1"
+	"cloud.google.com/go/redis/apiv1"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/storage/v1"
 
@@ -504,6 +505,27 @@ func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, er
 
 	// so it was not in cache - create service
 	svc, err := cloudkms.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// RedisService returns the service connection for GCP Redis service
+func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisClient, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "RedisService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*redis.CloudRedisClient), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := redis.NewCloudRedisClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
