@@ -18,7 +18,7 @@ from
   gcp_redis_instance;
 ```
 
-### List all instances that have auth enabled
+### List instances that have authentication enabled
 
 ```sql
 select
@@ -34,7 +34,7 @@ where
   auth_enabled;
 ```
 
-### List all instances created in the last 7 days
+### List instances created in the last 7 days
 
 ```sql
 select
@@ -50,7 +50,7 @@ where
   create_time >= current_timestamp - interval '7 days';
 ```
 
-### List the node details for each instance
+### List the node details of each instance
 
 ```sql
 select
@@ -66,7 +66,7 @@ where
   and location_id = 'europe-west3-c';
 ```
 
-### List instances encrypted with customer managed keys
+### List instances encrypted with customer-managed keys
 
 ```sql
 select
@@ -82,7 +82,7 @@ where
   customer_managed_key is not null;
 ```
 
-### List all instances which have transit mode disabled
+### List instances that have transit mode disabled
 
 ```sql
 select
@@ -98,7 +98,7 @@ where
   transit_encryption_mode = 2;
 ```
 
-### List the maintenance details of a specific instance
+### List the maintenance details of instances
 
 ```sql
 select
