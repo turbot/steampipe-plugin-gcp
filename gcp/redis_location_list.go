@@ -10,6 +10,7 @@ import (
 
 const matrixKeyRedisLocation = "redis-location"
 
+// BuildRedisLocationList :: return a list of matrix items, one per region specified
 func BuildRedisLocationList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 
 	// have we already created and cached the locations?
@@ -30,14 +31,16 @@ func BuildRedisLocationList(ctx context.Context, d *plugin.QueryData) []map[stri
 		return nil
 	}
 	project := projectData.Project
-
+	if project == ""  {
+		return nil
+	}
+	
 	req := &location.ListLocationsRequest{
 		Name:     "projects/" + project,
 		PageSize: 100,
 	}
 
 	it := service.ListLocations(ctx, req)
-	// var matrix []map[string]interface{}
 	matrix := []map[string]interface{}{}
 	for {
 		resp, err := it.Next()

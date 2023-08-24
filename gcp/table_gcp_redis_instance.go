@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"cloud.google.com/go/redis/apiv1/redispb"
@@ -24,6 +23,9 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpRedisInstances,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "location_id", Require: plugin.Optional},
+			},
 		},
 		GetMatrixItemFunc: BuildRedisLocationList,
 		Columns: []*plugin.Column{
@@ -205,7 +207,7 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// standard steampipe columns
+			// Standard steampipe columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -219,13 +221,7 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 				Transform:   transform.FromP(gcpRedisInstanceTurbotData, "Akas"),
 			},
 
-			// standard gcp columns
-			{
-				Name:        "location",
-				Description: ColumnDescriptionLocation,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant("global"),
-			},
+			// Standard gcp columns
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
@@ -279,10 +275,11 @@ func listGcpRedisInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 			logger.Error("gcp_redis_instance.listGcpRedisInstances", "api_error", err)
 			return nil, err
 		}
-		test := resp.CreateTime.AsTime()
-		fmt.Println(test)
+
 		d.StreamListItem(ctx, resp)
 
+		// Check if context has been cancelled or if the limit has been hit (if specified)
+		// if there is a limit, it will return the number of rows required to reach this limit
 		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
@@ -296,10 +293,6 @@ func getGcpRedisInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	logger := plugin.Logger(ctx)
 	instanceName := d.EqualsQualString("name")
 	instanceLocationId := d.EqualsQualString("location_id")
-
-	if instanceName == "" || instanceLocationId == "" {
-		return nil, nil
-	}
 
 	// Create Service Connection
 	service, err := RedisService(ctx, d)
@@ -352,9 +345,9 @@ func gcpRedisInstanceTurbotData(ctx context.Context, d *transform.TransformData)
 }
 
 func gcpRedisInstanceCreateTime(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(*redispb.Instance).CreateTime
-	if instance == nil {
+	instanceCreateTime := d.HydrateItem.(*redispb.Instance).CreateTime
+	if instanceCreateTime == nil {
 		return nil, nil
 	}
-	return instance.AsTime(), nil
+	return instanceCreateTime.AsTime(), nil
 }

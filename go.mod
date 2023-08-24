@@ -12,12 +12,7 @@ require (
 require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.5.0 // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/docker/go-units v0.5.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
-	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.0.2 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect
@@ -44,7 +39,6 @@ require (
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/docker/docker v24.0.5+incompatible
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eko/gocache/v3 v3.1.2 // indirect
 	github.com/fatih/color v1.13.0 // indirect
@@ -116,7 +110,7 @@ require (
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc // indirect
+	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
 	google.golang.org/grpc v1.55.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
