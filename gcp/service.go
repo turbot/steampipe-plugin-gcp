@@ -6,6 +6,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/apikeys/v2"
+	"cloud.google.com/go/aiplatform/apiv1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/billingbudgets/v1"
@@ -526,6 +527,27 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 
 	// so it was not in cache - create service
 	svc, err := redis.NewCloudRedisClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// AIplatformService returns the service connection for GCP Redis service
+func AIplatformService(ctx context.Context, d *plugin.QueryData) (*aiplatform.EndpointClient, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "AIplatformService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*aiplatform.EndpointClient), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := aiplatform.NewEndpointClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

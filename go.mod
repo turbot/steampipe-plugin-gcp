@@ -6,7 +6,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/turbot/go-kit v0.6.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.5.1
-	google.golang.org/api v0.126.0
+	google.golang.org/api v0.128.0
 )
 
 require (
@@ -20,8 +20,9 @@ require (
 
 require (
 	cloud.google.com/go v0.110.2 // indirect
+	cloud.google.com/go/aiplatform v1.49.0
 	cloud.google.com/go/compute v1.19.3 // indirect
-	cloud.google.com/go/iam v0.13.0 // indirect
+	cloud.google.com/go/iam v1.1.0 // indirect
 	cloud.google.com/go/redis v1.13.1
 	cloud.google.com/go/storage v1.29.0 // indirect
 	github.com/XiaoMi/pegasus-go-client v0.0.0-20210427083443-f3b6b08bc4c2 // indirect
@@ -53,8 +54,8 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
-	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.7.1 // indirect
@@ -111,8 +112,8 @@ require (
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
-	google.golang.org/grpc v1.55.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/grpc v1.56.1 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
