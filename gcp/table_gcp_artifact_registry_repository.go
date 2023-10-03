@@ -24,6 +24,12 @@ func tableGcpArtifactRegistryRepository(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listArtifactRegistryRepositories,
+			KeyColumns: plugin.KeyColumnSlice{
+				{
+					Name:    "location",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItemFunc: BuildComputeLocationList,
 		Columns: []*plugin.Column{
@@ -163,11 +169,18 @@ func tableGcpArtifactRegistryRepository(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listArtifactRegistryRepositories(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	region := d.EqualsQualString("location")
+
 	var location string
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
 	if matrixLocation != "" {
 		location = matrixLocation
+	}
+
+	// Minimize API call for given location
+	if region != "" && region != location {
+		return nil, nil
 	}
 
 	// Create Service Connection
