@@ -31,7 +31,7 @@ func tableGcpArtifactRegistryRepository(ctx context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildComputeLocationList,
+		GetMatrixItemFunc: BuildArtifactRegistryLocationList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
