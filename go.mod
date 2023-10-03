@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/turbot/go-kit v0.8.0
+	github.com/turbot/go-kit v0.8.1
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.6.2
 	google.golang.org/api v0.139.0
 )
