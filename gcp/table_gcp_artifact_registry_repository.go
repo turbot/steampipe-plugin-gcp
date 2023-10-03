@@ -173,6 +173,7 @@ func listArtifactRegistryRepositories(ctx context.Context, d *plugin.QueryData, 
 	// Create Service Connection
 	service, err := ArtifactRegistryService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_artifact_registry_repository.listArtifactRegistryRepositories", "service_error", err)
 		return nil, err
 	}
 
@@ -210,6 +211,7 @@ func listArtifactRegistryRepositories(ctx context.Context, d *plugin.QueryData, 
 		}
 		return nil
 	}); err != nil {
+		plugin.Logger(ctx).Error("gcp_artifact_registry_repository.listArtifactRegistryRepositories", "api_error", err)
 		return nil, err
 	}
 
@@ -222,6 +224,7 @@ func getArtifactRegistryRepository(ctx context.Context, d *plugin.QueryData, h *
 	// Create Service Connection
 	service, err := ArtifactRegistryService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_artifact_registry_repository.getArtifactRegistryRepository", "service_error", err)
 		return nil, err
 	}
 
@@ -243,6 +246,7 @@ func getArtifactRegistryRepository(ctx context.Context, d *plugin.QueryData, h *
 
 	resp, err := service.Projects.Locations.Repositories.Get("projects/" + project + "/locations/" + location + "/repositories/" + name).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_artifact_registry_repository.getArtifactRegistryRepository", "api_error", err)
 		return nil, err
 	}
 
