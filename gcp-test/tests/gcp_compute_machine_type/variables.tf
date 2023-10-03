@@ -41,7 +41,7 @@ output "machine_type" {
 }
 
 output "zone" {
-  value = "us-central1-c"
+  value = "us-east1-b"
 }
 
 output "resource_aka" {

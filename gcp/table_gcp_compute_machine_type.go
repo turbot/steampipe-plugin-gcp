@@ -18,11 +18,18 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 		Name:        "gcp_compute_machine_type",
 		Description: "GCP Compute Machine Type",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
+			KeyColumns: plugin.AllColumns([]string{"name", "zone"}),
 			Hydrate:    getComputeMachineType,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeMachineTypes,
+			ParentHydrate: listComputeZones,
+			Hydrate:       listComputeMachineTypes,
+			KeyColumns: plugin.KeyColumnSlice{
+				{
+					Name:    "zone",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -87,14 +94,25 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "zone",
+				Description: "The name of the zone where the machine type resides, such as us-central1-a.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "accelerators",
 				Description: "A list of accelerator configurations assigned to this machine type.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "deprecated",
+				Description: "The deprecation status associated with this machine type. Only applicable if the machine type is unavailable.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "scratch_disks",
 				Description: "A list of extended scratch disks assigned to the instance.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("MachineType.Accelerators"),
 			},
 
 			// Steampipe standard columns
@@ -127,6 +145,14 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listComputeMachineTypes")
 
+	zoneDetails := h.Item.(*compute.Zone)
+	zoneName := d.EqualsQualString("zone")
+
+	// Restrict API call for other zones
+	if zoneName != "" && zoneName != zoneDetails.Name {
+		return nil, nil
+	}
+
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
@@ -150,7 +176,7 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, err
 	}
 	project := projectId.(string)
-	zone := "us-central1-c"
+	zone := zoneDetails.Name
 
 	resp := service.MachineTypes.List(project, zone).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.MachineTypeList) error {
@@ -189,11 +215,11 @@ func getComputeMachineType(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 	project := projectId.(string)
-	zone := "us-central1-c"
 	machineTypeName := d.EqualsQuals["name"].GetStringValue()
+	zone := d.EqualsQuals["zone"].GetStringValue()
 
 	// Return nil, if no input provided
-	if machineTypeName == "" {
+	if machineTypeName == "" || zone == "" {
 		return nil, nil
 	}
 

@@ -1,3 +1,35 @@
+## v0.44.0 [2023-10-02]
+
+_Dependencies_
+
+- Upgraded to [steampipe-plugin-sdk v5.6.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v561-2023-09-29) with support for rate limiters. ([#493](https://github.com/turbot/steampipe-plugin-gcp/pull/493))
+- Recompiled plugin with Go version `1.21`. ([#493](https://github.com/turbot/steampipe-plugin-gcp/pull/493))
+
+## v0.43.0 [2023-08-24]
+
+_What's new?_
+
+- New tables added
+  - [gcp_redis_instance](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_redis_instance) ([#482](https://github.com/turbot/steampipe-plugin-gcp/pull/482))
+
+## v0.42.1 [2023-08-17]
+
+_Bug fixes_
+
+- Fixed the `gcp_compute_machine_type` table to correctly return the supported machine types of all the zones. ([#480](https://github.com/turbot/steampipe-plugin-gcp/pull/480))
+
+## v0.42.0 [2023-08-07]
+
+_What's new?_
+
+- New tables added
+  - [gcp_cloud_identity_group](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_identity_group) ([#468](https://github.com/turbot/steampipe-plugin-gcp/pull/468))
+  - [gcp_cloud_identity_group_membership](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_identity_group_membership) ([#468](https://github.com/turbot/steampipe-plugin-gcp/pull/468))
+
+_Enhancements_
+
+- Added `prefix` as an optional list key column in `gcp_storage_object` table. ([#475](https://github.com/turbot/steampipe-plugin-gcp/pull/475)) (Thanks to [@villers](https://github.com/villers) for the contribution!)
+
 ## v0.41.0 [2023-07-20]
 
 _What's new?_
