@@ -31,7 +31,7 @@ func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 			// Add to support regex match as per error message
 			for _, pattern := range gcpConfig.IgnoreErrorMessages {
 				re := regexp.MustCompile(pattern)
-				result := re.MatchString(types.ToString(gerr.Message))
+				result := re.MatchString(gerr.Message)
 				if result {
 					return true
 				}
