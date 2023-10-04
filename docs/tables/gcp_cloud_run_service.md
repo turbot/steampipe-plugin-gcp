@@ -1,4 +1,4 @@
-# Table:  gcp_cloud_run_service
+# Table: gcp_cloud_run_service
 
 Google Cloud Run is a fully managed compute platform offered by Google Cloud Platform (GCP) that is designed for running containerized applications. It allows developers to deploy containerized applications quickly and easily without having to manage the underlying infrastructure. Cloud Run abstracts away many of the complexities of managing servers and scaling applications, making it an excellent choice for building and deploying microservices, APIs, web applications, and more.
 
@@ -19,7 +19,6 @@ select
 from
   gcp_cloud_run_service;
 ```
-
 
 ### Count of services by launch stage
 
@@ -52,7 +51,7 @@ where
   reconciling;
 ```
 
-### List services that are created in the last 30 days
+### List services created in the last 30 days
 
 ```sql
 select

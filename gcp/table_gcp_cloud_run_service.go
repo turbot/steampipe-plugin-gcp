@@ -26,7 +26,7 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 			Hydrate: listCloudRunServices,
 			KeyColumns: plugin.KeyColumnSlice{
 				{
-					Name: "location",
+					Name:    "location",
 					Require: plugin.Optional,
 				},
 			},
@@ -37,7 +37,7 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The fully qualified name of this Service.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("Name").Transform(lastPathElement),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "client",
@@ -188,6 +188,16 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
+				Name:        "terminal_condition",
+				Description: "The Condition of this Service, containing its readiness status, and detailed error information in case it did not reach a serving state.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "traffic",
+				Description: "Specifies how to distribute traffic over a collection of Revisions belonging to the Service. If traffic is empty or not provided, defaults to 100% traffic to the latest `Ready` Revision.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "traffic_statuses",
 				Description: "Detailed status information for corresponding traffic targets.",
 				Type:        proto.ColumnType_JSON,
@@ -243,7 +253,7 @@ func listCloudRunServices(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// Minimize API call as per given location
-	if region != "" && region != location{
+	if region != "" && region != location {
 		return nil, nil
 	}
 
