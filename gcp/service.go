@@ -3,10 +3,11 @@ package gcp
 import (
 	"context"
 
-	redis "cloud.google.com/go/redis/apiv1"
+	"cloud.google.com/go/redis/apiv1"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/apikeys/v2"
+	"google.golang.org/api/artifactregistry/v1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/billingbudgets/v1"
@@ -128,6 +129,27 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 
 	// so it was not in cache - create service
 	svc, err := bigquery.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// ArtifactRegistryService returns the service connection for GCP ArtifactRegistry service
+func ArtifactRegistryService(ctx context.Context, d *plugin.QueryData) (*artifactregistry.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "ArtifactRegistryService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*artifactregistry.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := artifactregistry.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
