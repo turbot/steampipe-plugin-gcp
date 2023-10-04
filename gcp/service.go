@@ -25,6 +25,7 @@ import (
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/monitoring/v3"
 	"google.golang.org/api/pubsub/v1"
+	"google.golang.org/api/run/v2"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/storage/v1"
 
@@ -191,6 +192,27 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 
 	// so it was not in cache - create service
 	svc, err := cloudresourcemanager.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudRunService returns the service connection for GCP Cloud Run service
+func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudRunService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*run.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := run.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
