@@ -1,3 +1,15 @@
+## v0.45.0 [2023-10-04]
+
+_What's new?_
+
+- New tables added
+  - [gcp_cloud_run_service](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_run_service) ([#497](https://github.com/turbot/steampipe-plugin-gcp/pull/497))
+  - [gcp_artifact_registry_repository](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_artifact_registry_repository) ([#496](https://github.com/turbot/steampipe-plugin-gcp/pull/496))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.6.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v562-2023-10-03) which prevents nil pointer reference errors for implicit hydrate configs. ([#498](https://github.com/turbot/steampipe-plugin-gcp/pull/498))
+
 ## v0.44.0 [2023-10-02]
 
 _Dependencies_
