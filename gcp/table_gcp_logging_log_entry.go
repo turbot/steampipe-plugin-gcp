@@ -330,31 +330,32 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 						filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetStringValue() + "\""
 					}
 				case "timestamp":
+					propertyPath := filterQualItem.PropertyPath
 					if filter == "" {
 						switch qual.Operator {
 						case "=":
-							filter = filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = propertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case ">":
-							filter = filterQualItem.PropertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = propertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case "<":
-							filter = filterQualItem.PropertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = propertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case ">=":
-							filter = filterQualItem.PropertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = propertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case "<=":
-							filter = filterQualItem.PropertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = propertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						}
 					} else {
 						switch qual.Operator {
 						case "=":
-							filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = filter + " AND " + propertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case ">":
-							filter = filter + " AND " + filterQualItem.PropertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = filter + " AND " + propertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case "<":
-							filter = filter + " AND " + filterQualItem.PropertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = filter + " AND " + propertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case ">=":
-							filter = filter + " AND " + filterQualItem.PropertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = filter + " AND " + propertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						case "<=":
-							filter = filter + " AND " + filterQualItem.PropertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+							filter = filter + " AND " + propertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
 						}
 					}
 				}
