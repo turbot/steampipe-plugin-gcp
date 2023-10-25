@@ -30,8 +30,8 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "log_name", Require: plugin.Optional},
 				{Name: "span_id", Require: plugin.Optional},
 				{Name: "text_payload", Require: plugin.Optional},
-				{Name: "receive_timestamp", Require: plugin.Optional},
-				{Name: "timestamp", Require: plugin.Optional},
+				{Name: "receive_timestamp", Require: plugin.Optional, Operators: []string{"=", ">", "<", ">=", "<="}},
+				{Name: "timestamp", Require: plugin.Optional, Operators: []string{"=", ">", "<", ">=", "<="}},
 				{Name: "trace", Require: plugin.Optional},
 				{Name: "log_entry_operation_id", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
@@ -331,9 +331,31 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 					}
 				case "timestamp":
 					if filter == "" {
-						filter = filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						switch qual.Operator {
+						case "=":
+							filter = filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">":
+							filter = filterQualItem.PropertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<":
+							filter = filterQualItem.PropertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">=":
+							filter = filterQualItem.PropertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<=":
+							filter = filterQualItem.PropertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						}
 					} else {
-						filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						switch qual.Operator {
+						case "=":
+							filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">":
+							filter = filter + " AND " + filterQualItem.PropertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<":
+							filter = filter + " AND " + filterQualItem.PropertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">=":
+							filter = filter + " AND " + filterQualItem.PropertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<=":
+							filter = filter + " AND " + filterQualItem.PropertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						}
 					}
 				}
 			}
