@@ -15,7 +15,7 @@ In Google Cloud Platform (GCP), a logging log entry represents a single log even
   - `timestamp`
   - `trace`
   - `log_entry_operation_id`
-  - `filter`
+  - `filter`: For additional details regarding the filter string, please refer to the documentation at https://cloud.google.com/logging/docs/view/logging-query-language.
 
 ## Examples
 
