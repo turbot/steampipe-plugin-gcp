@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/turbot/go-kit/types"
@@ -136,6 +137,23 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Description: "A globally unique identifier for all log entries in a sequence of split log entries.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Split.Uid"),
+			},
+			{
+				Name:        "text_payload1",
+				Description: "The log entry payload, represented as a Unicode string (UTF-8).",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "json_payload",
+				Description: "The log entry payload, represented as a structure that is expressed as a JSON object.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromP(covertLogEntryByteArrayToJsonObject, "JsonPayload"),
+			},
+			{
+				Name:        "proto_payload",
+				Description: "The log entry payload, represented as a protocol buffer. Some Google Cloud Platform services use this field for their log entry payloads. The following protocol buffer types are supported; user-defined types are not supported: 'type.googleapis.com/google.cloud.audit.AuditLog' 'type.googleapis.com/google.appengine.logging.v1.RequestLog'",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromP(covertLogEntryByteArrayToJsonObject, "ProtoPayload"),
 			},
 			{
 				Name:        "resource_labels",
@@ -363,4 +381,33 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 		}
 	}
 	return filter
+}
+
+// // TRANSFORM FUNCTION
+
+func covertLogEntryByteArrayToJsonObject(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	entry := d.HydrateItem.(*logging.LogEntry)
+	param := d.Param.(string)
+
+	var jsonPayload interface{}
+	var protoPlayload interface{}
+
+	a, err := entry.ProtoPayload.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	b, err := entry.JsonPayload.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	json.Unmarshal(b, &jsonPayload)
+	json.Unmarshal(a, &protoPlayload)
+
+	payload := map[string]interface{}{
+		"JsonPayload":  jsonPayload,
+		"ProtoPayload": protoPlayload,
+	}
+
+	return payload[param], nil
 }
