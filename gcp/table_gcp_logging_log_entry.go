@@ -139,11 +139,6 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Split.Uid"),
 			},
 			{
-				Name:        "text_payload",
-				Description: "The log entry payload, represented as a Unicode string (UTF-8).",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "json_payload",
 				Description: "The log entry payload, represented as a structure that is expressed as a JSON object.",
 				Type:        proto.ColumnType_JSON,
@@ -389,8 +384,8 @@ func covertLogEntryByteArrayToJsonObject(ctx context.Context, d *transform.Trans
 	entry := d.HydrateItem.(*logging.LogEntry)
 	param := d.Param.(string)
 
-	var jsonPayload interface{}
 	var protoPlayload interface{}
+	var jsonPayload interface{}
 
 	a, err := entry.ProtoPayload.MarshalJSON()
 	if err != nil {
@@ -401,14 +396,14 @@ func covertLogEntryByteArrayToJsonObject(ctx context.Context, d *transform.Trans
 		return nil, err
 	}
 
-	err = json.Unmarshal(b, &jsonPayload)
-	if err != nil {
-		return nil, err
-	}
-
 	err = json.Unmarshal(a, &protoPlayload)
 	if err != nil {
-		return nil, err
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.covertLogEntryByteArrayToJsonObject.protoPlayload", err)
+	}
+
+	err = json.Unmarshal(b, &jsonPayload)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.covertLogEntryByteArrayToJsonObject.jsonPayload", err)
 	}
 
 	payload := map[string]interface{}{
