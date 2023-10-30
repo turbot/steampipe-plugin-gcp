@@ -127,6 +127,24 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Split.Index"),
 			},
 			{
+				Name:        "source_location_file",
+				Description: "Source file name. Depending on the runtime environment, this might be a simple name or a fully-qualified name.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SourceLocation.File"),
+			},
+			{
+				Name:        "source_location_function",
+				Description: "Human-readable name of the function or method being invoked, with optional context such as the class or package name. This information may be used in contexts such as the logs viewer, where a file and line number are less meaningful. The format can vary by language. For example: qual.if.ied.Class.method (Java), dir/package.func (Go), function (Python).",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SourceLocation.Function"),
+			},
+			{
+				Name:        "source_location_line",
+				Description: "Line within the source file. 1-based; 0 indicates no line number available.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SourceLocation.Line"),
+			},
+			{
 				Name:        "total_splits",
 				Description: "The total number of log entries that the original LogEntry was split into.",
 				Type:        proto.ColumnType_INT,
@@ -199,8 +217,9 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Max limit isn't mentioned in the documentation
-	// Default limit is set as 1000
-	pageSize := types.Int64(1000)
+	// Default limit is set as 10000
+	// After conducting tests with maximum page sizes of 1000, 5000, 17000, 20000, and 30000, we decided to stick with a page size of 10000 for performance improvement.
+	pageSize := types.Int64(10000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
