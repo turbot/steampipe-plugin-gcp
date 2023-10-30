@@ -397,7 +397,7 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 	return filter
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTION
 
 func covertLogEntryByteArrayToJsonObject(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	entry := d.HydrateItem.(*logging.LogEntry)
