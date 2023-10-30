@@ -34,7 +34,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "receive_timestamp", Require: plugin.Optional, Operators: []string{"=", ">", "<", ">=", "<="}},
 				{Name: "timestamp", Require: plugin.Optional, Operators: []string{"=", ">", "<", ">=", "<="}},
 				{Name: "trace", Require: plugin.Optional},
-				{Name: "log_entry_operation_id", Require: plugin.Optional},
+				{Name: "operation_id", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
 			},
 		},
@@ -50,34 +50,16 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "log_entry_operation_first",
-				Description: "Set this to True if this is the first log entry in the operation.",
-				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("Operation.First"),
-			},
-			{
-				Name:        "log_entry_operation_last",
-				Description: "Set this to True if this is the last log entry in the operation.",
-				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("Operation.Last"),
-			},
-			{
 				Name:        "filter",
 				Type:        proto.ColumnType_STRING,
 				Description: "The filter pattern for the search.",
 				Transform:   transform.FromQual("filter"),
 			},
 			{
-				Name:        "log_entry_operation_id",
+				Name:        "operation_id",
 				Description: "An arbitrary operation identifier. Log entries with the same identifier are assumed to be part of the same operation.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Operation.Id"),
-			},
-			{
-				Name:        "log_entry_operation_producer",
-				Description: "An arbitrary producer identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Operation.Producer"),
 			},
 			{
 				Name:        "receive_timestamp",
@@ -121,42 +103,6 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
-				Name:        "split_index",
-				Description: "The index of this LogEntry in the sequence of split log entries.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("Split.Index"),
-			},
-			{
-				Name:        "source_location_file",
-				Description: "Source file name. Depending on the runtime environment, this might be a simple name or a fully-qualified name.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("SourceLocation.File"),
-			},
-			{
-				Name:        "source_location_function",
-				Description: "Human-readable name of the function or method being invoked, with optional context such as the class or package name. This information may be used in contexts such as the logs viewer, where a file and line number are less meaningful. The format can vary by language. For example: qual.if.ied.Class.method (Java), dir/package.func (Go), function (Python).",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("SourceLocation.Function"),
-			},
-			{
-				Name:        "source_location_line",
-				Description: "Line within the source file. 1-based; 0 indicates no line number available.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("SourceLocation.Line"),
-			},
-			{
-				Name:        "total_splits",
-				Description: "The total number of log entries that the original LogEntry was split into.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("Split.TotalSplits"),
-			},
-			{
-				Name:        "split_uid",
-				Description: "A globally unique identifier for all log entries in a sequence of split log entries.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Split.Uid"),
-			},
-			{
 				Name:        "json_payload",
 				Description: "The log entry payload, represented as a structure that is expressed as a JSON object.",
 				Type:        proto.ColumnType_JSON,
@@ -169,14 +115,33 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Transform:   transform.FromP(covertLogEntryByteArrayToJsonObject, "ProtoPayload"),
 			},
 			{
-				Name:        "resource_labels",
-				Description: "Values for all of the labels listed in the associated monitored resource descriptor.",
+				Name:        "operation",
+				Description: "Information about an operation associated with the log entry, if applicable.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Resource.Labels"),
+			},
+			{
+				Name:        "resource",
+				Description: "The monitored resource that produced this log entry. Example: a log entry that reports a database error would be associated with the monitored resource designating the particular database that reported the error.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "split",
+				Description: "Information indicating this LogEntry is part of a sequence of multiple log entries split from a single LogEntry.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "source_location",
 				Description: "Source code location information associated with the log entry, if any.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "metadata",
+				Description: "Auxiliary metadata for a MonitoredResource object. MonitoredResource objects contain the minimum set of information to uniquely identify a monitored resource instance.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "labels",
+				Description: "A map of key, value pairs that provides additional information about the log entry. The labels can be user-defined or system-defined.User-defined labels are arbitrary key, value pairs that you can use to classify logs.System-defined labels are defined by GCP services for platform logs.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -218,7 +183,7 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	// Max limit isn't mentioned in the documentation
 	// Default limit is set as 10000
-	// After conducting tests with maximum page sizes of 1000, 5000, 17000, 20000, and 30000, we decided to stick with a page size of 10000 for performance improvement.
+	// 10000 seems to be a balanced limit, based on initial tests for retrieving 140k log entries: 5000 (124s), 10000 (88s), 20000 (84s).
 	pageSize := types.Int64(10000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -333,7 +298,7 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 		{"span_id", "spanId", "string"},
 		{"text_payload", "textPayload", "string"},
 		{"trace", "trace", "string"},
-		{"log_entry_operation_id", "operation.id", "string"},
+		{"operation_id", "operation.id", "string"},
 		{"receive_timestamp", "receiveTimestamp", "timestamp"},
 		{"timestamp", "timestamp", "timestamp"},
 	}

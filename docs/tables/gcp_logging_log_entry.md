@@ -14,7 +14,7 @@ In Google Cloud Platform (GCP), a logging log entry represents a single log even
   - `receive_timestamp`
   - `timestamp`
   - `trace`
-  - `log_entry_operation_id`
+  - `operation_id`
   - `filter`: For additional details regarding the filter string, please refer to the documentation at https://cloud.google.com/logging/docs/view/logging-query-language.
 
 ## Examples
@@ -25,8 +25,7 @@ In Google Cloud Platform (GCP), a logging log entry represents a single log even
 select
   log_name,
   insert_id,
-  log_entry_operation_first,
-  log_entry_operation_id,
+  operation_id,
   receive_timestamp
 from
   gcp_logging_log_entry;
@@ -38,8 +37,6 @@ from
 select
   log_name,
   insert_id,
-  log_entry_operation_first,
-  log_entry_operation_last,
   resource_type,
   span_id,
   text_payload
@@ -55,7 +52,6 @@ where
 select
   log_name,
   insert_id,
-  resource_type,
   severity,
   span_id,
   timestamp
@@ -107,14 +103,14 @@ order by
 select
   log_name,
   insert_id,
-  log_entry_operation_last,
+  operation ->> 'Last' as log_entry_operation_last,
   receive_timestamp,
   resource_type,
   severity,
   text_payload
 from
   gcp_logging_log_entry
-where log_entry_operation_last;
+where (operation ->> 'Last')::boolean;
 ```
 
 ### Filter log entries by log name
@@ -134,6 +130,33 @@ where
   log_name = 'projects/parker-abbb/logs/cloudaudit.googleapis.com%2Factivity';
 ```
 
+### Get split details of each log entry
+
+```sql
+select
+  log_name,
+  insert_id,
+  split ->> 'Index' as split_index,
+  split ->> 'TotalSplits' as total_splits,
+  split ->> 'Uid' as split_uid
+from
+  gcp_logging_log_entry;
+```
+
+### Get operation details of each log entry
+
+```sql
+select
+  log_name,
+  insert_id,
+  operation_id,
+  operation ->> 'Producer' as operation_producer,
+  operation ->> 'First' as operation_first,
+  operation ->> 'Last' as operation_last
+from
+  gcp_logging_log_entry;
+```
+
 ## Filter examples
 
 For more information on Logging log entry filters, please refer to [Filter Pattern Syntax](https://cloud.google.com/logging/docs/view/logging-query-language).
@@ -144,8 +167,6 @@ For more information on Logging log entry filters, please refer to [Filter Patte
 select
   log_name,
   insert_id,
-  log_entry_operation_first,
-  log_entry_operation_last,
   receive_timestamp,
   resource_type,
   severity
@@ -164,8 +185,7 @@ select
   receive_timestamp,
   resource_type,
   severity,
-  timestamp,
-  resource_labels
+  timestamp
 from
   gcp_logging_log_entry
 where
