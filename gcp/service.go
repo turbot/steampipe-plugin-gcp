@@ -3,7 +3,8 @@ package gcp
 import (
 	"context"
 
-	"cloud.google.com/go/redis/apiv1"
+	aiplatform "cloud.google.com/go/aiplatform/apiv1"
+	redis "cloud.google.com/go/redis/apiv1"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/apikeys/v2"
@@ -24,6 +25,7 @@ import (
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/monitoring/v3"
+	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
 	"google.golang.org/api/run/v2"
 	"google.golang.org/api/serviceusage/v1"
@@ -52,6 +54,63 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 
 	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
 	return svc, nil
+}
+
+type AIplatfromServiceClients struct {
+	Endpoint *aiplatform.EndpointClient
+	Dataset  *aiplatform.DatasetClient
+	Index    *aiplatform.IndexClient
+	Job      *aiplatform.JobClient
+}
+
+func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AIplatfromServiceClients, error) {
+	// have we already created and cached the service?
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
+
+	serviceCacheKey := "AIService" + matrixLocation + clientType
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*AIplatfromServiceClients), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+	opts = append(opts, option.WithEndpoint(matrixLocation+"-aiplatform.googleapis.com:443"))
+
+	clients := &AIplatfromServiceClients{}
+
+	switch clientType {
+	case "Endpoint":
+		svc, err := aiplatform.NewEndpointClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Endpoint = svc
+		return clients, nil
+	case "Dataset":
+		svc, err := aiplatform.NewDatasetClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Dataset = svc
+		return clients, nil
+	case "Index":
+		svc, err := aiplatform.NewIndexClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Index = svc
+		return clients, nil
+	case "Job":
+		svc, err := aiplatform.NewJobClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Job = svc
+		return clients, nil
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, clients)
+	return clients, nil
 }
 
 func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service, error) {

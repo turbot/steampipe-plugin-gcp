@@ -32,6 +32,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+			"gcp_aiplatform_endpoint":                                 tableGcpAIPlatformEndpoint(ctx),
 			"gcp_apikeys_key":                                         tableGcpApiKeysKey(ctx),
 			"gcp_artifact_registry_repository":                        tableGcpArtifactRegistryRepository(ctx),
 			"gcp_audit_policy":                                        tableGcpAuditPolicy(ctx),
