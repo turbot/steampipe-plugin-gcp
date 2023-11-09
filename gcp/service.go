@@ -67,6 +67,11 @@ func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AI
 	// have we already created and cached the service?
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 
+	// Default to us-central1 for building the supported locations for the resources like Endpoint, Dataset, Index, Job etc...
+	if matrixLocation == "" {
+		matrixLocation = "us-central1"
+	}
+
 	serviceCacheKey := "AIService" + matrixLocation + clientType
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*AIplatfromServiceClients), nil

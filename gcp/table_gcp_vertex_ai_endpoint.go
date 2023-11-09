@@ -29,7 +29,7 @@ func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 			Hydrate:           listAIPlatformEndpoints,
 			ShouldIgnoreError: isIgnorableError([]string{"Unimplemented"}),
 		},
-		GetMatrixItemFunc: BuildComputeLocationList,
+		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Endpoint"),
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
