@@ -16,13 +16,14 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpAIPlatformEndpoint(_ context.Context) *plugin.Table {
+func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_aiplatform_endpoint",
+		Name:        "gcp_vertex_ai_endpoint",
 		Description: "GCP AI Endpoint",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getAIPlatformEndpoint,
+			ShouldIgnoreError: isIgnorableError([]string{"Unimplemented"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listAIPlatformEndpoints,
@@ -167,7 +168,7 @@ func listAIPlatformEndpoints(ctx context.Context, d *plugin.QueryData, h *plugin
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		logger.Error("gcp_aiplatform_endpoint.listAIPlatformEndpoints", "cache_error", err)
+		logger.Error("gcp_vertex_ai_endpoint.listAIPlatformEndpoints", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -184,7 +185,7 @@ func listAIPlatformEndpoints(ctx context.Context, d *plugin.QueryData, h *plugin
 	// Create Service Connection
 	service, err := AIService(ctx, d, "Endpoint")
 	if err != nil {
-		logger.Error("gcp_aiplatform_endpoint.listAIPlatformEndpoints", "service_error", err)
+		logger.Error("gcp_vertex_ai_endpoint.listAIPlatformEndpoints", "service_error", err)
 		return nil, err
 	}
 
@@ -204,7 +205,7 @@ func listAIPlatformEndpoints(ctx context.Context, d *plugin.QueryData, h *plugin
 			if err == iterator.Done {
 				break
 			}
-			logger.Error("gcp_aiplatform_endpoint.listAIPlatformEndpoints", "api_error", err)
+			logger.Error("gcp_vertex_ai_endpoint.listAIPlatformEndpoints", "api_error", err)
 			return nil, err
 		}
 
@@ -231,7 +232,7 @@ func getAIPlatformEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		logger.Error("gcp_aiplatform_endpoint.getAIPlatformEndpoint", "cache_error", err)
+		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformEndpoint", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -246,7 +247,10 @@ func getAIPlatformEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Create Service Connection
 	service, err := AIService(ctx, d, "Endpoint")
 	if err != nil {
-		logger.Error("gcp_aiplatform_endpoint.getAIPlatformEndpoint", "service_error", err)
+		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "NotFound") {
+				return nil, nil
+			}
+		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformEndpoint", "service_error", err)
 		return nil, err
 	}
 	input := &aiplatformpb.GetEndpointRequest{
@@ -254,7 +258,10 @@ func getAIPlatformEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	op, err := service.Endpoint.GetEndpoint(ctx, input)
 	if err != nil {
-		logger.Error("gcp_aiplatform_endpoint.getAIPlatformEndpoint", "api_error", err)
+	if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "NotFound") {
+				return nil, nil
+			}
+		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformEndpoint", "api_error", err)
 		return nil, err
 	}
 	return op, nil
