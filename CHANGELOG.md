@@ -7,7 +7,7 @@ _What's new?_
 
 _Bug fixes_
 
-- Fixed `retention_policy` column of `gcp_storage_bucket` table to correctly return data instead of null. ([#502](https://github.com/turbot/steampipe-plugin-gcp/pull/502))
+- Fixed the `retention_policy` column of `gcp_storage_bucket` table to correctly return data instead of null. ([#502](https://github.com/turbot/steampipe-plugin-gcp/pull/502))
 
 ## v0.45.0 [2023-10-04]
 
