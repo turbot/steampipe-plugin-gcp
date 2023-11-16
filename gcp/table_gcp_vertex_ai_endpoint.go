@@ -19,7 +19,7 @@ import (
 func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_vertex_ai_endpoint",
-		Description: "GCP AI Endpoint",
+		Description: "GCP Vertex AI Endpoint",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getAIPlatformEndpoint,
