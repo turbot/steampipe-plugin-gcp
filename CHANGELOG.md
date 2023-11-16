@@ -1,3 +1,14 @@
+## v0.46.0 [2023-11-16]
+
+_What's new?_
+
+- New tables added
+  - [gcp_aiplatform_endpoints](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_aiplatform_endpoints) ([#513](https://github.com/turbot/steampipe-plugin-gcp/pull/513))
+
+_Bug fixes_
+
+- Fixed `retention_policy` column of `gcp_storage_bucket` table to correctly return data instead of null. ([#502](https://github.com/turbot/steampipe-plugin-gcp/pull/502))
+
 ## v0.45.0 [2023-10-04]
 
 _What's new?_
