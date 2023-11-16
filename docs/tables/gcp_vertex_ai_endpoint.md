@@ -14,7 +14,6 @@ from
   gcp_vertex_ai_endpoint;
 ```
 
-
 ### List endpoints that are exposed via private service connect
 
 ```sql
