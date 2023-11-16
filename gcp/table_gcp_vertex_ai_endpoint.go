@@ -145,7 +145,7 @@ func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 	}
 }
 
-//// FETCH FUNCTIONS
+//// LIST FUNCTION
 
 func listAIPlatformEndpoints(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
