@@ -43,7 +43,7 @@ where
   create_time >= now() - interval '30' day;
 ```
 
-### Get customer managed key details of endpoings
+### Get customer-managed key details of endpoints
 
 ```sql
 select
