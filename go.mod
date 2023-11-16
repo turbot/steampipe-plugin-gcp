@@ -3,6 +3,7 @@ module github.com/turbot/steampipe-plugin-gcp
 go 1.21
 
 require (
+	cloud.google.com/go/aiplatform v1.48.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/turbot/go-kit v0.8.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.6.2
