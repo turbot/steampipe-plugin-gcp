@@ -237,7 +237,7 @@ func getAIPlatformEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	project := projectId.(string)
 
-	name := d.EqualsQuals["name"].GetStringValue()
+	name := d.EqualsQualString("name")
 
 	// Validate - name should not be blank
 	if name == "" {
