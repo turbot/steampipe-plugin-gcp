@@ -135,6 +135,7 @@ func listComputeMachineImages(ctx context.Context, d *plugin.QueryData, h *plugi
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_machine_image.listComputeMachineImages", "connection_error", err)
 		return nil, err
 	}
 
@@ -152,6 +153,7 @@ func listComputeMachineImages(ctx context.Context, d *plugin.QueryData, h *plugi
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_machine_image.listComputeMachineImages.getProjectCached", "cached_function", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -170,6 +172,7 @@ func listComputeMachineImages(ctx context.Context, d *plugin.QueryData, h *plugi
 		}
 		return nil
 	}); err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_machine_image.listComputeMachineImages", "api_error", err)
 		return nil, err
 	}
 
@@ -182,6 +185,7 @@ func getComputeMachineImage(ctx context.Context, d *plugin.QueryData, h *plugin.
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_machine_image.getComputeMachineImage", "connection_error", err)
 		return nil, err
 	}
 
@@ -189,6 +193,7 @@ func getComputeMachineImage(ctx context.Context, d *plugin.QueryData, h *plugin.
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_machine_image.getComputeMachineImage.getProjectCached", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -201,6 +206,7 @@ func getComputeMachineImage(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	resp, err := service.MachineImages.Get(project, machineImageName).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_machine_image.getComputeMachineImage", "api_error", err)
 		return nil, err
 	}
 	return resp, nil
