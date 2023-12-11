@@ -34,7 +34,6 @@ from
   gcp_compute_resource_policy;
 ```
 
-
 ### List policies used to schedule an instance
 Explore which policies are used to schedule instances in your GCP Compute Engine. This can help you understand and manage your resource allocation more effectively.
 
@@ -61,7 +60,6 @@ from
 where
   p.instance_schedule_policy is not null;
 ```
-
 
 ### List invalid policies
 Explore which policies in your Google Cloud Platform compute resources are invalid. This can be beneficial for maintaining optimal resource management and troubleshooting potential issues.

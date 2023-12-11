@@ -98,17 +98,17 @@ where
 
 ```sql+sqlite
 select
-  name,
-  display_name,
-  json_extract(dynamic_group_metadata, '$.Status') as dynamic_group_status,
+  g.name,
+  g.display_name,
+  json_extract(g.dynamic_group_metadata, '$.Status') as dynamic_group_status,
   json_extract(queries.value, '$.Query') as dynamic_group_query,
   json_extract(queries.value, '$.ResourceType') as dynamic_group_query_resource_type,
-  project
+  g.project
 from
-  gcp_cloud_identity_group,
-  json_each(json_extract(dynamic_group_metadata, '$.Queries')) as queries
+  gcp_cloud_identity_group as g,
+  json_each(json_extract(g.dynamic_group_metadata, '$.Queries')) as queries
 where
-  parent = 'C046psxkn';
+  g.parent = 'C046psxkn';
 ```
 
 ### List groups created in the last 7 days

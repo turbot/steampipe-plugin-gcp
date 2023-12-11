@@ -44,7 +44,6 @@ from
   gcp_sql_backup;
 ```
 
-
 ### Count of backups by their type (i.e AUTOMATED and ON_DEMAND)
 Determine the distribution of backup types to understand your database's backup strategy. This can help in assessing the balance between automated and on-demand backups, and optimize your data protection approach.
 
@@ -68,7 +67,6 @@ group by
   type;
 ```
 
-
 ### Get the error message if the backup failed
 Determine the areas in which a backup failure has occurred in your Google Cloud Platform SQL database. This query can be used to identify the specific instances and error messages associated with each failure, helping you troubleshoot and resolve issues more efficiently.
 
@@ -87,12 +85,12 @@ where
 
 ```sql+sqlite
 select
-  id,
-  instance_name,
+  b.id,
+  b.instance_name,
   json_extract(e.value, '$.code') as error_code,
   json_extract(e.value, '$.message') as error_message
 from
-  gcp_sql_backup,
+  gcp_sql_backup as b,
   json_each(error) as e
 where
   status = 'FAILED';

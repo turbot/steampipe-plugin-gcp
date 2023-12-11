@@ -56,7 +56,8 @@ select
   sample_count
 from
   gcp_compute_disk_metric_read_ops_daily
-where average > 10
+where
+  average > 10
 order by
   name;
 ```
@@ -70,7 +71,8 @@ select
   sample_count
 from
   gcp_compute_disk_metric_read_ops_daily
-where average > 10
+where
+  average > 10
 order by
   name;
 ```
@@ -87,7 +89,8 @@ select
   sample_count
 from
   gcp_compute_disk_metric_read_ops_daily
-where average < 1
+where
+  average < 1
 order by
   name;
 ```
@@ -101,7 +104,8 @@ select
   sample_count
 from
   gcp_compute_disk_metric_read_ops_daily
-where average < 1
+where
+  average < 1
 order by
   name;
 ```

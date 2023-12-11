@@ -56,7 +56,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_connections_daily
-where average > 100
+where
+  average > 100
 order by
   instance_id;
 ```
@@ -70,7 +71,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_connections_daily
-where average > 100
+where
+  average > 100
 order by
   instance_id;
 ```
@@ -87,7 +89,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_connections_daily
-where average < 10
+where
+  average < 10
 order by
   instance_id;
 ```
@@ -101,7 +104,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_connections_daily
-where average < 10
+where
+  average < 10
 order by
   instance_id;
 ```

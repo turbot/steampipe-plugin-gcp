@@ -58,7 +58,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_hourly
-where average > 80
+where
+  average > 80
 order by
   instance_id;
 ```
@@ -72,7 +73,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_hourly
-where average > 80
+where
+  average > 80
 order by
   instance_id;
 ```
@@ -89,7 +91,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_hourly
-where average < 1
+where
+  average < 1
 order by
   instance_id;
 ```
@@ -103,7 +106,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_hourly
-where average < 1
+where
+  average < 1
 order by
   instance_id;
 ```

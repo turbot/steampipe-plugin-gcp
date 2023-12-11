@@ -58,7 +58,7 @@ select
 from
   gcp_kms_key
 where
-  create_time <= date('now','-30 day')
+  date(create_time) <= date('now','-30 day')
 order by
   create_time;
 ```
@@ -78,7 +78,14 @@ where
 ```
 
 ```sql+sqlite
-Error: SQLite does not support split_part function.
+select
+  name,
+  create_time,
+  rotation_period
+from
+  gcp_kms_key
+where
+  cast(substr(rotation_period, 1, instr(rotation_period, 's') - 1) as integer) > 7776000;
 ```
 
 ### List publicly accessible keys
@@ -97,5 +104,14 @@ where
 ```
 
 ```sql+sqlite
-Error: SQLite does not support array operations and the '?' operator used in PostgreSQL.
+select distinct
+  k.name,
+  k.key_ring_name,
+  k.location
+from
+  gcp_kms_key k,
+  json_each(k.iam_policy, '$.bindings') as b
+where
+  json_extract(b.value, '$.members') like '%allAuthenticatedUsers%' OR
+  json_extract(b.value, '$.members') like '%allUsers%';
 ```

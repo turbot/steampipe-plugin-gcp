@@ -67,8 +67,8 @@ select
 from
   gcp_kms_key_version
 where
-  create_time <= date('now','-30 day') and
-  state <> 'DESTROYED'
+  date(create_time) <= date('now', '-30 days')
+  and state <> 'DESTROYED'
 order by
   create_time;
 ```

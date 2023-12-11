@@ -74,16 +74,16 @@ from
   gcp_compute_network as i,
   jsonb_array_elements(subnetworks) as d
 group by
-    name;
+  name;
 ```
 
 ```sql+sqlite
 select
-  name,
-  count(d) as num_subnets
+  g.name,
+  count(d.value) as num_subnets
 from
-  gcp_compute_network,
-  json_each(subnetworks) as d
+  gcp_compute_network g,
+  json_each(g.subnetworks) as d
 group by
-  name;
+  g.name;
 ```

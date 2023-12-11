@@ -64,7 +64,7 @@ select
 from
   gcp_artifact_registry_repository
 where
-  kms_key_name = '';
+  kms_key_name is null;
 ```
 
 ### List docker format package repositories

@@ -40,9 +40,9 @@ order by
   count(*) desc;
 ```
 
-
 ### Count the number of instances by instance type
 Identify the distribution of different machine types within your Google Cloud Compute instances. This allows you to understand which machine types are most commonly used, aiding in resource allocation and cost management.
+
 ```sql+postgres
 select
   machine_type_name,
@@ -67,9 +67,9 @@ order by
   count desc;
 ```
 
-
 ### List of instances without application label
 Identify instances where the application label is missing. This is useful for maintaining consistent tagging practices across your Google Cloud Compute instances.
+
 ```sql+postgres
 select
   name,
@@ -89,7 +89,6 @@ from
 where
   json_extract(tags, '$.application') is null;
 ```
-
 
 ### List instances having deletion protection feature disabled
 Determine the areas in which instances lack deletion protection, a feature that safeguards against accidental data loss. This query is useful for identifying potential vulnerabilities and ensuring data integrity.
@@ -114,7 +113,6 @@ where
   deletion_protection = 0;
 ```
 
-
 ### List the disk stats attached to the instances
 Determine the overall storage capacity across all instances by analyzing the number of disks attached and their respective sizes. This aids in managing resources and planning for storage expansion.
 
@@ -127,21 +125,20 @@ from
   gcp_compute_instance as i,
   jsonb_array_elements(disks) as d
 group by
-    name;
+  name;
 ```
 
 ```sql+sqlite
 select
-  name,
-  count(d) as num_disks,
-  sum( json_extract(d.value, '$.diskSizeGb') ) as total_storage
+  i.name,
+  count(d.value) as num_disks,
+  sum(json_extract(d.value, '$.diskSizeGb')) as total_storage
 from
-  gcp_compute_instance as i,
-  json_each(disks) as d
+  gcp_compute_instance i,
+  json_each(i.disks) as d
 group by
-  name;
+  i.name;
 ```
-
 
 ### Find instances with IP in a given CIDR range
 Identify instances within a specific IP range in your Google Cloud Platform's compute instances. This can be useful in understanding your network distribution and identifying potential security risks.
@@ -154,26 +151,33 @@ from
   gcp_compute_instance as i,
   jsonb_array_elements(network_interfaces) as nic
 where
-    (nic ->> 'networkIP') :: inet <<= '10.128.0.0/16' ;
+  (nic ->> 'networkIP') :: inet <<= '10.128.0.0/16' ;
 ```
 
 ```sql+sqlite
-Error: SQLite does not support CIDR operations.
+select
+  i.name,
+  json_extract(nic.value, '$.networkIP') as ip_address
+from
+  gcp_compute_instance i,
+  json_each(i.network_interfaces) as nic
+where
+  json_extract(nic.value, '$.networkIP') like '10.128.%';
 ```
-
 
 ### Find instances that have been stopped for more than 30 days
 Explore instances that have been inactive for an extended period of time. This is useful for identifying potential cost-saving opportunities by eliminating unused resources.
+
 ```sql+postgres
 select
   name,
   status,
   last_stop_timestamp
 from
-    gcp_compute_instance
+  gcp_compute_instance
 where
-    status = 'TERMINATED'
-    and last_stop_timestamp < current_timestamp - interval '30 days' ;
+  status = 'TERMINATED'
+  and last_stop_timestamp < current_timestamp - interval '30 days' ;
 ```
 
 ```sql+sqlite
@@ -188,9 +192,9 @@ where
   and last_stop_timestamp < datetime('now', '-30 days');
 ```
 
-
 ### Find the boot disk of each instance
 This query allows you to identify the boot disk associated with each virtual machine instance, particularly useful when you need to understand the source image used for the boot disk, such as in instances where you're troubleshooting or auditing system configurations.
+
 ```sql+postgres
 select
   vm.name as instance_name,

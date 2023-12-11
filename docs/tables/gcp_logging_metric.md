@@ -34,7 +34,6 @@ from
   gcp_logging_metric;
 ```
 
-
 ### Bucket configuration details of the logging metrics
 Explore the configuration of logging metrics in Google Cloud Platform, focusing on specific parameters such as growth factor, scale, offset, and width. This can be useful in understanding the structure and distribution of data within your logging metrics, aiding in efficient data management and analysis.
 

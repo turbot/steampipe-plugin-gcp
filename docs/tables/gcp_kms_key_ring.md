@@ -54,7 +54,7 @@ select
 from
   gcp_kms_key_ring
 where
-  create_time <= date('now','-30 day')
+  date(create_time) <= date('now', '-30 days')
 order by
   create_time;
 ```

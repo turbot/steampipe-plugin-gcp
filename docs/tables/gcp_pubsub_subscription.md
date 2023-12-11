@@ -38,7 +38,6 @@ where
   dead_letter_policy_topic is null;
 ```
 
-
 ### Message configuration details for the subscriptions
 Analyze the settings to understand the configuration of your message subscriptions, including message retention duration and delivery attempts. This can help you optimize your message delivery and retention processes for better resource management and efficiency.
 

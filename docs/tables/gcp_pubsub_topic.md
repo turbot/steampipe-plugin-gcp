@@ -33,9 +33,8 @@ select
 from
   gcp_pubsub_topic
 where
-  kms_key_name = '';
+  kms_key_name is null;
 ```
-
 
 ### List of regions which are allowed in message storage policy for each topic
 Determine the areas in which message storage policies are permitted for each topic to manage and streamline your data storage strategy effectively.
@@ -59,7 +58,6 @@ from
   json_each(message_storage_policy_allowed_persistence_regions);
 ```
 
-
 ### Find topics with policies that grant public access
 This query allows you to pinpoint specific topics that have policies granting public access. This can be useful for identifying potential security risks and ensuring that sensitive information is adequately protected.
 
@@ -78,5 +76,18 @@ where
 ```
 
 ```sql+sqlite
-Error: SQLite does not support split or string_to_array functions.
+select
+  g.name,
+  substr(
+    json_extract(s.value, '$.role'),
+    instr(json_extract(s.value, '$.role'), '/') + 1
+  ) as role,
+  e.value as entity
+from
+  gcp_pubsub_topic g,
+  json_each(json_extract(g.iam_policy, '$.bindings')) as s,
+  json_each(json_extract(s.value, '$.members')) as e
+where
+  e.value = 'allUsers'
+  or e.value = 'allAuthenticatedUsers';
 ```

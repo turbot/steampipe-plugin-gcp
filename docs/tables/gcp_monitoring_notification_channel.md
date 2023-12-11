@@ -37,9 +37,8 @@ select
 from
   gcp_monitoring_notification_channel
 where
-  verification_status != 'VERIFIED';
+  verification_status <> 'VERIFIED' OR verification_status is null;
 ```
-
 
 ### List of monitoring notification channel which are not enabled
 Explore which monitoring notification channels in your Google Cloud Platform are not currently enabled. This can help you identify potential gaps in your monitoring strategy and ensure that all necessary channels are active.

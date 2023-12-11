@@ -36,7 +36,6 @@ from
   gcp_sql_database;
 ```
 
-
 ### Get the SQL Server version with which the database is to be made compatible
 Determine the compatibility level of your database with different versions of SQL Server. This can be useful for planning version upgrades or ensuring backward compatibility with older versions.
 
@@ -55,7 +54,6 @@ select
 from
   gcp_sql_database;
 ```
-
 
 ### Count of databases per instance
 Analyze the settings to understand the distribution of databases across different instances. This can help in assessing the load distribution and managing resources more effectively.

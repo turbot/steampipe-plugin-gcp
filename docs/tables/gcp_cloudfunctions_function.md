@@ -13,7 +13,6 @@ The `gcp_cloudfunctions_function` table provides insights into Cloud Functions w
 
 ## Examples
 
-
 ### Basic function info
 Explore the operational status of various cloud functions to manage resources effectively. Analyze the settings to understand the runtime, available memory, and maximum instances for optimal performance.
 
@@ -45,7 +44,6 @@ from
   gcp_cloudfunctions_function;
 ```
 
-
 ### Count of cloud functions by runtime engines
 Analyze the distribution of cloud functions across different runtime engines, providing a useful overview to optimize resource allocation and understand usage patterns.
 ```sql+postgres
@@ -68,7 +66,6 @@ group by
   runtime;
 ```
 
-
 ### Cloud functions service account info
 Explore which cloud functions are linked to specific service accounts. This can help manage and secure access to resources, by ensuring only authorized accounts are connected to specific functions.
 
@@ -80,8 +77,8 @@ select
 from
   gcp_cloudfunctions_function as f,
   gcp_service_account as a
-where 
-  f.service_account_email = a.email
+where
+  f.service_account_email = a.email;
 ```
 
 ```sql+sqlite
@@ -92,10 +89,9 @@ select
 from
   gcp_cloudfunctions_function as f,
   gcp_service_account as a
-where 
-  f.service_account_email = a.email
+where
+  f.service_account_email = a.email;
 ```
-
 
 ### Cloud functions service account info, including roles assigned in the project IAM policy
 Determine the roles assigned to various service accounts within your project's IAM policy, particularly those associated with cloud functions. This can help maintain security by ensuring only necessary permissions are granted.
@@ -112,9 +108,9 @@ from
   gcp_iam_policy as p,
   jsonb_array_elements(bindings) as b,
   jsonb_array_elements_text(b -> 'members') as m
-where 
+where
   f.service_account_email = a.email
-  and m = ( 'serviceAccount:' || f.service_account_email)
+  and m = ( 'serviceAccount:' || f.service_account_email);
 ```
 
 ```sql+sqlite
@@ -129,11 +125,10 @@ from
   gcp_iam_policy as p,
   json_each(bindings) as b,
   json_each(json_extract(b.value, '$.members')) as m
-where 
+where
   f.service_account_email = a.email
-  and m.value = ( 'serviceAccount:' || f.service_account_email)
+  and m.value = ( 'serviceAccount:' || f.service_account_email);
 ```
-
 
 ### View the resource-level IAM policy on cloud functions
 Explore the access control measures applied to your cloud functions. This query is useful to understand the security configuration and permissions associated with each function, helping to maintain robust access management.
@@ -166,7 +161,7 @@ from
   jsonb_array_elements(iam_policy -> 'bindings') as b,
   jsonb_array_elements_text(b -> 'members') as m
 where
-  m not like '%@turbot.com'
+  m not like '%@turbot.com';
 ```
 
 ```sql+sqlite
@@ -179,5 +174,5 @@ from
   json_each(iam_policy, '$.bindings') as b,
   json_each(b.value, '$.members') as m
 where
-  m.value not like '%@turbot.com'
+  m.value not like '%@turbot.com';
 ```

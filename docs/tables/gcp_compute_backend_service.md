@@ -31,7 +31,6 @@ from
 Error: The corresponding SQLite query is unavailable.
 ```
 
-
 ### List of backend services where health check is not configured
 Discover the segments that lack health check configurations within the Google Cloud Platform's backend services. This can help in identifying potential vulnerabilities and ensuring optimal performance of the services.
 
@@ -59,7 +58,6 @@ where
   health_checks is null;
 ```
 
-
 ### List of backend services where connection draining timeout is less than 300 sec
 Determine the areas in which backend services may experience connection issues due to a draining timeout of less than 300 seconds. This can be useful for troubleshooting and optimizing network performance.
 
@@ -85,7 +83,6 @@ where
   connection_draining_timeout_sec < 300;
 ```
 
-
 ### List of backend services where logging is not enabled
 Discover the segments that have logging disabled in your backend services. This can help in identifying areas where crucial event tracking might be missing, aiding in improving system monitoring and error detection.
 
@@ -108,5 +105,5 @@ select
 from
   gcp_compute_backend_service
 where
-   log_config_enable = 0;
+  log_config_enable = 0;
 ```

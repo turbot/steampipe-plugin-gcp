@@ -18,10 +18,10 @@ Explore the configuration of your Google Cloud Platform DNS record sets to gain 
 
 ```sql+postgres
 select
-  name, 
-  managed_zone_name, 
-  type, 
-  kind, 
+  name,
+  managed_zone_name,
+  type,
+  kind,
   routing_policy,
   rrdatas,
   signature_rrdatas,
@@ -32,10 +32,10 @@ from
 
 ```sql+sqlite
 select
-  name, 
-  managed_zone_name, 
-  type, 
-  kind, 
+  name,
+  managed_zone_name,
+  type,
+  kind,
   routing_policy,
   rrdatas,
   signature_rrdatas,
@@ -49,24 +49,24 @@ Explore which alias domain names are associated with actual domain names in your
 
 ```sql+postgres
 select
-  name, 
-  managed_zone_name, 
-  type, 
+  name,
+  managed_zone_name,
+  type,
   ttl
 from
   gcp_dns_record_set
-where 
+where
  type = 'CNAME';
 ```
 
 ```sql+sqlite
 select
-  name, 
-  managed_zone_name, 
-  type, 
+  name,
+  managed_zone_name,
+  type,
   ttl
 from
   gcp_dns_record_set
-where 
+where
  type = 'CNAME';
 ```

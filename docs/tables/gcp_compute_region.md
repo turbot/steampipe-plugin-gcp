@@ -38,7 +38,6 @@ where
   status = 'DOWN';
 ```
 
-
 ### Get the quota info for a region (us-west1)
 Analyze the settings to understand the quota limits for a specific region. This is useful for managing resources and preventing overuse.
 
@@ -70,7 +69,6 @@ order by
   quota_metric;
 ```
 
-
 ### Get the available zone info of each region
 Explore which zones are available in each region to optimize resource allocation and manage your resources efficiently across different geographical locations.
 
@@ -89,7 +87,6 @@ select
 from
   gcp_compute_region;
 ```
-
 
 ### Count the available zone in each region
 Identify the number of available zones within each region to better distribute resources and maintain system balance.

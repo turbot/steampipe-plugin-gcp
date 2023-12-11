@@ -60,12 +60,12 @@ where
 
 ```sql+sqlite
 select
-  name,
-  id,
+  s.name,
+  s.id,
   json_extract(p.value, '$.members') as members,
   json_extract(p.value, '$.role') as role
 from
-  gcp_compute_subnetwork,
+  gcp_compute_subnetwork as s,
   json_each(iam_policy, '$.bindings') as p
 where
   json_extract(p.value, '$.role') = 'roles/compute.admin';
@@ -87,12 +87,12 @@ from
 
 ```sql+sqlite
 select
-  name,
-  id,
+  s.name,
+  s.id,
   json_extract(p.value, '$.rangeName') as range_name,
   json_extract(p.value, '$.ipCidrRange') as ip_cidr_range
 from
-  gcp_compute_subnetwork,
+  gcp_compute_subnetwork as s,
   json_each(secondary_ip_ranges) as p;
 ```
 
