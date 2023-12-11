@@ -215,7 +215,4 @@ export CLOUDSDK_CORE_PROJECT=myproject
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
 ```
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-gcp
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
