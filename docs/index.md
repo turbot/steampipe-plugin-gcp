@@ -8,6 +8,7 @@ name: "gcp"
 description: "Steampipe plugin for querying buckets, instances, functions and more from GCP."
 og_description: Query GCP with SQL! Open source CLI. No DB required.
 og_image: "/images/plugins/turbot/gcp-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # GCP + Steampipe
@@ -214,7 +215,4 @@ export CLOUDSDK_CORE_PROJECT=myproject
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
 ```
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-gcp
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
