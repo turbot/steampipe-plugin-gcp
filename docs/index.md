@@ -13,9 +13,9 @@ engines: ["steampipe", "sqlite", "postgres", "export"]
 
 # GCP + Steampipe
 
-[GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
-
 [Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
+
+[GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
 For example:
 
