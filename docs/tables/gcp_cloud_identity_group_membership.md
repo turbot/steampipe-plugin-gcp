@@ -124,18 +124,18 @@ where
 
 ```sql+sqlite
 select
-  name,
-  group_name,
-  create_time,
-  type,
-  json_extract(preferred_member_key, '$.id') as member_id,
+  g.name,
+  g.group_name,
+  g.create_time,
+  g.type,
+  json_extract(g.preferred_member_key, '$.id') as member_id,
   json_extract(role.value, '$.name') as role_name,
   json_extract(json_extract(role.value, '$.expiryDetail'), '$.expireTime') as role_expiry_time
 from
-  gcp_cloud_identity_group_membership,
-  json_each(roles) as role
+  gcp_cloud_identity_group_membership as g,
+  json_each(g.roles) as role
 where
-  group_name = '123j0zll4288gmz';
+  g.group_name = '123j0zll4288gmz';
 ```
 
 ### Get details of a specific member of a group
@@ -160,10 +160,10 @@ where
 
 ```sql+sqlite
 select
-  name,
-  group_name,
-  create_time,
-  type,
+  g.name,
+  g.group_name,
+  g.create_time,
+  g.type,
   json_extract(preferred_member_key, '$.id') as member_id,
   json_extract(role.value, '$.name') as role_name,
   json_extract(json_extract(role.value, '$.expiryDetail'), '$.expireTime') as role_expiry_time

@@ -28,14 +28,13 @@ from
 
 ```sql+sqlite
 select
-  entity,
+  e.value as entity,
   json_extract(p.value, '$.role') as role
 from
   gcp_iam_policy,
   json_each(bindings) as p,
-  json_each(json_extract(p.value, '$.members')) as entity;
+  json_each(json_extract(p.value, '$.members')) as e;
 ```
-
 
 ### List of members with owner roles
 Explore which members have been assigned the 'owner' role in your Google Cloud Platform IAM policy. This is useful for gaining insights into access control and ensuring appropriate permissions are in place.

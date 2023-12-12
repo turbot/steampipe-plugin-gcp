@@ -38,7 +38,6 @@ where
   versioning_enabled is not 1;
 ```
 
-
 ### List of members and their associated iam roles for the bucket
 Discover the segments that illustrate the relationship between members and their respective roles for a specific storage bucket in GCP. This could be useful in assessing access permissions and managing security within your cloud storage environment.
 
@@ -63,7 +62,6 @@ from
   gcp_storage_bucket,
   json_each(iam_policy, '$.bindings') as p;
 ```
-
 
 ### Lifecycle rule of each storage bucket
 Explore the lifecycle rules of your storage buckets to understand how they're configured. This can help in managing resources more effectively by determining when certain actions, such as transitioning to a different storage class or deleting objects, are set to occur.
@@ -90,7 +88,6 @@ from
   json_each(lifecycle_rules) as p;
 ```
 
-
 ### List of storage buckets whose retention period is less than 7 days
 Explore which storage buckets have a retention period of less than a week. This can be useful in identifying potential data loss risks due to short retention periods.
 
@@ -111,5 +108,5 @@ select
 from
   gcp_storage_bucket
 where
-  CAST(json_extract(retention_policy, '$.retentionPeriod') AS INTEGER) < 604800;
+  cast(json_extract(retention_policy, '$.retentionPeriod') as integer) < 604800;
 ```

@@ -46,7 +46,6 @@ from
   gcp_kubernetes_cluster;
 ```
 
-
 ### List zonal clusters
 Explore which Kubernetes clusters in your Google Cloud Platform are configured as zonal. This is useful to understand the geographical distribution of your resources and plan for redundancy or disaster recovery.
 
@@ -69,7 +68,6 @@ from
 where
   location_type = 'ZONAL';
 ```
-
 
 ### List clusters with node auto-upgrade enabled
 Explore clusters that have the node auto-upgrade feature enabled. This is useful for ensuring your systems are always up-to-date with the latest features and security updates.
@@ -98,7 +96,6 @@ where
   json_extract(n.value, '$.management.autoUpgrade') = 'true';
 ```
 
-
 ### List clusters with default service account
 Identify instances where clusters are using the default service account in Google Cloud Platform's Kubernetes service. This can help in improving security by ensuring each cluster uses a unique service account.
 
@@ -123,7 +120,6 @@ from
 where
   json_extract(node_config, '$.serviceAccount') = 'default';
 ```
-
 
 ### List clusters with legacy authorization enabled
 Determine the areas in which legacy authorization is still enabled on clusters. This is useful to identify potential security risks and areas for improvement in your Google Cloud Platform Kubernetes setup.
@@ -150,7 +146,6 @@ where
   legacy_abac_enabled = 1;
 ```
 
-
 ### List clusters with shielded nodes features disabled
 Discover the segments that have the shielded nodes feature disabled in your Kubernetes clusters. This can help you identify potential security risks and enhance the protection of your clusters.
 
@@ -176,7 +171,6 @@ where
   shielded_nodes_enabled = 0;
 ```
 
-
 ### List clusters where secrets in etcd are not encrypted
 Determine the areas in which sensitive information in your clusters is not secured. This is useful for identifying potential security vulnerabilities and ensuring data protection standards are met.
 
@@ -199,7 +193,6 @@ from
 where
   database_encryption_state <> 'ENCRYPTED';
 ```
-
 
 ### Node configuration of clusters
 Explore the configuration settings of your clusters to understand their disk size, machine type, and other important parameters. This can be useful for optimizing your resources, ensuring security measures are in place, and maintaining efficient operation of your clusters.

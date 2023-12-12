@@ -36,7 +36,6 @@ from
   gcp_pubsub_snapshot;
 ```
 
-
 ### Find pubsub snapshots with policies that grant public access
 Determine the areas in which public access is granted to pubsub snapshots. This query is useful in identifying potential security risks by pinpointing which snapshots have policies that allow public access.
 
@@ -55,5 +54,18 @@ where
 ```
 
 ```sql+sqlite
-Error: SQLite does not support split or string_to_array functions.
+select
+  g.name,
+  substr(
+    json_extract(s.value, '$.role'),
+    instr(json_extract(s.value, '$.role'), '/') + 1
+  ) as role,
+  e.value as entity
+from
+  gcp_pubsub_snapshot g,
+  json_each(g.iam_policy, '$.bindings') as s,
+  json_each(json_extract(s.value, '$.members')) as e
+where
+  e.value = 'allUsers'
+  or e.value = 'allAuthenticatedUsers';
 ```

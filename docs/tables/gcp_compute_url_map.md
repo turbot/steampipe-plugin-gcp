@@ -70,12 +70,12 @@ from
 
 ```sql+sqlite
 select
-  name,
-  id,
+  u.name,
+  u.id,
   json_extract(p.value, '$.hosts') as hosts,
   json_extract(p.value, '$.pathMatcher') as path_matcher
 from
-  gcp_compute_url_map,
+  gcp_compute_url_map as u,
   json_each(host_rules) as p;
 ```
 

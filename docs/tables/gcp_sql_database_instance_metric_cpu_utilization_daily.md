@@ -25,7 +25,7 @@ select
   maximum,
   average,
   sample_count,
-  time_stamp
+  timestamp
 from
   gcp_sql_database_instance_metric_cpu_utilization_daily
 order by
@@ -39,7 +39,7 @@ select
   maximum,
   average,
   sample_count,
-  time_stamp
+  timestamp
 from
   gcp_sql_database_instance_metric_cpu_utilization_daily
 order by
@@ -58,7 +58,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_daily
-where average > 100
+where
+  average > 100
 order by
   instance_id;
 ```
@@ -72,7 +73,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_daily
-where average > 100
+where
+  average > 100
 order by
   instance_id;
 ```
@@ -89,7 +91,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_daily
-where average < 1
+where
+  average < 1
 order by
   instance_id;
 ```
@@ -103,7 +106,8 @@ select
   sample_count
 from
   gcp_sql_database_instance_metric_cpu_utilization_daily
-where average < 1
+where
+  average < 1
 order by
   instance_id;
 ```

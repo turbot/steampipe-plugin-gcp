@@ -17,28 +17,28 @@ The `gcp_compute_autoscaler` table provides insights into the autoscaling config
 Explore the basic details of your Google Cloud Platform's compute autoscalers, such as their names, statuses, and recommended sizes. This information can be useful in understanding your autoscaler setup and identifying areas for potential optimization.
 
 ```sql+postgres
-select 
+select
   name,
   description,
-  self_link, 
+  self_link,
   status,
-  location, 
+  location,
   akas,
   recommended_size
-from 
+from
   gcp_compute_autoscaler;
 ```
 
 ```sql+sqlite
-select 
+select
   name,
   description,
-  self_link, 
+  self_link,
   status,
-  location, 
+  location,
   akas,
   recommended_size
-from 
+from
   gcp_compute_autoscaler;
 ```
 
@@ -75,32 +75,32 @@ from
 Discover the autoscalers in your Google Cloud Platform that are encountering configuration errors. This can help in identifying and rectifying issues that could potentially hinder the automatic scaling of your resources.
 
 ```sql+postgres
-select 
+select
   name,
   description,
-  self_link, 
+  self_link,
   status,
-  location, 
+  location,
   akas,
   recommended_size
-from 
+from
   gcp_compute_autoscaler
-where 
+where
   status = 'ERROR';
 ```
 
 ```sql+sqlite
-select 
+select
   name,
   description,
-  self_link, 
+  self_link,
   status,
-  location, 
+  location,
   akas,
   recommended_size
-from 
+from
   gcp_compute_autoscaler
-where 
+where
   status = 'ERROR';
 ```
 
@@ -121,5 +121,14 @@ where
 ```
 
 ```sql+sqlite
-Error: SQLite does not support split_part function.
+select
+  a.title as autoscaler_name,
+  g.name as instance_group_name,
+  g.description as instance_group_description,
+  g.size as instance_group_size
+from
+  gcp_compute_instance_group g,
+  gcp_compute_autoscaler a
+where
+  g.name = substr(a.target, instr(a.target, 'instanceGroupManagers/') + length('instanceGroupManagers/'));
 ```

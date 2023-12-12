@@ -56,7 +56,8 @@ select
   sample_count
 from
   gcp_compute_disk_metric_write_ops_hourly
-where average > 10
+where
+  average > 10
 order by
   name;
 ```
@@ -70,7 +71,8 @@ select
   sample_count
 from
   gcp_compute_disk_metric_write_ops_hourly
-where average > 10
+where
+  average > 10
 order by
   name;
 ```

@@ -40,7 +40,6 @@ where
   node_type = 'n2-node-80-640';
 ```
 
-
 ### List of node templates where cpu overcommit is enabled
 Determine the areas in which CPU overcommit is enabled within node templates, to manage resource allocation effectively and optimize cloud infrastructure performance.
 
@@ -66,7 +65,6 @@ where
   cpu_overcommit_type = 'ENABLED';
 ```
 
-
 ### Count of node templates per location
 Determine the distribution of node templates across different locations in your Google Cloud Platform. This can help you understand the geographical spread of your compute resources for better resource management and planning.
 
@@ -89,7 +87,6 @@ from
 group by
   location;
 ```
-
 
 ### Find unused node templates
 Explore which node templates in your Google Cloud Platform are not currently being used. This can help in identifying unused resources, potentially leading to cost savings and better resource management.

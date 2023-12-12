@@ -34,7 +34,6 @@ from
   gcp_compute_router;
 ```
 
-
 ### NAT gateway info attached to router
 Discover the settings of your NAT gateway that's linked to a router to understand its configuration and operational parameters. This can aid in network management by providing insights into features like endpoint independent mapping and IP allocation options.
 
@@ -61,7 +60,6 @@ from
   gcp_compute_router,
   json_each(nats) as nat;
 ```
-
 
 ### List all routers with custom route advertisements
 Explore which routers have custom route advertisements to better manage network traffic and understand your network's routing protocols. This is particularly useful when you want to assess the elements within your network that are using custom configurations for route advertisements.

@@ -107,7 +107,14 @@ where
 ```
 
 ```sql+sqlite
-Error: The corresponding SQLite query is unavailable.
+select
+  uid,
+  display_name,
+  json_extract(restrictions, '$.browserKeyRestrictions.allowedReferrers') as allowed_website
+from
+  gcp_apikeys_key
+where
+  json_type(restrictions, '$.browserKeyRestrictions.allowedIps') = 'array';
 ```
 
 ### Get ip restrictions associated with each key
@@ -126,7 +133,14 @@ where
 ```
 
 ```sql+sqlite
-Error: The corresponding SQLite query is unavailable.
+select
+  uid,
+  display_name,
+  json_extract(restrictions, '$.serverKeyRestrictions.allowedIps') as allowed_ip
+from
+  gcp_apikeys_key
+where
+  json_type(restrictions, '$.serverKeyRestrictions.allowedIps') = 'array';
 ```
 
 ### Get iOS app restrictions associated with each key
@@ -172,6 +186,12 @@ where
 ```
 
 ```sql+sqlite
-Error: The corresponding SQLite query is unavailable.
+select
+  uid,
+  display_name,
+  json_extract(restrictions, '$.androidKeyRestrictions.allowedApplications') as allowed_ip
+from
+  gcp_apikeys_key
+where
+  json_type(restrictions, '$.androidKeyRestrictions.allowedApplications') = 'array';
 ```
-

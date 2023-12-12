@@ -34,7 +34,6 @@ from
   gcp_monitoring_group;
 ```
 
-
 ### List of cluster monitoring groups
 Discover the segments that are grouped into clusters within the Google Cloud Platform's monitoring system, allowing you to better manage and organize your monitoring resources.
 

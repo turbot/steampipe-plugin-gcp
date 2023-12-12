@@ -90,7 +90,6 @@ where
   maintenance_policy = 'DEFAULT';
 ```
 
-
 ### List node types for node groups
 Analyze the settings to understand the different types of nodes within each group in your Google Cloud Platform's compute engine. This is useful for managing resources and optimizing your cloud infrastructure.
 

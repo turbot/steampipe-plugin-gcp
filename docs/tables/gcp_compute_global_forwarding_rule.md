@@ -40,7 +40,6 @@ from
   gcp_compute_global_forwarding_rule;
 ```
 
-
 ### List global forwarding rules which are globally accessible
 Determine the areas in which global forwarding rules are set to be globally accessible, allowing for a broadened network reach and enhanced connectivity. This can be particularly useful in understanding the scope of your network access and identifying potential security considerations.
 

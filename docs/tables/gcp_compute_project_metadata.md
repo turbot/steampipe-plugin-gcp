@@ -36,7 +36,6 @@ from
   gcp_compute_project_metadata;
 ```
 
-
 ### Check if OS Login is enabled for Linux instances in the project
 Determine the areas in which OS Login is not activated for Linux instances within a project. This insight can help enhance security by ensuring that all instances are properly configured for OS Login.
 
@@ -55,10 +54,10 @@ where
 
 ```sql+sqlite
 select
-  name,
-  id
+  m.name,
+  m.id
 from
-  gcp_compute_project_metadata,
+  gcp_compute_project_metadata as m,
   json_each(common_instance_metadata, '$.items') as q
 where
   json_extract(common_instance_metadata, '$.items') like '%"key": "enable-oslogin"%'

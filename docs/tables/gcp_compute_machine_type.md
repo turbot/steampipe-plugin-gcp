@@ -40,7 +40,6 @@ from
   gcp_compute_machine_type;
 ```
 
-
 ### List machine types with more than 48 cores
 Determine the areas in which machine types have high processing power, specifically those with more than 48 cores. This can help in identifying high-performance options for resource-intensive applications.
 
@@ -68,7 +67,6 @@ where
   guest_cpus >= 48;
 ```
 
-
 ### List machine types with shared CPUs
 Determine the types of machines that utilize shared CPUs to optimize resource allocation and enhance performance efficiency.
 
@@ -94,7 +92,6 @@ where
   is_shared_cpu = 1;
 ```
 
-
 ### Get accelerator configurations assigned to each machine type
 Analyze machine configurations to understand the number and type of accelerators assigned to each. This is beneficial in optimizing resource allocation and performance in a GCP compute environment.
 
@@ -111,12 +108,12 @@ from
 
 ```sql+sqlite
 select
-  name,
-  id,
+  m.name,
+  m.id,
   json_extract(a.value, '$.guestAcceleratorCount') as guest_accelerator_count,
   json_extract(a.value, '$.guestAcceleratorType') as guest_accelerator_type
 from
-  gcp_compute_machine_type,
+  gcp_compute_machine_type as m,
   json_each(accelerators) as a;
 ```
 

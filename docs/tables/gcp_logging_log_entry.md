@@ -200,7 +200,8 @@ select
   text_payload
 from
   gcp_logging_log_entry
-where log_entry_operation_last;
+where
+  log_entry_operation_last;
 ```
 
 ```sql+sqlite
@@ -214,7 +215,8 @@ select
   text_payload
 from
   gcp_logging_log_entry
-where log_entry_operation_last = 1;
+where
+  log_entry_operation_last = 1;
 ```
 
 ### Filter log entries by log name
@@ -269,7 +271,7 @@ select
 from
   gcp_logging_log_entry
 where
-  filter = 'resource.type = "gce_instance" AND (severity = ERROR OR "error")';
+  filter = 'resource.type = "gce_instance" and (severity = ERROR OR "error")';
 ```
 
 ```sql+sqlite
@@ -284,7 +286,7 @@ select
 from
   gcp_logging_log_entry
 where
-  filter = 'resource.type = "gce_instance" AND (severity = "ERROR" OR severity = "error")';
+  filter = 'resource.type = "gce_instance" and (severity = "ERROR" OR severity = "error")';
 ```
 
 ### List events originating from a specific IP address range that occurred over the last hour

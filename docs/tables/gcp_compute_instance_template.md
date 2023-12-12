@@ -38,7 +38,6 @@ where
   instance_machine_type = 'c2-standard-4';
 ```
 
-
 ### Boot Disk info of each instance template
 Determine the characteristics of each instance template's boot disk in a GCP compute environment. This can be useful to assess the disk type, size, and source image, which can aid in capacity planning and performance optimization.
 ```sql+postgres
@@ -62,7 +61,6 @@ from
 ```sql+sqlite
 Error: SQLite does not support split functions.
 ```
-
 
 ### List of SPECIFIC_RESERVATION Instance type instance template
 Analyze the settings to understand which instance templates in the Google Cloud Platform are specifically set to consume reservations. This can help optimize resource allocation and cost management in cloud environments.
@@ -88,7 +86,6 @@ where
   json_extract(instance_reservation_affinity, '$.consumeReservationType') = 'SPECIFIC_RESERVATION';
 ```
 
-
 ### Network interface info of each instance template
 Determine the network interface details of each instance template in your GCP Compute Engine to understand the network configuration and access settings in each instance. This will help in identifying any irregularities or inconsistencies in the network setup.
 
@@ -110,7 +107,6 @@ from
 ```sql+sqlite
 Error: SQLite does not support split or string_to_array functions.
 ```
-
 
 ### List of instance templates where instance_can_ip_forward is true
 Discover the segments that have the ability to forward IP, a useful feature for routing network traffic effectively and securely. This can be particularly beneficial in scenarios where you need to manage traffic flow across different network interfaces.

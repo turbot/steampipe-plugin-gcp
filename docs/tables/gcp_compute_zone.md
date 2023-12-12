@@ -36,7 +36,6 @@ from
   gcp_compute_zone;
 ```
 
-
 ### Get the available cpu platforms in each zone
 Determine the areas in which different CPU platforms are available in each zone to optimize resource allocation and performance.
 
@@ -55,7 +54,6 @@ select
 from
   gcp_compute_zone;
 ```
-
 
 ### Get the zones which are down
 Explore which zones in your GCP Compute environment are currently down. This is useful for quickly identifying areas of your infrastructure that may be experiencing issues.

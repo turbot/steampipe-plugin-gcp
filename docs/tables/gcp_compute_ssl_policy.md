@@ -106,11 +106,11 @@ where
 
 ```sql+sqlite
 select
-  name,
-  id,
+  p.name,
+  p.id,
   enabled_feature
 from
-  gcp_compute_ssl_policy,
+  gcp_compute_ssl_policy as p,
   json_each(enabled_features) as enabled_feature
 where
   profile = 'CUSTOM'

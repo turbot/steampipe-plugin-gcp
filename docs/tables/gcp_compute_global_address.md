@@ -40,7 +40,6 @@ where
   address_type = 'INTERNAL';
 ```
 
-
 ### List of unused global addresses
 Assess the elements within your Google Cloud Platform to identify unused global addresses. This can help optimize resource utilization and reduce costs by pinpointing areas of potential waste.
 

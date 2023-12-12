@@ -36,7 +36,6 @@ from
   gcp_compute_firewall;
 ```
 
-
 ### List of rules which are applied to TCP protocol
 Explore which firewall rules are applied specifically to the TCP protocol in your Google Cloud Platform. This will help in assessing network security and identifying potential vulnerabilities.
 
@@ -55,17 +54,16 @@ where
 
 ```sql+sqlite
 select
-  name,
-  id,
+  f.name,
+  f.id,
   json_extract(p.value, '$.IPProtocol') as ip_protocol,
   json_extract(p.value, '$.ports') as ports
 from
-  gcp_compute_firewall,
+  gcp_compute_firewall as f,
   json_each(allowed) as p
 where
   json_extract(p.value, '$.IPProtocol') = 'tcp';
 ```
-
 
 ### List of disabled rules
 Determine the areas in which firewall rules are disabled to strengthen your security posture in Google Cloud Platform. This can assist in identifying potential vulnerabilities and maintaining robust network security.
@@ -79,7 +77,7 @@ select
 from
   gcp_compute_firewall
 where
-  disabled
+  disabled;
 ```
 
 ```sql+sqlite
@@ -91,9 +89,8 @@ select
 from
   gcp_compute_firewall
 where
-  disabled = 1
+  disabled = 1;
 ```
-
 
 ### List of Egress rules
 Explore which firewall rules in your Google Cloud Platform are set to allow outbound traffic. This can help understand your network's security posture and identify potential vulnerabilities.

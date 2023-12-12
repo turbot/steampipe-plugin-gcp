@@ -27,7 +27,7 @@ from
 ```sql+sqlite
 select
   service,
-  json_extract(audit_log_configs.value, '$.logType') as log_type
+  json_extract(audit_log_configs, '$.logType') as log_type
 from
   gcp_audit_policy,
   json_each(audit_log_configs);

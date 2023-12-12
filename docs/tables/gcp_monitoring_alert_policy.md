@@ -38,7 +38,6 @@ from
   gcp_monitoring_alert_policy;
 ```
 
-
 ### Get the creation record for each alert policy
 Discover the segments that show when and by whom each alert policy was last modified. This can be particularly useful for auditing purposes or to track changes in alert policies over time.
 
@@ -61,7 +60,6 @@ select
 from
   gcp_monitoring_alert_policy;
 ```
-
 
 ### Get the condition details for each alert policy
 Discover the specifics of each alert policy, including the filter details and threshold values. This allows for a comprehensive understanding of the alert triggers, aiding in effective monitoring and management.

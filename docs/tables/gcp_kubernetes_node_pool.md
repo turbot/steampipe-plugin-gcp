@@ -73,7 +73,6 @@ from
   gcp_kubernetes_node_pool;
 ```
 
-
 ### List maximum pods for each node
 Determine the capacity of each node in your Kubernetes cluster by identifying the maximum number of pods each node can run. This helps in efficient resource allocation and load balancing within the cluster.
 
@@ -94,7 +93,6 @@ select
 from
   gcp_kubernetes_node_pool;
 ```
-
 
 ### List of all zonal node pools
 Explore which node pools in your Google Cloud Platform Kubernetes service are zonal. This can help you manage and optimize your resources, as zonal node pools can offer different benefits and limitations compared to regional ones.

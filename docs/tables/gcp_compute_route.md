@@ -37,7 +37,6 @@ from
   gcp_compute_route;
 ```
 
-
 ### List of routes that are not applied to default network
 Discover the segments that are not part of the default network. This is useful to identify any routes that may have been incorrectly assigned or overlooked during network configuration.
 
@@ -62,7 +61,6 @@ from
 where
   network_name <> 'default';
 ```
-
 
 ### List of system-generated default routes
 Explore instances where potential misconfigurations have been detected on routes, in order to proactively address any issues and maintain optimal network performance.
@@ -93,25 +91,24 @@ where
   and dest_range = '0.0.0.0/0';
 ```
 
-
-# List of warning messages for potential misconfigurations detected on routes  
+# List of warning messages for potential misconfigurations detected on routes
 
 ```sql+postgres
 select
-  name, 
-  warnings 
-from 
-  gcp_compute_route 
-where 
+  name,
+  warnings
+from
+  gcp_compute_route
+where
   warnings is not null;
 ```
 
 ```sql+sqlite
 select
-  name, 
-  warnings 
-from 
-  gcp_compute_route 
-where 
+  name,
+  warnings
+from
+  gcp_compute_route
+where
   warnings is not null;
 ```
