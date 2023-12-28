@@ -270,6 +270,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Name:        "node_config",
 				Description: "Parameters used in creating the cluster's nodes.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(gcpKubernetesClusterNodeConfig),
 			},
 			{
 				Name:        "node_pools",
@@ -447,6 +448,16 @@ func gcpKubernetesClusterNetworkConfig(ctx context.Context, d *transform.Transfo
 
 	result := make(map[string]interface{})
 	extractNonNilFields(reflect.ValueOf(cluster.NetworkConfig), result)
+	jsonResult, _ := json.MarshalIndent(result, "", "    ")
+
+	return string(jsonResult), nil
+}
+
+func gcpKubernetesClusterNodeConfig(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	cluster := d.HydrateItem.(*container.Cluster)
+
+	result := make(map[string]interface{})
+	extractNonNilFields(reflect.ValueOf(cluster.NodeConfig), result)
 	jsonResult, _ := json.MarshalIndent(result, "", "    ")
 
 	return string(jsonResult), nil
