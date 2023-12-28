@@ -197,6 +197,31 @@ from
   json_each(conditions) as c;
 ```
 
+### Get associated members or principals, with a role of services
+Attaching an Identity and Access Management (IAM) policy to a Google Cloud Run service involves setting permissions for that particular service. Google Cloud Run services use IAM for access control, and by configuring IAM policies, you can define who has what type of access to your Cloud Run services.
+
+```sql+postgres
+select
+  name,
+  i -> 'Condition' as condition,
+  i -> 'Members' as members,
+  i ->> 'Role' as role
+from
+  gcp_cloud_run_service,
+  jsonb_array_elements(iam_policy -> 'Bindings') as i;
+```
+
+```sql+sqlite
+select
+  name,
+  json_extract(i.value, '$.Condition') as condition,
+  json_extract(i.value, '$.Members') as members,
+  json_extract(i.value, '$.Role') as role
+from
+  gcp_cloud_run_service,
+  json_each(json_extract(iam_policy, '$.Bindings')) as i;
+```
+
 ### Get template details of services
 Explore the various attributes of your cloud-based services, such as encryption keys, container details, and scaling parameters. This query is useful to gain an understanding of your service configurations and identify areas for potential adjustments or enhancements.
 
