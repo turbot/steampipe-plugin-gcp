@@ -103,22 +103,22 @@ Identify instances where clusters are using the default service account in Googl
 select
   name,
   location_type,
-  node_config ->> 'serviceAccount' service_account
+  node_config ->> 'ServiceAccount' service_account
 from
   gcp_kubernetes_cluster
 where
-  node_config ->> 'serviceAccount' = 'default';
+  node_config ->> 'ServiceAccount' = 'default';
 ```
 
 ```sql+sqlite
 select
   name,
   location_type,
-  json_extract(node_config, '$.serviceAccount') service_account
+  json_extract(node_config, '$.ServiceAccount') service_account
 from
   gcp_kubernetes_cluster
 where
-  json_extract(node_config, '$.serviceAccount') = 'default';
+  json_extract(node_config, '$.ServiceAccount') = 'default';
 ```
 
 ### List clusters with legacy authorization enabled
@@ -200,14 +200,14 @@ Explore the configuration settings of your clusters to understand their disk siz
 ```sql+postgres
 select
   name,
-  node_config ->> 'diskSizeGb' as disk_size_gb,
-  node_config ->> 'diskType' as disk_type,
-  node_config ->> 'imageType' as image_type,
-  node_config ->> 'machineType' as machine_type,
-  node_config ->> 'diskType' as disk_type,
-  node_config -> 'metadata' ->> 'disable-legacy-endpoints' as disable_legacy_endpoints,
-  node_config ->> 'serviceAccount' as service_account,
-  node_config -> 'shieldedInstanceConfig' ->> 'enableIntegrityMonitoring' as enable_integrity_monitoring
+  node_config ->> 'Disksizegb' as disk_size_gb,
+  node_config ->> 'Disktype' as disk_type,
+  node_config ->> 'Imagetype' as image_type,
+  node_config ->> 'Machinetype' as machine_type,
+  node_config ->> 'Disktype' as disk_type,
+  node_config -> 'Metadata' ->> 'disable-legacy-endpoints' as disable_legacy_endpoints,
+  node_config ->> 'Serviceaccount' as service_account,
+  node_config -> 'Shieldedinstanceconfig' ->> 'EnableIntegrityMonitoring' as enable_integrity_monitoring
 from
   gcp_kubernetes_cluster;
 ```
@@ -215,14 +215,14 @@ from
 ```sql+sqlite
 select
   name,
-  json_extract(node_config, '$.diskSizeGb') as disk_size_gb,
-  json_extract(node_config, '$.diskType') as disk_type,
-  json_extract(node_config, '$.imageType') as image_type,
-  json_extract(node_config, '$.machineType') as machine_type,
-  json_extract(node_config, '$.diskType') as disk_type,
-  json_extract(json_extract(node_config, '$.metadata'), '$.disable-legacy-endpoints') as disable_legacy_endpoints,
-  json_extract(node_config, '$.serviceAccount') as service_account,
-  json_extract(json_extract(node_config, '$.shieldedInstanceConfig'), '$.enableIntegrityMonitoring') as enable_integrity_monitoring
+  json_extract(node_config, '$.Disksizegb') as disk_size_gb,
+  json_extract(node_config, '$.Disktype') as disk_type,
+  json_extract(node_config, '$.Imagetype') as image_type,
+  json_extract(node_config, '$.Machinetype') as machine_type,
+  json_extract(node_config, '$.Disktype') as disk_type,
+  json_extract(json_extract(node_config, '$.Metadata'), '$.disable-legacy-endpoints') as disable_legacy_endpoints,
+  json_extract(node_config, '$.ServiceAccount') as service_account,
+  json_extract(json_extract(node_config, '$.ShieldedInstanceConfig'), '$.EnableIntegrityMonitoring') as enable_integrity_monitoring
 from
   gcp_kubernetes_cluster;
 ```
