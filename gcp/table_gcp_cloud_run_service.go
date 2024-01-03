@@ -202,6 +202,13 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 				Description: "Detailed status information for corresponding traffic targets.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "iam_policy",
+				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getCloudRunServiceIamPolicy,
+				Transform:   transform.FromValue(),
+			},
 
 			// Standard steampipe columns
 			{
@@ -337,6 +344,38 @@ func getCloudRunService(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		plugin.Logger(ctx).Error("gcp_cloud_run_service.getCloudRunService", "api_error", err)
 		return nil, err
 	}
+	return resp, err
+}
+
+func getCloudRunServiceIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	data := h.Item.(*run.GoogleCloudRunV2Service)
+	serviceName := strings.Split(data.Name, "/")[5]
+	location := strings.Split(data.Name, "/")[3]
+
+	// Create Service Connection
+	service, err := CloudRunService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_cloud_run_service.getCloudRunServiceIamPolicy", "service_error", err)
+		return nil, err
+	}
+
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	input := "projects/" + project + "/locations/" + location + "/services/" + serviceName
+
+	resp, err := service.Projects.Locations.Services.GetIamPolicy(input).Do()
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_cloud_run_service.getCloudRunServiceIamPolicy", "api_error", err)
+		return nil, err
+	}
+
 	return resp, err
 }
 
