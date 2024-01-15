@@ -1,15 +1,15 @@
 ---
-title: "Steampipe Table: gcp_cloud_asset - Query GCP Cloud Asset Inventory using SQL"
-description: "Allows users to query GCP Cloud Asset Inventory, specifically visibility and control over their cloud resources, ensuring that they can manage these assets effectively in terms of security, compliance, and operational efficiency."
+title: "Steampipe Table: gcp_cloud_asset - Query GCP Cloud Asset using SQL"
+description: "Allows users to query GCP Cloud Asset, specifically visibility and control over their cloud resources, ensuring that they can manage these assets effectively in terms of security, compliance, and operational efficiency."
 ---
 
-# Table: gcp_cloud_asset - Query GCP Cloud Asset Inventory using SQL
+# Table: gcp_cloud_asset - Query GCP Cloud Asset using SQL
 
-GCP Cloud Asset Inventory is a powerful tool for organizations to maintain visibility and control over their cloud resources, ensuring that they can manage these assets effectively in terms of security, compliance, and operational efficiency.
+GCP Cloud Asset is a powerful tool for organizations to maintain visibility and control over their cloud resources, ensuring that they can manage these assets effectively in terms of security, compliance, and operational efficiency.
 
 ## Table Usage Guide
 
-The `gcp_cloud_asset` table provides an inventory management system for resources and policies within GCP. It allows users to keep track of their cloud assets across various GCP services.
+The `gcp_cloud_asset` table provides an management system for resources and policies within GCP. It allows users to keep track of their cloud assets across various GCP services.
 
 ## Examples
 
