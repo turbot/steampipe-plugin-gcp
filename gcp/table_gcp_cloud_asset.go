@@ -40,13 +40,11 @@ func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 				Name:        "access_level",
 				Description: "Access levels are used for permitting access to resources based on contextual information about the request. ",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("AccessLevel"),
 			},
 			{
 				Name:        "access_policy",
 				Description: "An access policy is a container for all of your Access Context Manager resources.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("AccessPolicy"),
 			},
 			{
 				Name:        "ancestors",
@@ -62,31 +60,26 @@ func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 				Name:        "org_policy",
 				Description: "A representation of an organization policy.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("OrgPolicy"),
 			},
 			{
 				Name:        "os_inventory",
 				Description: "A representation of runtime OS Inventory information.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("OsInventory"),
 			},
 			{
 				Name:        "related_asset",
 				Description: "One related asset of the current asset.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("RelatedAsset"),
 			},
 			{
 				Name:        "resource",
 				Description: "A representation of the resource.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Resource"),
 			},
 			{
 				Name:        "service_perimeter",
 				Description: "An overview of VPC Service Controls and describes its advantages and capabilities.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("ServicePerimeter"),
 			},
 
 			// Standard steampipe columns
