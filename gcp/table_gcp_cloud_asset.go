@@ -13,10 +13,10 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpCloudAssetInventory(ctx context.Context) *plugin.Table {
+func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_cloud_asset_inventory",
-		Description: "GCP Cloud Asset Inventory",
+		Name:        "gcp_cloud_asset",
+		Description: "GCP Cloud Asset",
 		List: &plugin.ListConfig{
 			Hydrate: listCloudAssets,
 		},
@@ -116,7 +116,7 @@ func listCloudAssets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create Service Connection
 	service, err := CloudAssetService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_asset_inventory.listCloudAssets", "service_error", err)
+		plugin.Logger(ctx).Error("gcp_cloud_asset.listCloudAssets", "service_error", err)
 		return nil, err
 	}
 
@@ -153,7 +153,7 @@ func listCloudAssets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_asset_inventory.listCloudAssets", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_cloud_asset.listCloudAssets", "api_error", err)
 		return nil, err
 	}
 
