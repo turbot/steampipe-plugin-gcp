@@ -189,21 +189,6 @@ Explore the most recent activities in your system by checking the last entries i
 select
   log_name,
   insert_id,
-  log_entry_operation_last,
-  receive_timestamp,
-  resource_type,
-  severity,
-  text_payload
-from
-  gcp_logging_log_entry
-where
-  log_entry_operation_last;
-```
-
-```sql+sqlite
-select
-  log_name,
-  insert_id,
   operation ->> 'Last' as log_entry_operation_last,
   receive_timestamp,
   resource_type,
@@ -211,7 +196,23 @@ select
   text_payload
 from
   gcp_logging_log_entry
-where (operation ->> 'Last')::boolean;
+where
+  (operation ->> 'Last')::boolean;
+```
+
+```sql+sqlite
+select
+  log_name,
+  insert_id,
+  json_extract(operation, '$.Last') as log_entry_operation_last,
+  receive_timestamp,
+  resource_type,
+  severity,
+  text_payload
+from
+  gcp_logging_log_entry
+where
+  json_extract(operation, '$.Last') = 'true';
 ```
 
 ### Filter log entries by log name
