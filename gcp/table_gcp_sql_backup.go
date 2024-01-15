@@ -57,21 +57,25 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 				Name:        "end_time",
 				Description: "Specifies the time when the backup operation completed.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("EndTime").NullIfZero(),
 			},
 			{
 				Name:        "enqueued_time",
 				Description: "Specifies the time when the run was enqueued.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("EnqueuedTime").NullIfZero(),
 			},
 			{
 				Name:        "start_time",
 				Description: "Specifies the time when the backup operation actually started.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("StartTime").NullIfZero(),
 			},
 			{
 				Name:        "window_start_time",
 				Description: "Specifies the start time of the backup window during which this the backup was attempted.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("WindowStartTime").NullIfZero(),
 			},
 			{
 				Name:        "self_link",

@@ -196,6 +196,8 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "retention_policy",
 				Description: "The bucket's retention policy. The retention policy enforces a minimum retention time for all objects contained in the bucket, based on their creation time. Any attempt to overwrite or delete objects younger than the retention period will result in a PERMISSION_DENIED error.",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     extractRetentionPolicy,
+				Transform:   transform.FromValue(),
 			},
 
 			// standard steampipe columns
@@ -298,7 +300,6 @@ func getGcpStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		plugin.Logger(ctx).Trace("getGcpStorageBucket", "Error", err)
 		return nil, err
 	}
-
 	return req, nil
 }
 
@@ -335,4 +336,21 @@ func getBucketAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 
 	akas := []string{"gcp://storage.googleapis.com/projects/" + project + "/buckets/" + bucket.Name}
 	return akas, nil
+}
+
+func extractRetentionPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	bucket := h.Item.(*storage.Bucket)
+
+	bucketRetentionPolicy := make(map[string]interface{})
+
+	if bucket.RetentionPolicy != nil {
+
+		bucketRetentionPolicy["is_locked"] = bucket.RetentionPolicy.IsLocked
+
+		bucketRetentionPolicy["retention_period"] = bucket.RetentionPolicy.RetentionPeriod
+		
+		bucketRetentionPolicy["effective_time"] = bucket.RetentionPolicy.EffectiveTime
+	}
+
+	return bucketRetentionPolicy, nil
 }

@@ -29,7 +29,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
-			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_apikeys_key":                                         tableGcpApiKeysKey(ctx),
@@ -41,6 +40,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_bigtable_instance":                                   tableGcpBigtableInstance(ctx),
 			"gcp_billing_account":                                     tableGcpBillingAccount(ctx),
 			"gcp_billing_budget":                                      tableGcpBillingBudget(ctx),
+			"gcp_cloud_asset":                                         tableGcpCloudAsset(ctx),
 			"gcp_cloud_identity_group":                                tableGcpCloudIdentityGroup(ctx),
 			"gcp_cloud_identity_group_membership":                     tableGcpCloudIdentityGroupMembership(ctx),
 			"gcp_cloudfunctions_function":                             tableGcpCloudfunctionFunction(ctx),
@@ -126,6 +126,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_sql_database_instance_metric_cpu_utilization_hourly": tableGcpSQLDatabaseInstanceMetricCpuUtilizationHourly(ctx),
 			"gcp_storage_bucket":                                      tableGcpStorageBucket(ctx),
 			"gcp_storage_object":                                      tableGcpStorageObject(ctx),
+			"gcp_vertex_ai_endpoint":                                  tableGcpVertexAIEndpoint(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),

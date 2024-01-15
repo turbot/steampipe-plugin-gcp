@@ -3,7 +3,8 @@ package gcp
 import (
 	"context"
 
-	"cloud.google.com/go/redis/apiv1"
+	aiplatform "cloud.google.com/go/aiplatform/apiv1"
+	redis "cloud.google.com/go/redis/apiv1"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/apikeys/v2"
@@ -11,6 +12,7 @@ import (
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/billingbudgets/v1"
+	"google.golang.org/api/cloudasset/v1"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudidentity/v1"
@@ -24,6 +26,7 @@ import (
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/monitoring/v3"
+	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
 	"google.golang.org/api/run/v2"
 	"google.golang.org/api/serviceusage/v1"
@@ -52,6 +55,68 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 
 	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
 	return svc, nil
+}
+
+type AIplatfromServiceClients struct {
+	Endpoint *aiplatform.EndpointClient
+	Dataset  *aiplatform.DatasetClient
+	Index    *aiplatform.IndexClient
+	Job      *aiplatform.JobClient
+}
+
+func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AIplatfromServiceClients, error) {
+	// have we already created and cached the service?
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
+
+	// Default to us-central1 for building the supported locations for the resources like Endpoint, Dataset, Index, Job etc...
+	if matrixLocation == "" {
+		matrixLocation = "us-central1"
+	}
+
+	serviceCacheKey := "AIService" + matrixLocation + clientType
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*AIplatfromServiceClients), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+	opts = append(opts, option.WithEndpoint(matrixLocation+"-aiplatform.googleapis.com:443"))
+
+	clients := &AIplatfromServiceClients{}
+
+	switch clientType {
+	case "Endpoint":
+		svc, err := aiplatform.NewEndpointClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Endpoint = svc
+		return clients, nil
+	case "Dataset":
+		svc, err := aiplatform.NewDatasetClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Dataset = svc
+		return clients, nil
+	case "Index":
+		svc, err := aiplatform.NewIndexClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Index = svc
+		return clients, nil
+	case "Job":
+		svc, err := aiplatform.NewJobClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Job = svc
+		return clients, nil
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, clients)
+	return clients, nil
 }
 
 func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service, error) {
@@ -381,6 +446,27 @@ func CloudIdentityService(ctx context.Context, d *plugin.QueryData) (*cloudident
 
 	// so it was not in cache - create service
 	svc, err := cloudidentity.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudAssetService returns the service connection for GCP Asset Service
+func CloudAssetService(ctx context.Context, d *plugin.QueryData) (*cloudasset.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudIdentityService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudasset.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudasset.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
