@@ -249,8 +249,9 @@ where
 ```
 
 ### Get split details of each log entry
+Extracting detailed information about specific log entries in a structured and relational manner. It allows for a deeper analysis of the logs by providing contextual information like the sequence of the log entry
 
-```sql
+```sql+postgres
 select
   log_name,
   insert_id,
@@ -261,9 +262,21 @@ from
   gcp_logging_log_entry;
 ```
 
-### Get operation details of each log entry
+```sql+sqlite
+select
+  log_name,
+  insert_id,
+  json_extract(split, '$.Index') as split_index,
+  json_extract(split, '$.TotalSplits') as total_splits,
+  json_extract(split, '$.Uid') as split_uid
+from
+  gcp_logging_log_entry;
+```
 
-```sql
+### Get operation details of each log entry
+Retrieve the specifics of operation-related details from log entry records. This query can be instrumental in acquiring information regarding the initial operation, concluding operation, and the source of each operation.
+
+```sql+postgres
 select
   log_name,
   insert_id,
@@ -271,6 +284,18 @@ select
   operation ->> 'Producer' as operation_producer,
   operation ->> 'First' as operation_first,
   operation ->> 'Last' as operation_last
+from
+  gcp_logging_log_entry;
+```
+
+```sql+sqlite
+select
+  log_name,
+  insert_id,
+  operation_id,
+  json_extract(operation, '$.Producer') as operation_producer,
+  json_extract(operation, '$.First') as operation_first,
+  json_extract(operation, '$.Last') as operation_last
 from
   gcp_logging_log_entry;
 ```
