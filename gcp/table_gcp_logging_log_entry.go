@@ -141,7 +141,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "labels",
-				Description: "A map of key, value pairs that provides additional information about the log entry. The labels can be user-defined or system-defined.User-defined labels are arbitrary key, value pairs that you can use to classify logs.System-defined labels are defined by GCP services for platform logs.",
+				Description: "A map of key, value pairs that provides additional information about the log entry. The labels can be user-defined or system-defined.User-defined labels are arbitrary key, value pairs that you can use to classify logs. System-defined labels are defined by GCP services for platform logs.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -151,6 +151,12 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("InsertId"),
+			},
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Labels"),
 			},
 
 			// Standard GCP columns
