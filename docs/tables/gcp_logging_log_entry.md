@@ -22,8 +22,8 @@ The `gcp_logging_log_entry` table provides insights into Log Entries within Goog
   - `receive_timestamp`
   - `timestamp`
   - `trace`
-  - `log_entry_operation_id`
-  - `filter`
+  - `operation_id`
+  - `filter`: For additional details regarding the filter string, please refer to the documentation at https://cloud.google.com/logging/docs/view/logging-query-language.
 
 ## Examples
 
@@ -45,8 +45,7 @@ from
 select
   log_name,
   insert_id,
-  log_entry_operation_first,
-  log_entry_operation_id,
+  operation_id,
   receive_timestamp
 from
   gcp_logging_log_entry;
@@ -74,8 +73,6 @@ where
 select
   log_name,
   insert_id,
-  log_entry_operation_first,
-  log_entry_operation_last,
   resource_type,
   span_id,
   text_payload
@@ -106,7 +103,6 @@ where
 select
   log_name,
   insert_id,
-  resource_type,
   severity,
   span_id,
   timestamp
@@ -193,7 +189,7 @@ Explore the most recent activities in your system by checking the last entries i
 select
   log_name,
   insert_id,
-  log_entry_operation_last,
+  operation ->> 'Last' as log_entry_operation_last,
   receive_timestamp,
   resource_type,
   severity,
@@ -201,14 +197,14 @@ select
 from
   gcp_logging_log_entry
 where
-  log_entry_operation_last;
+  (operation ->> 'Last')::boolean;
 ```
 
 ```sql+sqlite
 select
   log_name,
   insert_id,
-  log_entry_operation_last,
+  json_extract(operation, '$.Last') as log_entry_operation_last,
   receive_timestamp,
   resource_type,
   severity,
@@ -216,7 +212,7 @@ select
 from
   gcp_logging_log_entry
 where
-  log_entry_operation_last = 1;
+  json_extract(operation, '$.Last') = 'true';
 ```
 
 ### Filter log entries by log name
@@ -252,6 +248,58 @@ where
   log_name = 'projects/parker-abbb/logs/cloudaudit.googleapis.com%2Factivity';
 ```
 
+### Get split details of each log entry
+Extracting detailed information about specific log entries in a structured and relational manner. It allows for a deeper analysis of the logs by providing contextual information like the sequence of the log entry
+
+```sql+postgres
+select
+  log_name,
+  insert_id,
+  split ->> 'Index' as split_index,
+  split ->> 'TotalSplits' as total_splits,
+  split ->> 'Uid' as split_uid
+from
+  gcp_logging_log_entry;
+```
+
+```sql+sqlite
+select
+  log_name,
+  insert_id,
+  json_extract(split, '$.Index') as split_index,
+  json_extract(split, '$.TotalSplits') as total_splits,
+  json_extract(split, '$.Uid') as split_uid
+from
+  gcp_logging_log_entry;
+```
+
+### Get operation details of each log entry
+Retrieve the specifics of operation-related details from log entry records. This query can be instrumental in acquiring information regarding the initial operation, concluding operation, and the source of each operation.
+
+```sql+postgres
+select
+  log_name,
+  insert_id,
+  operation_id,
+  operation ->> 'Producer' as operation_producer,
+  operation ->> 'First' as operation_first,
+  operation ->> 'Last' as operation_last
+from
+  gcp_logging_log_entry;
+```
+
+```sql+sqlite
+select
+  log_name,
+  insert_id,
+  operation_id,
+  json_extract(operation, '$.Producer') as operation_producer,
+  json_extract(operation, '$.First') as operation_first,
+  json_extract(operation, '$.Last') as operation_last
+from
+  gcp_logging_log_entry;
+```
+
 ## Filter examples
 
 For more information on Logging log entry filters, please refer to [Filter Pattern Syntax](https://cloud.google.com/logging/docs/view/logging-query-language).
@@ -263,8 +311,6 @@ Discover the segments that have logged errors on your Google Compute Engine virt
 select
   log_name,
   insert_id,
-  log_entry_operation_first,
-  log_entry_operation_last,
   receive_timestamp,
   resource_type,
   severity
@@ -299,8 +345,7 @@ select
   receive_timestamp,
   resource_type,
   severity,
-  timestamp,
-  resource_labels
+  timestamp
 from
   gcp_logging_log_entry
 where
@@ -310,6 +355,39 @@ order by
   receive_timestamp asc;
 ```
 
+### Get proto payload details of each log entry
+The query is useful for extracting specific information from log entries in a GCP logging system, particularly for entries related to Google Compute Engine (GCE) instances with errors. Extracting specific information from log entries in a GCP logging system, particularly for entries related to Google Compute Engine (GCE) instances with errors.
+
+```sql+postgres
+select
+  insert_id,
+  log_name,
+  proto_payload -> 'authenticationInfo' as authentication_info,
+  proto_payload -> 'authorizationInfo' as authorization_info,
+  proto_payload -> 'serviceName' as service_name,
+  proto_payload -> 'resourceName' as resource_name,
+  proto_payload ->> '@type' as proto_payload_type,
+  proto_payload ->> 'methodName' as method_name,
+  proto_payload ->> 'callerIp' as caller_ip
+from
+  gcp_logging_log_entry
+where
+  filter = 'resource.type = "gce_instance" AND (severity = ERROR OR "error")';
+```
+
 ```sql+sqlite
-Error: SQLite does not support CIDR operations.
+select
+  insert_id,
+  log_name,
+  json_extract(proto_payload, '$.authenticationInfo') AS authentication_info,
+  json_extract(proto_payload, '$.authorizationInfo') AS authorization_info,
+  json_extract(proto_payload, '$.serviceName') AS service_name,
+  json_extract(proto_payload, '$.resourceName') AS resource_name,
+  json_extract(proto_payload, '$.@type') AS proto_payload_type,
+  json_extract(proto_payload, '$.methodName') AS method_name,
+  json_extract(proto_payload, '$.callerIp') AS caller_ip
+from
+  gcp_logging_log_entry
+where
+  filter = 'resource.type = "gce_instance" AND (severity = ERROR OR severity = "error")';
 ```
