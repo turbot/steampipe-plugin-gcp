@@ -8,7 +8,8 @@ _What's new?_
 _Enhancements_
 
 - Added column `iam_policy `to `gcp_cloud_run_service` table. ([#531](https://github.com/turbot/steampipe-plugin-gcp/pull/531))
-- Optimized the `gcp_logging_log_entry` table result or result timing by applying a timestamp filter and added the columns `json_payload`, `proto_payload`, `metadata`, `resource`, `operation` and `tags. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
+- Optimized the `gcp_logging_log_entry` table result or result timing by applying a timestamp filter. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
+- Added the `json_payload`, `proto_payload`, `metadata`, `resource`, `operation`, and `tags` columns to `gcp_logging_log_entry` table. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
 
 _Bug fixes_
 
