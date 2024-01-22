@@ -1,3 +1,22 @@
+## v0.48.0 [2024-01-22]
+
+_What's new?_
+
+- New tables added
+  - [gcp_cloud_asset](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_asset) ([#532](https://github.com/turbot/steampipe-plugin-gcp/pull/532))
+
+_Enhancements_
+
+- Added column `iam_policy `to `gcp_cloud_run_service` table. ([#531](https://github.com/turbot/steampipe-plugin-gcp/pull/531))
+- Optimized the `gcp_logging_log_entry` table result or result timing by applying a timestamp filter. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
+- Added the `json_payload`, `proto_payload`, `metadata`, `resource`, `operation`, and `tags` columns to `gcp_logging_log_entry` table. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
+
+_Bug fixes_
+
+- Fixed the `addons_config`, `network_config` and `network_policy` column of `gcp_kubernetes_cluster` table to correctly return data instead of null. ([#530](https://github.com/turbot/steampipe-plugin-gcp/pull/530))
+- Fixed the `end_time` column of the `gcp_sql_backup` table to return `null` instead of an error when end time is unavailable for a SQL backup. ([#534](https://github.com/turbot/steampipe-plugin-gcp/pull/534))
+- Fixed the `enqueued_time`, `start_time` and `window_start_time` columns of the `gcp_sql_backup` table to return `null` instead of an error when timestamp is unavailable for a SQL backup. ([#536](https://github.com/turbot/steampipe-plugin-gcp/pull/536))
+
 ## v0.47.0 [2023-12-12]
 
 _What's new?_
