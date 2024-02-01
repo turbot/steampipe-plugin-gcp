@@ -10,7 +10,7 @@ import (
 
 //// TABLE DEFINITION
 
-// We can heve only one Application per project. And the App Id wouuld be the Project ID.
+// We can have only one Application per project. The App ID would be the Project ID.
 func tableGcpAppEngineApplication(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_app_engine_application",
