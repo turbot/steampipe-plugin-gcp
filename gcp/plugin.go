@@ -68,6 +68,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_instance_metric_cpu_utilization_daily":       tableGcpComputeInstanceMetricCpuUtilizationDaily(ctx),
 			"gcp_compute_instance_metric_cpu_utilization_hourly":      tableGcpComputeInstanceMetricCpuUtilizationHourly(ctx),
 			"gcp_compute_instance_template":                           tableGcpComputeInstanceTemplate(ctx),
+			"gcp_compute_machine_image":                               tableGcpComputeMachineImage(ctx),
 			"gcp_compute_machine_type":                                tableGcpComputeMachineType(ctx),
 			"gcp_compute_network":                                     tableGcpComputeNetwork(ctx),
 			"gcp_compute_node_group":                                  tableGcpComputeNodeGroup(ctx),
