@@ -46,7 +46,7 @@ func tableGcpAppEngineApplication(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "database_type",
-				Description: "he type of the Cloud Firestore or Cloud Datastore database associated with this application.",
+				Description: "The type of the Cloud Firestore or Cloud Datastore database associated with this application.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
