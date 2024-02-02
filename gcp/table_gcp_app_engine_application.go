@@ -62,7 +62,7 @@ func tableGcpAppEngineApplication(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "default_hostname",
-				Description: "Hostname used to reach this application, as resolved by App Engine.@OutputOnly",
+				Description: "Hostname used to reach this application, as resolved by App Engine.@OutputOnly.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
