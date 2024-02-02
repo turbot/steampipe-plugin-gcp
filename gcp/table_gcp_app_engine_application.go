@@ -11,6 +11,7 @@ import (
 //// TABLE DEFINITION
 
 // We can have only one Application per project. The App ID would be the Project ID.
+// https://cloud.google.com/appengine/docs/flexible/managing-projects-apps-billing#:~:text=Important%3A%20Each%20Google%20Cloud%20project,of%20your%20App%20Engine%20application
 func tableGcpAppEngineApplication(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_app_engine_application",
