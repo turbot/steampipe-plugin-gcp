@@ -1,3 +1,11 @@
+## v0.49.0 [2024-02-02]
+
+_What's new?_
+
+- New tables added
+  - [gcp_app_engine_application](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_app_engine_application) ([#537](https://github.com/turbot/steampipe-plugin-gcp/pull/537))
+  - [gcp_compute_machine_image](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_machine_image) ([#519](https://github.com/turbot/steampipe-plugin-gcp/pull/519))
+
 ## v0.48.0 [2024-01-22]
 
 _What's new?_
