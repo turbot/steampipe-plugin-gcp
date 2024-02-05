@@ -20,9 +20,11 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getProjectOrganizationPolicy,
+			Tags:       map[string]string{"service": "cloudresourcemanager", "action": "GetOrgPolicy"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listProjectOrganizationPolicies,
+			Tags:       map[string]string{"service": "cloudresourcemanager", "action": "ListOrgPolicies"},
 		},
 		Columns: []*plugin.Column{
 			{

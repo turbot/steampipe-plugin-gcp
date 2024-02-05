@@ -22,6 +22,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("insert_id"),
 			Hydrate:    getGcpLoggingLogEntry,
+			Tags:       map[string]string{"service": "logging", "action": "Entries.List"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingLogEntries,
@@ -37,6 +38,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "operation_id", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
 			},
+			Tags: map[string]string{"service": "logging", "action": "Exclusions.List"},
 		},
 		Columns: []*plugin.Column{
 			{

@@ -20,12 +20,14 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getGcpRedisInstance,
+			Tags:       map[string]string{"service": "redis", "action": "GetInstance"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpRedisInstances,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "location", Require: plugin.Optional},
 			},
+			Tags: map[string]string{"service": "redis", "action": "ListInstances"},
 		},
 		GetMatrixItemFunc: BuildRedisLocationList,
 		Columns: []*plugin.Column{
@@ -358,4 +360,3 @@ func gcpRedisInstanceCreateTime(_ context.Context, d *transform.TransformData) (
 	}
 	return instanceCreateTime.AsTime(), nil
 }
-

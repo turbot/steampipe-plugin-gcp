@@ -21,6 +21,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpMonitoringNotificationChannel,
+			Tags:       map[string]string{"service": "monitoring", "action": "NotificationChannels.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpMonitoringNotificationChannels,
@@ -29,6 +30,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				{Name: "type", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "monitoring", "action": "NotificationChannels.List"},
 		},
 		Columns: []*plugin.Column{
 			{

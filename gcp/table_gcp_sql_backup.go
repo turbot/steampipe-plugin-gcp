@@ -21,10 +21,12 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"id", "instance_name"}),
 			Hydrate:    getSQLBackup,
+			Tags:       map[string]string{"service": "sqladmin", "action": "BackupRuns.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listSQLBackups,
 			ParentHydrate: listSQLDatabaseInstances,
+			Tags:          map[string]string{"service": "sqladmin", "action": "BackupRuns.List"},
 		},
 		Columns: []*plugin.Column{
 			{

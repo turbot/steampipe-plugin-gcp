@@ -20,9 +20,11 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpLoggingSink,
+			Tags:       map[string]string{"service": "logging", "action": "Sinks.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingSinks,
+			Tags:    map[string]string{"service": "logging", "action": "Sinks.List"},
 		},
 		Columns: []*plugin.Column{
 			{

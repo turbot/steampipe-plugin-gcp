@@ -20,9 +20,11 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpServiceAccount,
+			Tags: 		 map[string]string{"service": "iam", "action": "ServiceAccounts.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpServiceAccounts,
+			Tags: 	map[string]string{"service": "iam", "action": "ServiceAccounts.List"},
 		},
 		Columns: []*plugin.Column{
 			{

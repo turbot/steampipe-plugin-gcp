@@ -20,9 +20,11 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpLoggingMetric,
+			Tags:       map[string]string{"service": "logging", "action": "Metrics.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingMetrics,
+			Tags:       map[string]string{"service": "logging", "action": "Metrics.List"},
 		},
 		Columns: []*plugin.Column{
 			{

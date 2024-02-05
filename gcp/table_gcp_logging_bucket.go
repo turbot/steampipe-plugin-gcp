@@ -21,9 +21,11 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getLoggingBucket,
+			Tags:       map[string]string{"service": "logging", "action": "Locations.Buckets.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listLoggingBuckets,
+			Tags:    map[string]string{"service": "logging", "action": "Locations.Buckets.List"},
 		},
 		Columns: []*plugin.Column{
 			{

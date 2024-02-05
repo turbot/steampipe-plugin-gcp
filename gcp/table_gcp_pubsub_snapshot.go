@@ -19,9 +19,11 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getPubSubSnapshot,
+			Tags:       map[string]string{"service": "pubsub", "action": "Snapshots.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubSnapshots,
+			Tags:    map[string]string{"service": "pubsub", "action": "Snapshots.List"},
 		},
 		Columns: []*plugin.Column{
 			{

@@ -18,9 +18,11 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getMonitoringGroup,
+			Tags:       map[string]string{"service": "monitoring", "action": "Groups.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringGroup,
+			Tags:    map[string]string{"service": "monitoring", "action": "Groups.List"},
 		},
 		Columns: []*plugin.Column{
 			{

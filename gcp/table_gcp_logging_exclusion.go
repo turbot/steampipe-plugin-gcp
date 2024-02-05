@@ -20,9 +20,11 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpLoggingExclusion,
+			Tags:       map[string]string{"service": "logging", "action": "Exclusions.List"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingExclusions,
+			Tags:    map[string]string{"service": "logging", "action": "Exclusions.Get"},
 		},
 		Columns: []*plugin.Column{
 			{

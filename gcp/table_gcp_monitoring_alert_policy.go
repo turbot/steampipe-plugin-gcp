@@ -18,6 +18,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getMonitoringAlertPolicy,
+			Tags:       map[string]string{"service": "monitoring", "action": "AlertPolicies.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringAlertPolicies,
@@ -28,6 +29,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "monitoring", "action": "AlertPolicies.List"},
 		},
 		Columns: []*plugin.Column{
 			{
