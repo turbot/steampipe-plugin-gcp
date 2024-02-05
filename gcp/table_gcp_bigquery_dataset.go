@@ -21,9 +21,11 @@ func tableGcpBigQueryDataset(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("dataset_id"),
 			Hydrate:    getBigQueryDataset,
+			Tags:    map[string]string{"service": "bigquery", "action": "Datasets.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listBigQueryDatasets,
+			Tags:    map[string]string{"service": "bigquery", "action": "Datasets.List"},
 		},
 		Columns: []*plugin.Column{
 			{
