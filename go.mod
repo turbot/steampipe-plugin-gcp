@@ -5,7 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/aiplatform v1.48.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/turbot/go-kit v0.9.0-rc.1
+	github.com/turbot/go-kit v0.10.0-rc.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.8.0
 	google.golang.org/api v0.139.0
 )
@@ -44,7 +44,7 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gertd/go-pluralize v0.2.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
