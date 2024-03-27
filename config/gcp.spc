@@ -20,6 +20,11 @@ connection "gcp" {
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
 
+  # `quota_project_id` (optional) - The project ID used for billing and quota. When set,
+  # this project ID is used to track quota usage and billing for the operations performed with the GCP connection.
+  # If not specified, billing and quota are tracked against the project associated with the credentials used for authentication.
+  #quota_project_id = "YOUR_QUOTA_PROJECT_ID"
+  
   # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
   # By default, common not found error codes are ignored and will still be ignored even if this argument is not set.
   # Refer https://cloud.google.com/resource-manager/docs/core_errors#Global_Errors for more information on GCP error codes

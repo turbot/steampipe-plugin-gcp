@@ -204,6 +204,12 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 
 		opts = append(opts, option.WithTokenSource(ts))
 	}
+
+	// Handle quota project ID
+	if gcpConfig.QuotaProjectID != nil {
+		opts = append(opts, option.WithQuotaProject(*gcpConfig.QuotaProjectID))
+	}
+
 	return opts
 }
 
