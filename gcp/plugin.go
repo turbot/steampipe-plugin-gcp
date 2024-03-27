@@ -129,6 +129,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_storage_bucket":                                      tableGcpStorageBucket(ctx),
 			"gcp_storage_object":                                      tableGcpStorageObject(ctx),
 			"gcp_vertex_ai_endpoint":                                  tableGcpVertexAIEndpoint(ctx),
+			"gcp_vertex_ai_model":                                     tableGcpVertexAIModel(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),

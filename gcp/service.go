@@ -63,6 +63,7 @@ type AIplatfromServiceClients struct {
 	Dataset  *aiplatform.DatasetClient
 	Index    *aiplatform.IndexClient
 	Job      *aiplatform.JobClient
+	Model    *aiplatform.ModelClient
 }
 
 func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AIplatfromServiceClients, error) {
@@ -113,6 +114,13 @@ func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AI
 			return nil, err
 		}
 		clients.Job = svc
+		return clients, nil
+	case "Model":
+		svc, err := aiplatform.NewModelClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Model = svc
 		return clients, nil
 	}
 
