@@ -14,14 +14,13 @@ import (
 )
 
 func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
-	plugin.Logger(ctx).Error("inside tableGcpVertexAIModel")
 	return &plugin.Table{
 		Name:        "gcp_vertex_ai_model",
 		Description: "GCP Vertex AI Model",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("name"),
 			Hydrate:           getAIPlatformModel,
-			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated","Unimplemented", "InvalidArgument"}),
+			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listAIPlatformModels,
@@ -30,176 +29,175 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Model"),
 		Columns: []*plugin.Column{
 			{
-					Name: "name",
-					Type: proto.ColumnType_STRING,
-					Description: "The resource name of the Model.",
-					Transform: transform.FromField("Name").Transform(lastPathElement),
+				Name:        "name",
+				Type:        proto.ColumnType_STRING,
+				Description: "The resource name of the Model.",
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
-					Name: "version_id",
-					Type: proto.ColumnType_STRING,
-					Description: "Immutable. The version ID of the model.",
+				Name:        "version_id",
+				Type:        proto.ColumnType_STRING,
+				Description: "Immutable. The version ID of the model.",
 			},
 			{
-					Name: "version_create_time",
-					Type: proto.ColumnType_TIMESTAMP,
-					Transform: transform.FromField("VersionCreateTime").Transform(convertTimestamppbAsTime),
-					Description: "Timestamp when this version was created.",
+				Name:        "version_create_time",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("VersionCreateTime").Transform(convertTimestamppbAsTime),
+				Description: "Timestamp when this version was created.",
 			},
 			{
-					Name: "version_update_time",
-					Type: proto.ColumnType_TIMESTAMP,
-					Transform: transform.FromField("VersionUpdateTime").Transform(convertTimestamppbAsTime),
-					Description: "Timestamp when this version was most recently updated.",
+				Name:        "version_update_time",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("VersionUpdateTime").Transform(convertTimestamppbAsTime),
+				Description: "Timestamp when this version was most recently updated.",
 			},
 			{
-					Name: "display_name",
-					Type: proto.ColumnType_STRING,
-					Description: "The display name of the Model.",
+				Name:        "display_name",
+				Type:        proto.ColumnType_STRING,
+				Description: "The display name of the Model.",
 			},
 			{
-					Name: "description",
-					Type: proto.ColumnType_STRING,
-					Description: "The description of the Model.",
+				Name:        "description",
+				Type:        proto.ColumnType_STRING,
+				Description: "The description of the Model.",
 			},
 			{
-					Name: "version_description",
-					Type: proto.ColumnType_STRING,
-					Description: "The description of this version.",
+				Name:        "version_description",
+				Type:        proto.ColumnType_STRING,
+				Description: "The description of this version.",
 			},
 			{
-					Name: "metadata_schema_uri",
-					Type: proto.ColumnType_STRING,
-					Description: "Points to a YAML file stored on Google Cloud Storage describing additional information about the model, immutable.",
+				Name:        "metadata_schema_uri",
+				Type:        proto.ColumnType_STRING,
+				Description: "Points to a YAML file stored on Google Cloud Storage describing additional information about the model, immutable.",
 			},
 			{
-					Name: "training_pipeline",
-					Type: proto.ColumnType_STRING,
-					Description: "The resource name of the TrainingPipeline that uploaded this model, if any.",
+				Name:        "training_pipeline",
+				Type:        proto.ColumnType_STRING,
+				Description: "The resource name of the TrainingPipeline that uploaded this model, if any.",
 			},
 			{
-					Name: "pipeline_job",
-					Type: proto.ColumnType_STRING,
-					Description: "Populated if the model is produced by a pipeline job.",
+				Name:        "pipeline_job",
+				Type:        proto.ColumnType_STRING,
+				Description: "Populated if the model is produced by a pipeline job.",
 			},
 			{
-					Name: "artifact_uri",
-					Type: proto.ColumnType_STRING,
-					Description: "The path to the directory containing the Model artifact and its supporting files, immutable.",
+				Name:        "artifact_uri",
+				Type:        proto.ColumnType_STRING,
+				Description: "The path to the directory containing the Model artifact and its supporting files, immutable.",
 			},
 			{
-					Name: "create_time",
-					Type: proto.ColumnType_TIMESTAMP,
-					Transform: transform.FromField("CreateTime").Transform(convertTimestamppbAsTime),
-					Description: "Timestamp when this Model was uploaded into Vertex AI.",
+				Name:        "create_time",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("CreateTime").Transform(convertTimestamppbAsTime),
+				Description: "Timestamp when this Model was uploaded into Vertex AI.",
 			},
 			{
-					Name: "update_time",
-					Type: proto.ColumnType_TIMESTAMP,
-					Transform: transform.FromField("UpdateTime").Transform(convertTimestamppbAsTime),
-					Description: "Timestamp when this Model was most recently updated.",
+				Name:        "update_time",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("UpdateTime").Transform(convertTimestamppbAsTime),
+				Description: "Timestamp when this Model was most recently updated.",
 			},
 			{
-					Name: "etag",
-					Type: proto.ColumnType_STRING,
-					Description: "Used to perform consistent read-modify-write updates.",
+				Name:        "etag",
+				Type:        proto.ColumnType_STRING,
+				Description: "Used to perform consistent read-modify-write updates.",
 			},
 			{
-					Name: "metadata_artifact",
-					Type: proto.ColumnType_STRING,
-					Description: "The resource name of the Artifact that was created in MetadataStore when creating the model.",
+				Name:        "metadata_artifact",
+				Type:        proto.ColumnType_STRING,
+				Description: "The resource name of the Artifact that was created in MetadataStore when creating the model.",
 			},
 			// JSON columns
 			{
-					Name: "version_aliases",
-					Type: proto.ColumnType_JSON,
-					Description: "User provided version aliases so that a model version can be referenced via alias.",
+				Name:        "version_aliases",
+				Type:        proto.ColumnType_JSON,
+				Description: "User provided version aliases so that a model version can be referenced via alias.",
 			},
 			{
-					Name: "predict_schemata",
-					Type: proto.ColumnType_JSON,
-					Description: "The schemata that describe formats of the model's predictions and explanations.",
+				Name:        "predict_schemata",
+				Type:        proto.ColumnType_JSON,
+				Description: "The schemata that describe formats of the model's predictions and explanations.",
 			},
 			{
-					Name: "metadata",
-					Type: proto.ColumnType_JSON,
-					Description: "An additional information about the model; the schema of the metadata can be found in metadata_schema_uri, immutable.",
+				Name:        "metadata",
+				Type:        proto.ColumnType_JSON,
+				Description: "An additional information about the model; the schema of the metadata can be found in metadata_schema_uri, immutable.",
 			},
 			{
-					Name: "supported_export_formats",
-					Type: proto.ColumnType_JSON,
-					Description: "The formats in which this model may be exported. If empty, this model is not available for export.",
+				Name:        "supported_export_formats",
+				Type:        proto.ColumnType_JSON,
+				Description: "The formats in which this model may be exported. If empty, this model is not available for export.",
 			},
 			{
-					Name: "container_spec",
-					Type: proto.ColumnType_JSON,
-					Description: "The specification of the container that is to be used when deploying this model.",
+				Name:        "container_spec",
+				Type:        proto.ColumnType_JSON,
+				Description: "The specification of the container that is to be used when deploying this model.",
 			},
 			{
-					Name: "supported_deployment_resources_types",
-					Type: proto.ColumnType_JSON,
-					Description: "The configuration types this model supports for deployment.",
+				Name:        "supported_deployment_resources_types",
+				Type:        proto.ColumnType_JSON,
+				Description: "The configuration types this model supports for deployment.",
 			},
 			{
-					Name: "supported_input_storage_formats",
-					Type: proto.ColumnType_JSON,
-					Description: "The formats this Model supports in BatchPredictionJob.input_config.",
+				Name:        "supported_input_storage_formats",
+				Type:        proto.ColumnType_JSON,
+				Description: "The formats this Model supports in BatchPredictionJob.input_config.",
 			},
 			{
-					Name: "supported_output_storage_formats",
-					Type: proto.ColumnType_JSON,
-					Description: "The formats this Model supports in BatchPredictionJob.output_config.",
+				Name:        "supported_output_storage_formats",
+				Type:        proto.ColumnType_JSON,
+				Description: "The formats this Model supports in BatchPredictionJob.output_config.",
 			},
 			{
-					Name: "deployed_models",
-					Type: proto.ColumnType_JSON,
-					Description: "The pointers to DeployedModels created from this Model.",
+				Name:        "deployed_models",
+				Type:        proto.ColumnType_JSON,
+				Description: "The pointers to DeployedModels created from this Model.",
 			},
 			{
-					Name: "explanation_spec",
-					Type: proto.ColumnType_JSON,
-									Description: "The default explanation specification for this Model.",
+				Name:        "explanation_spec",
+				Type:        proto.ColumnType_JSON,
+				Description: "The default explanation specification for this Model.",
 			},
 			{
-					Name: "labels",
-					Type: proto.ColumnType_JSON,
-					Description: "The labels with user-defined metadata to organize your Models.",
+				Name:        "labels",
+				Type:        proto.ColumnType_JSON,
+				Description: "The labels with user-defined metadata to organize your Models.",
 			},
 			{
-					Name: "encryption_spec",
-					Type: proto.ColumnType_JSON,
-					Description: "Customer-managed encryption key spec for a Model.",
+				Name:        "encryption_spec",
+				Type:        proto.ColumnType_JSON,
+				Description: "Customer-managed encryption key spec for a Model.",
 			},
 			{
-					Name: "model_source_info",
-					Type: proto.ColumnType_JSON,
-					Description: "Source of a model.",
+				Name:        "model_source_info",
+				Type:        proto.ColumnType_JSON,
+				Description: "Source of a model.",
 			},
 			{
-					Name: "original_model_info",
-					Type: proto.ColumnType_JSON,
-					Description: "If this model is a copy of another model, this contains info about the original.",
+				Name:        "original_model_info",
+				Type:        proto.ColumnType_JSON,
+				Description: "If this model is a copy of another model, this contains info about the original.",
 			},
 			// Standard columns for integration with Steampipe
 			{
-					Name: "title",
-					Type: proto.ColumnType_STRING,
-					Transform: transform.FromField("DisplayName"),
-					Description: "Title of the model, usually the same as display_name.",
+				Name:        "title",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
+				Description: "Title of the model, usually the same as display_name.",
 			},
 			{
-					Name: "tags",
-					Type: proto.ColumnType_JSON,
-					Transform: transform.FromField("Labels"),
-					Description: "A map of tags for the resource, represented as a JSON object.",
+				Name:        "tags",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Labels"),
+				Description: "A map of tags for the resource, represented as a JSON object.",
 			},
-	},
+		},
 	}
 }
 
 func listAIPlatformModels(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	logger.Error("inside listAIPlatformModels")
 
 	region := d.EqualsQualString("location")
 	var location string
@@ -247,7 +245,7 @@ func listAIPlatformModels(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	it := service.Model.ListModels(ctx, req)
-	logger.Error("listAIPlatformModels", "Model", it)
+
 	for {
 		model, err := it.Next()
 		if err != nil {
@@ -260,7 +258,7 @@ func listAIPlatformModels(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			logger.Error("gcp_vertex_ai_model.listAIPlatformModels", err)
 			return nil, err
 		}
-		logger.Warn("listAIPlatformModels.models", model.Name)
+
 		d.StreamListItem(ctx, model)
 
 		if d.RowsRemaining(ctx) == 0 {
@@ -275,7 +273,6 @@ func listAIPlatformModels(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 func getAIPlatformModel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	logger.Error("inside getAIPlatformModels")
 
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 
