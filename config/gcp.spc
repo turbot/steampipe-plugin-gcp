@@ -1,5 +1,5 @@
 connection "gcp" {
-  plugin    = "gcp"
+  plugin = "gcp"
 
   # `project` (optional) - The project ID to connect to. This is the project ID (string), not the
   # project name or number. If the `project` argument is not specified for a connection,
@@ -25,7 +25,6 @@ connection "gcp" {
   # If `quota_project` is not specified directly, the system will look for the `GOOGLE_CLOUD_QUOTA_PROJECT`
   # environment variable to determine which project to use for billing and quota.
   # If neither is specified, billing and quota are tracked against the project associated with the credentials used for authentication.
-  # Example to set this in your configuration:
   # quota_project = "YOUR_QUOTA_PROJECT_ID"
 
   # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
