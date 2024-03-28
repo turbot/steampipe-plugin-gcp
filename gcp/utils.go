@@ -211,7 +211,6 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 	// check if quota project is set in config
 	if gcpConfig.QuotaProject != nil {
 		quotaProject = *gcpConfig.QuotaProject
-		opts = append(opts, option.WithQuotaProject(*gcpConfig.QuotaProject))
 	}
 
 	if quotaProject != "" {
