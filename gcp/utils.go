@@ -204,6 +204,19 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 
 		opts = append(opts, option.WithTokenSource(ts))
 	}
+
+	// check if quota project is set via env var
+	quotaProject := os.Getenv("GOOGLE_CLOUD_QUOTA_PROJECT")
+
+	// check if quota project is set in config
+	if gcpConfig.QuotaProject != nil {
+		quotaProject = *gcpConfig.QuotaProject
+	}
+
+	if quotaProject != "" {
+		opts = append(opts, option.WithQuotaProject(quotaProject))
+	}
+
 	return opts
 }
 
