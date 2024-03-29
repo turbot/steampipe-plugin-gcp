@@ -126,7 +126,6 @@ func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromP(gcpAIPlatformTurbotData, "Akas"),
 			},
-
 			// Standard gcp columns
 			{
 				Name:        "location",
