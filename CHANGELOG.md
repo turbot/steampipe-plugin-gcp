@@ -7,7 +7,7 @@ _What's new?_
 
 _Enhancements_
 
-- Added support for `quota_project` config arg to provide users the ability to set the `project ID` used for billing and quota. When set, this `project ID` is used to track quota usage and billing for the operations performed with the GCP connection. If `quota_project` is not specified directly, the system will look for the `GOOGLE_CLOUD_QUOTA_PROJECT` environment variable to determine which project to use for billing and quota. If neither is specified, billing and quota are tracked against the project associated with the credentials used for authentication. ([#556](https://github.com/turbot/steampipe-plugin-gcp/pull/556))
+- Added support for `quota_project` config arg to provide users the ability to set the `project ID` used for billing and quota. ([#556](https://github.com/turbot/steampipe-plugin-gcp/pull/556))
 
 _Bug fixes_
 
