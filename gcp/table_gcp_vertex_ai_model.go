@@ -195,14 +195,14 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "akas",
 				Type:        proto.ColumnType_JSON,
-				Transform:  transform.FromP(gcpModelNameToAkas, "akas"),
+				Transform:  transform.FromP(gcpModelStandard, "akas"),
 				Description: ColumnDescriptionAkas,
 			},
 			// Standard gcp columns
 			{
 				Name:        "location",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpAIPlatformTurbotData, "Location"),
+				Transform:   transform.FromP(gcpModelStandard, "Location"),
 				Description: ColumnDescriptionLocation,
 			},
 			{
@@ -300,7 +300,7 @@ func getAIPlatformModel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
 	projectId, err := getProjectCached(ctx, d, h)
 	if err != nil {
-		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformEndpoint", "cache_error", err)
+		logger.Error("gcp_vertex_ai_model.getAIPlatformModel", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
@@ -343,7 +343,7 @@ func getAIPlatformModel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 /// TRANSFORM FUNCTIONS
 
-func gcpModelNameToAkas(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpModelStandard(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	param := d.Param.(string)
 	AIData := d.HydrateItem.(*aiplatformpb.Model)
 	akas := []string{"gcp://aiplatform.googleapis.com/" + AIData.Name}
