@@ -1,3 +1,18 @@
+## v0.50.0 [2024-03-29]
+
+_What's new?_
+
+- New tables added
+  - [gcp_vertex_ai_model](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_vertex_ai_model) ([#555](https://github.com/turbot/steampipe-plugin-gcp/pull/555))
+
+_Enhancements_
+
+- Added support for `quota_project` config arg to provide users the ability to set the `project ID` used for billing and quota. ([#556](https://github.com/turbot/steampipe-plugin-gcp/pull/556))
+
+_Bug fixes_
+
+- Fixed the `retry_policy_maximum_backoff` and `retry_policy_minimum_backoff` columns of `gcp_pubsub_subscription` table to correctly return data. ([#552](https://github.com/turbot/steampipe-plugin-gcp/pull/552)) (Thanks to [@mvanholsteijn](https://github.com/mvanholsteijn) for the contribution!)
+
 ## v0.49.0 [2024-02-02]
 
 _What's new?_
