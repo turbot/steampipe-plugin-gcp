@@ -184,13 +184,33 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DisplayName"),
-				Description: "Title of the model, usually the same as display_name.",
+				Description: ColumnDescriptionTitle,
 			},
 			{
 				Name:        "tags",
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Labels"),
-				Description: "A map of tags for the resource, represented as a JSON object.",
+				Description: ColumnDescriptionTags,
+			},
+			{
+				Name:        "akas",
+				Type:        proto.ColumnType_JSON,
+				Transform:  transform.FromP(gcpModelNameToAkas, "akas"),
+				Description: ColumnDescriptionAkas,
+			},
+			// Standard gcp columns
+			{
+				Name:        "location",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpAIPlatformTurbotData, "Location"),
+				Description: ColumnDescriptionLocation,
+			},
+			{
+				Name:        "project",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:   plugin.HydrateFunc(getProject).WithCache(),
+				Transform: transform.FromValue(),
+				Description: ColumnDescriptionProject,
 			},
 		},
 	}
@@ -318,4 +338,19 @@ func getAIPlatformModel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	return result, nil
+}
+
+
+/// TRANSFORM FUNCTIONS
+
+func gcpModelNameToAkas(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	param := d.Param.(string)
+	AIData := d.HydrateItem.(*aiplatformpb.Model)
+	akas := []string{"gcp://aiplatform.googleapis.com/" + AIData.Name}
+
+	turbotData := map[string]interface{}{
+		"Location": strings.Split(AIData.Name, "/")[3],
+		"Akas":     akas,
+	}
+	return turbotData[param], nil
 }
