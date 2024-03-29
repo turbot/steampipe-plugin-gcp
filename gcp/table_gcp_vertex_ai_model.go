@@ -37,7 +37,7 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "version_id",
 				Type:        proto.ColumnType_STRING,
-				Description: "Immutable. The version ID of the model.",
+				Description: "The version ID of the model.",
 			},
 			{
 				Name:        "version_create_time",
@@ -69,7 +69,7 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "metadata_schema_uri",
 				Type:        proto.ColumnType_STRING,
-				Description: "Points to a YAML file stored on Google Cloud Storage describing additional information about the model, immutable.",
+				Description: "Points to a YAML file stored on Google Cloud Storage describing additional information about the model.",
 			},
 			{
 				Name:        "training_pipeline",
@@ -84,7 +84,7 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "artifact_uri",
 				Type:        proto.ColumnType_STRING,
-				Description: "The path to the directory containing the Model artifact and its supporting files, immutable.",
+				Description: "The path to the directory containing the Model artifact and its supporting files.",
 			},
 			{
 				Name:        "create_time",
@@ -313,7 +313,7 @@ func getAIPlatformModel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "NotFound") {
 			return nil, nil
 		}
-		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformModel", "api_error", err)
+		logger.Error("gcp_vertex_ai_model.getAIPlatformModel", "api_error", err)
 		return nil, err
 	}
 
