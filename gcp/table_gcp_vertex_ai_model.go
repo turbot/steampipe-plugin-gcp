@@ -195,7 +195,7 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "akas",
 				Type:        proto.ColumnType_JSON,
-				Transform:  transform.FromP(gcpModelStandard, "akas"),
+				Transform:  transform.FromP(gcpModelStandard, "Akas"),
 				Description: ColumnDescriptionAkas,
 			},
 			// Standard gcp columns
