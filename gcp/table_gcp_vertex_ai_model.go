@@ -340,7 +340,6 @@ func getAIPlatformModel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	return result, nil
 }
 
-
 /// TRANSFORM FUNCTIONS
 
 func gcpModelStandard(ctx context.Context, d *transform.TransformData) (interface{}, error) {
