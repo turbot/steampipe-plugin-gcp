@@ -155,6 +155,8 @@ cloud.google.com/go/redis v1.7.0/go.mod h1:V3x5Jq1jzUcg+UNsRvdmsfuFnit1cfe3Z/PGy
 cloud.google.com/go/redis v1.8.0/go.mod h1:Fm2szCDavWzBk2cDKxrkmWBqoCiL1+Ctwq7EyqBCA/A=
 cloud.google.com/go/redis v1.13.1 h1:YrjQnCC7ydk+k30op7DSjSHw1yAYhqYXFcOq1bSXRYA=
 cloud.google.com/go/redis v1.13.1/go.mod h1:VP7DGLpE91M6bcsDdMuyCm2hIpB6Vp2hI090Mfd1tcg=
+cloud.google.com/go/resourcemanager v1.9.1 h1:QIAMfndPOHR6yTmMUB0ZN+HSeRmPjR/21Smq5/xwghI=
+cloud.google.com/go/resourcemanager v1.9.1/go.mod h1:dVCuosgrh1tINZ/RwBufr8lULmWGOkPS8gL5gqyjdT8=
 cloud.google.com/go/retail v1.8.0/go.mod h1:QblKS8waDmNUhghY2TI9O3JLlFk8jybHeV4BF19FrE4=
 cloud.google.com/go/retail v1.9.0/go.mod h1:g6jb6mKuCS1QKnH/dpu7isX253absFl6iE92nHwlBUY=
 cloud.google.com/go/scheduler v1.4.0/go.mod h1:drcJBmxF3aqZJRhmkHQ9b3uSSpQoltBPGPxGAWROx6s=

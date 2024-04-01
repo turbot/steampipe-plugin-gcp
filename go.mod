@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	cloud.google.com/go/aiplatform v1.48.0
+	cloud.google.com/go/resourcemanager v1.9.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/turbot/go-kit v0.9.0-rc.1
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.8.0

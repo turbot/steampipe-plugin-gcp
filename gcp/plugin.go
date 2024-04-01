@@ -128,6 +128,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_sql_database_instance_metric_cpu_utilization_hourly": tableGcpSQLDatabaseInstanceMetricCpuUtilizationHourly(ctx),
 			"gcp_storage_bucket":                                      tableGcpStorageBucket(ctx),
 			"gcp_storage_object":                                      tableGcpStorageObject(ctx),
+			"gcp_tag_binding":                                         tableGcpTagBinding(ctx),
 			"gcp_vertex_ai_endpoint":                                  tableGcpVertexAIEndpoint(ctx),
 			"gcp_vertex_ai_model":                                     tableGcpVertexAIModel(ctx),
 			/*
