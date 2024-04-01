@@ -61,7 +61,7 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	req := &resourcemanagerpb.ListTagBindingsRequest{
 		Parent: parent,
 	}
-	plugin.Logger(ctx).Warn("listGcpTagBindingsrequest", "req", req)
+
 	// Iterate through the results
 	it := client.ListTagBindings(ctx, req)
 	for {
@@ -72,7 +72,7 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		if err != nil {
 			return nil, err
 		}
-		plugin.Logger(ctx).Warn("insidelistGcpTagBindingsresponse", tagBinding)
+
 		d.StreamListItem(ctx, tagBinding)
 
 		// Context cancellation check
