@@ -3,7 +3,7 @@ package gcp
 import (
 	"context"
 
-	"cloud.google.com/go/resourcemanager/apiv3"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	resourcemanagerpb "cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -17,8 +17,9 @@ func tableGcpTagBinding(ctx context.Context) *plugin.Table {
 		Name:        "gcp_tag_binding",
 		Description: "GCP Tag Binding",
 		List: &plugin.ListConfig{
-			Hydrate: listGcpTagBindings,
-			KeyColumns: plugin.SingleColumn("parent"),
+			Hydrate:           listGcpTagBindings,
+			KeyColumns:        plugin.SingleColumn("parent"),
+			ShouldIgnoreError: isIgnorableError([]string{"InvalidArgument"}),
 		},
 		Columns: []*plugin.Column{
 			{
@@ -43,6 +44,21 @@ func tableGcpTagBinding(ctx context.Context) *plugin.Table {
 				Description: "Title of the resource.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
+			},
+			{
+				Name:        "akas",
+				Description: ColumnDescriptionAkas,
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     plugin.HydrateFunc(getTagBindingAka),
+				Transform:   transform.FromValue(),
+			},
+			//Standard GCP columns
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -98,4 +114,13 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	return nil, nil
+}
+
+//// HYDRATE FUNCTIONS
+
+func getTagBindingAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*resourcemanagerpb.TagBinding)
+	region := "global"
+	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + data.Name + "/tagBindings/" + data.Name + "/tagValues/" + data.Name + "/regions/" + region}
+	return akas, nil
 }
