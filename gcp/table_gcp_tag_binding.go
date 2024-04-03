@@ -37,7 +37,6 @@ func tableGcpTagBinding(ctx context.Context) *plugin.Table {
 				Description: "The TagValue of the TagBinding. Must be of the form `tagValues/456`.",
 				Type:        proto.ColumnType_STRING,
 			},
-			// Additional fields as needed
 			// Standard Steampipe columns
 			{
 				Name:        "title",
