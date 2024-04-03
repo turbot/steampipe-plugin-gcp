@@ -119,7 +119,15 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func getTagBindingAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	data := h.Item.(*resourcemanagerpb.TagBinding)
-	region := "global"
-	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + data.Name + "/tagBindings/" + data.Name + "/tagValues/" + data.Name + "/regions/" + region}
+	
+	// Get project details
+	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
+	projectId, err := getProjectCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/" + data.Name}
 	return akas, nil
 }
