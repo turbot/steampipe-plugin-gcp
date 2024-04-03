@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  default     = "979620418102"
+  default     = "1111111111"
   description = "The project ID."
 }
 
@@ -39,12 +39,12 @@ resource "google_tags_tag_binding" "binding" {
   tag_value = "tagValues/${google_tags_tag_value.value.name}"
 }
 
-output "id" {
-  value = google_tags_tag_binding.binding.id
-}
-
 output "parent" {
   value = google_tags_tag_binding.binding.parent
+}
+
+output "name" {
+  value = google_tags_tag_binding.binding.id
 }
 
 output "tag_value" {
