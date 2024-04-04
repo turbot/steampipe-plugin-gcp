@@ -1,0 +1,6 @@
+[
+  {
+    "name": "{{ output.name.value }}",
+    "title": "{{ output.name.value }}"
+  }
+]

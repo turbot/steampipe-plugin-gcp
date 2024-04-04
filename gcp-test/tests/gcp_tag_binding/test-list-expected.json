@@ -1,0 +1,8 @@
+[
+	{
+		"name": "{{ output.name.value }}",
+		"parent": "{{ output.parent.value }}",
+		"tag_value": "{{ output.tag_value.value }}",
+		"title": "{{ output.name.value }}"
+	}
+]
