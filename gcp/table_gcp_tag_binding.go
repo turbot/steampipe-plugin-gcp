@@ -37,19 +37,17 @@ func tableGcpTagBinding(ctx context.Context) *plugin.Table {
 				Description: "The TagValue of the TagBinding. Must be of the form `tagValues/456`.",
 				Type:        proto.ColumnType_STRING,
 			},
+			{
+				Name:        "tag_value_namespaced_name",
+				Description: "The namespaced name for the TagValue of the TagBinding.",
+				Type:        proto.ColumnType_STRING,
+			},
 			// Standard Steampipe columns
 			{
 				Name:        "title",
 				Description: "Title of the resource.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
-			},
-			{
-				Name:        "akas",
-				Description: ColumnDescriptionAkas,
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     plugin.HydrateFunc(getTagBindingAka),
-				Transform:   transform.FromValue(),
 			},
 			//Standard GCP columns
 			{
@@ -113,21 +111,4 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getTagBindingAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	data := h.Item.(*resourcemanagerpb.TagBinding)
-	
-	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-
-	akas := []string{"gcp://cloudresourcemanager.googleapis.com/projects/" + project + "/" + data.Name}
-	return akas, nil
 }
