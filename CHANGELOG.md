@@ -1,3 +1,10 @@
+## v0.51.0 [2024-04-05]
+
+_What's new?_
+
+- New tables added
+  - [gcp_tag_binding](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_tag_binding) ([#560](https://github.com/turbot/steampipe-plugin-gcp/pull/560))
+
 ## v0.50.0 [2024-03-29]
 
 _What's new?_
