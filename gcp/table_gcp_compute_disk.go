@@ -18,6 +18,7 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeDisk,
+			Tags:       map[string]string{"service": "compute", "action": "disks.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeDisk,
@@ -25,6 +26,13 @@ func tableGcpComputeDisk(ctx context.Context) *plugin.Table {
 				// String columns
 				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "compute", "action": "disks.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeDiskIamPolicy,
+				Tags: map[string]string{"service": "compute", "action": "disks.getIamPolicy"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -301,6 +309,9 @@ func listComputeDisk(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	resp := service.Disks.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.DiskAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, disk := range item.Disks {
 				d.StreamListItem(ctx, disk)

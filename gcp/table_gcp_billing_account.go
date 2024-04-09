@@ -18,6 +18,7 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			KeyColumns: plugin.OptionalColumns([]string{"name"}),
 			Hydrate:    getBillingAccount,
+			Tags:    map[string]string{"service": "billing", "action": "accounts.get"},
 		},
 		Columns: []*plugin.Column{
 			{

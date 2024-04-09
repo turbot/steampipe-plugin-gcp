@@ -22,6 +22,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("insert_id"),
 			Hydrate:    getGcpLoggingLogEntry,
+			Tags:       map[string]string{"service": "logging", "action": "logEntries.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingLogEntries,
@@ -37,6 +38,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "operation_id", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
 			},
+			Tags: map[string]string{"service": "logging", "action": "logEntries.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -228,6 +230,9 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	if err := op.Pages(
 		ctx,
 		func(page *logging.ListLogEntriesResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, entry := range page.Entries {
 				d.StreamListItem(ctx, entry)
 

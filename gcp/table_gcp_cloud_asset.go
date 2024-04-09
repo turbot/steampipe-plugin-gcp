@@ -19,6 +19,7 @@ func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 		Description: "GCP Cloud Asset",
 		List: &plugin.ListConfig{
 			Hydrate: listCloudAssets,
+			Tags:    map[string]string{"service": "billing", "action": "budgets.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -134,6 +135,9 @@ func listCloudAssets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	resp := service.Assets.List(input).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *cloudasset.ListAssetsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Assets {
 			d.StreamListItem(ctx, item)
 

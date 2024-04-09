@@ -20,9 +20,11 @@ func tableGcpProjectOrganizationPolicy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getProjectOrganizationPolicy,
+			Tags:       map[string]string{"service": "resourcemanager", "action": "projects.getIamPolicy"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listProjectOrganizationPolicies,
+			Tags:    map[string]string{"service": "resourcemanager", "action": "projects.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -127,6 +129,9 @@ func listProjectOrganizationPolicies(ctx context.Context, d *plugin.QueryData, h
 
 	resp := service.Projects.ListOrgPolicies("projects/"+project, rb)
 	if err := resp.Pages(ctx, func(page *cloudresourcemanager.ListOrgPoliciesResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, orgPolicy := range page.Policies {
 			d.StreamListItem(ctx, orgPolicy)
 

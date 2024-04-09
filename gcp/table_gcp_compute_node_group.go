@@ -21,6 +21,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeNodeGroup,
+			Tags:       map[string]string{"service": "compute", "action": "nodeGroups.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeNodeGroups,
@@ -29,6 +30,7 @@ func tableGcpComputeNodeGroup(ctx context.Context) *plugin.Table {
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "maintenance_policy", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "nodeGroups.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -196,6 +198,9 @@ func listComputeNodeGroups(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	resp := service.NodeGroups.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NodeGroupAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, nodeGroup := range item.NodeGroups {
 				d.StreamListItem(ctx, nodeGroup)

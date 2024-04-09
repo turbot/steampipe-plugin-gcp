@@ -28,6 +28,7 @@ func tableGcpComputeTargetSslProxy(ctx context.Context) *plugin.Table {
 				// String columns
 				{Name: "proxy_header", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "targetSslProxies.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -148,6 +149,9 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 
 	resp := service.TargetSslProxies.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetSslProxyList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, targetSslProxy := range page.Items {
 			d.StreamListItem(ctx, targetSslProxy)
 

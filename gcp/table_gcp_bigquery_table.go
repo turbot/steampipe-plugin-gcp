@@ -20,10 +20,18 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"dataset_id", "table_id"}),
 			Hydrate:    getBigqueryTable,
+			Tags:       map[string]string{"service": "bigquery", "action": "tables.get"},
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listBigQueryDatasets,
 			Hydrate:       listBigqueryTables,
+			Tags:          map[string]string{"service": "bigquery", "action": "tables.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getBigqueryTable,
+				Tags: map[string]string{"service": "bigquery", "action": "tables.get"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -276,6 +284,9 @@ func listBigqueryTables(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp := service.Tables.List(project, dataset.DatasetReference.DatasetId).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *bigquery.TableList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, table := range page.Tables {
 			d.StreamListItem(ctx, table)
 

@@ -20,9 +20,11 @@ func tableGcpLoggingExclusion(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpLoggingExclusion,
+			Tags:       map[string]string{"service": "logging", "action": "exclusions.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingExclusions,
+			Tags:    map[string]string{"service": "logging", "action": "exclusions.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -120,6 +122,9 @@ func listGcpLoggingExclusions(ctx context.Context, d *plugin.QueryData, h *plugi
 	if err := resp.Pages(
 		ctx,
 		func(page *logging.ListExclusionsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, exclusion := range page.Exclusions {
 				d.StreamListItem(ctx, exclusion)
 

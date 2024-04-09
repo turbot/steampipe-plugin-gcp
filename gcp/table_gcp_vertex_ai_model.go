@@ -21,10 +21,12 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			KeyColumns:        plugin.SingleColumn("name"),
 			Hydrate:           getAIPlatformModel,
 			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
+			Tags:              map[string]string{"service": "aiplatform", "action": "models.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listAIPlatformModels,
 			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
+			Tags:              map[string]string{"service": "aiplatform", "action": "models.list"},
 		},
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Model"),
 		Columns: []*plugin.Column{
@@ -195,7 +197,7 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "akas",
 				Type:        proto.ColumnType_JSON,
-				Transform:  transform.FromP(gcpModelStandard, "Akas"),
+				Transform:   transform.FromP(gcpModelStandard, "Akas"),
 				Description: ColumnDescriptionAkas,
 			},
 			// Standard gcp columns
@@ -208,8 +210,8 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 			{
 				Name:        "project",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:   plugin.HydrateFunc(getProject).WithCache(),
-				Transform: transform.FromValue(),
+				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Transform:   transform.FromValue(),
 				Description: ColumnDescriptionProject,
 			},
 		},
@@ -267,6 +269,9 @@ func listAIPlatformModels(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	it := service.Model.ListModels(ctx, req)
 
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		model, err := it.Next()
 		if err != nil {
 			if strings.Contains(err.Error(), "404") {

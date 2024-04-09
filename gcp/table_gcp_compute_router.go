@@ -21,9 +21,11 @@ func tableGcpComputeRouter(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeRouter,
+			Tags:       map[string]string{"service": "compute", "action": "routers.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeRouters,
+			Tags:    map[string]string{"service": "compute", "action": "routers.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -163,6 +165,9 @@ func listComputeRouters(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp := service.Routers.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.RouterAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, router := range item.Routers {
 				d.StreamListItem(ctx, router)

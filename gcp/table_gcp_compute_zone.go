@@ -23,6 +23,7 @@ func tableGcpComputeZone(ctx context.Context) *plugin.Table {
 				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "zones.list"},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -149,6 +150,9 @@ func listComputeZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.ZoneList) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, zone := range page.Items {
 				d.StreamListItem(ctx, zone)
 

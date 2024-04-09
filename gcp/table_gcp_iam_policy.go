@@ -19,6 +19,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		Description: "GCP IAM Policy",
 		List: &plugin.ListConfig{
 			Hydrate: listGcpIamPolicies,
+			Tags:    map[string]string{"service": "cloudresourcemanager", "action": "projects.getIamPolicy"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -89,6 +90,9 @@ func listGcpIamPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	rb := &cloudresourcemanager.GetIamPolicyRequest{}
 	resp, err := service.Projects.GetIamPolicy(project, rb).Context(ctx).Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
 	if err != nil {
 		return nil, err
 	}

@@ -20,10 +20,12 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("name"),
 			Hydrate:           getGcpProjectService,
+			Tags:              map[string]string{"service": "serviceusage", "action": "services.get"},
 			ShouldIgnoreError: isIgnorableError([]string{"404"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpProjectServices,
+			Tags:    map[string]string{"service": "serviceusage", "action": "services.list"},
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "state", Require: plugin.Optional, Operators: []string{"<>", "="}},
@@ -109,6 +111,9 @@ func listGcpProjectServices(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if err := result.Pages(
 		ctx,
 		func(page *serviceusage.ListServicesResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, service := range page.Services {
 				d.StreamListItem(ctx, service)
 

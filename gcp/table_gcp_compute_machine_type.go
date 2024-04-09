@@ -20,6 +20,7 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "zone"}),
 			Hydrate:    getComputeMachineType,
+			Tags:       map[string]string{"service": "compute", "action": "machineTypes.get"},
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listComputeZones,
@@ -30,6 +31,7 @@ func tableGcpComputeMachineType(ctx context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			Tags: map[string]string{"service": "compute", "action": "machineTypes.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -180,6 +182,9 @@ func listComputeMachineTypes(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	resp := service.MachineTypes.List(project, zone).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.MachineTypeList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, machineType := range page.Items {
 			d.StreamListItem(ctx, machineType)
 

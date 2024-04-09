@@ -19,10 +19,12 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listKubernetesNodePools,
 			ParentHydrate: listKubernetesClusters,
+			Tags:          map[string]string{"service": "container", "action": "nodePools.list"},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location", "cluster_name"}),
 			Hydrate:    getKubernetesNodePool,
+			Tags:       map[string]string{"service": "container", "action": "nodePools.get"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -204,6 +206,9 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	parent := "projects/" + project + "/locations/" + location + "/clusters/" + clusterName + "/nodePools/" + name
 
 	resp, err := service.Projects.Locations.Clusters.NodePools.Get(parent).Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
 	if err != nil {
 		return nil, err
 	}
