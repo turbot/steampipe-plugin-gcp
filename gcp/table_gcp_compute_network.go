@@ -18,6 +18,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeNetwork,
+			Tags:       map[string]string{"service": "compute", "action": "networks.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeNetworks,
@@ -25,6 +26,7 @@ func tableGcpComputeNetwork(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "auto_create_subnetworks", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "networks.list"},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -168,6 +170,9 @@ func listComputeNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	resp := service.Networks.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NetworkList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, network := range page.Items {
 			d.StreamListItem(ctx, network)
 

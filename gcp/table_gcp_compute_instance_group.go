@@ -18,9 +18,17 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeInstanceGroup,
+			Tags:       map[string]string{"service": "compute", "action": "instanceGroups.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeInstanceGroup,
+			Tags:    map[string]string{"service": "compute", "action": "instanceGroups.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeInstanceGroupInstances,
+				Tags: map[string]string{"service": "compute", "action": "instances.list"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -173,6 +181,9 @@ func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	resp := service.InstanceGroups.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.InstanceGroupAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, group := range item.InstanceGroups {
 				d.StreamListItem(ctx, group)

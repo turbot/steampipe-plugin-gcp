@@ -20,6 +20,7 @@ func tableGcpTagBinding(ctx context.Context) *plugin.Table {
 			Hydrate:           listGcpTagBindings,
 			KeyColumns:        plugin.SingleColumn("parent"),
 			ShouldIgnoreError: isIgnorableError([]string{"InvalidArgument"}),
+			Tags:              map[string]string{"service": "resourcemanager", "action": "hierarchyNodes.listTagBindings"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -94,6 +95,9 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	// Iterate through the results
 	it := client.ListTagBindings(ctx, req)
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		tagBinding, err := it.Next()
 		if err == iterator.Done {
 			break

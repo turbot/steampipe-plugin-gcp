@@ -21,6 +21,7 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getCloudRunService,
+			Tags:       map[string]string{"service": "run", "action": "services.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCloudRunServices,
@@ -29,6 +30,13 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 					Name:    "location",
 					Require: plugin.Optional,
 				},
+			},
+			Tags: map[string]string{"service": "run", "action": "services.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getCloudRunServiceIamPolicy,
+				Tags: map[string]string{"service": "run", "action": "services.getIamPolicy"},
 			},
 		},
 		GetMatrixItemFunc: BuildCloudRunLocationList,
@@ -292,6 +300,9 @@ func listCloudRunServices(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	resp := service.Projects.Locations.Services.List(input).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *run.GoogleCloudRunV2ListServicesResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Services {
 			d.StreamListItem(ctx, item)
 

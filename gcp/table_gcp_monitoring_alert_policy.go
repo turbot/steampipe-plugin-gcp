@@ -18,6 +18,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getMonitoringAlertPolicy,
+			Tags:       map[string]string{"service": "monitoring", "action": "alertPolicies.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringAlertPolicies,
@@ -28,6 +29,7 @@ func tableGcpMonitoringAlert(_ context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "enabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "monitoring", "action": "alertPolicies.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -164,6 +166,9 @@ func listMonitoringAlertPolicies(ctx context.Context, d *plugin.QueryData, h *pl
 
 	resp := service.Projects.AlertPolicies.List("projects/" + project).Filter(filterString).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, alertPolicy := range page.AlertPolicies {
 			d.StreamListItem(ctx, alertPolicy)
 

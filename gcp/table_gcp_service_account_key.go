@@ -123,6 +123,9 @@ func listGcpServiceAccountKeys(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	result, err := service.Projects.ServiceAccounts.Keys.List(serviceAccount.Name).Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
 	if err != nil {
 		return nil, err
 	}

@@ -14,6 +14,7 @@ func tableGcpComputeProjectMetadata(ctx context.Context) *plugin.Table {
 		Description: "GCP Compute Project Metadata",
 		List: &plugin.ListConfig{
 			Hydrate: listComputeProjectMetadata,
+			Tags:    map[string]string{"service": "compute", "action": "projects.get"},
 		},
 		Columns: []*plugin.Column{
 			{

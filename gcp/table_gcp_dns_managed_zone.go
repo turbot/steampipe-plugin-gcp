@@ -20,9 +20,11 @@ func tableGcpDnsManagedZone(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDnsManagedZone,
+			Tags:       map[string]string{"service": "dns", "action": "managedZones.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listDnsManagedZones,
+			Tags:    map[string]string{"service": "dns", "action": "managedZones.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -195,6 +197,9 @@ func listDnsManagedZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	resp := service.ManagedZones.List(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *dns.ManagedZonesListResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, managedZone := range page.ManagedZones {
 			d.StreamListItem(ctx, managedZone)
 

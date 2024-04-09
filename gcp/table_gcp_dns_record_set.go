@@ -24,10 +24,12 @@ func tableDnsRecordSet(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"managed_zone_name", "name", "type"}),
 			Hydrate:    getDnsRecordSet,
+			Tags:       map[string]string{"service": "dns", "action": "resourceRecordSets.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listDnsRecordSets,
 			ParentHydrate: listDnsManagedZones,
+			Tags:          map[string]string{"service": "dns", "action": "resourceRecordSets.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -144,6 +146,9 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	project := projectId.(string)
 
 	resp, err := service.ResourceRecordSets.List(project, managedZone.Name).MaxResults(*pageSize).Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
 	if err != nil {
 		return nil, err
 	}

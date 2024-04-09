@@ -20,9 +20,11 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getKeyRingDetail,
+			Tags:       map[string]string{"service": "cloudkms", "action": "keyRings.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listKeyRingDetails,
+			Tags:    map[string]string{"service": "cloudkms", "action": "keyRings.list"},
 		},
 		GetMatrixItemFunc: BuildLocationList,
 		Columns: []*plugin.Column{
@@ -56,7 +58,7 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate: 		 gcpKmsKeyRingTurbotData,
+				Hydrate:     gcpKmsKeyRingTurbotData,
 				Transform:   transform.FromField("Akas"),
 			},
 
@@ -65,21 +67,21 @@ func tableGcpKmsKeyRing(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Hydrate: 		 gcpKmsKeyRingTurbotData,
+				Hydrate:     gcpKmsKeyRingTurbotData,
 				Transform:   transform.FromField("Location"),
 			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate: 		 gcpKmsKeyRingTurbotData,
+				Hydrate:     gcpKmsKeyRingTurbotData,
 				Transform:   transform.FromField("Project"),
 			},
 		},
 	}
 }
 
-//// LIST FUNCTION
+// // LIST FUNCTION
 func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("listKeyRingDetails")
 
@@ -116,6 +118,9 @@ func listKeyRingDetails(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp := service.Projects.Locations.KeyRings.List("projects/" + project + "/locations/" + location).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListKeyRingsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, ring := range page.KeyRings {
 			d.StreamListItem(ctx, ring)
 
