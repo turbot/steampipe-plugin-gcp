@@ -18,6 +18,7 @@ func tableGcpAuditPolicy(_ context.Context) *plugin.Table {
 		Description: "GCP Audit Policy",
 		List: &plugin.ListConfig{
 			Hydrate: listGcpAuditPolicies,
+			Tags:    map[string]string{"service": "resourcemanager", "action": "projects.getIamPolicy"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -76,6 +77,8 @@ func listGcpAuditPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	project := projectId.(string)
 
 	resp, err := service.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
 	if err != nil {
 		return nil, err
 	}

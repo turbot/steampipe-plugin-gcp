@@ -20,10 +20,22 @@ func tableGcpServiceAccountKey(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "service_account_name"}),
 			Hydrate:    getGcpServiceAccountKey,
+			Tags:       map[string]string{"service": "iam", "action": "serviceAccountKeys.get"},
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listGcpServiceAccounts,
 			Hydrate:       listGcpServiceAccountKeys,
+			Tags:          map[string]string{"service": "iam", "action": "serviceAccountKeys.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getGcpServiceAccountKey,
+				Tags: map[string]string{"service": "iam", "action": "serviceAccountKeys.get"},
+			},
+			{
+				Func: getGcpServiceAccountKeyPublicKeyDataWithRawFormat,
+				Tags: map[string]string{"service": "iam", "action": "serviceAccountKeys.get"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
