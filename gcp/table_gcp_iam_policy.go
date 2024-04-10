@@ -19,7 +19,7 @@ func tableGcpIAMPolicy(ctx context.Context) *plugin.Table {
 		Description: "GCP IAM Policy",
 		List: &plugin.ListConfig{
 			Hydrate: listGcpIamPolicies,
-			Tags:    map[string]string{"service": "cloudresourcemanager", "action": "projects.getIamPolicy"},
+			Tags:    map[string]string{"service": "resourcemanager", "action": "projects.getIamPolicy"},
 		},
 		Columns: []*plugin.Column{
 			{
