@@ -19,7 +19,7 @@ func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 		Description: "GCP Cloud Asset",
 		List: &plugin.ListConfig{
 			Hydrate: listCloudAssets,
-			Tags:    map[string]string{"service": "cloudasset", "action": "assets.searchAllResources"},
+			Tags:    map[string]string{"service": "cloudasset", "action": "assets.listResource"},
 		},
 		Columns: []*plugin.Column{
 			{
