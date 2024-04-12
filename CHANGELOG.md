@@ -1,3 +1,9 @@
+## v0.51.1 [2024-04-12]
+
+_Bug fixes_
+
+- Fixed the plugin's Postgres FDW Extension crash [issue](https://github.com/turbot/steampipe-postgres-fdw/issues/434).
+
 ## v0.51.0 [2024-04-05]
 
 _What's new?_
