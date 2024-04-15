@@ -37,8 +37,8 @@ func listSQLDatabaseInstanceMetricConnections(ctx context.Context, d *plugin.Que
 	instanceInfo := h.Item.(*sqladmin.DatabaseInstance)
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

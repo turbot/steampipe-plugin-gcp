@@ -149,8 +149,8 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -188,8 +188,8 @@ func getGcpMonitoringNotificationChannel(ctx context.Context, d *plugin.QueryDat
 	plugin.Logger(ctx).Trace("getGcpMonitoringNotificationChannel")
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

@@ -239,7 +239,7 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -351,8 +351,8 @@ func getObjectAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	object := h.Item.(*storage.Object)
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		plugin.Logger(ctx).Trace("gcp_storage_object.getObjectAka", "cache_error", err)
 		return nil, err

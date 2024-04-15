@@ -207,8 +207,8 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -247,8 +247,8 @@ func getComputeFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

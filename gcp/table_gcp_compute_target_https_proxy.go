@@ -172,8 +172,8 @@ func listComputeTargetHttpsProxies(ctx context.Context, d *plugin.QueryData, h *
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -216,8 +216,8 @@ func getComputeTargetHttpsProxy(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

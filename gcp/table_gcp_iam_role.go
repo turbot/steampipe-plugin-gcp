@@ -106,7 +106,7 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -128,8 +128,8 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
 		if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
 			// apply rate limiting
-		d.WaitForListRateLimit(ctx)
+			d.WaitForListRateLimit(ctx)
 
 			for _, role := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{role, false})

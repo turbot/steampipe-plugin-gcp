@@ -152,8 +152,8 @@ func listComputeMachineImages(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		plugin.Logger(ctx).Error("gcp_compute_machine_image.listComputeMachineImages.getProjectCached", "cached_function", err)
 		return nil, err
@@ -195,8 +195,8 @@ func getComputeMachineImage(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		plugin.Logger(ctx).Error("gcp_compute_machine_image.getComputeMachineImage.getProjectCached", "cache_error", err)
 		return nil, err

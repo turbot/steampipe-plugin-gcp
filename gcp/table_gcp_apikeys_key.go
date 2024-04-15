@@ -102,7 +102,7 @@ func tableGcpApiKeysKey(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -114,8 +114,7 @@ func tableGcpApiKeysKey(_ context.Context) *plugin.Table {
 func listApiKeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		logger.Error("gcp_api_key.listApiKeysKeys", "cache_error", err)
 		return nil, err
@@ -173,8 +172,7 @@ func getApiKeysKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	logger := plugin.Logger(ctx)
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		logger.Error("gcp_api_key.getApiKeysKey", "cache_error", err)
 		return nil, err

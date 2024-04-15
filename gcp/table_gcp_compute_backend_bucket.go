@@ -152,8 +152,8 @@ func listComputeBackendBuckets(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -192,8 +192,8 @@ func getComputeBackendBucket(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
