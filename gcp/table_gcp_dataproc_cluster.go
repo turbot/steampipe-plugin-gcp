@@ -20,6 +20,7 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("cluster_name"),
 			Hydrate:    getDataprocCluster,
+			Tags:       map[string]string{"service": "dataproc", "action": "clusters.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listDataprocClusters,
@@ -28,6 +29,7 @@ func tableGcpDataprocCluster(ctx context.Context) *plugin.Table {
 				{Name: "cluster_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
 			},
+			Tags: map[string]string{"service": "dataproc", "action": "clusters.list"},
 		},
 		GetMatrixItemFunc: BuildComputeLocationList,
 		Columns: []*plugin.Column{
@@ -170,6 +172,9 @@ func listDataprocClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	resp := service.Projects.Regions.Clusters.List(project, location).PageSize(*pageSize).Filter(filterString)
 	if err := resp.Pages(ctx, func(page *dataproc.ListClustersResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, cluster := range page.Clusters {
 			d.StreamListItem(ctx, cluster)
 

@@ -18,9 +18,11 @@ func tableGcpMonitoringGroup(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getMonitoringGroup,
+			Tags:       map[string]string{"service": "monitoring", "action": "groups.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMonitoringGroup,
+			Tags:    map[string]string{"service": "monitoring", "action": "groups.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -111,6 +113,9 @@ func listMonitoringGroup(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	resp := service.Projects.Groups.List("projects/" + project).PageSize(*pageSize)
 
 	if err := resp.Pages(ctx, func(page *monitoring.ListGroupsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, group := range page.Group {
 			d.StreamListItem(ctx, group)
 

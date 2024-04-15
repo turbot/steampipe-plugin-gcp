@@ -22,12 +22,14 @@ func tableGcpIamRole(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getIamRole,
+			Tags:       map[string]string{"service": "iam", "action": "roles.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIamRoles,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "is_gcp_managed", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "iam", "action": "roles.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -174,6 +176,9 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		// List all the custom project roles
 		customRoles := service.Projects.Roles.List("projects/" + project).View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
 		if err := customRoles.Pages(ctx, func(page *iam.ListRolesResponse) error {
+			// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 			for _, role := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{role, false})
 
@@ -195,6 +200,9 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		// List all the pre-defined roles
 		managedRole := service.Roles.List().View(view).ShowDeleted(showDeleted).PageSize(*pageSize)
 		if err := managedRole.Pages(ctx, func(page *iam.ListRolesResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, managedRole := range page.Roles {
 				d.StreamListItem(ctx, &roleInfo{managedRole, true})
 

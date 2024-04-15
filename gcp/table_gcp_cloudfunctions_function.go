@@ -20,9 +20,11 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getCloudFunction,
+			Tags:       map[string]string{"service": "cloudfunctions", "action": "functions.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCloudFunctions,
+			Tags:    map[string]string{"service": "cloudfunctions", "action": "functions.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -233,6 +235,9 @@ func listCloudFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	if err := resp.Pages(
 		ctx,
 		func(page *cloudfunctions.ListFunctionsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, item := range page.Functions {
 				d.StreamListItem(ctx, item)
 

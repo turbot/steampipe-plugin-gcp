@@ -20,9 +20,17 @@ func tableGcpComputeHaVpnGateway(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeHaVpnGateway,
+			Tags:       map[string]string{"service": "compute", "action": "vpnGateways.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeHaVpnGateways,
+			Tags:    map[string]string{"service": "compute", "action": "vpnGateways.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeHaVpnGateway,
+				Tags: map[string]string{"service": "compute", "action": "vpnGateways.get"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -162,6 +170,9 @@ func listComputeHaVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	resp := service.VpnGateways.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.VpnGatewayAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, vpnGateway := range item.VpnGateways {
 				d.StreamListItem(ctx, vpnGateway)

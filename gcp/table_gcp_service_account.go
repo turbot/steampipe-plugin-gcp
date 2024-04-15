@@ -20,9 +20,17 @@ func tableGcpServiceAccount(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpServiceAccount,
+			Tags:       map[string]string{"service": "iam", "action": "serviceAccounts.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpServiceAccounts,
+			Tags:    map[string]string{"service": "iam", "action": "serviceAccounts.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getServiceAccountIamPolicy,
+				Tags: map[string]string{"service": "iam", "action": "serviceAccounts.getIamPolicy"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -132,6 +140,9 @@ func listGcpServiceAccounts(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if err := resp.Pages(
 		ctx,
 		func(page *iam.ListServiceAccountsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, account := range page.Accounts {
 				d.StreamListItem(ctx, account)
 

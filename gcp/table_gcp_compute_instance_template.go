@@ -19,9 +19,11 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeInstanceTemplate,
+			Tags:       map[string]string{"service": "monitoring", "action": "instanceTemplates.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeInstanceTemplate,
+			Tags:    map[string]string{"service": "monitoring", "action": "instanceTemplates.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -229,6 +231,9 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 
 	resp := service.InstanceTemplates.List(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, template := range page.Items {
 			d.StreamListItem(ctx, template)
 
