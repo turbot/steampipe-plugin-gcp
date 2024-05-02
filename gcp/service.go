@@ -15,7 +15,7 @@ import (
 	"google.golang.org/api/billingbudgets/v1"
 	"google.golang.org/api/cloudasset/v1"
 	"google.golang.org/api/cloudbilling/v1"
-	"google.golang.org/api/cloudfunctions/v1"
+	"google.golang.org/api/cloudfunctions/v2"
 	"google.golang.org/api/cloudidentity/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
