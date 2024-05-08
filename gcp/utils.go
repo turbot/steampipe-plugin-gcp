@@ -69,29 +69,17 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 }
 
 func getProjectUncached(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	cacheKey := "getGCPProjectInfo"
 	var err error
 	var projectData *projectInfo
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
-		projectData = cachedData.(*projectInfo)
-	} else {
-		projectData, err = activeProject(ctx, d)
-		if err != nil {
-			return nil, err
-		}
-		// save to extension cache
-		d.ConnectionManager.Cache.Set(cacheKey, projectData)
+	projectData, err = activeProject(ctx, d)
+	if err != nil {
+		return nil, err
 	}
+
 	return projectData.Project, nil
 }
 
 func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, error) {
-	// have we already created and cached the session?
-	serviceCacheKey := "gcp_project_id"
-
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*projectInfo), nil
-	}
 
 	var err error
 	var projectData *projectInfo
@@ -128,8 +116,6 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 	if projectData == nil {
 		return nil, fmt.Errorf("an active project must be set")
 	}
-
-	d.ConnectionManager.Cache.Set(serviceCacheKey, projectData)
 
 	return projectData, nil
 }
