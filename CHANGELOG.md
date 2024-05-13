@@ -4,9 +4,11 @@ _Enhancements_
 
 - The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#580](https://github.com/turbot/steampipe-plugin-gcp/pull/580))
 
+- The `project` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple GCP projects. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+
 _Bug fixes_
 
-- Fixed the table `gcp_cloudfunctions_function` to list `gen2` cloud functions. ([#568](https://github.com/turbot/steampipe-plugin-gcp/pull/568)) (Thanks to [@ashutoshmore658](https://github.com/ashutoshmore658) for the contribution!)
+- Fixed the table `gcp_cloudfunctions_function` to list `gen2` cloud functions. ([#568](https://github.com/turbot/steampipe-plugin-gcp/pull/568)) (Thanks [@ashutoshmore658](https://github.com/ashutoshmore658) for the contribution!)
 
 _Dependencies_
 
