@@ -1,3 +1,19 @@
+## v0.52.0 [2024-05-13]
+
+_Enhancements_
+
+- The `project` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple GCP projects. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#580](https://github.com/turbot/steampipe-plugin-gcp/pull/580))
+- Added the `version` flag to the plugin's Export tool. ([#65](https://github.com/turbot/steampipe-export/pull/65))****
+
+_Bug fixes_
+
+- Fixed the table `gcp_cloudfunctions_function` to list `gen2` cloud functions. ([#568](https://github.com/turbot/steampipe-plugin-gcp/pull/568)) (Thanks [@ashutoshmore658](https://github.com/ashutoshmore658) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.10.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+
 ## v0.51.1 [2024-04-12]
 
 _Bug fixes_
