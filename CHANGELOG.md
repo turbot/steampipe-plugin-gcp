@@ -12,7 +12,7 @@ _Bug fixes_
 
 _Dependencies_
 
-Recompiled plugin with [steampipe-plugin-sdk v5.10.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- Recompiled plugin with [steampipe-plugin-sdk v5.10.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
 
 ## v0.51.1 [2024-04-12]
 
