@@ -1,3 +1,17 @@
+## v0.52.0 [2024-05-13]
+
+_Enhancements_
+
+- The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#580](https://github.com/turbot/steampipe-plugin-gcp/pull/580))
+
+_Bug fixes_
+
+- Fixed the table `gcp_cloudfunctions_function` to list `gen2` cloud functions. ([#568](https://github.com/turbot/steampipe-plugin-gcp/pull/568)) (Thanks to [@ashutoshmore658](https://github.com/ashutoshmore658) for the contribution!)
+
+_Dependencies_
+
+Recompiled plugin with [steampipe-plugin-sdk v5.10.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+
 ## v0.51.1 [2024-04-12]
 
 _Bug fixes_
