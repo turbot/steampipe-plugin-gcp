@@ -2,9 +2,9 @@
 
 _Enhancements_
 
-- The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#580](https://github.com/turbot/steampipe-plugin-gcp/pull/580))
-
 - The `project` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple GCP projects. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#580](https://github.com/turbot/steampipe-plugin-gcp/pull/580))
+- Added the `version` flag to the plugin's Export tool. ([#65](https://github.com/turbot/steampipe-export/pull/65))****
 
 _Bug fixes_
 
