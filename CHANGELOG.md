@@ -13,6 +13,7 @@ _Bug fixes_
 _Dependencies_
 
 - Recompiled plugin with [steampipe-plugin-sdk v5.10.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- Recompiled plugin with [github.com/hashicorp/go-getter v1.7.4](https://github.com/hashicorp/go-getter/releases/tag/v1.7.4). ([#570](https://github.com/turbot/steampipe-plugin-gcp/pull/570))
 
 ## v0.51.1 [2024-04-12]
 
