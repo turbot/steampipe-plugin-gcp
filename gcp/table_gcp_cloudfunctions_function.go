@@ -391,50 +391,6 @@ func getCloudFunctionBuildConfigData(_ context.Context, d *transform.TransformDa
 	return buildConfigData[param], nil
 }
 
-// func getSourceUploadUrlForCloudFUnction(_ context.Context, d *transform.TransformData) (interface{}, error) {
-// 	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-
-// 	buildConfigs := cloudFunctionAttributeData.BuildConfig
-
-// 	sourceUploadUrlInitial := "https://storage.googleapis.com/"
-// 	source := buildConfigs.Source
-// 	storageSource := source.StorageSource
-// 	sourceUploadUrl := sourceUploadUrlInitial + strings.TrimSpace(storageSource.Bucket) + strings.TrimSpace(storageSource.Object)
-
-// 	return sourceUploadUrl, nil
-// }
-
-// func getEntryPointForCloudFunction(_ context.Context, d *transform.TransformData) (interface{}, error) {
-// 	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-
-// 	buildConfigs := cloudFunctionAttributeData.BuildConfig
-
-// 	entryPoint := buildConfigs.EntryPoint
-
-// 	return entryPoint, nil
-// }
-
-// func getBuildIdForCloudFunction(_ context.Context, d *transform.TransformData) (interface{}, error) {
-// 	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-
-// 	buildConfigs := cloudFunctionAttributeData.BuildConfig
-
-// 	attributesOfBuild := strings.Split(buildConfigs.Build, "/")
-// 	buildId := attributesOfBuild[len(attributesOfBuild)-1]
-
-// 	return buildId, nil
-// }
-
-// func getRunTimeForCloudFunction(_ context.Context, d *transform.TransformData) (interface{}, error) {
-// 	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-
-// 	buildConfigs := cloudFunctionAttributeData.BuildConfig
-
-// 	runTime := buildConfigs.Runtime
-
-// 	return runTime, nil
-// }
-
 func getCloudFunctionServiceConfigData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
 	param := d.Param.(string)
