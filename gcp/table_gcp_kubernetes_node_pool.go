@@ -212,6 +212,11 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	resp, err := service.Projects.Locations.Clusters.NodePools.Get(parent).Do()
 	if err != nil {
+		// This operation is not allowed if the cluster has Autopilot Enabled.
+		// We are getting the error Error: gcp: googleapi: Error 400: Autopilot node pools cannot be accessed or modified.
+		if strings.Contains(err.Error(), "Autopilot node pools cannot be accessed or modified") {
+			return nil, nil
+		}
 		return nil, err
 	}
 
