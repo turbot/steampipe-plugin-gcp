@@ -148,6 +148,13 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 	// Get the details of Cluster
 	cluster := h.Item.(*container.Cluster)
 
+	// This operation is not allowed if the cluster has Autopilot Enabled.
+	// We are getting the error Error: gcp: googleapi: Error 400: Autopilot node pools cannot be accessed or modified.
+
+	if cluster.Autopilot.Enabled {
+		return nil, nil
+	}
+
 	// Create Service Connection
 	service, err := ContainerService(ctx, d)
 	if err != nil {
