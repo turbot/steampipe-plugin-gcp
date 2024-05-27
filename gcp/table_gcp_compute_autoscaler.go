@@ -157,8 +157,8 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -199,8 +199,8 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 func getComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

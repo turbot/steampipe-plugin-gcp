@@ -27,6 +27,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		DefaultIgnoreConfig: &plugin.IgnoreConfig{
 			ShouldIgnoreErrorFunc: shouldIgnoreErrorPluginDefault(),
 		},
+		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
+			{
+				Name:    "project",
+				Hydrate: getProject,
+			},
+		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 		},

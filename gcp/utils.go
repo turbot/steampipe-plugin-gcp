@@ -14,6 +14,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 	"google.golang.org/api/impersonate"
@@ -48,7 +49,26 @@ func lastPathElement(_ context.Context, d *transform.TransformData) (interface{}
 	return getLastPathElement(types.SafeString(d.Value)), nil
 }
 
-func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+// if the caching is required other than per connection, build a cache key for the call and use it in Memoize
+// since getProject is a call, caching should be per connection
+var getProjectMemoized = plugin.HydrateFunc(getProjectUncached).Memoize(memoize.WithCacheKeyFunction(getProjectCacheKey))
+
+// Build a cache key for the call to getProject.
+func getProjectCacheKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	key := fmt.Sprintf("getGCPProjectInfo%s", "")
+	return key, nil
+}
+
+func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (any, error) {
+	projectId, err := getProjectMemoized(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	return projectId, nil
+}
+
+func getProjectUncached(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	cacheKey := "getGCPProjectInfo"
 	var err error
 	var projectData *projectInfo

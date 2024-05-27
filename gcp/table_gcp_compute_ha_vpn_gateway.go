@@ -127,7 +127,7 @@ func tableGcpComputeHaVpnGateway(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -146,8 +146,8 @@ func listComputeHaVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -188,8 +188,8 @@ func listComputeHaVpnGateways(ctx context.Context, d *plugin.QueryData, h *plugi
 func getComputeHaVpnGateway(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -238,8 +238,8 @@ func getComputeHaVpnGatewayVpnConnections(ctx context.Context, d *plugin.QueryDa
 	region := getLastPathElement(types.SafeString(vpnGateway.Region))
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -265,8 +265,8 @@ func getVpnGatewayAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	region := getLastPathElement(types.SafeString(vpnGateway.Region))
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		plugin.Logger(ctx).Error("gcp_compute_ha_vpn_gateway.getVpnGatewayAka", "cache_err", err)
 		return nil, err
