@@ -34,6 +34,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "status",
 				Description: "Status of the function deployment (ACTIVE, OFFLINE, CLOUD_FUNCTION_STATUS_UNSPECIFIED,DEPLOY_IN_PROGRESS, DELETE_IN_PROGRESS, UNKNOWN).",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("State"),
 			},
 			{
 				Name:        "self_link",
@@ -50,33 +51,39 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "runtime",
 				Description: "The runtime in which to run the function.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("BuildConfig.Runtime"),
 			},
 
 			// other columns
 			{
 				Name:        "available_memory_mb",
 				Description: "The amount of memory in MB available for the function.",
-				Type:        proto.ColumnType_INT,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.AvailableMemory"),
 			},
 			{
 				Name:        "build_environment_variables",
 				Description: "Environment variables that shall be available during build time",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("BuildConfig.EnvironmentVariables"),
 			},
 			{
 				Name:        "build_id",
 				Description: "The Cloud Build ID of the latest successful deployment of the function.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("BuildConfig.Build"),
 			},
 			{
 				Name:        "entry_point",
 				Description: "The name of the function (as defined in source code) that will be executed.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("BuildConfig.EntryPoint"),
 			},
 			{
-				Name:        "environment_variables",
+				Name:        "service_environment_variables",
 				Description: "Environment variables that shall be available during function execution.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ServiceConfig.EnvironmentVariables"),
 			},
 			{
 				Name:        "event_trigger",
@@ -97,6 +104,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "ingress_settings",
 				Description: "The ingress settings for the function, controlling what traffic can reach it (INGRESS_SETTINGS_UNSPECIFIED, ALLOW_ALL, ALLOW_INTERNAL_ONLY, ALLOW_INTERNAL_AND_GCLB).",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.IngressSettings"),
 			},
 			{
 				Name:        "labels",
@@ -107,6 +115,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "max_instances",
 				Description: "The limit on the maximum number of function instances that may coexist at a given time. In some cases, such as rapid traffic surges, Cloud Functions may, for a short period of time, create more instances than the specified max instances limit.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ServiceConfig.MaxInstanceCount"),
 			},
 			{
 				Name:        "network",
@@ -117,6 +126,13 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "service_account_email",
 				Description: "The email of the function's service account.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.ServiceAccountEmail"),
+			},
+			{
+				Name:        "build_source",
+				Description: "The location of the function source code.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ServiceConfig.Source"),
 			},
 			{
 				Name:        "source_archive_url",
@@ -137,6 +153,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "timeout",
 				Description: "The function execution timeout. Execution is consideredfailed and can be terminated if the function is not completed at the end of the timeout period. Defaults to 60 seconds.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.TimeoutSeconds"),
 			},
 			{
 				Name:        "update_time",
@@ -152,11 +169,13 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "vpc_connector",
 				Description: "The VPC Network Connector that this cloud function can  connect to. This field is mutually exclusive with `network` field and will eventually replace it.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.VpcConnector"),
 			},
 			{
 				Name:        "vpc_connector_egress_settings",
 				Description: "The egress settings for the connector, controlling what traffic is diverted through it (VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED, PRIVATE_RANGES_ONLY, ALL_TRAFFIC).",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.VpcConnectorEgressSettings"),
 			},
 
 			// standard steampipe columns
