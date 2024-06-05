@@ -160,6 +160,13 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Description: "This is set for the read-write VM of the PRIMARY instance only.",
 			},
+			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     alloyDBInstanceSelfLink,
+				Transform:   transform.FromValue(),
+			},
 
 			// Steampipe standard columns
 			{
