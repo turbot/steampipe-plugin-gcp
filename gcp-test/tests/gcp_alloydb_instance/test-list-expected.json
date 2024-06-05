@@ -1,0 +1,6 @@
+[
+  {
+    "cluster_name": "{{ resourceName }}",
+    "instance_display_name": "{{ resourceName }}"
+  }
+]
