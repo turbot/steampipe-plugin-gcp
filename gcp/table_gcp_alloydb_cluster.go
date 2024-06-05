@@ -299,6 +299,7 @@ func getAlloydbCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	resp, err := service.Projects.Locations.Clusters.Get("projects/" + project + "/locations/" + location + "/clusters/" + clusterName).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_alloydb_instance.getAlloydbCluster", "api_error", err)
 		return nil, err
 	}
 

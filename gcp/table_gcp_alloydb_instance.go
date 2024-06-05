@@ -300,6 +300,7 @@ func getAlloydbInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp, err := service.Projects.Locations.Clusters.Instances.Get("projects/" + project + "/locations/" + location + "/clusters/" + clusterName + "/instances/" + instanceName).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_alloydb_instance.getAlloydbInstance", "api_error", err)
 		return nil, err
 	}
 
