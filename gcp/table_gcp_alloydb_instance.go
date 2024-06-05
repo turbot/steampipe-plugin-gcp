@@ -23,17 +23,16 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 			ParentHydrate: listAlloydbClusters,
 			Hydrate:       listAlloydbInstances,
 			KeyColumns: plugin.KeyColumnSlice{
-				// String columns
 				{Name: "location", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "cluster_name", Require: plugin.Optional, Operators: []string{"="}},
 			},
 		},
 		GetMatrixItemFunc: BuildAlloyDBLocationList,
 		Columns: []*plugin.Column{
-			// Renamed the column name to instance_display_name because:
-			// This table is a child of gcp_alloydb_cluster
-			// We have a column named display_name in the table gcp_alloydb_cluster
-			// There will be a ambiguity issue in case of parent hydrate use while querying the child table with parent qualifiers.
+			// Changed the column name to instance_display_time because:
+			// This table is associated with gcp_alloydb_cluster.
+			// There is already a column named display_name in the gcp_alloydb_cluster table.
+			// Using the same column name would cause ambiguity when querying this table in conjunction with its parent table using parent qualifiers.
 			{
 				Name:        "instance_display_name",
 				Type:        proto.ColumnType_STRING,
@@ -202,6 +201,8 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 	}
 }
 
+//// LIST FUNCTION
+
 func listAlloydbInstances(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	cluster := h.Item.(*alloydb.Cluster)
 	clusterName := strings.Split(cluster.Name, "/")[5]
@@ -268,7 +269,8 @@ func listAlloydbInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	return nil, nil
 }
 
-// // HYDRATE CALL
+//// HYDRATE FUNCTION
+
 func getAlloydbInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)

@@ -49,7 +49,6 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Description: "The system-generated UID of the resource.",
 			},
-
 			{
 				Name:        "cluster_type",
 				Type:        proto.ColumnType_STRING,
@@ -58,13 +57,13 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "update_time",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Description: "Update time stamp.",
+				Description: "The update timestamp.",
 				Transform:   transform.FromField("UpdateTime").Transform(transform.NullIfZeroValue),
 			},
 			{
 				Name:        "create_time",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Description: "Create time stamp.",
+				Description: "The create timestamp.",
 				Transform:   transform.FromField("CreateTime").Transform(transform.NullIfZeroValue),
 			},
 			{
@@ -75,7 +74,7 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "delete_time",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Description: "Delete time stamp.",
+				Description: "The delete timestamp.",
 				Transform:   transform.FromField("DeleteTime").Transform(transform.NullIfZeroValue),
 			},
 			{
@@ -210,6 +209,8 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 	}
 }
 
+//// LIST FUNCTION
+
 func listAlloydbClusters(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
@@ -268,7 +269,8 @@ func listAlloydbClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	return nil, nil
 }
 
-// // HYDRATE CALL
+//// HYDRATE FUNCTION
+
 func getAlloydbCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
