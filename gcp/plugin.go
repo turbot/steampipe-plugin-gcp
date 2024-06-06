@@ -121,6 +121,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_pubsub_subscription":                                 tableGcpPubSubSubscription(ctx),
 			"gcp_pubsub_topic":                                        tableGcpPubSubTopic(ctx),
 			"gcp_redis_instance":                                      tableGcpRedisInstance(ctx),
+			"gcp_secret_manager_secret":                               tableGcpSecretManagerSecret(ctx),
 			"gcp_service_account":                                     tableGcpServiceAccount(ctx),
 			"gcp_service_account_key":                                 tableGcpServiceAccountKey(ctx),
 			"gcp_sql_backup":                                          tableGcpSQLBackup(ctx),

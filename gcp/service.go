@@ -32,6 +32,7 @@ import (
 	"google.golang.org/api/run/v2"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/storage/v1"
+	"google.golang.org/api/secretmanager/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -686,6 +687,26 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 
 	// so it was not in cache - create service
 	svc, err := redis.NewCloudRedisClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+func SecretManagerService(ctx context.Context, d *plugin.QueryData) (*secretmanager.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "RedisService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*secretmanager.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := secretmanager.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
