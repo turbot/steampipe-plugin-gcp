@@ -113,6 +113,13 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 				Description: "Last update time of the instance.",
 				Transform:   transform.FromField("UpdateTime").Transform(transform.NullIfZeroValue),
 			},
+			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     alloyDBInstanceSelfLink,
+				Transform:   transform.FromValue(),
+			},
 			// JSON Fields
 			{
 				Name:        "annotations",
@@ -158,13 +165,6 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 				Name:        "writable_node",
 				Type:        proto.ColumnType_JSON,
 				Description: "This is set for the read-write VM of the PRIMARY instance only.",
-			},
-			{
-				Name:        "self_link",
-				Description: "Server-defined URL for the resource.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     alloyDBInstanceSelfLink,
-				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns

@@ -108,6 +108,13 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 				Description: "Reserved for future use.",
 			},
 			{
+				Name:        "self_link",
+				Description: "Server-defined URL for the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     alloyDBClusterSelfLink,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "secondary_config",
 				Type:        proto.ColumnType_JSON,
 				Description: "Cross Region replication config specific to SECONDARY cluster.",
@@ -166,13 +173,6 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 				Name:        "migration_source",
 				Type:        proto.ColumnType_JSON,
 				Description: "Cluster created via DMS migration.",
-			},
-			{
-				Name:        "self_link",
-				Description: "Server-defined URL for the resource.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     alloyDBClusterSelfLink,
-				Transform:   transform.FromValue(),
 			},
 
 			// Steampipe standard columns
