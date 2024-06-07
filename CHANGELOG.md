@@ -1,3 +1,17 @@
+## v0.53.0 [2024-06-07]
+
+_What's new?_
+
+- New tables added
+  - [gcp_alloydb_cluster](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_alloydb_cluster) ([#597](https://github.com/turbot/steampipe-plugin-gcp/pull/597))
+  - [gcp_alloydb_instance](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_alloydb_cluster) ([#597](https://github.com/turbot/steampipe-plugin-gcp/pull/597))
+  - [gcp_secret_manager_secret](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_secret_manager_secret) ([#593](https://github.com/turbot/steampipe-plugin-gcp/pull/593))
+
+_Bug fixes_
+
+- Fixed the table `gcp_sql_database` to avoid returning a `400` error when SQL database instances are not in a running state. ([#586](https://github.com/turbot/steampipe-plugin-gcp/pull/586))
+- Fixed the table `gcp_kubernetes_node_pool` to avoid returning a `400` error when Autopilot GKE is used. ([#591](https://github.com/turbot/steampipe-plugin-gcp/pull/591))
+
 ## v0.52.0 [2024-05-13]
 
 _Enhancements_
