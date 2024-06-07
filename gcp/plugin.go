@@ -37,6 +37,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			NewInstance: ConfigInstance,
 		},
 		TableMap: map[string]*plugin.Table{
+			"gcp_alloydb_cluster":                                     tableGcpAlloyDBCluster(ctx),
+			"gcp_alloydb_instance":                                    tableGcpAlloyDBInstance(ctx),
 			"gcp_apikeys_key":                                         tableGcpApiKeysKey(ctx),
 			"gcp_app_engine_application":                              tableGcpAppEngineApplication(ctx),
 			"gcp_artifact_registry_repository":                        tableGcpArtifactRegistryRepository(ctx),
