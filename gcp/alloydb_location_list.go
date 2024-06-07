@@ -6,12 +6,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
-// func init() {
-// 	pluginQueryData = &plugin.QueryData{
-// 		ConnectionManager: connection.NewManager(),
-// 	}
-// }
-
 // BuildregionList :: return a list of matrix items, one per region specified
 func BuildAlloyDBLocationList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 
