@@ -9,8 +9,8 @@ _What's new?_
 
 _Bug fixes_
 
-- Fixed the table `gcp_sql_database` to avoid returning a `400` error when SQL database instances are not in a running state. ([#586](https://github.com/turbot/steampipe-plugin-gcp/pull/586))
-- Fixed the table `gcp_kubernetes_node_pool` to avoid returning a `400` error when Autopilot GKE is used. ([#591](https://github.com/turbot/steampipe-plugin-gcp/pull/591))
+- Fixed the `gcp_sql_database` table to skip SQL database instances that are not in the `running` state. ([#586](https://github.com/turbot/steampipe-plugin-gcp/pull/586))
+- Fixed the `gcp_kubernetes_node_pool` table to skip clusters that have `autopilot` mode enabled. ([#591](https://github.com/turbot/steampipe-plugin-gcp/pull/591))
 
 ## v0.52.0 [2024-05-13]
 
