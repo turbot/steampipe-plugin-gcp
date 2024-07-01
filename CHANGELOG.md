@@ -1,3 +1,9 @@
+## v0.54.0 [2024-07-01]
+
+_Bug fixes_
+
+- Reverted the Export CLI behaviour to return `<nil>` for `null` values instead of `empty`. ([#77](https://github.com/turbot/steampipe-export/issues/77))
+
 ## v0.53.0 [2024-06-14]
 
 _What's new?_
