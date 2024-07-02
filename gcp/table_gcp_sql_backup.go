@@ -21,10 +21,12 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"id", "instance_name"}),
 			Hydrate:    getSQLBackup,
+			Tags:       map[string]string{"service": "cloudsql", "action": "backupRuns.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listSQLBackups,
 			ParentHydrate: listSQLDatabaseInstances,
+			Tags:          map[string]string{"service": "cloudsql", "action": "backupRuns.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -169,6 +171,9 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	resp := service.BackupRuns.List(project, instance.Name).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *sqladmin.BackupRunsListResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, backup := range page.Items {
 			d.StreamListItem(ctx, backup)
 

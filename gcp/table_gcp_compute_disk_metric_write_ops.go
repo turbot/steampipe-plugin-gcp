@@ -20,6 +20,7 @@ func tableGcpComputeDiskMetricWriteOps(_ context.Context) *plugin.Table {
 			ParentHydrate: listComputeDisk,
 			Hydrate:       listComputeDiskMetricWriteOps,
 			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
+			Tags:          map[string]string{"service": "monitoring", "action": "timeSeries.list"},
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

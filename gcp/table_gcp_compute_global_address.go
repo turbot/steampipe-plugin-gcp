@@ -21,6 +21,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeGlobalAddress,
+			Tags:       map[string]string{"service": "compute", "action": "globalAddresses.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeGlobalAddresses,
@@ -31,6 +32,7 @@ func tableGcpComputeGlobalAddress(ctx context.Context) *plugin.Table {
 				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "globalAddresses.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -187,6 +189,9 @@ func listComputeGlobalAddresses(ctx context.Context, d *plugin.QueryData, h *plu
 
 	resp := service.GlobalAddresses.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.AddressList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, globalAddress := range page.Items {
 			d.StreamListItem(ctx, globalAddress)
 

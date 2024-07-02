@@ -21,9 +21,11 @@ func tableGcpLoggingBucket(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getLoggingBucket,
+			Tags:       map[string]string{"service": "logging", "action": "buckets.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listLoggingBuckets,
+			Tags:    map[string]string{"service": "logging", "action": "buckets.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -136,6 +138,9 @@ func listLoggingBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	if err := resp.Pages(
 		ctx,
 		func(page *logging.ListBucketsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, bucket := range page.Buckets {
 				d.StreamListItem(ctx, bucket)
 

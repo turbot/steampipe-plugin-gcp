@@ -20,6 +20,7 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location", "key_ring_name"}),
 			Hydrate:    getKeyDetail,
+			Tags:       map[string]string{"service": "cloudkms", "action": "cryptoKeys.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listKeyDetails,
@@ -28,6 +29,13 @@ func tableGcpKmsKey(ctx context.Context) *plugin.Table {
 				// String columns
 				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "rotation_period", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "cloudkms", "action": "cryptoKeys.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getKeyIamPolicy,
+				Tags: map[string]string{"service": "cloudkms", "action": "cryptoKeys.getIamPolicy"},
 			},
 		},
 		GetMatrixItemFunc: BuildLocationList,
@@ -168,6 +176,9 @@ func listKeyDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.List(keyRing.Name).Filter(filterString).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, key := range page.CryptoKeys {
 			d.StreamListItem(ctx, key)
 

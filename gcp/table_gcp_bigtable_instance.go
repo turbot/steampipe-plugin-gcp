@@ -20,9 +20,17 @@ func tableGcpBigtableInstance(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getBigtableInstance,
+			Tags:       map[string]string{"service": "bigtable", "action": "instances.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listBigtableInstances,
+			Tags:    map[string]string{"service": "bigtable", "action": "instances.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getBigtableInstanceIamPolicy,
+				Tags: map[string]string{"service": "bigtable", "action": "instances.getIamPolicy"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -124,6 +132,9 @@ func listBigtableInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	resp := service.Projects.Instances.List("projects/" + project)
 	if err := resp.Pages(ctx, func(page *bigtableadmin.ListInstancesResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, instance := range page.Instances {
 			d.StreamListItem(ctx, instance)
 		}

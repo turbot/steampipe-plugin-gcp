@@ -20,6 +20,7 @@ func tableGcpComputeTargetHttpsProxy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeTargetHttpsProxy,
+			Tags:       map[string]string{"service": "compute", "action": "targetHttpProxies.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeTargetHttpsProxies,
@@ -27,6 +28,7 @@ func tableGcpComputeTargetHttpsProxy(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "proxy_bind", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "targetHttpProxies.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -179,6 +181,9 @@ func listComputeTargetHttpsProxies(ctx context.Context, d *plugin.QueryData, h *
 
 	resp := service.TargetHttpsProxies.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetHttpsProxyAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, targetHttpsProxy := range item.TargetHttpsProxies {
 				d.StreamListItem(ctx, targetHttpsProxy)

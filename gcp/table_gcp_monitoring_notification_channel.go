@@ -21,6 +21,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpMonitoringNotificationChannel,
+			Tags:       map[string]string{"service": "monitoring", "action": "notificationChannels.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpMonitoringNotificationChannels,
@@ -29,6 +30,7 @@ func tableGcpMonitoringNotificationChannel(_ context.Context) *plugin.Table {
 				{Name: "type", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "monitoring", "action": "notificationChannels.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -158,6 +160,9 @@ func listGcpMonitoringNotificationChannels(ctx context.Context, d *plugin.QueryD
 	if err := resp.Pages(
 		ctx,
 		func(page *monitoring.ListNotificationChannelsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, notificationChannel := range page.NotificationChannels {
 				d.StreamListItem(ctx, notificationChannel)
 

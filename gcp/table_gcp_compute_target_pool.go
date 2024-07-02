@@ -19,6 +19,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeTargetPool,
+			Tags:       map[string]string{"service": "compute", "action": "targetPools.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeTargetPools,
@@ -26,6 +27,7 @@ func tableGcpComputeTargetPool(ctx context.Context) *plugin.Table {
 				// String columns
 				{Name: "session_affinity", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "targetPools.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -152,6 +154,9 @@ func listComputeTargetPools(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	resp := service.TargetPools.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.TargetPoolAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, targetPool := range item.TargetPools {
 				d.StreamListItem(ctx, targetPool)

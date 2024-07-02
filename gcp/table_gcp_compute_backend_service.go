@@ -21,6 +21,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeBackendService,
+			Tags:       map[string]string{"service": "compute", "action": "backendServices.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeBackendServices,
@@ -33,6 +34,7 @@ func tableGcpComputeBackendService(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "enable_cdn", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "backendServices.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -280,6 +282,9 @@ func listComputeBackendServices(ctx context.Context, d *plugin.QueryData, h *plu
 
 	resp := service.BackendServices.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.BackendServiceAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, backendService := range item.BackendServices {
 				d.StreamListItem(ctx, backendService)

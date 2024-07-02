@@ -22,10 +22,12 @@ func tableGcpKmsKeyVersion(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"key_name", "key_ring_name", "location", "crypto_key_version"}),
 			Hydrate:    getKeyVersionDetail,
+			Tags:       map[string]string{"service": "cloudkms", "action": "cryptoKeyVersions.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listKeyVersionDetails,
 			ParentHydrate: listKeyRingDetails,
+			Tags:          map[string]string{"service": "cloudkms", "action": "cryptoKeyVersions.list"},
 		},
 		GetMatrixItemFunc: BuildLocationList,
 		Columns: []*plugin.Column{
@@ -167,6 +169,9 @@ func listKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	var wg sync.WaitGroup
 	errorCh := make(chan error, int(*pageSize))
 	if err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeysResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, key := range page.CryptoKeys {
 			wg.Add(1)
 			go getCryptoKeyVersionDetailsAsync(ctx, d, h, key, pageSize, service, errorCh, &wg)
@@ -201,6 +206,9 @@ func getCryptoKeyVersionDetails(ctx context.Context, d *plugin.QueryData, h *plu
 	resp := service.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(key.Name).PageSize(*pageSize)
 
 	err := resp.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, keyVersion := range page.CryptoKeyVersions {
 			d.StreamListItem(ctx, keyVersion)
 

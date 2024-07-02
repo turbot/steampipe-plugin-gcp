@@ -19,6 +19,7 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeSubnetwork,
+			Tags:       map[string]string{"service": "compute", "action": "subnetworks.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeSubnetworks,
@@ -31,6 +32,13 @@ func tableGcpComputeSubnetwork(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "enable_flow_logs", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "private_ip_google_access", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "compute", "action": "subnetworks.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeSubnetworkIamPolicy,
+				Tags: map[string]string{"service": "compute", "action": "subnetworks.getIamPolicy"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -257,6 +265,9 @@ func listComputeSubnetworks(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	resp := service.Subnetworks.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.SubnetworkAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, subnetwork := range item.Subnetworks {
 				d.StreamListItem(ctx, subnetwork)

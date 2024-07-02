@@ -19,6 +19,7 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"bucket", "name"}),
 			Hydrate:    getStorageObject,
+			Tags:       map[string]string{"service": "storage", "action": "objects.get"},
 		},
 		List: &plugin.ListConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -26,6 +27,13 @@ func tableGcpStorageObject(_ context.Context) *plugin.Table {
 				{Name: "prefix", Require: plugin.Optional},
 			},
 			Hydrate: listStorageObjects,
+			Tags:    map[string]string{"service": "storage", "action": "objects.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getStorageObjectIAMPolicy,
+				Tags: map[string]string{"service": "storage", "action": "objects.getIamPolicy"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -267,6 +275,9 @@ func listStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp := service.Objects.List(bucket).Prefix(prefix).Projection("full").MaxResults(*maxResults)
 	if err := resp.Pages(ctx, func(page *storage.Objects) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, object := range page.Items {
 			d.StreamListItem(ctx, object)
 

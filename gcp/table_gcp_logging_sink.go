@@ -20,9 +20,11 @@ func tableGcpLoggingSink(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpLoggingSink,
+			Tags:       map[string]string{"service": "logging", "action": "sinks.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingSinks,
+			Tags:    map[string]string{"service": "logging", "action": "sinks.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -150,6 +152,9 @@ func listGcpLoggingSinks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	if err := resp.Pages(
 		ctx,
 		func(page *logging.ListSinksResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, sink := range page.Sinks {
 				d.StreamListItem(ctx, sink)
 

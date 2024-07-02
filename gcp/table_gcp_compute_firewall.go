@@ -21,6 +21,7 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeFirewall,
+			Tags:       map[string]string{"service": "compute", "action": "firewalls.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeFirewalls,
@@ -31,6 +32,7 @@ func tableGcpComputeFirewall(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "disabled", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "firewalls.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -214,6 +216,9 @@ func listComputeFirewalls(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	resp := service.Firewalls.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.FirewallList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, firewall := range page.Items {
 			d.StreamListItem(ctx, firewall)
 

@@ -19,9 +19,11 @@ func tableDnsPolicy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDnsPolicy,
+			Tags:       map[string]string{"service": "dns", "action": "policies.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listDnsPolicies,
+			Tags:    map[string]string{"service": "dns", "action": "policies.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -130,6 +132,9 @@ func listDnsPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	res := service.Policies.List(project).MaxResults(*pageSize)
 	if err := res.Pages(ctx, func(page *dns.PoliciesListResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, policy := range page.Policies {
 			d.StreamListItem(ctx, policy)
 

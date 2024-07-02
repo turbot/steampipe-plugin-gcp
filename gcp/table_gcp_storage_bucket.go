@@ -17,9 +17,17 @@ func tableGcpStorageBucket(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpStorageBucket,
+			Tags:       map[string]string{"service": "storage", "action": "buckets.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpStorageBuckets,
+			Tags:    map[string]string{"service": "storage", "action": "buckets.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getGcpStorageBucketIAMPolicy,
+				Tags: map[string]string{"service": "storage", "action": "buckets.getIamPolicy"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -267,6 +275,9 @@ func listGcpStorageBuckets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	resp := service.Buckets.List(project).Projection("full").MaxResults(*maxResults)
 	if err := resp.Pages(ctx, func(page *storage.Buckets) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, bucket := range page.Items {
 			d.StreamListItem(ctx, bucket)
 
@@ -348,7 +359,7 @@ func extractRetentionPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.
 		bucketRetentionPolicy["is_locked"] = bucket.RetentionPolicy.IsLocked
 
 		bucketRetentionPolicy["retention_period"] = bucket.RetentionPolicy.RetentionPeriod
-		
+
 		bucketRetentionPolicy["effective_time"] = bucket.RetentionPolicy.EffectiveTime
 	}
 

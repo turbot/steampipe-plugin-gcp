@@ -21,6 +21,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeSslPolicy,
+			Tags:       map[string]string{"service": "compute", "action": "sslPolicies.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeSslPolicies,
@@ -28,6 +29,13 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 				// String columns
 				{Name: "min_tls_version", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "profile", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "compute", "action": "sslPolicies.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeSslPolicy,
+				Tags: map[string]string{"service": "compute", "action": "sslPolicies.get"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -167,6 +175,9 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	resp := service.SslPolicies.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.SslPoliciesList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, sslPolicy := range page.Items {
 			d.StreamListItem(ctx, sslPolicy)
 

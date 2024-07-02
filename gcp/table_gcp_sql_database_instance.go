@@ -22,6 +22,7 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getSQLDatabaseInstance,
+			Tags:       map[string]string{"service": "cloudsql", "action": "instances.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listSQLDatabaseInstances,
@@ -32,6 +33,13 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				{Name: "database_version", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "backend_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "gce_zone", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "cloudsql", "action": "instances.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getSQLDatabaseInstanceUsers,
+				Tags: map[string]string{"service": "cloudsql", "action": "users.list"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -413,6 +421,9 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	resp := service.Instances.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *sqladmin.InstancesListResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, instance := range page.Items {
 			d.StreamListItem(ctx, instance)
 

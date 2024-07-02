@@ -20,11 +20,17 @@ func tableGcpCloudIdentityGroup(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getCloudIdentityGroup,
+			// Since there are no specific permissions required for get the group, the rate-limiter tag is applied based on the method ID.
+			// https://cloud.google.com/identity/docs/reference/rest/v1/groups/get
+			Tags: map[string]string{"service": "cloudidentity", "action": "groups.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listCloudIdentityGroups,
 			ShouldIgnoreError: isIgnorableError([]string{"400"}),
 			KeyColumns:        plugin.SingleColumn("parent"),
+			// Since there are no specific permissions required for listing groups, the rate-limiter tag is applied based on the method ID.
+			// https://cloud.google.com/identity/docs/reference/rest/v1/groups/list
+			Tags: map[string]string{"service": "cloudidentity", "action": "groups.list"},
 		},
 		Columns: []*plugin.Column{
 			{

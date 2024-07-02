@@ -21,6 +21,7 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeBackendBucket,
+			Tags:       map[string]string{"service": "compute", "action": "backendBuckets.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeBackendBuckets,
@@ -31,6 +32,7 @@ func tableGcpComputeBackendBucket(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "enable_cdn", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "backendBuckets.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -159,6 +161,9 @@ func listComputeBackendBuckets(ctx context.Context, d *plugin.QueryData, h *plug
 
 	resp := service.BackendBuckets.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.BackendBucketList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, backendBucket := range page.Items {
 			d.StreamListItem(ctx, backendBucket)
 

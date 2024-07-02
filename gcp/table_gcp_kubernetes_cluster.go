@@ -20,10 +20,12 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 		Description: "GCP Kubernetes Cluster",
 		List: &plugin.ListConfig{
 			Hydrate: listKubernetesClusters,
+			Tags:    map[string]string{"service": "container", "action": "clusters.list"},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getKubernetesCluster,
+			Tags:       map[string]string{"service": "container", "action": "clusters.get"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -369,6 +371,9 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, h *plugin.
 	project := projectId.(string)
 
 	resp, err := service.Projects.Locations.Clusters.List("projects/" + project + "/locations/-").Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
 	if err != nil {
 		return nil, err
 	}

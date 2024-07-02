@@ -21,9 +21,11 @@ func tableGcpComputeURLMap(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeURLMap,
+			Tags:       map[string]string{"service": "compute", "action": "urlMaps.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeURLMaps,
+			Tags:    map[string]string{"service": "compute", "action": "urlMaps.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -225,6 +227,9 @@ func listComputeURLMaps(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	resp := service.UrlMaps.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.UrlMapsAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, urlMap := range item.UrlMaps {
 				d.StreamListItem(ctx, urlMap)

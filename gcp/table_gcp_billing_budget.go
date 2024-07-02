@@ -20,11 +20,13 @@ func tableGcpBillingBudget(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "billing_account"}),
 			Hydrate:    getBillingBudget,
+			Tags:       map[string]string{"service": "billing", "action": "budgets.get"},
 		},
 		List: &plugin.ListConfig{
 			KeyColumns:    plugin.OptionalColumns([]string{"billing_account"}),
 			ParentHydrate: getBillingAccount,
 			Hydrate:       listBillingBudgets,
+			Tags:          map[string]string{"service": "billing", "action": "budgets.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -144,6 +146,9 @@ func listBillingBudgets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	if err := response.Pages(
 		ctx,
 		func(page *billingbudgets.GoogleCloudBillingBudgetsV1ListBudgetsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, item := range page.Budgets {
 				d.StreamListItem(ctx, budgetInfo{acc.Name, item})
 

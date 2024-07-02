@@ -19,9 +19,17 @@ func tableGcpPubSubSnapshot(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getPubSubSnapshot,
+			Tags:       map[string]string{"service": "pubsub", "action": "snapshots.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubSnapshots,
+			Tags:    map[string]string{"service": "pubsub", "action": "snapshots.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getPubSubSnapshotIamPolicy,
+				Tags: map[string]string{"service": "pubsub", "action": "snapshots.getIamPolicy"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -132,6 +140,9 @@ func listPubSubSnapshots(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	resp := service.Projects.Snapshots.List("projects/" + project).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *pubsub.ListSnapshotsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, snapshot := range page.Snapshots {
 			d.StreamListItem(ctx, snapshot)
 

@@ -18,6 +18,7 @@ func tableGcpAppEngineApplication(ctx context.Context) *plugin.Table {
 		Description: "GCP App Engine Application",
 		List: &plugin.ListConfig{
 			Hydrate: getAppEngineApplication,
+			Tags:    map[string]string{"service": "appengine", "action": "applications.get"},
 		},
 		Columns: []*plugin.Column{
 			{

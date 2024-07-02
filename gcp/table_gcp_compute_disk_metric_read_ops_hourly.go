@@ -20,6 +20,7 @@ func tableGcpComputeDiskMetricReadOpsHourly(_ context.Context) *plugin.Table {
 			ParentHydrate: listComputeDisk,
 			Hydrate:       listComputeDiskMetricReadOpsHourly,
 			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
+			Tags:          map[string]string{"service": "monitoring", "action": "timeSeries.list"},
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

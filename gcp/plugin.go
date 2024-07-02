@@ -11,6 +11,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/rate_limiter"
 )
 
 const pluginName = "steampipe-plugin-gcp"
@@ -26,6 +27,21 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		// Default ignore config for the plugin
 		DefaultIgnoreConfig: &plugin.IgnoreConfig{
 			ShouldIgnoreErrorFunc: shouldIgnoreErrorPluginDefault(),
+		},
+		RateLimiters: []*rate_limiter.Definition{
+			// A user can make up to 100 BigQuery API requests per second, per user, per project to an API method. If a user makes more than 100 requests per second to a method, then throttling can occur. This limit does not apply to
+			// Service API limit: https://cloud.google.com/bigquery/quotas#api_request_quotas
+			// https://cloud.google.com/bigquery/quotas#dataset_limits
+			// Configuring the rate limiter only for LIST operations will result in hitting rate limits when executing the query "select * from gcp_bigquery_dataset".
+			// This occurs because the table `gcp_bigquery_dataset` includes hydrated calls (getBigQueryDataset). Therefore, it is necessary to configure the rate limiter for both LIST and GET operations.
+			{
+				Name:           "gcp_bigquery_list_datasets",
+				FillRate:       100,
+				BucketSize:     100,
+				MaxConcurrency: 50,
+				Scope:          []string{"connection", "service", "action"},
+				Where:          "service = 'bigquery' and (action = 'datasets.list' or action = 'datasets.get')",
+			},
 		},
 		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
 			{

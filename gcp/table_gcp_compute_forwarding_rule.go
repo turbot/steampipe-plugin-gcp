@@ -21,6 +21,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeForwardingRule,
+			Tags:       map[string]string{"service": "compute", "action": "forwardingRules.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeForwardingRules,
@@ -35,6 +36,7 @@ func tableGcpComputeForwardingRule(ctx context.Context) *plugin.Table {
 				{Name: "all_ports", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "is_mirroring_collector", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "forwardingRules.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -252,6 +254,9 @@ func listComputeForwardingRules(ctx context.Context, d *plugin.QueryData, h *plu
 
 	resp := service.ForwardingRules.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.ForwardingRuleAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, forwardingRule := range item.ForwardingRules {
 				d.StreamListItem(ctx, forwardingRule)

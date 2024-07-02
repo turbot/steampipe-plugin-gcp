@@ -21,13 +21,15 @@ func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 		Name:        "gcp_vertex_ai_endpoint",
 		Description: "GCP Vertex AI Endpoint",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getAIPlatformEndpoint,
+			KeyColumns:        plugin.SingleColumn("name"),
+			Hydrate:           getAIPlatformEndpoint,
 			ShouldIgnoreError: isIgnorableError([]string{"Unimplemented"}),
+			Tags:              map[string]string{"service": "aiplatform", "action": "endpoints.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listAIPlatformEndpoints,
 			ShouldIgnoreError: isIgnorableError([]string{"Unimplemented"}),
+			Tags:              map[string]string{"service": "aiplatform", "action": "endpoints.list"},
 		},
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Endpoint"),
 		Columns: []*plugin.Column{
@@ -196,6 +198,9 @@ func listAIPlatformEndpoints(ctx context.Context, d *plugin.QueryData, h *plugin
 	it := service.Endpoint.ListEndpoints(ctx, input)
 
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		resp, err := it.Next()
 		if err != nil {
 			if strings.Contains(err.Error(), "404") {
@@ -247,8 +252,8 @@ func getAIPlatformEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	service, err := AIService(ctx, d, "Endpoint")
 	if err != nil {
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "NotFound") {
-				return nil, nil
-			}
+			return nil, nil
+		}
 		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformEndpoint", "service_error", err)
 		return nil, err
 	}
@@ -257,9 +262,9 @@ func getAIPlatformEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	op, err := service.Endpoint.GetEndpoint(ctx, input)
 	if err != nil {
-	if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "NotFound") {
-				return nil, nil
-			}
+		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "NotFound") {
+			return nil, nil
+		}
 		logger.Error("gcp_vertex_ai_endpoint.getAIPlatformEndpoint", "api_error", err)
 		return nil, err
 	}

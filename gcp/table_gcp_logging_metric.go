@@ -20,9 +20,11 @@ func tableGcpLoggingMetric(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpLoggingMetric,
+			Tags:       map[string]string{"service": "logging", "action": "logMetrics.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpLoggingMetrics,
+			Tags:    map[string]string{"service": "logging", "action": "logMetrics.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -208,6 +210,9 @@ func listGcpLoggingMetrics(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	if err := resp.Pages(
 		ctx,
 		func(page *logging.ListLogMetricsResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, metric := range page.Metrics {
 				d.StreamListItem(ctx, metric)
 

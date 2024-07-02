@@ -21,6 +21,7 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeNodeTemplate,
+			Tags:       map[string]string{"service": "compute", "action": "nodeTemplates.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeNodeTemplates,
@@ -29,6 +30,13 @@ func tableGcpComputeNodeTemplate(ctx context.Context) *plugin.Table {
 				{Name: "cpu_overcommit_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "node_type", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "compute", "action": "nodeTemplates.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeNodeGroupIamPolicy,
+				Tags: map[string]string{"service": "compute", "action": "nodeTemplates.getIamPolicy"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -198,6 +206,9 @@ func listComputeNodeTemplates(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	resp := service.NodeTemplates.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.NodeTemplateAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, nodeTemplate := range item.NodeTemplates {
 				d.StreamListItem(ctx, nodeTemplate)

@@ -18,6 +18,7 @@ func tableGcpSQLDatabaseInstanceMetricCpuUtilizationDaily(_ context.Context) *pl
 		List: &plugin.ListConfig{
 			ParentHydrate: listSQLDatabaseInstances,
 			Hydrate:       listSQLDatabaseInstanceMetricCpuUtilizationDaily,
+			Tags:          map[string]string{"service": "monitoring", "action": "timeSeries.list"},
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

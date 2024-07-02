@@ -20,6 +20,7 @@ func tableGcpOrganization(_ context.Context) *plugin.Table {
 		Description: "GCP Organization",
 		List: &plugin.ListConfig{
 			Hydrate: listGCPOrganizations,
+			Tags:    map[string]string{"service": "resourcemanager", "action": "organizations.get"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -105,6 +106,9 @@ func listGCPOrganizations(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	resp := service.Organizations.Search(rb)
 	if err := resp.Pages(ctx, func(page *cloudresourcemanager.SearchOrganizationsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, organization := range page.Organizations {
 			d.StreamListItem(ctx, organization)
 

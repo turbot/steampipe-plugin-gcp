@@ -23,6 +23,7 @@ func tableGcpBigQueryJob(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listBigQueryJobs,
+			Tags:    map[string]string{"service": "bigquery", "action": "jobs.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -270,6 +271,9 @@ func listBigQueryJobs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	resp := service.Jobs.List(project).MaxResults(*pageSize).AllUsers(true)
 	if err := resp.Pages(ctx, func(page *bigquery.JobList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, job := range page.Jobs {
 			d.StreamListItem(ctx, job)
 

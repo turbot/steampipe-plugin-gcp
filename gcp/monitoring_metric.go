@@ -209,6 +209,9 @@ func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, h *pl
 
 	resp := service.Projects.TimeSeries.List("projects/" + project).Filter(filterString).IntervalStartTime(startTime).IntervalEndTime(endTime).AggregationAlignmentPeriod(period)
 	if err := resp.Pages(ctx, func(page *monitoring.ListTimeSeriesResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, metric := range page.TimeSeries {
 			statistics, _ := metricstatistic(granularity, metric.Points, ctx)
 			for _, statistic := range statistics {

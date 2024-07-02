@@ -21,12 +21,20 @@ func tableGcpComputeResourcePolicy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeResourcePolicy,
+			Tags:       map[string]string{"service": "compute", "action": "resourcePolicies.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeResourcePolicies,
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
+			},
+			Tags: map[string]string{"service": "compute", "action": "resourcePolicies.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeResourcePolicyIamPolicy,
+				Tags: map[string]string{"service": "compute", "action": "resourcePolicies.getIamPolicy"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -167,6 +175,9 @@ func listComputeResourcePolicies(ctx context.Context, d *plugin.QueryData, h *pl
 	if err := resp.Pages(
 		ctx,
 		func(page *compute.ResourcePolicyAggregatedList) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, item := range page.Items {
 				for _, policy := range item.ResourcePolicies {
 					d.StreamListItem(ctx, policy)

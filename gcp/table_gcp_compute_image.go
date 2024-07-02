@@ -22,6 +22,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "source_project"}),
 			Hydrate:    getComputeImage,
+			Tags:       map[string]string{"service": "compute", "action": "images.get"},
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate:     listComputeImageProjects,
@@ -33,6 +34,13 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				{Name: "source_project", Require: plugin.Optional},
 				{Name: "status", Require: plugin.Optional},
 				{Name: "source_type", Require: plugin.Optional},
+			},
+			Tags: map[string]string{"service": "compute", "action": "images.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeImageIamPolicy,
+				Tags: map[string]string{"service": "compute", "action": "images.getIamPolicy"},
 			},
 		},
 		Columns: []*plugin.Column{
@@ -329,6 +337,9 @@ func listImagesForProject(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	// resp := service.Images.List(project).Filter("deprecated.state!=\"DEPRECATED\"")
 	resp := service.Images.List(projectName).MaxResults(*pageSize).Filter(filterString)
 	if err := resp.Pages(ctx, func(page *compute.ImageList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, image := range page.Items {
 			d.StreamListItem(ctx, image)
 
