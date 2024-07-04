@@ -1,3 +1,9 @@
+## v0.54.1 [2024-07-04]
+
+_Bug fixes_
+
+- Fixed the export tool of the plugin to return a non-zero error code instead of 0 whenever an error occurred. ([#79](https://github.com/turbot/steampipe-export/pull/79))
+
 ## v0.54.0 [2024-07-01]
 
 _Bug fixes_
