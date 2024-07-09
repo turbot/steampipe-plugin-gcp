@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/turbot/go-kit/types"
@@ -35,7 +34,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "status",
 				Description: "Status of the function deployment (ACTIVE, OFFLINE, CLOUD_FUNCTION_STATUS_UNSPECIFIED,DEPLOY_IN_PROGRESS, DELETE_IN_PROGRESS, UNKNOWN).",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(getCloudFunctionStatus),
+				Transform:   transform.FromField("State"),
 			},
 			{
 				Name:        "self_link",
@@ -52,37 +51,39 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "runtime",
 				Description: "The runtime in which to run the function.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionBuildConfigData, "RunTime"),
+				Transform:   transform.FromField("BuildConfig.Runtime"),
 			},
 
 			// other columns
 			{
 				Name:        "available_memory_mb",
 				Description: "The amount of memory in MB available for the function.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "AvailableMemory"),
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.AvailableMemory"),
 			},
 			{
 				Name:        "build_environment_variables",
 				Description: "Environment variables that shall be available during build time",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("BuildConfig.EnvironmentVariables"),
 			},
 			{
 				Name:        "build_id",
 				Description: "The Cloud Build ID of the latest successful deployment of the function.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionBuildConfigData, "BuildId"),
+				Transform:   transform.FromField("BuildConfig.Build"),
 			},
 			{
 				Name:        "entry_point",
 				Description: "The name of the function (as defined in source code) that will be executed.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionBuildConfigData, "EntryPoint"),
+				Transform:   transform.FromField("BuildConfig.EntryPoint"),
 			},
 			{
-				Name:        "environment_variables",
+				Name:        "service_environment_variables",
 				Description: "Environment variables that shall be available during function execution.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ServiceConfig.EnvironmentVariables"),
 			},
 			{
 				Name:        "event_trigger",
@@ -93,7 +94,6 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "https_trigger",
 				Description: "An HTTPS endpoint type of source that can be triggered via URL.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "HttpsTriggers"),
 			},
 			{
 				Name:        "iam_policy",
@@ -104,7 +104,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "ingress_settings",
 				Description: "The ingress settings for the function, controlling what traffic can reach it (INGRESS_SETTINGS_UNSPECIFIED, ALLOW_ALL, ALLOW_INTERNAL_ONLY, ALLOW_INTERNAL_AND_GCLB).",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "IngressSettings"),
+				Transform:   transform.FromField("ServiceConfig.IngressSettings"),
 			},
 			{
 				Name:        "labels",
@@ -115,7 +115,7 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "max_instances",
 				Description: "The limit on the maximum number of function instances that may coexist at a given time. In some cases, such as rapid traffic surges, Cloud Functions may, for a short period of time, create more instances than the specified max instances limit.",
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "MaxInstances"),
+				Transform:   transform.FromField("ServiceConfig.MaxInstanceCount"),
 			},
 			{
 				Name:        "network",
@@ -126,7 +126,13 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Name:        "service_account_email",
 				Description: "The email of the function's service account.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "ServiceAccountEmail"),
+				Transform:   transform.FromField("ServiceConfig.ServiceAccountEmail"),
+			},
+			{
+				Name:        "build_source",
+				Description: "The location of the function source code.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ServiceConfig.Source"),
 			},
 			{
 				Name:        "source_archive_url",
@@ -139,16 +145,10 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "source_upload_url",
-				Description: "The Google Cloud Storage signed URL used for source uploading, generated by google.cloud.functions.v1/v2.GenerateUploadUrl",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionBuildConfigData, "SourceUploadUrl"),
-			},
-			{
-				Name:        "timeout",
+				Name:        "service_timeout",
 				Description: "The function execution timeout. Execution is consideredfailed and can be terminated if the function is not completed at the end of the timeout period. Defaults to 60 seconds.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "TimeOut"),
+				Transform:   transform.FromField("ServiceConfig.TimeoutSeconds"),
 			},
 			{
 				Name:        "update_time",
@@ -156,21 +156,100 @@ func tableGcpCloudfunctionFunction(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
-				Name:        "version_id",
-				Description: "The version identifier of the Cloud Function. Each deployment attempt results in a new version of a function being created.",
-				Type:        proto.ColumnType_INT,
-			},
-			{
 				Name:        "vpc_connector",
 				Description: "The VPC Network Connector that this cloud function can  connect to. This field is mutually exclusive with `network` field and will eventually replace it.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "VpcConnector"),
+				Transform:   transform.FromField("ServiceConfig.VpcConnector"),
 			},
 			{
 				Name:        "vpc_connector_egress_settings",
 				Description: "The egress settings for the connector, controlling what traffic is diverted through it (VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED, PRIVATE_RANGES_ONLY, ALL_TRAFFIC).",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(getCloudFunctionServiceConfigData, "VpcConnectorEgressSettings"),
+				Transform:   transform.FromField("ServiceConfig.VpcConnectorEgressSettings"),
+			},
+			{
+				Name:        "kms_key_name",
+				Description: "Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt function resources.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "url",
+				Description: "The deployed URL for the function.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "service",
+				Description: "Name of the service associated with the function.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.Service"),
+			},
+			{
+				Name:        "service_revision",
+				Description: "The name of the service revision.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.Revision"),
+			},
+			{
+				Name:        "service_all_traffic_on_latest_revision",
+				Description: "Whether 100% of traffic is routed to the latest revision.",
+				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("ServiceConfig.AllTrafficOnLatestRevision"),
+			},
+			{
+				Name:        "service_available_cpu",
+				Description: "The number of CPUs used in a single container instance.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.AvailableCpu"),
+			},
+			{
+				Name:        "max_instance_request_concurrency",
+				Description: "The maximum number of concurrent requests that each instance can receive.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ServiceConfig.MaxInstanceRequestConcurrency"),
+			},
+			{
+				Name:        "min_instances",
+				Description: "The minimum number of function instances that may coexist at a given time.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ServiceConfig.MinInstanceCount"),
+			},
+			{
+				Name:        "satisfies_pzs",
+				Description: "Reserved for future use.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "service_security_level",
+				Description: "Configure whether the function only accepts HTTPS.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ServiceConfig.SecurityLevel"),
+			},
+			{
+				Name:        "service_secret_environment_variables",
+				Description: "Secret environment variables configuration.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ServiceConfig.SecretEnvironmentVariables"),
+			},
+			{
+				Name:        "service_secret_volumes",
+				Description: "Secret volumes configuration.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ServiceConfig.SecretVolumes"),
+			},
+			{
+				Name:        "state_messages",
+				Description: "State Messages for this Cloud Function.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "build_config",
+				Description: "Describes the Build step of the function that builds a container from the given source.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "service_config",
+				Description: "Describes the Service being deployed. Currently deploys services to Cloud Run (fully managed).",
+				Type:        proto.ColumnType_JSON,
 			},
 
 			// standard steampipe columns
@@ -354,90 +433,4 @@ func cloudFunctionSelfLink(_ context.Context, d *transform.TransformData) (inter
 	}
 
 	return selfLink, nil
-}
-
-func getCloudFunctionStatus(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-
-	status := cloudFunctionAttributeData.State
-	return status, nil
-}
-
-func getCloudFunctionBuildConfigData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-	param := d.Param.(string)
-
-	buildConfigs := cloudFunctionAttributeData.BuildConfig
-
-	runTime := buildConfigs.Runtime
-
-	attributesOfBuild := strings.Split(buildConfigs.Build, "/")
-	buildId := attributesOfBuild[len(attributesOfBuild)-1]
-
-	entryPoint := buildConfigs.EntryPoint
-
-	sourceUploadUrlInitial := "https://storage.googleapis.com/"
-	source := buildConfigs.Source
-	storageSource := source.StorageSource
-	sourceUploadUrl := sourceUploadUrlInitial + strings.TrimSpace(storageSource.Bucket) + strings.TrimSpace(storageSource.Object)
-
-	buildConfigData := map[string]interface{}{
-		"RunTime":         runTime,
-		"BuildId":         buildId,
-		"EntryPoint":      entryPoint,
-		"SourceUploadUrl": sourceUploadUrl,
-	}
-
-	return buildConfigData[param], nil
-}
-
-func getCloudFunctionServiceConfigData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	cloudFunctionAttributeData := d.HydrateItem.(*cloudfunctions.Function)
-	param := d.Param.(string)
-
-	serviceConfigs := cloudFunctionAttributeData.ServiceConfig
-
-	availableMemoryInString := strings.TrimSpace(serviceConfigs.AvailableMemory)
-	if cloudFunctionAttributeData.Environment == "GEN_1" {
-		availableMemoryInString = availableMemoryInString[0 : len(availableMemoryInString)-1]
-
-	} else {
-		availableMemoryInString = availableMemoryInString[0 : len(availableMemoryInString)-2]
-	}
-	availableMemoryInInt, err := strconv.Atoi(availableMemoryInString)
-	if err != nil {
-		availableMemoryInInt = 0
-	}
-
-	ingressSettings := serviceConfigs.IngressSettings
-
-	httpsTriggers := make(map[string]string)
-	httpsTriggers["Url"] = serviceConfigs.Uri
-	securityLevel := serviceConfigs.SecurityLevel
-	if len(securityLevel) == 0 {
-		securityLevel = "SECURITY_LEVEL_UNSPECIFIED"
-	}
-	httpsTriggers["SecurityLevel"] = securityLevel
-
-	maxInstances := serviceConfigs.MaxInstanceCount
-
-	serviceAccountEmail := serviceConfigs.ServiceAccountEmail
-
-	timeOut := serviceConfigs.TimeoutSeconds
-
-	vpcConnector := serviceConfigs.VpcConnector
-	vpcConnectorEgressSettings := serviceConfigs.VpcConnectorEgressSettings
-
-	serviceConfigData := map[string]interface{}{
-		"AvailableMemory":            availableMemoryInInt,
-		"IngressSettings":            ingressSettings,
-		"HttpsTriggers":              httpsTriggers,
-		"MaxInstances":               maxInstances,
-		"ServiceAccountEmail":        serviceAccountEmail,
-		"TimeOut":                    timeOut,
-		"VpcConnector":               vpcConnector,
-		"VpcConnectorEgressSettings": vpcConnectorEgressSettings,
-	}
-
-	return serviceConfigData[param], nil
 }

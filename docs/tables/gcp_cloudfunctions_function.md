@@ -25,7 +25,7 @@ select
   available_memory_mb,
   max_instances,
   ingress_settings,
-  timeout
+  service_timeout
 from
   gcp_cloudfunctions_function;
 ```
@@ -39,7 +39,7 @@ select
   available_memory_mb,
   max_instances,
   ingress_settings,
-  timeout
+  service_timeout
 from
   gcp_cloudfunctions_function;
 ```
