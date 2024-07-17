@@ -195,7 +195,7 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     gcpAlloyDBInstanceTurbotData,
-				Transform:   transform.FromField("ProjectId"),
+				Transform:   transform.FromField("Project"),
 			},
 		},
 	}
