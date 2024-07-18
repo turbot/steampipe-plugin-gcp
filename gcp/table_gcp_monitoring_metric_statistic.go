@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -76,11 +75,6 @@ func buildMetricStatisticInputParam(_ context.Context, d *plugin.QueryData) (Met
 	dimValue := d.EqualsQualString("dimension_value")
 	granularity := d.EqualsQualString("granularity")
 	metricType := d.EqualsQualString("metric_type")
-
-	// Validate granularity
-	if strings.ToLower(granularity) != "hourly" && strings.ToLower(granularity) != "daily" {
-		return MetricStatisticInput{}, fmt.Errorf("the granularity value must be 'HOURLY' or 'DAILY'")
-	}
 
 	return MetricStatisticInput{
 		DimKey:      fmt.Sprintf("%s = ", dimKey),

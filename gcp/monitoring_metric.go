@@ -185,11 +185,6 @@ func getIncrementalTimeAsPerGranularity(granularity string) time.Duration {
 }
 
 func listMonitorMetricStatistics(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, granularity string, metricType string, dimensionKey string, dimensionValue string, resourceName string, location string) (*monitoring.ListTimeSeriesResponse, error) {
-	plugin.Logger(ctx).Trace("listMonitorMetricStatistics")
-	plugin.Logger(ctx).Error("dimKey ===> ", dimensionKey)
-	plugin.Logger(ctx).Error("dimValue ===> ", dimensionValue)
-	plugin.Logger(ctx).Error("granularity ===> ", granularity)
-	plugin.Logger(ctx).Error("metricType ===> ", metricType)
 
 	// Create Service Connection
 	service, err := MonitoringService(ctx, d)
