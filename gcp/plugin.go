@@ -114,6 +114,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_logging_sink":                                        tableGcpLoggingSink(ctx),
 			"gcp_monitoring_alert_policy":                             tableGcpMonitoringAlert(ctx),
 			"gcp_monitoring_group":                                    tableGcpMonitoringGroup(ctx),
+			"gcp_monitoring_metric_statistic":                         tableGcpMonitoringMetricStatistic(ctx),
 			"gcp_monitoring_notification_channel":                     tableGcpMonitoringNotificationChannel(ctx),
 			"gcp_organization":                                        tableGcpOrganization(ctx),
 			"gcp_project":                                             tableGcpProject(ctx),
