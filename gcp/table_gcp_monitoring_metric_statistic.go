@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -79,7 +80,7 @@ func buildMetricStatisticInputParam(_ context.Context, d *plugin.QueryData) (Met
 	return MetricStatisticInput{
 		DimKey:      fmt.Sprintf("%s = ", dimKey),
 		DimValue:    fmt.Sprintf("\"%s\"", dimValue),
-		Granularity: granularity,
+		Granularity: strings.ToUpper(granularity),
 		MetricType:  fmt.Sprintf("\"%s\"", metricType),
 		Location:    d.EqualsQualString("location"),
 	}, nil
