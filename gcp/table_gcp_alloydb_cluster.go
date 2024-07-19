@@ -203,7 +203,7 @@ func tableGcpAlloyDBCluster(ctx context.Context) *plugin.Table {
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     gcpAlloyDBClusterTurbotData,
-				Transform:   transform.FromField("ProjectId"),
+				Transform:   transform.FromField("Project"),
 			},
 		},
 	}
