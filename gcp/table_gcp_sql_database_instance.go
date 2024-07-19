@@ -52,7 +52,7 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "create_time",
-				Description: "The time when the instance was created in.",
+				Description: "The time when the instance was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
