@@ -51,6 +51,11 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "create_time",
+				Description: "The time when the instance was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+			},
+			{
 				Name:        "database_version",
 				Description: "Specifies the type and version of the database engine.",
 				Type:        proto.ColumnType_STRING,
