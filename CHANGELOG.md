@@ -1,3 +1,13 @@
+## v0.55.0 [2024-07-22]
+
+_Enhancements_
+
+- Added column `create_time `to `gcp_sql_database_instance` table. ([#615](https://github.com/turbot/steampipe-plugin-gcp/pull/615))
+
+_Bug fixes_
+
+- Fixed the `gcp_alloydb_cluster` and `gcp_alloydb_instance` tables to correctly return values for `project` column instead of `null`. ([#617](https://github.com/turbot/steampipe-plugin-gcp/pull/617))
+
 ## v0.54.1 [2024-07-04]
 
 _Bug fixes_
