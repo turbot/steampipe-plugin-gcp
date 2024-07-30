@@ -17,6 +17,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"golang.org/x/oauth2"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 )
@@ -197,6 +198,14 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 		opts = append(opts, option.WithCredentialsJSON([]byte(contents)))
 	} else if gcpConfig.CredentialFile != nil {
 		opts = append(opts, option.WithCredentialsFile(*gcpConfig.CredentialFile))
+	}
+
+	if gcpConfig.ImpersonateAccessToken != nil {
+		tokenConfig := oauth2.Token{
+			AccessToken: *gcpConfig.ImpersonateAccessToken,
+		}
+		staticTokenSource := oauth2.StaticTokenSource(&tokenConfig)
+		opts = append(opts, option.WithTokenSource(staticTokenSource))
 	}
 
 	if gcpConfig.ImpersonateServiceAccount != nil {

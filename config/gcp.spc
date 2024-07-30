@@ -16,6 +16,10 @@ connection "gcp" {
   #   - The standard location (`~/.config/gcloud/application_default_credentials.json`)
   #credentials = "~/.config/gcloud/application_default_credentials.json"
 
+  # `impersonate_access_token` (optional) - You can generate an OAuth 2.0 access token by using the gcloud CLI, the REST API, or the Cloud Client Libraries and Google API Client Libraries.
+  # Refer https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#gcloud_2 for generating the access token.
+  # impersonate_access_token = "ya29.c.c0ASRK0GZ7mv8lIV0iiudmiGBs...hb5aMYJd"
+
   # `impersonate_service_account` (optional) - The GCP service account (string) which should be impersonated.
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
