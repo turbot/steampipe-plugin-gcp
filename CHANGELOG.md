@@ -1,5 +1,12 @@
 ## v0.56.0 [2024-07-31]
 
+_Breaking changes_
+
+- Removed the following columns in `gcp_cloudfunctions_function` table to align with the new API response structure: ([#612](https://github.com/turbot/steampipe-plugin-gcp/pull/612))
+  - `environment_variables`
+  - `source_upload_url`
+  - `version_id`
+
 _What's new?_
 
 - Added the `impersonate_access_token` config argument to support plugin authentication by using a pre-generated temporary access token. ([#621](https://github.com/turbot/steampipe-plugin-gcp/pull/621))
@@ -10,14 +17,7 @@ _Enhancements_
 
 _Bug fixes_
 
-- Fixed the cache key issue in `SecretManager` service client creation. ([#624](https://github.com/turbot/steampipe-plugin-gcp/pull/624))
-
-_Breaking changes_
-
-- Removed the following columns in `gcp_cloudfunctions_function` table to align with the new API response structure: ([#612](https://github.com/turbot/steampipe-plugin-gcp/pull/612))
-  - `environment_variables`
-  - `source_upload_url`
-  - `version_id`
+- Fixed the cache key issue in the `SecretManager` service client creation. ([#624](https://github.com/turbot/steampipe-plugin-gcp/pull/624))
 
 ## v0.55.0 [2024-07-22]
 
