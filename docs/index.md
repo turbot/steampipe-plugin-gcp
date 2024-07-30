@@ -112,7 +112,7 @@ connection "gcp" {
 
 By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run `gcloud auth application-default login`. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
 
-For users with multiple GCP project and more complex authentication use cases, here are some examples of advanced configuration options:
+For users with multiple GCP projects and more complex authentication use cases, here are some examples of advanced configuration options:
 
 ### Use a service account
 
@@ -126,9 +126,9 @@ connection "gcp_my_other_project" {
 }
 ```
 
-### Use impersonate access token
+### Use impersonation access token
 
-Generate Impersonate access token using: [Gcloud CLI command](https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#gcloud_2).
+Generate an impersonate access token using: [gcloud CLI command](https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#gcloud_2).
 
 ```hcl
 connection "gcp_my_other_project" {
