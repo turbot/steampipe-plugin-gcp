@@ -719,7 +719,7 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 
 func SecretManagerService(ctx context.Context, d *plugin.QueryData) (*secretmanager.Service, error) {
 	// have we already created and cached the service?
-	serviceCacheKey := "RedisService"
+	serviceCacheKey := "SecretManagerService"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*secretmanager.Service), nil
 	}
