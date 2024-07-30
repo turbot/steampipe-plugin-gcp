@@ -18,7 +18,7 @@ connection "gcp" {
 
   # `impersonate_access_token` (optional) - You can generate an OAuth 2.0 access token by using the gcloud CLI, the REST API, or the Cloud Client Libraries and Google API Client Libraries.
   # Refer https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#gcloud_2 for generating the access token.
-  # impersonate_access_token = "ya29.c.c0ASRK0GZ7mv8lIV0iiudmiGBs9m1gqGfBYZzVRhHY9xQsu82jdCmZZcGe70CjkxcvsCsVXsPeCeGWE6aDl5K561WRcJi1T9l7pTB7fTuWgWDfAzTHye9Kg3z9dc66hVEct_i8seajX9f3WtdQBSqzYvZSenm_jdsuqfyWCSiiz_aVbx5y_MVgx3D_kT2Rz7ePbwSfuqnbsKfiByG0QI8YJlqB1_A6s5pyhITpvWmkNg1baWzqFW5IP9lzvLdGCaTAQ2Nf18IidExI50GLb5NdLQ1Njig_UnVNrEdc-Vke3X3J4PX0fsKY7y4tBcoGlq9Cc9bGEzPHrElEENaJ_iP7WCbZf-b8aUqoqkVQl8Wl15AoJwbrcksjyuXVTg28QpC3cUb6a_aXUnrQcu9Ru1ULRHjVA9JKU0ayu1tpYNLSRxCeM5cMCtGet3f34xCaV7kT1wut6vD4hlpKRfOBHrnd6bTw2dF8Q89m9AA2jHR-X2v68KngKFkvmkTuUEhPJPOXl1VXUAkN1W1oI0ccW8Y04TN_YSreMh56dmeziAZ9O4S_WB9eYcBbgNvW6ghkrQ83UWJ15DeD8hiWPTKFppITzjgaFCQDE4Q1aF5yKlVGFFdpS1Fe9UZvIY4bDKgE645DsSewy-Swiw4wRIiF6wgdwp0cdavl5BoodtI4OSomxxbh3n_u-wJmO12xBXUMiaRMlu72a_ilXow5ynU9U-wdlqScr2uf4bZwZyfUrUX1xXpUJmd8kXka8Skpv6wtOnywQmkWeupbMQXRO504S76u-cXekOdcUSR4RJlZ9s9geB5aWFJ5SmFkwcYXS3Ijh66m_Mq-s2JmI51wd4F-ZY0U75pRw-OmiRX2xtBk5c2mS7gZfoae88MmmU4J2aBwsOwcedX9fUrBl-4QSBxhSRcdsRyFp1eXf0-whBd8mQ9WyJOOb1v9zd1qrmBZpXma2i5ltst6FsizQrxmSb98xROqjY6iqtmqIyshWjydY3RzFYcdOlhb5aMYJd"
+  # impersonate_access_token = "ya29.c.c0ASRK0GZ7mv8lIV0iiudmiGBs...hb5aMYJd"
 
   # `impersonate_service_account` (optional) - The GCP service account (string) which should be impersonated.
   # If not set, no impersonation is done.
