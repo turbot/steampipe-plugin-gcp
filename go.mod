@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/resourcemanager v1.9.5
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/turbot/go-kit v0.10.0-rc.0
-	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.3
+	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.4
 	google.golang.org/api v0.162.0
 )
 
