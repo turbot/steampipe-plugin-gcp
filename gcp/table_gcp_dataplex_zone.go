@@ -13,16 +13,17 @@ import (
 	"google.golang.org/api/dataplex/v1"
 )
 
-func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
+func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_dataplex_lake",
+		Name:        "gcp_dataplex_zone",
 		Description: "GCP Dataplex Lake",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getDataplexLake,
+			Hydrate:    getDataplexZone,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDataplexLakes,
+			ParentHydrate: listDataplexLakes,
+			Hydrate:       listDataplexZones,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
@@ -37,59 +38,65 @@ func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "name",
-				Description: "The relative resource name of the lake.",
+				Description: "The relative resource name of the zone.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "lake_name",
+				Description: "The relative resource name of the lake.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(dataplexLakeName),
+			},
+			{
 				Name:        "state",
-				Description: "Current state of the lake.",
+				Description: "Current state of the zone.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "create_time",
-				Description: "The time when the lake was created.",
+				Description: "The time when the zone was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "update_time",
-				Description: "The time when the lake was last updated.",
+				Description: "The time when the zone was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
 				Name:        "description",
-				Description: "Description of the lake.",
+				Description: "Description of the zone.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "uid",
-				Description: "System generated globally unique ID for the lake.",
+				Description: "System generated globally unique ID for the zone.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "service_account",
-				Description: "Service account associated with this lake. This service account must be authorized to access or operate on resources managed by the lake.",
+				Name:        "type",
+				Description: "The type of the zone.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "asset_status",
-				Description: "Aggregated status of the underlying assets of the lake.",
+				Description: "Aggregated status of the underlying assets of the zone.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "metastore",
-				Description: "Settings to manage lake and Dataproc Metastore service instance association.",
+				Name:        "resource_spec",
+				Description: "Specification of the resources that are referenced by the assets within this zone.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "metastore_status",
-				Description: "Metastore status of the lake.",
+				Name:        "discovery_spec",
+				Description: "Specification of the discovery feature applied to data in this zone.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     dataplexLakeSelfLink,
+				Hydrate:     dataplexZoneSelfLink,
 				Transform:   transform.FromValue(),
 			},
 
@@ -110,7 +117,7 @@ func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     gcpDataplexLakeTurbotData,
+				Hydrate:     gcpDataplexZoneTurbotData,
 				Transform:   transform.FromField("Akas"),
 			},
 
@@ -119,14 +126,14 @@ func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpDataplexLakeTurbotData,
+				Hydrate:     gcpDataplexZoneTurbotData,
 				Transform:   transform.FromField("Location"),
 			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpDataplexLakeTurbotData,
+				Hydrate:     gcpDataplexZoneTurbotData,
 				Transform:   transform.FromField("Project"),
 			},
 		},
@@ -135,25 +142,13 @@ func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDataplexLakes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	var location string
-	matrixLocation := d.EqualsQualString(matrixKeyLocation)
-	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != "" {
-		location = matrixLocation
-	}
-
-	// We should not make the APi call for the regions "global", "eu" and "us"".
-	// Error 400: Malformed name: 'projects/parker-aaa/locations/global/lakes'
-	//  Error 400: Malformed name: 'projects/parker-aaa/locations/us/lakes'
-	if location == "global" || location == "us" || location == "eu" {
-		return nil, nil
-	}
+func listDataplexZones(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	lake := h.Item.(*dataplex.GoogleCloudDataplexV1Lake)
 
 	// Create Service Connection
 	service, err := DataplexService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_dataplex_lake.listDataplexLakes", "connection_error", err)
+		plugin.Logger(ctx).Error("gcp_dataplex_zone.listDataplexZones", "connection_error", err)
 		return nil, err
 	}
 
@@ -180,19 +175,10 @@ func listDataplexLakes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		}
 	}
 
-	// Get project details
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-
-	parent := "projects/" + project + "/locations/" + location
-
-	resp := service.Projects.Locations.Lakes.List(parent).PageSize(*pageSize).Filter(filterString)
-	if err := resp.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListLakesResponse) error {
-		for _, lake := range page.Lakes {
-			d.StreamListItem(ctx, lake)
+	resp := service.Projects.Locations.Lakes.Zones.List(lake.Name).PageSize(*pageSize).Filter(filterString)
+	if err := resp.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListZonesResponse) error {
+		for _, zone := range page.Zones {
+			d.StreamListItem(ctx, zone)
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
@@ -203,7 +189,7 @@ func listDataplexLakes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_dataplex_lake.listDataplexLakes", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_dataplex_zone.listDataplexZones", "api_error", err)
 		return nil, err
 	}
 
@@ -212,7 +198,7 @@ func listDataplexLakes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 //// HYDRATE FUNCTIONS
 
-func getDataplexLake(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getDataplexZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var location string
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
 	// Since, when the service API is disabled, matrixLocation value will be nil
@@ -234,8 +220,6 @@ func getDataplexLake(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// We should not make the API call for the regions "global", "eu" and "us"".
-	// Error 400: Malformed name: 'projects/parker-aaa/locations/global/lakes'
-	// Error 400: Malformed name: 'projects/parker-aaa/locations/us/lakes'
 	if location == "global" || location == "us" || location == "eu" {
 		return nil, nil
 	}
@@ -243,21 +227,22 @@ func getDataplexLake(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create Service Connection
 	service, err := DataplexService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_dataplex_lake.getDataplexLake", "connection_error", err)
+		plugin.Logger(ctx).Error("gcp_dataplex_zone.getDataplexLake", "connection_error", err)
 		return nil, err
 	}
 
-	resp, err := service.Projects.Locations.Lakes.Get(name).Do()
+	resp, err := service.Projects.Locations.Lakes.Zones.Get(name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_dataplex_lake.getDataplexLake", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_dataplex_zone.getDataplexLake", "api_error", err)
 		return nil, err
 	}
 
 	return resp, nil
 }
 
-func gcpDataplexLakeTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	lake := h.Item.(*dataplex.GoogleCloudDataplexV1Lake)
+func gcpDataplexZoneTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	zone := h.Item.(*dataplex.GoogleCloudDataplexV1Zone)
+	splitName := strings.Split(zone.Name, "/")
 
 	// Get project details
 	projectId, err := getProject(ctx, d, h)
@@ -265,26 +250,28 @@ func gcpDataplexLakeTurbotData(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
-	var location string
-	matrixLocation := d.EqualsQualString(matrixKeyLocation)
-	// Since, when the service API is disabled, matrixLocation value will be nil
-	if matrixLocation != "" {
-		location = matrixLocation
-	}
-
 	turbotData := map[string]interface{}{
 		"Project":  projectId,
-		"Location": location,
-		"Akas":     []string{"gcp://dataplex.googleapis.com/" + lake.Name},
+		"Location": splitName[3],
+		"Akas":     []string{"gcp://dataplex.googleapis.com/" + zone.Name},
 	}
 
 	return turbotData, nil
 }
 
-func dataplexLakeSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	data := h.Item.(*dataplex.GoogleCloudDataplexV1Lake)
+func dataplexZoneSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	data := h.Item.(*dataplex.GoogleCloudDataplexV1Zone)
 
 	selfLink := "https://dataplex.googleapis.com/v1/" + data.Name
 
 	return selfLink, nil
+}
+
+//// TRANSFORM FUNCTION
+
+func dataplexLakeName(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(*dataplex.GoogleCloudDataplexV1Zone)
+	lakeName := strings.Split(data.Name, "/zones")[0]
+
+	return lakeName, nil
 }
