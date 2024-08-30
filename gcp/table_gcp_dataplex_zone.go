@@ -25,6 +25,7 @@ func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 			ParentHydrate: listDataplexLakes,
 			Hydrate:       listDataplexZones,
 			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "lake_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
 			},
@@ -144,6 +145,12 @@ func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 
 func listDataplexZones(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	lake := h.Item.(*dataplex.GoogleCloudDataplexV1Lake)
+
+	lakeName := d.EqualsQualString("lake_name")
+
+	if lakeName != "" && lakeName != lake.Name{
+		return nil, nil
+	}
 
 	// Create Service Connection
 	service, err := DataplexService(ctx, d)
