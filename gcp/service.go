@@ -21,6 +21,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/dataplex/v1"
 	"google.golang.org/api/container/v1"
 	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/dns/v1"
@@ -331,6 +332,27 @@ func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, er
 
 	// so it was not in cache - create service
 	svc, err := run.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// DataplexService returns the service connection for GCP Dataplex service
+func DataplexService(ctx context.Context, d *plugin.QueryData) (*dataplex.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "DataplexService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*dataplex.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := dataplex.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
