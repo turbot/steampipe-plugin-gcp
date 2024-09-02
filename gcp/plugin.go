@@ -97,6 +97,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_vpn_tunnel":                                  tableGcpComputeVpnTunnel(ctx),
 			"gcp_compute_zone":                                        tableGcpComputeZone(ctx),
 			"gcp_dataplex_lake":                                       tableGcpDataplexLake(ctx),
+			"gcp_dataplex_task":                                       tableGcpDataplexTask(ctx),
 			"gcp_dataplex_zone":                                       tableGcpDataplexZone(ctx),
 			"gcp_dataproc_cluster":                                    tableGcpDataprocCluster(ctx),
 			"gcp_dns_managed_zone":                                    tableGcpDnsManagedZone(ctx),
