@@ -140,6 +140,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_tag_binding":                                         tableGcpTagBinding(ctx),
 			"gcp_vertex_ai_endpoint":                                  tableGcpVertexAIEndpoint(ctx),
 			"gcp_vertex_ai_model":                                     tableGcpVertexAIModel(ctx),
+			"gcp_vpc_access_connector":                                tableGcpVPCAccessConnector(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),

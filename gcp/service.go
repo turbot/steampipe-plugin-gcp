@@ -31,9 +31,10 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
 	"google.golang.org/api/run/v2"
+	"google.golang.org/api/secretmanager/v1"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/storage/v1"
-	"google.golang.org/api/secretmanager/v1"
+	"google.golang.org/api/vpcaccess/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -729,6 +730,26 @@ func SecretManagerService(ctx context.Context, d *plugin.QueryData) (*secretmana
 
 	// so it was not in cache - create service
 	svc, err := secretmanager.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+func VPCAccessService(ctx context.Context, d *plugin.QueryData) (*vpcaccess.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "VPCAccessService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*vpcaccess.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := vpcaccess.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
