@@ -30,7 +30,8 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "A descriptive name for this table, if one exists.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("FriendlyName"),
+				Hydrate:     getBigqueryTable,
+				Transform:   transform.FromField("TableReference.TableId"),
 			},
 			{
 				Name:        "table_id",
