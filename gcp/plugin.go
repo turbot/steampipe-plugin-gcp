@@ -54,6 +54,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_cloud_identity_group_membership":                     tableGcpCloudIdentityGroupMembership(ctx),
 			"gcp_cloudfunctions_function":                             tableGcpCloudfunctionFunction(ctx),
 			"gcp_cloud_run_service":                                   tableGcpCloudRunService(ctx),
+			"gcp_composer_environment":                                tableGcpComposerEnvironment(ctx),
 			"gcp_compute_address":                                     tableGcpComputeAddress(ctx),
 			"gcp_compute_autoscaler":                                  tableGcpComputeAutoscaler(ctx),
 			"gcp_compute_backend_bucket":                              tableGcpComputeBackendBucket(ctx),
