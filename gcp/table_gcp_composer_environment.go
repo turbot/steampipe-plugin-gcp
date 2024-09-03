@@ -40,7 +40,7 @@ func tableGcpComposerEnvironment(ctx context.Context) *plugin.Table {
 			{
 				Name:        "state",
 				Description: "The current state of the environment.",
-				Type:        proto.ColumnType_IPADDR,
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "create_time",
@@ -235,7 +235,8 @@ func listComposerEnvironments(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	parent := "projects/" + project + "/locations/" + location
 
-	resp := service.Projects.Locations.Environments.List(parent). Context(ctx).PageSize(*pageSize)
+	resp := service.Projects.Locations.Environments.List(parent).PageSize(*pageSize)
+
 	if err := resp.Pages(ctx, func(page *composer.ListEnvironmentsResponse) error {
 		for _, item := range page.Environments {
 			d.StreamListItem(ctx, item)
