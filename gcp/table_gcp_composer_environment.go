@@ -95,6 +95,12 @@ func tableGcpComposerEnvironment(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Config.ResilienceMode"),
 			},
 			{
+				Name:        "software_config_bucket",
+				Description: "Storage configuration for this environment.",
+				Type:        proto.ColumnType_STRING,
+				Transform: transform.FromField("StorageConfig.Bucket"),
+			},
+			{
 				Name:        "data_retention_config",
 				Description: "The configuration setting for Airflow database data retention mechanism.",
 				Type:        proto.ColumnType_JSON,
