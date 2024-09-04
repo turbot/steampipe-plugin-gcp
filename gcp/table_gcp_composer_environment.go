@@ -95,7 +95,7 @@ func tableGcpComposerEnvironment(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("Config.ResilienceMode"),
 			},
 			{
-				Name:        "software_config_bucket",
+				Name:        "storage_config_bucket",
 				Description: "Storage configuration for this environment.",
 				Type:        proto.ColumnType_STRING,
 				Transform: transform.FromField("StorageConfig.Bucket"),
