@@ -94,7 +94,7 @@ where
   and max_throughput >= 1000;
 ```
 
-### List connectors with connected projects
+### List the projects associated with the connectors
 Identify VPC Access Connectors that are being used by specific projects, which can help in understanding project dependencies and managing access.
 
 ```sql+postgres
