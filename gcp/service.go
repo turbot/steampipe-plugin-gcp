@@ -20,6 +20,7 @@ import (
 	"google.golang.org/api/cloudidentity/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/composer/v1"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dataplex/v1"
 	"google.golang.org/api/container/v1"
@@ -438,6 +439,27 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 
 	// so it was not in cache - create service
 	svc, err := compute.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// ComposerService returns the service connection for GCP Composer service
+func ComposerService(ctx context.Context, d *plugin.QueryData) (*composer.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "ComposerService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*composer.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := composer.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
