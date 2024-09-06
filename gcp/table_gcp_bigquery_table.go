@@ -27,12 +27,6 @@ func tableGcpBigqueryTable(ctx context.Context) *plugin.Table {
 		},
 		Columns: []*plugin.Column{
 			{
-				Name:        "name",
-				Description: "A descriptive name for this table, if one exists.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("FriendlyName"),
-			},
-			{
 				Name:        "table_id",
 				Description: "The ID of the table resource.",
 				Type:        proto.ColumnType_STRING,
