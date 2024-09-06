@@ -166,6 +166,13 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Description: "This is set for the read-write VM of the PRIMARY instance only.",
 			},
+			{
+				Name:        "connection_info",
+				Type:        proto.ColumnType_JSON,
+				Description: "ConnectionInfo singleton resource.",
+				Hydrate:     getAlloydbInstanceConnectionInfo,
+				Transform:   transform.FromValue(),
+			},
 
 			// Steampipe standard columns
 			{
@@ -303,6 +310,24 @@ func getAlloydbInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	resp, err := service.Projects.Locations.Clusters.Instances.Get("projects/" + project + "/locations/" + location + "/clusters/" + clusterName + "/instances/" + instanceName).Do()
 	if err != nil {
 		plugin.Logger(ctx).Error("gcp_alloydb_instance.getAlloydbInstance", "api_error", err)
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func getAlloydbInstanceConnectionInfo(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	alloyDBInstance := h.Item.(*alloydb.Instance)
+
+	service, err := AlloyDBService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_alloydb_instance.getAlloydbInstanceConnectionInfo", "connection_error", err)
+		return nil, err
+	}
+
+	resp, err := service.Projects.Locations.Clusters.Instances.GetConnectionInfo(alloyDBInstance.Name).Do()
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_alloydb_instance.getAlloydbInstanceConnectionInfo", "api_error", err)
 		return nil, err
 	}
 
