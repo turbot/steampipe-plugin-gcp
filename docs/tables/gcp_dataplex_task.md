@@ -145,4 +145,3 @@ join
 on
   t.lake_name = l.name;
 ```
----
