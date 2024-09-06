@@ -421,3 +421,15 @@ var GcpFilterOperatorMap = map[string]string{
 	"<=": "<", // Filter ((property=value) OR (property<value))
 	">=": ">", // Filter ((property=value) OR (property>value))
 }
+
+func extractLastPartSeparatedByBackslash(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	data :=types.SafeString(d.Value)
+
+	if data == "" {
+		return nil, nil
+	}
+
+	splitStr := strings.Split(data, "/")
+
+	return splitStr[len(splitStr) - 1], nil
+}

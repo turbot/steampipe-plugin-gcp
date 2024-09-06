@@ -1,0 +1,7 @@
+[
+	{
+
+		"name": "{{ output.resource_id.value }}",
+		"self_link": "https://vpcaccess.googleapis.com/v1/{{ output.resource_id.value }}"
+	}
+]
