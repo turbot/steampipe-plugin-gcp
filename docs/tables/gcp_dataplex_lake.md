@@ -39,7 +39,7 @@ from
 ```
 
 ### Dataplex Lakes by location
-Explore which regions have the most Dataplex Lakes to better understand your data infrastructure distribution.
+Explore which regions have the most Dataplex Lakes to understand your data infrastructure distribution better.
 
 ```sql+postgres
 select
@@ -62,7 +62,7 @@ group by
 ```
 
 ### Get details of lakes with a specific state
-Retrieve Dataplex Lakes that are in a specific state (e.g., `ACTIVE`) to monitor their status.
+Retrieve Dataplex Lakes in a specific state (e.g., `ACTIVE`) to monitor their status.
 
 ```sql+postgres
 select
@@ -88,7 +88,7 @@ where
   state = 'ACTIVE';
 ```
 
-### Get Dataplex Lakes with associated Metastore
+### Get Dataplex Lakes with the associated metastore settings
 List all Dataplex Lakes that have an associated Dataproc Metastore, including their metastore settings and status.
 
 ```sql+postgres
@@ -114,4 +114,3 @@ from
 where
   metastore is not null;
 ```
----
