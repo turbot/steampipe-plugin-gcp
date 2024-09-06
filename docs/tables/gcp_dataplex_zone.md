@@ -39,7 +39,7 @@ from
 ```
 
 ### Dataplex zones by type
-Explore the different types of Dataplex Zones to understand how your data is organized and managed within Lakes.
+Explore the different types of Dataplex Zones to understand how your data is organized and managed within lakes.
 
 ```sql+postgres
 select
@@ -62,7 +62,7 @@ group by
 ```
 
 ### Get details of zones in a specific state
-Retrieve Dataplex Zones that are in a specific state (e.g., `ACTIVE`) to monitor their status.
+Retrieve Dataplex Zones in a specific state (e.g., `ACTIVE`) to monitor their status.
 
 ```sql+postgres
 select
