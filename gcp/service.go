@@ -25,6 +25,7 @@ import (
 	"google.golang.org/api/dataplex/v1"
 	"google.golang.org/api/container/v1"
 	"google.golang.org/api/dataproc/v1"
+	"google.golang.org/api/metastore/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/essentialcontacts/v1"
 	"google.golang.org/api/iam/v1"
@@ -481,6 +482,27 @@ func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Servic
 
 	// so it was not in cache - create service
 	svc, err := dataproc.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// DataprocService returns the service connection for GCP Dataproc service
+func DataprocMetastoreService(ctx context.Context, d *plugin.QueryData) (*metastore.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "DataprocMetastoreService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*metastore.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := metastore.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

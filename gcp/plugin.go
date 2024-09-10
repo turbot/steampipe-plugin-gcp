@@ -102,6 +102,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_dataplex_task":                                       tableGcpDataplexTask(ctx),
 			"gcp_dataplex_zone":                                       tableGcpDataplexZone(ctx),
 			"gcp_dataproc_cluster":                                    tableGcpDataprocCluster(ctx),
+			"gcp_dataproc_metastore_service":                          tableGcpDataprocMetastoreService(ctx),
 			"gcp_dns_managed_zone":                                    tableGcpDnsManagedZone(ctx),
 			"gcp_dns_policy":                                          tableDnsPolicy(ctx),
 			"gcp_dns_record_set":                                      tableDnsRecordSet(ctx),
