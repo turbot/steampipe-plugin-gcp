@@ -106,7 +106,7 @@ func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName"),
+				Transform:   transform.FromField("Name").Transform(lastPathElement),
 			},
 			{
 				Name:        "tags",
