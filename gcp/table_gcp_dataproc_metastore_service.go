@@ -25,6 +25,9 @@ func tableGcpDataprocMetastoreService(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.KeyColumnSlice{
 				// String columns
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
+				{Name: "database_type", Require: plugin.Optional, Operators: []string{"="}},
+				{Name: "uid", Require: plugin.Optional, Operators: []string{"="}},
+				{Name: "release_channel", Require: plugin.Optional, Operators: []string{"="}},
 			},
 		},
 		GetMatrixItemFunc: BuildDataprocMetastoreLocationList,
@@ -179,7 +182,8 @@ func tableGcpDataprocMetastoreService(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ProjectId"),
+				Hydrate:     gcpMetastoreServiceTurbotData,
+				Transform:   transform.FromField("Project"),
 			},
 		},
 	}
@@ -205,7 +209,16 @@ func listDataprocMetastoreServices(ctx context.Context, d *plugin.QueryData, h *
 	var filters []string
 
 	if d.EqualsQualString("state") != "" {
-		filters = append(filters, fmt.Sprintf("status.state = '%s'", d.EqualsQualString("state")))
+		filters = append(filters, fmt.Sprintf("state=\"%s\"", d.EqualsQualString("state")))
+	}
+	if d.EqualsQualString("database_type") != "" {
+		filters = append(filters, fmt.Sprintf("databaseType=\"%s\"", d.EqualsQualString("database_type")))
+	}
+	if d.EqualsQualString("uid") != "" {
+		filters = append(filters, fmt.Sprintf("uid=\"%s\"", d.EqualsQualString("uid")))
+	}
+	if d.EqualsQualString("release_channel") != "" {
+		filters = append(filters, fmt.Sprintf("releaseChannel=\"%s\"", d.EqualsQualString("release_channel")))
 	}
 
 	filterString := ""
@@ -274,7 +287,6 @@ func getDataprocMetastoreService(ctx context.Context, d *plugin.QueryData, h *pl
 		plugin.Logger(ctx).Error("gcp_dataproc_metastore_service.getDataprocMetastoreService", "connection_error", err)
 		return nil, err
 	}
-
 
 	resp, err := service.Projects.Locations.Services.Get(name).Do()
 	if err != nil {
