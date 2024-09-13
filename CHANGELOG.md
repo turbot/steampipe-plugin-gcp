@@ -1,3 +1,29 @@
+## v0.57.0 [2024-09-13]
+
+_What's new?_
+
+- New tables added
+  - [gcp_composer_environment](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_composer_environment) ([#649](https://github.com/turbot/steampipe-plugin-gcp/pull/649))
+  - [gcp_dataplex_lake](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_lake) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataplex_zone](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_zone) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataplex_task](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_task) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataplex_asset](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_asset) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataproc_metastore_service](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataproc_metastore_service) ([#654](https://github.com/turbot/steampipe-plugin-gcp/pull/654))
+  - [gcp_vpc_access_connector](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_vpc_access_connector) ([#647](https://github.com/turbot/steampipe-plugin-gcp/pull/647))
+
+_Enhancements_
+
+- Added `connection_info` column to the `gcp_alloydb_instance` table. ([#651](https://github.com/turbot/steampipe-plugin-gcp/pull/651))
+
+_Bug fixes_
+
+- Removed the `name` column from the `gcp_bigquery_table` table since the API response does not include this field. ([#648](https://github.com/turbot/steampipe-plugin-gcp/pull/648))
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.22`. ([#635](https://github.com/turbot/steampipe-plugin-gcp/pull/635))
+- Recompiled plugin with [steampipe-plugin-sdk v5.10.4](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5104-2024-08-29) that fixes logging in the plugin export tool. ([#635](https://github.com/turbot/steampipe-plugin-gcp/pull/635))
+
 ## v0.56.0 [2024-07-31]
 
 _Breaking changes_
