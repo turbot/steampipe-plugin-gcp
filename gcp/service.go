@@ -70,6 +70,7 @@ type AIplatfromServiceClients struct {
 	Index    *aiplatform.IndexClient
 	Job      *aiplatform.JobClient
 	Model    *aiplatform.ModelClient
+	Notebook *aiplatform.NotebookClient
 }
 
 func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AIplatfromServiceClients, error) {
@@ -127,6 +128,13 @@ func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AI
 			return nil, err
 		}
 		clients.Model = svc
+		return clients, nil
+	case "Notebook":
+		svc, err := aiplatform.NewNotebookClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Notebook = svc
 		return clients, nil
 	}
 
