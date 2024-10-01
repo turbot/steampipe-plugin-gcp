@@ -122,6 +122,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_monitoring_group":                                    tableGcpMonitoringGroup(ctx),
 			"gcp_monitoring_notification_channel":                     tableGcpMonitoringNotificationChannel(ctx),
 			"gcp_organization":                                        tableGcpOrganization(ctx),
+			"gcp_organization_project":                                tableGcpOrganizationProject(ctx),
 			"gcp_project":                                             tableGcpProject(ctx),
 			"gcp_project_organization_policy":                         tableGcpProjectOrganizationPolicy(ctx),
 			"gcp_project_service":                                     tableGcpProjectService(ctx),
