@@ -20,6 +20,16 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 			Hydrate: listGCPProjects,
 			Tags:    map[string]string{"service": "resourcemanager", "action": "projects.list"},
 		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getProjectAccessApprovalSettings,
+				Tags: map[string]string{"service": "resourcemanager", "action": "projects.getAccessApprovalSettings"},
+			},
+			{
+				Func: getProjectAncestors,
+				Tags: map[string]string{"service": "resourcemanager", "action": "projects.getAncestry"},
+			},
+		},
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
