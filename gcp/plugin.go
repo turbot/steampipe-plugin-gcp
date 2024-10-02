@@ -70,6 +70,29 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'rediscluster' and action = 'GetCluster'",
 			},
+			// FIXME: Limits are per API consumer project so we need to find a way to take quota_project into account instead of connection
+			// https://cloud.google.com/resource-manager/docs/limits
+			{
+				Name:       "gcp_cloudresourcemanager_projects_get_access_approval_settings",
+				FillRate:   10,
+				BucketSize: 10,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'cloudresourcemanager' and action = 'ProjectsGetAccessApprovalSettings'",
+			},
+			{
+				Name:       "gcp_cloudresourcemanager_projects_list",
+				FillRate:   4,
+				BucketSize: 4,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'cloudresourcemanager' and action = 'ProjectsList'",
+			},
+			{
+				Name:       "gcp_cloudresourcemanager_projects_get_ancestry",
+				FillRate:   10,
+				BucketSize: 10,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'cloudresourcemanager' and action = 'ProjectsGetAncestry'",
+			},
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_alloydb_cluster":                                     tableGcpAlloyDBCluster(ctx),

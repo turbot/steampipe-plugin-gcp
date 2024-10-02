@@ -18,6 +18,17 @@ func tableGcpOrganizationProject(_ context.Context) *plugin.Table {
 		Description: "GCP Organization Project",
 		List: &plugin.ListConfig{
 			Hydrate: listGCPOrganizationProjects,
+			Tags:    map[string]string{"service": "cloudresourcemanager", "action": "ProjectsList"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getProjectAccessApprovalSettings,
+				Tags: map[string]string{"service": "cloudresourcemanager", "action": "ProjectsGetAccessApprovalSettings"},
+			},
+			{
+				Func: getProjectAncestors,
+				Tags: map[string]string{"service": "cloudresourcemanager", "action": "ProjectsGetAncestry"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
