@@ -68,6 +68,13 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Hydrate:     getProjectAccessApprovalSettings,
 				Transform:   transform.FromValue(),
 			},
+			{
+				Name:        "ancestors",
+				Description: "The ancestors of the project in the resource hierarchy, from bottom to top.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getProjectAncestors,
+				Transform:   transform.FromValue(),
+			},
 
 			// Steampipe standard columns
 			{
@@ -160,6 +167,32 @@ func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 	return resp, nil
+}
+
+func getProjectAncestors(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.getProjectAncestors", "connection_error", err)
+		return nil, err
+	}
+
+	// Get project details
+	projectId, err := getProject(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	resp, err := service.Projects.GetAncestry(project, &cloudresourcemanager.GetAncestryRequest{}).Do()
+	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
+		plugin.Logger(ctx).Error("gcp_project.getProjectAncestors", "api_err", err)
+		return nil, err
+	}
+	return resp.Ancestor, nil
 }
 
 func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
