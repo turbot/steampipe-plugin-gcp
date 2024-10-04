@@ -57,6 +57,9 @@ func BuildVertexAILocationList(clientType string) func(ctx context.Context, d *p
 		case "Model":
 			resp := service.Model.ListLocations(ctx, input)
 			resourceLocations = append(resourceLocations, iterateLocationResponse(resp)...)
+		case "Notebook":
+			resp := service.Notebook.ListLocations(ctx, input)
+			resourceLocations = append(resourceLocations, iterateLocationResponse(resp)...)
 		}
 
 		// validate location list
