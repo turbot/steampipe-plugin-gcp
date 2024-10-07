@@ -106,6 +106,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "service_err", err)
 		return nil, err
 	}
 
@@ -120,6 +121,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	resp, err := service.Projects.List().Filter("id=" + project).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "api_err", err)
 		return nil, err
 	}
 

@@ -3,9 +3,11 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 //// TABLE DEFINITION
@@ -104,17 +106,36 @@ func listGCPOrganizationProjects(ctx context.Context, d *plugin.QueryData, h *pl
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_organization_project.listGCPOrganizationProjects", "service_err", err)
 		return nil, err
+	}
+
+	// Max limit is not documented
+	pageSize := types.Int64(500)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < *pageSize {
+			pageSize = limit
+		}
 	}
 
 	// List projects
-	resp, err := service.Projects.List().Do()
-	if err != nil {
-		return nil, err
-	}
+	resp := service.Projects.List().PageSize(*pageSize)
+	if err := resp.Pages(ctx, func(page *cloudresourcemanager.ListProjectsResponse) error {
+		for _, project := range page.Projects {
+			d.StreamListItem(ctx, project)
 
-	for _, project := range resp.Projects {
-		d.StreamListItem(ctx, project)
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
+			}
+		}
+		return nil
+	}); err != nil {
+		plugin.Logger(ctx).Error("gcp_organization_project.listGCPOrganizationProjects", "api_err", err)
+		return nil, err
 	}
 
 	return nil, nil
