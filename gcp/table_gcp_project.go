@@ -106,6 +106,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "service_err", err)
 		return nil, err
 	}
 
@@ -120,6 +121,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	resp, err := service.Projects.List().Filter("id=" + project).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "api_err", err)
 		return nil, err
 	}
 
@@ -151,14 +153,9 @@ func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, 
 	}
 
 	// Get project details
+	projectId := h.Item.(*cloudresourcemanager.Project).ProjectId
 
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-
-	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + project + "/accessApprovalSettings").Do()
+	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + projectId + "/accessApprovalSettings").Do()
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			return nil, nil
@@ -178,13 +175,9 @@ func getProjectAncestors(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Get project details
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
+	projectId := h.Item.(*cloudresourcemanager.Project).ProjectId
 
-	resp, err := service.Projects.GetAncestry(project, &cloudresourcemanager.GetAncestryRequest{}).Do()
+	resp, err := service.Projects.GetAncestry(projectId, &cloudresourcemanager.GetAncestryRequest{}).Do()
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			return nil, nil
