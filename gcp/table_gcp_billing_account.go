@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -71,13 +72,6 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromConstant("global"),
 			},
-			{
-				Name:        "project",
-				Description: ColumnDescriptionProject,
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getProject,
-				Transform:   transform.FromValue(),
-			},
 		},
 	}
 }
@@ -86,8 +80,6 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 
 func getBillingAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
-	var accountName string
-
 	// Create Service Connection
 	service, err := BillingService(ctx, d)
 	if err != nil {
@@ -95,39 +87,44 @@ func getBillingAccount(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 
-	// Validate whether a user has provided any input, then skip the `GetBillingInfo` api
+	// If a user has provided a billing account name, get it instead of listing all accounts
 	if d.EqualsQualString("name") != "" {
-		accountName = "billingAccounts/" + d.EqualsQualString("name")
+		accountName := "billingAccounts/" + d.EqualsQualString("name")
+
+		resp, err := service.BillingAccounts.Get(accountName).Do()
+		if err != nil {
+			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount.get", "api_err", err)
+			return nil, err
+		}
+
+		d.StreamListItem(ctx, resp)
 	} else {
+		// Max limit is set as per documentation
+		pageSize := types.Int64(100)
+		limit := d.QueryContext.Limit
+		if d.QueryContext.Limit != nil {
+			if *limit < *pageSize {
+				pageSize = limit
+			}
+		}
+		resp := service.BillingAccounts.List().PageSize(*pageSize)
+		if err := resp.Pages(ctx, func(page *cloudbilling.ListBillingAccountsResponse) error {
+			for _, account := range page.BillingAccounts {
+				d.StreamListItem(ctx, account)
 
-		// Fetch BillingInfo for the project, to get the billing account name
-		// Get project details
-
-		projectId, err := getProject(ctx, d, h)
-		if err != nil {
-			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "cache_err", err)
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
+			}
+			return nil
+		}); err != nil {
+			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount.list", "api_err", err)
 			return nil, err
 		}
-		project := projectId.(string)
-
-		resp, err := service.Projects.GetBillingInfo("projects/" + project).Do()
-		if err != nil {
-			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount.GetBillingInfo", "api_err", err)
-			return nil, err
-		}
-
-		if resp != nil && resp.BillingAccountName != "" {
-			accountName = resp.BillingAccountName
-		}
 	}
-
-	accResponse, err := service.BillingAccounts.Get(accountName).Do()
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "api_err", err)
-		return nil, err
-	}
-
-	d.StreamListItem(ctx, accResponse)
 
 	return nil, nil
 }
@@ -152,17 +149,8 @@ func getBillingAccountIamPolicy(ctx context.Context, d *plugin.QueryData, h *plu
 }
 
 func getBillingAccountAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
-	// Get project details
-
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-
-	project := projectId.(string)
 	acc := h.Item.(*cloudbilling.BillingAccount)
-	akas := []string{"gcp://cloudbilling.googleapis.com/projects/" + project + "/" + acc.Name}
+	akas := []string{"gcp://cloudbilling.googleapis.com/" + acc.Name}
 
 	return akas, nil
 }
