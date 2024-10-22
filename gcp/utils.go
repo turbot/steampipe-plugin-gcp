@@ -196,10 +196,7 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 			panic(err)
 		}
 		opts = append(opts, option.WithCredentialsJSON([]byte(contents)))
-	} else if gcpConfig.CredentialFile != nil {
-		opts = append(opts, option.WithCredentialsFile(*gcpConfig.CredentialFile))
 	}
-
 	if gcpConfig.ImpersonateAccessToken != nil {
 		tokenConfig := oauth2.Token{
 			AccessToken: *gcpConfig.ImpersonateAccessToken,

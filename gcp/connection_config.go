@@ -7,7 +7,6 @@ import (
 type gcpConfig struct {
 	Project                   *string  `hcl:"project"`
 	Credentials               *string  `hcl:"credentials"`
-	CredentialFile            *string  `hcl:"credential_file"`
 	ImpersonateAccessToken    *string  `hcl:"impersonate_access_token"`
 	ImpersonateServiceAccount *string  `hcl:"impersonate_service_account"`
 	IgnoreErrorCodes          []string `hcl:"ignore_error_codes,optional"`
