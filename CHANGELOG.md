@@ -1,3 +1,11 @@
+## v1.0.0 [2024-10-22]
+
+There are no significant changes in this plugin version; it has been released to align with [Steampipe's v1.0.0](https://steampipe.io/changelog/steampipe-cli-v1-0-0) release. This plugin adheres to [semantic versioning](https://semver.org/#semantic-versioning-specification-semver), ensuring backward compatibility within each major version.
+
+_Breaking changes_
+
+- The `credential_file` argument in the configuration file has now been removed. We recommend using the `credentials` argument instead, which can take the same file path as the `credential_file` argument. ([#672](https://github.com/turbot/steampipe-plugin-gcp/pull/672))
+
 ## v0.57.0 [2024-09-13]
 
 _What's new?_
