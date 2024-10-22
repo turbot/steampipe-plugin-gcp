@@ -259,14 +259,23 @@ func getComputeInstanceGroupInstances(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 
-	resp, err := service.InstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Zone)), instanceGroup.Name, &compute.InstanceGroupsListInstancesRequest{}).Do()
-
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
-		return nil, err
+	// Regional instance groups do not have any zone specified but a region instead,
+	// and querying their instances must be done with the regional endpoint
+	if instanceGroup.Zone == "" {
+		resp, err := service.RegionInstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Region)), instanceGroup.Name, &compute.RegionInstanceGroupsListInstancesRequest{}).Do()
+		if err != nil {
+			plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
+			return nil, err
+		}
+		return &resp.Items, nil
+	} else {
+		resp, err := service.InstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Zone)), instanceGroup.Name, &compute.InstanceGroupsListInstancesRequest{}).Do()
+		if err != nil {
+			plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
+			return nil, err
+		}
+		return &resp.Items, nil
 	}
-
-	return &resp.Items, nil
 }
 
 //// TRANSFORM FUNCTIONS
