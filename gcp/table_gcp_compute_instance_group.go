@@ -45,7 +45,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "fingerprint",
-				Description: "The fingerprint of the named ports.",
+				Description: "The fingerprint of the instance group.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -89,7 +89,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "zone",
-				Description: "URL of the zone where the instance group resides.",
+				Description: "The URL of the zone where the instance group resides.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -148,7 +148,6 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	// Max limit is set as per documentation
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
@@ -159,7 +158,6 @@ func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
@@ -202,7 +200,6 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	plugin.Logger(ctx).Trace("getComputeInstanceGroup")
 
 	// Get project details
-
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err

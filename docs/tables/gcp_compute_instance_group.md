@@ -5,7 +5,7 @@ description: "Allows users to query Google Cloud Compute Engine Instance Groups,
 
 # Table: gcp_compute_instance_group - Query Google Cloud Compute Engine Instance Groups using SQL
 
-Google Cloud Compute Engine Instance Groups are collections of virtual machine (VM) instances that you can manage as a single entity. These groups are ideal for applications that require a lot of computing power and need to scale rapidly to meet demand. They offer a range of features including autoscaling, load balancing, and rolling updates.
+Google Cloud Compute Engine Instance Groups are collections of virtual machine (VM) instances that you can manage as a single entity. When they are managed by Instance Group Managers, these groups are called [Managed Instance Groups (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups), and are ideal for highly available applications that require a lot of computing power and need to scale rapidly to meet demand. They offer a range of features including autoscaling, autohealing, regional (multiple zone) deployment, and automatic updating. Otherwise, these groups are called [Unmanaged Instance Groups](https://cloud.google.com/compute/docs/instance-groups#unmanaged_instance_groups), and can contain heterogeneous instances that you can arbitrarily add and remove from them, but do not offer autoscaling, autohealing, rolling update support, multi-zone support, or the use of instance templates and are not a good fit for deploying highly available and scalable workloads, they can just be used for load balancing.
 
 ## Table Usage Guide
 
