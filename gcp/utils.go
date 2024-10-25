@@ -188,8 +188,6 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	// 'credential_file' in connection config is DEPRECATED, and will be removed in future release
-	// use `credentials` instead
 	if gcpConfig.Credentials != nil {
 		contents, err := pathOrContents(*gcpConfig.Credentials)
 		if err != nil {
@@ -420,7 +418,7 @@ var GcpFilterOperatorMap = map[string]string{
 }
 
 func extractLastPartSeparatedByBackslash(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	data :=types.SafeString(d.Value)
+	data := types.SafeString(d.Value)
 
 	if data == "" {
 		return nil, nil
@@ -428,5 +426,5 @@ func extractLastPartSeparatedByBackslash(ctx context.Context, d *transform.Trans
 
 	splitStr := strings.Split(data, "/")
 
-	return splitStr[len(splitStr) - 1], nil
+	return splitStr[len(splitStr)-1], nil
 }

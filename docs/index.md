@@ -106,8 +106,6 @@ connection "gcp" {
 }
 ```
 
-**NOTE:** The `credential_file` property has been deprecated and will be removed in the next major version. Please use `credentials` instead.
-
 ## Advanced configuration options
 
 By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run `gcloud auth application-default login`. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
