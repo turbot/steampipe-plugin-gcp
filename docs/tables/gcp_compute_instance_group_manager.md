@@ -5,7 +5,7 @@ description: "Allows users to query Google Cloud Compute Engine Instance Group M
 
 # Table: gcp_compute_instance_group_manager - Query Google Cloud Compute Engine Instance Group Managers using SQL
 
-Google Cloud Compute Engine Instance Group Managers manage [Managed Instance Groups (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups). are ideal for highly available applications that require a lot of computing power and need to scale rapidly to meet demand. They offer a range of features including autoscaling, autohealing, regional (multiple zone) deployment, and automatic updating.
+Google Cloud Compute Engine Instance Group Managers manage [Managed Instance Groups (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups), and are ideal for highly available applications that require a lot of computing power and need to scale rapidly to meet demand. They offer a range of features including autoscaling, autohealing, regional (multiple zone) deployment, and automatic updating.
 
 ## Table Usage Guide
 
