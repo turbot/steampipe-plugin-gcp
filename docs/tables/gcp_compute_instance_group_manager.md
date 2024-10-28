@@ -42,7 +42,6 @@ from
   gcp_compute_instance_group_manager;
 ```
 
-
 ### Get instance group details of each instance group manager
 Get the size of the instance groups managed by instance group managers.
 
