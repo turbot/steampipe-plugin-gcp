@@ -168,6 +168,12 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 
 			// standard steampipe columns
 			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Labels"),
+			},
+			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
