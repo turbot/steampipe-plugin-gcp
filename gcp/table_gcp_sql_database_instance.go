@@ -56,6 +56,11 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
+				Name:        "database_installed_version",
+				Description: "Specifies the current database version running on the instance including minor version such as MYSQL_8_0_18.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "database_version",
 				Description: "Specifies the type and version of the database engine.",
 				Type:        proto.ColumnType_STRING,
@@ -261,6 +266,11 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Description: "The start time of any upcoming scheduled maintenance for this instance.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("ScheduledMaintenance.StartTime"),
+			},
+			{
+				Name:        "maintenance_version",
+				Description: "The current software version on the instance.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "authorized_gae_applications",
