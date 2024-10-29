@@ -160,6 +160,11 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Description: "A list of ports can be configured.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "labels",
+				Description: "A list of labels attached to this resource.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// standard steampipe columns
 			{
