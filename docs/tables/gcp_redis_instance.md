@@ -1,20 +1,20 @@
 ---
-title: "Steampipe Table: gcp_redis_instance - Query Google Cloud Platform Redis Instances using SQL"
-description: "Allows users to query Redis Instances on Google Cloud Platform, providing detailed information about each instance."
+title: "Steampipe Table: gcp_redis_instance - Query Google Cloud Platform Memorystore Redis Instances using SQL"
+description: "Allows users to query Memorystore Redis Instances on Google Cloud Platform, providing detailed information about each instance."
 ---
 
-# Table: gcp_redis_instance - Query Google Cloud Platform Redis Instances using SQL
+# Table: gcp_redis_instance - Query Google Cloud Platform Memorystore Redis Instances using SQL
 
-Google Cloud Platform's Redis service is a fully managed service that powers applications with low-latency data access. It provides secure and highly available Redis instances while Google handles all the underlying infrastructure for you. Redis instances are ideal for use cases such as caching, session storage, gaming leaderboards, real-time analytics, and queueing.
+Google Cloud Platform's Memorystore Redis service is a fully managed service that powers applications with low-latency data access. It provides secure and highly available Redis instances while Google handles all the underlying infrastructure for you. Redis instances are ideal for use cases such as caching, session storage, gaming leaderboards, real-time analytics, and queueing.
 
 ## Table Usage Guide
 
-The `gcp_redis_instance` table provides insights into Redis Instances within Google Cloud Platform. As a DevOps engineer, you can explore instance-specific details through this table, including the instance's ID, name, region, and current status. Utilize it to monitor and manage your Redis instances, ensuring they are configured correctly and running efficiently.
+The `gcp_redis_instance` table provides insights into Memorystore Redis Instances within Google Cloud Platform. As a DevOps engineer, you can explore instance-specific details through this table, including the instance's ID, name, region, and current status. Utilize it to monitor and manage your Redis instances, ensuring they are configured correctly and running efficiently.
 
 ## Examples
 
 ### Basic info
-Explore which Google Cloud Platform (GCP) Redis instances have been created, along with their display names, creation times, locations, memory sizes, and reserved IP ranges. This is useful for gaining insights into your GCP Redis instances' configurations and understanding how your resources are being utilized.
+Explore which Google Cloud Platform (GCP) Memorystore Redis instances have been created, along with their display names, creation times, locations, memory sizes, and reserved IP ranges. This is useful for gaining insights into your GCP Memorystore Redis instances' configurations and understanding how your resources are being utilized.
 
 ```sql+postgres
 select
@@ -41,7 +41,7 @@ from
 ```
 
 ### List instances that have authentication enabled
-Discover the segments that have enabled authentication to enhance security measures and maintain data privacy within your GCP Redis instances. This can be particularly useful in identifying potential vulnerabilities and ensuring compliance with best practices.
+Discover the segments that have enabled authentication to enhance security measures and maintain data privacy within your GCP Memorystore Redis instances. This can be particularly useful in identifying potential vulnerabilities and ensuring compliance with best practices.
 
 ```sql+postgres
 select
@@ -103,7 +103,7 @@ where
 ```
 
 ### List the node details of each instance
-Gain insights into the specific details of each instance node in your Google Cloud Redis database, such as the creation time and location. This can be particularly useful for troubleshooting or for optimizing your database's performance and security.
+Gain insights into the specific details of each instance node in your GCP Memorystore Redis database, such as the creation time and location. This can be particularly useful for troubleshooting or for optimizing your database's performance and security.
 
 ```sql+postgres
 select
@@ -164,8 +164,8 @@ where
   customer_managed_key is not null;
 ```
 
-### List instances that have transit mode disabled
-Discover the segments where transit mode is disabled in instances. This is particularly useful in identifying potential security risks and ensuring data protection standards are maintained.
+### List instances that have in-transit encryption disabled
+Discover the segments where in-transit encryption is disabled in instances. This is particularly useful in identifying potential security risks and ensuring data protection standards are maintained.
 
 ```sql+postgres
 select
@@ -178,7 +178,7 @@ select
 from
   gcp_redis_instance
 where
-  transit_encryption_mode = 2;
+  transit_encryption_mode != 1;
 ```
 
 ```sql+sqlite
@@ -192,7 +192,7 @@ select
 from
   gcp_redis_instance
 where
-  transit_encryption_mode = 2;
+  transit_encryption_mode != 1;
 ```
 
 ### List the maintenance details of instances
@@ -227,7 +227,7 @@ from
 ```
 
 ### List instances with direct peering access
-Explore which instances have direct peering access in order to better manage your network and ensure secure connections. This can be especially useful for maintaining optimal performance and security in your GCP Redis instances.
+Explore which instances have direct peering access in order to better manage your network and ensure secure connections. This can be especially useful for maintaining optimal performance and security in your GCP Memorystore Redis instances.
 
 ```sql+postgres
 select
