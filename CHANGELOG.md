@@ -1,3 +1,20 @@
+## v1.2.0 [2024-11-04]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_instance_group_manager](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_group_manager) ([#669](https://github.com/turbot/steampipe-plugin-gcp/pull/669)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Enhancements_
+
+- Added `labels` and `tags` columns to the `gcp_compute_global_forwarding_rule` table. ([#678](https://github.com/turbot/steampipe-plugin-gcp/pull/678)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Added `database_installed_version` and `maintenance_version` columns to the `gcp_sql_database_instance` table. ([#677](https://github.com/turbot/steampipe-plugin-gcp/pull/677)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Bug fixes_
+
+- Fixed the `gcp_compute_instance_group` table to correctly return values for the `instances` column in cases of regional instance groups. ([#670](https://github.com/turbot/steampipe-plugin-gcp/pull/670)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Fixed the `kubernetes_node_pool` table to correctly return values when `cluster.Autopilot` is `nil`. ([#668](https://github.com/turbot/steampipe-plugin-gcp/pull/668)) (Thanks [@multani](https://github.com/multani) for the contribution!)
+
 ## v1.0.0 [2024-10-22]
 
 There are no significant changes in this plugin version; it has been released to align with [Steampipe's v1.0.0](https://steampipe.io/changelog/steampipe-cli-v1-0-0) release. This plugin adheres to [semantic versioning](https://semver.org/#semantic-versioning-specification-semver), ensuring backward compatibility within each major version.
