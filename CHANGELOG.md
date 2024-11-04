@@ -12,8 +12,8 @@ _Enhancements_
 
 _Bug fixes_
 
-- Fixed the `gcp_compute_instance_group` table to correctly return values for the `instances` column in cases of regional instance groups. ([#670](https://github.com/turbot/steampipe-plugin-gcp/pull/670)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
-- Fixed the `kubernetes_node_pool` table to correctly return values when `cluster.Autopilot` is `nil`. ([#668](https://github.com/turbot/steampipe-plugin-gcp/pull/668)) (Thanks [@multani](https://github.com/multani) for the contribution!)
+- Fixed the `gcp_compute_instance_group` table to correctly return values for the `instances` column of regional instance groups. ([#670](https://github.com/turbot/steampipe-plugin-gcp/pull/670)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Fixed the `kubernetes_node_pool` table to correctly return data instead of an error for node pools with auto-pilot disabled. ([#668](https://github.com/turbot/steampipe-plugin-gcp/pull/668)) (Thanks [@multani](https://github.com/multani) for the contribution!)
 
 ## v1.0.0 [2024-10-22]
 
