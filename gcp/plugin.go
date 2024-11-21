@@ -38,35 +38,35 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			NewInstance: ConfigInstance,
 		},
 		RateLimiters: []*rate_limiter.Definition{
-			// FIXME: API Requests per 100 seconds: 5,000
+			// API Requests per 100 seconds: 5,000
 			// https://cloud.google.com/memorystore/docs/redis/quotas#per-second_api_requests_quota
 			{
 				Name:       "gcp_redis_list_instances",
 				FillRate:   50,
-				BucketSize: 5000, // FIXME: this will burst if consumed all at once
+				BucketSize: 5000,
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'redis' and action = 'ListInstances'",
 			},
 			{
 				Name:       "gcp_redis_get_instance",
 				FillRate:   50,
-				BucketSize: 5000, // FIXME: this will burst if consumed all at once
+				BucketSize: 5000,
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'redis' and action = 'GetInstance'",
 			},
-			// FIXME: Redis Cluster requests per project per minute: 60
+			// Redis Cluster requests per project per minute: 60
 			// https://cloud.google.com/memorystore/docs/cluster/quotas#per-minute_api_requests_quota
 			{
 				Name:       "gcp_rediscluster_list_clusters",
 				FillRate:   1,
-				BucketSize: 60, // FIXME: this will burst if consumed all at once
+				BucketSize: 60,
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'rediscluster' and action = 'ListClusters'",
 			},
 			{
 				Name:       "gcp_rediscluster_get_cluster",
 				FillRate:   1,
-				BucketSize: 60, // FIXME: this will burst if consumed all at once
+				BucketSize: 60,
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'rediscluster' and action = 'GetCluster'",
 			},
