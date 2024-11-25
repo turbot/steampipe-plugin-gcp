@@ -5,6 +5,7 @@ import (
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	redis "cloud.google.com/go/redis/apiv1"
+	rediscluster "cloud.google.com/go/redis/cluster/apiv1"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/alloydb/v1"
@@ -22,14 +23,14 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/composer/v1"
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/dataplex/v1"
 	"google.golang.org/api/container/v1"
+	"google.golang.org/api/dataplex/v1"
 	"google.golang.org/api/dataproc/v1"
-	"google.golang.org/api/metastore/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/essentialcontacts/v1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
+	"google.golang.org/api/metastore/v1"
 	"google.golang.org/api/monitoring/v3"
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
@@ -784,6 +785,27 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 
 	// so it was not in cache - create service
 	svc, err := redis.NewCloudRedisClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// RedisClusterService returns the service connection for GCP Memorystore for Redis Cluster service
+func RedisClusterService(ctx context.Context, d *plugin.QueryData) (*rediscluster.CloudRedisClusterClient, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "RedisClusterService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*rediscluster.CloudRedisClusterClient), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := rediscluster.NewCloudRedisClusterClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

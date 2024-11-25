@@ -11,6 +11,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/rate_limiter"
 )
 
 const pluginName = "steampipe-plugin-gcp"
@@ -35,6 +36,40 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
+		},
+		RateLimiters: []*rate_limiter.Definition{
+			// API Requests per 100 seconds: 5,000
+			// https://cloud.google.com/memorystore/docs/redis/quotas#per-second_api_requests_quota
+			{
+				Name:       "gcp_redis_list_instances",
+				FillRate:   50,
+				BucketSize: 5000,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'redis' and action = 'ListInstances'",
+			},
+			{
+				Name:       "gcp_redis_get_instance",
+				FillRate:   50,
+				BucketSize: 5000,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'redis' and action = 'GetInstance'",
+			},
+			// Redis Cluster requests per project per minute: 60
+			// https://cloud.google.com/memorystore/docs/cluster/quotas#per-minute_api_requests_quota
+			{
+				Name:       "gcp_rediscluster_list_clusters",
+				FillRate:   1,
+				BucketSize: 60,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'rediscluster' and action = 'ListClusters'",
+			},
+			{
+				Name:       "gcp_rediscluster_get_cluster",
+				FillRate:   1,
+				BucketSize: 60,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'rediscluster' and action = 'GetCluster'",
+			},
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_alloydb_cluster":                                     tableGcpAlloyDBCluster(ctx),
@@ -131,6 +166,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_pubsub_snapshot":                                     tableGcpPubSubSnapshot(ctx),
 			"gcp_pubsub_subscription":                                 tableGcpPubSubSubscription(ctx),
 			"gcp_pubsub_topic":                                        tableGcpPubSubTopic(ctx),
+			"gcp_redis_cluster":                                       tableGcpRedisCluster(ctx),
 			"gcp_redis_instance":                                      tableGcpRedisInstance(ctx),
 			"gcp_secret_manager_secret":                               tableGcpSecretManagerSecret(ctx),
 			"gcp_service_account":                                     tableGcpServiceAccount(ctx),
