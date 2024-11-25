@@ -1,17 +1,17 @@
 ---
-title: "Steampipe Table: gcp_project - Query Google Cloud Platform Projects using SQL"
+title: "Steampipe Table: gcp_organization_project - Query Google Cloud Platform Projects using SQL"
 description: "Allows users to query Projects in Google Cloud Platform, specifically providing details about the project's ID, name, labels, and lifecycle state."
 ---
 
-# Table: gcp_project - Query Google Cloud Platform Projects using SQL
+# Table: gcp_organization_project - Query Google Cloud Platform Projects using SQL
 
-**Note: this table is a variant of the `gcp_organization_project` table which filters on the GCP project attached to connection, and thus, will only ever return details about that specific project.**
+**Note: this table is a variant of the `gcp_project` table which does not filter on the GCP project attached to connection, and thus, will return all projects that the credentials used by the connection have access to. Using this table in aggregator connections can produce unexpected duplicate results.**
 
 A Google Cloud Platform Project acts as an organizational unit within GCP where resources are allocated. It is used to group resources that belong to the same logical application or business unit. Each project is linked to a billing account and can have users, roles, and permissions assigned to it.
 
 ## Table Usage Guide
 
-The `gcp_project` table provides insights into Projects within Google Cloud Platform. As a DevOps engineer, explore project-specific details through this table, including ID, name, labels, and lifecycle state. Utilize it to uncover information about projects, such as their associated resources, user roles, permissions, and billing details.
+The `gcp_organization_project` table provides insights into Projects within Google Cloud Platform. As a DevOps engineer, explore project-specific details through this table, including ID, name, labels, and lifecycle state. Utilize it to uncover information about projects, such as their associated resources, user roles, permissions, and billing details.
 
 ## Examples
 
@@ -26,7 +26,7 @@ select
   lifecycle_state,
   create_time
 from
-  gcp_project;
+  gcp_organization_project;
 ```
 
 ```sql+sqlite
@@ -37,7 +37,7 @@ select
   lifecycle_state,
   create_time
 from
-  gcp_project;
+  gcp_organization_project;
 ```
 
 ### Get access approval settings for all projects
@@ -48,7 +48,7 @@ select
   name,
   jsonb_pretty(access_approval_settings) as access_approval_settings
 from
-  gcp_project;
+  gcp_organization_project;
 ```
 
 ```sql+sqlite
@@ -56,11 +56,11 @@ select
   name,
   access_approval_settings
 from
-  gcp_project;
+  gcp_organization_project;
 ```
 
 ### Get parent and organization ID for all projects
-Get the parent resource and organization ID across your various projects.
+Get the organization ID across your various projects.
 
 ```sql+postgres
 select
