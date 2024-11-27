@@ -75,6 +75,13 @@ func tableGcpOrganizationProject(_ context.Context) *plugin.Table {
 				Hydrate:     getProjectAncestors,
 				Transform:   transform.FromValue(),
 			},
+			{
+				Name:        "billing_information",
+				Description: "The billing information of the project.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getProjectBillingInfo,
+				Transform:   transform.FromValue(),
+			},
 
 			// Steampipe standard columns
 			{

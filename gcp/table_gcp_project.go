@@ -75,6 +75,13 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Hydrate:     getProjectAncestors,
 				Transform:   transform.FromValue(),
 			},
+			{
+				Name:        "billing_information",
+				Description: "The billing information of the project.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getProjectBillingInfo,
+				Transform:   transform.FromValue(),
+			},
 
 			// Steampipe standard columns
 			{
@@ -186,6 +193,28 @@ func getProjectAncestors(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 	return resp.Ancestor, nil
+}
+
+func getProjectBillingInfo(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
+	service, err := BillingService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.getProjectBillingInformation", "connection_error", err)
+		return nil, err
+	}
+
+	// Get project details
+	projectId := h.Item.(*cloudresourcemanager.Project).ProjectId
+
+	resp, err := service.Projects.GetBillingInfo("projects/" + projectId).Do()
+	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
+		plugin.Logger(ctx).Error("gcp_project.getProjectBillingInformation", "api_err", err)
+		return nil, err
+	}
+	return resp, nil
 }
 
 func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {
