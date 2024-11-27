@@ -156,7 +156,7 @@ func tableGcpRedisCluster(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpRedisClusterTurbotData, "Akas"),
+				Transform:   transform.FromP(gcpRedisClusterTurbotData, "akas"),
 			},
 
 			// Standard gcp columns

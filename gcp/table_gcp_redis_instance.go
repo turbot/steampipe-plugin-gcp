@@ -217,7 +217,7 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpRedisInstanceTurbotData, "Akas"),
+				Transform:   transform.FromP(gcpRedisInstanceTurbotData, "akas"),
 			},
 
 			// Standard gcp columns
