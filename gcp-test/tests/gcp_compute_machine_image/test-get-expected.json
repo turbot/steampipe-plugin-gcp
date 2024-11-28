@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "compute#machineImage",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}",
+    "title": "{{ resourceName }}"
+  }
+]

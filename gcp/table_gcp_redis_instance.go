@@ -27,7 +27,6 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 				{Name: "location", Require: plugin.Optional},
 			},
 		},
-		GetMatrixItemFunc: BuildRedisLocationList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -62,7 +61,7 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "reserved_ip_range",
-				Description: "The reserved IP range for the instnce.",
+				Description: "The reserved IP range for the instance.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -218,7 +217,7 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpRedisInstanceTurbotData, "Akas"),
+				Transform:   transform.FromP(gcpRedisInstanceTurbotData, "akas"),
 			},
 
 			// Standard gcp columns
@@ -232,7 +231,7 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -252,21 +251,20 @@ func listGcpRedisInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	location := d.EqualsQualString("location")
-	matrixLocation := d.EqualsQualString(matrixKeyRedisLocation)
-	// Since, when the service API is disabled, matrixLocation value will be nil
-	if location != "" && location != matrixLocation {
-		return nil, nil
+	if location == "" {
+		// Wildcard to query all locations at once
+		// https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances/list
+		location = "-"
 	}
 
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		logger.Error("gcp_redis_instance.listGcpRedisInstances", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
 
-	parent := "projects/" + project + "/locations/" + matrixLocation
+	parent := "projects/" + project + "/locations/" + location
 	req := &redispb.ListInstancesRequest{
 		Parent: parent,
 	}
@@ -307,21 +305,15 @@ func getGcpRedisInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	location := d.EqualsQualString("location")
-	matrixLocation := d.EqualsQualString(matrixKeyRedisLocation)
-	// Since, when the service API is disabled, matrixLocation value will be nil
-	if location != "" && location != matrixLocation {
-		return nil, nil
-	}
 
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		logger.Error("gcp_redis_instance.getGcpRedisInstance", "cache_error", err)
 		return nil, err
 	}
 	project := projectId.(string)
 
-	name := "projects/" + project + "/locations/" + matrixLocation + "/instances/" + instanceName
+	name := "projects/" + project + "/locations/" + location + "/instances/" + instanceName
 
 	req := &redispb.GetInstanceRequest{
 		Name: name,
@@ -358,4 +350,3 @@ func gcpRedisInstanceCreateTime(_ context.Context, d *transform.TransformData) (
 	}
 	return instanceCreateTime.AsTime(), nil
 }
-

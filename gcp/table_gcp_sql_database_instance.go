@@ -51,6 +51,16 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "create_time",
+				Description: "The time when the instance was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+			},
+			{
+				Name:        "database_installed_version",
+				Description: "Specifies the current database version running on the instance including minor version such as MYSQL_8_0_18.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "database_version",
 				Description: "Specifies the type and version of the database engine.",
 				Type:        proto.ColumnType_STRING,
@@ -258,6 +268,11 @@ func tableGcpSQLDatabaseInstance(ctx context.Context) *plugin.Table {
 				Transform:   transform.FromField("ScheduledMaintenance.StartTime"),
 			},
 			{
+				Name:        "maintenance_version",
+				Description: "The current software version on the instance.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "authorized_gae_applications",
 				Description: "A list of App Engine app IDs, that can access this instance.",
 				Type:        proto.ColumnType_JSON,
@@ -404,8 +419,8 @@ func listSQLDatabaseInstances(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -443,8 +458,8 @@ func getSQLDatabaseInstance(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

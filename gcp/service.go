@@ -3,29 +3,42 @@ package gcp
 import (
 	"context"
 
+	aiplatform "cloud.google.com/go/aiplatform/apiv1"
+	redis "cloud.google.com/go/redis/apiv1"
+	rediscluster "cloud.google.com/go/redis/cluster/apiv1"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"google.golang.org/api/accessapproval/v1"
+	"google.golang.org/api/alloydb/v1"
 	"google.golang.org/api/apikeys/v2"
+	"google.golang.org/api/appengine/v1"
+	"google.golang.org/api/artifactregistry/v1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/billingbudgets/v1"
+	"google.golang.org/api/cloudasset/v1"
 	"google.golang.org/api/cloudbilling/v1"
-	"google.golang.org/api/cloudfunctions/v1"
+	"google.golang.org/api/cloudfunctions/v2"
 	"google.golang.org/api/cloudidentity/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/composer/v1"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
+	"google.golang.org/api/dataplex/v1"
 	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/essentialcontacts/v1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
+	"google.golang.org/api/metastore/v1"
 	"google.golang.org/api/monitoring/v3"
+	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
-	"cloud.google.com/go/redis/apiv1"
+	"google.golang.org/api/run/v2"
+	"google.golang.org/api/secretmanager/v1"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/storage/v1"
+	"google.golang.org/api/vpcaccess/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -52,6 +65,105 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 	return svc, nil
 }
 
+type AIplatfromServiceClients struct {
+	Endpoint *aiplatform.EndpointClient
+	Dataset  *aiplatform.DatasetClient
+	Index    *aiplatform.IndexClient
+	Job      *aiplatform.JobClient
+	Model    *aiplatform.ModelClient
+	Notebook *aiplatform.NotebookClient
+}
+
+func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AIplatfromServiceClients, error) {
+	// have we already created and cached the service?
+	matrixLocation := d.EqualsQualString(matrixKeyLocation)
+
+	// Default to us-central1 for building the supported locations for the resources like Endpoint, Dataset, Index, Job etc...
+	if matrixLocation == "" {
+		matrixLocation = "us-central1"
+	}
+
+	serviceCacheKey := "AIService" + matrixLocation + clientType
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*AIplatfromServiceClients), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+	opts = append(opts, option.WithEndpoint(matrixLocation+"-aiplatform.googleapis.com:443"))
+
+	clients := &AIplatfromServiceClients{}
+
+	switch clientType {
+	case "Endpoint":
+		svc, err := aiplatform.NewEndpointClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Endpoint = svc
+		return clients, nil
+	case "Dataset":
+		svc, err := aiplatform.NewDatasetClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Dataset = svc
+		return clients, nil
+	case "Index":
+		svc, err := aiplatform.NewIndexClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Index = svc
+		return clients, nil
+	case "Job":
+		svc, err := aiplatform.NewJobClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Job = svc
+		return clients, nil
+	case "Model":
+		svc, err := aiplatform.NewModelClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Model = svc
+		return clients, nil
+	case "Notebook":
+		svc, err := aiplatform.NewNotebookClient(ctx, opts...)
+		if err != nil {
+			return nil, err
+		}
+		clients.Notebook = svc
+		return clients, nil
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, clients)
+	return clients, nil
+}
+
+// AlloyDBService returns the service connection for GCP Alloy DB service
+func AlloyDBService(ctx context.Context, d *plugin.QueryData) (*alloydb.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "AlloyDBservice"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*alloydb.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := alloydb.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
 func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "APIKeysService"
@@ -64,6 +176,27 @@ func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service,
 
 	// so it was not in cache - create service
 	svc, err := apikeys.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// AppEngineService returns the service connection for GCP App Engine service
+func AppEngineService(ctx context.Context, d *plugin.QueryData) (*appengine.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "BillingBudgetsService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*appengine.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := appengine.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +268,27 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 	return svc, nil
 }
 
+// ArtifactRegistryService returns the service connection for GCP ArtifactRegistry service
+func ArtifactRegistryService(ctx context.Context, d *plugin.QueryData) (*artifactregistry.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "ArtifactRegistryService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*artifactregistry.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := artifactregistry.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
 // BigtableAdminService returns the service connection for GCP Bigtable Admin service
 func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtableadmin.Service, error) {
 	// have we already created and cached the service?
@@ -169,6 +323,48 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 
 	// so it was not in cache - create service
 	svc, err := cloudresourcemanager.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudRunService returns the service connection for GCP Cloud Run service
+func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudRunService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*run.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := run.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// DataplexService returns the service connection for GCP Dataplex service
+func DataplexService(ctx context.Context, d *plugin.QueryData) (*dataplex.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "DataplexService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*dataplex.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := dataplex.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -261,6 +457,27 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 	return svc, nil
 }
 
+// ComposerService returns the service connection for GCP Composer service
+func ComposerService(ctx context.Context, d *plugin.QueryData) (*composer.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "ComposerService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*composer.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := composer.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
 // DataprocService returns the service connection for GCP Dataproc service
 func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Service, error) {
 	// have we already created and cached the service?
@@ -274,6 +491,27 @@ func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Servic
 
 	// so it was not in cache - create service
 	svc, err := dataproc.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// DataprocService returns the service connection for GCP Dataproc service
+func DataprocMetastoreService(ctx context.Context, d *plugin.QueryData) (*metastore.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "DataprocMetastoreService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*metastore.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := metastore.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -337,6 +575,27 @@ func CloudIdentityService(ctx context.Context, d *plugin.QueryData) (*cloudident
 
 	// so it was not in cache - create service
 	svc, err := cloudidentity.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudAssetService returns the service connection for GCP Asset Service
+func CloudAssetService(ctx context.Context, d *plugin.QueryData) (*cloudasset.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudIdentityService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*cloudasset.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := cloudasset.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -526,6 +785,67 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 
 	// so it was not in cache - create service
 	svc, err := redis.NewCloudRedisClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// RedisClusterService returns the service connection for GCP Memorystore for Redis Cluster service
+func RedisClusterService(ctx context.Context, d *plugin.QueryData) (*rediscluster.CloudRedisClusterClient, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "RedisClusterService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*rediscluster.CloudRedisClusterClient), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := rediscluster.NewCloudRedisClusterClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+func SecretManagerService(ctx context.Context, d *plugin.QueryData) (*secretmanager.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "SecretManagerService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*secretmanager.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := secretmanager.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+func VPCAccessService(ctx context.Context, d *plugin.QueryData) (*vpcaccess.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "VPCAccessService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*vpcaccess.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := vpcaccess.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

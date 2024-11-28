@@ -120,8 +120,15 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	instance := h.Item.(*sqladmin.DatabaseInstance)
 
 	// ERROR: rpc error: code = Unknown desc = googleapi: Error 400: Invalid request: Invalid request since instance is not running., invalid
-	// Return nil, if the instance not in running state
-	if instance.State != "RUNNABLE" {
+	// Return nil, if the instance is not in Runnable state.
+	// ActivationPolicy specifies when the instance is activated.
+        // - SQL_ACTIVATION_POLICY_UNSPECIFIED  Unknown activation plan.
+	// - ALWAYS	The instance is always up and running.
+	// - NEVER	The instance never starts.
+	// - ON_DEMAND  The instance starts upon receiving requests.(Deprecated)
+	// https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1/instances#SqlActivationPolicy
+	
+	if instance.State != "RUNNABLE" || instance.Settings.ActivationPolicy !=  "ALWAYS" {
 		return nil, nil
 	}
 
@@ -132,8 +139,8 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +169,8 @@ func getSQLDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

@@ -8,11 +8,12 @@ name: "gcp"
 description: "Steampipe plugin for querying buckets, instances, functions and more from GCP."
 og_description: Query GCP with SQL! Open source CLI. No DB required.
 og_image: "/images/plugins/turbot/gcp-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # GCP + Steampipe
 
-[Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
+[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
 
 [GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
@@ -53,12 +54,12 @@ steampipe plugin install gcp
 
 ### Credentials
 
-| Item | Description |
-| - | - |
+| Item        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Credentials | When running locally, you must configure your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default). If you are running in Cloud Shell or Cloud Code, [the tool uses the credentials you provided when you logged in, and manages any authorizations required](https://cloud.google.com/docs/authentication/provide-credentials-adc#cloud-based-dev). |
-| Permissions | Assign the `Viewer` role to your user or service account. |
-| Radius | Each connection represents a single GCP project. |
-| Resolution |  1. Credentials from the JSON file specified by the `credentials` parameter in your steampipe config.<br />2. Credentials from the JSON file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default JSON file location (~/.config/gcloud/application_default_credentials.json). <br />4. Credentials from [the metadata server](https://cloud.google.com/docs/authentication/application-default-credentials#attached-sa)|
+| Permissions | Assign the `Viewer` role to your user or service account. You may also need additional permissions related to IAM policies, like `pubsub.subscriptions.getIamPolicy`, `pubsub.topics.getIamPolicy`, `storage.buckets.getIamPolicy`, since these are not included in the `Viewer` role. You can grant these by creating a custom role in your project. |
+| Radius      | Each connection represents a single GCP project, except for some tables like `gcp_organization` and `gcp_organization_project` which return all resources the credentials attached to the connection have access to. |
+| Resolution  | 1. Credentials from the JSON file specified by the `credentials` parameter in your steampipe config.<br />2. Credentials from the JSON file specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.<br />3. Credentials from the default JSON file location (~/.config/gcloud/application_default_credentials.json). <br />4. Credentials from [the metadata server](https://cloud.google.com/docs/authentication/application-default-credentials#attached-sa) |
 
 ### Configuration
 
@@ -83,9 +84,20 @@ connection "gcp" {
   #   - The standard location (`~/.config/gcloud/application_default_credentials.json`)
   #credentials = "~/.config/gcloud/application_default_credentials.json"
 
+  # `impersonate_access_token` (optional) - You can generate an OAuth 2.0 access token by using the gcloud CLI, the REST API, or the Cloud Client Libraries and Google API Client Libraries.
+  # Refer https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#gcloud_2 for generating the access token.
+  # impersonate_access_token = "ya29.c.c0ASRK0GZ7mv8lIV0iiudmiGBs9m1gqGfBYZzV...aMYJd"
+
   # `impersonate_service_account` (optional) - The GCP service account (string) which should be impersonated.
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
+
+  # `quota_project` (optional) - The project ID used for billing and quota. When set,
+  # this project ID is used to track quota usage and billing for the operations performed with the GCP connection.
+  # If `quota_project` is not specified directly, the system will look for the `GOOGLE_CLOUD_QUOTA_PROJECT`
+  # environment variable to determine which project to use for billing and quota.
+  # If neither is specified, billing and quota are tracked against the project associated with the credentials used for authentication.
+  # quota_project = "YOUR_QUOTA_PROJECT_ID"
 
   # `ignore_error_messages` (optional) - List of additional GCP error message patterns to ignore for all queries.
   #ignore_error_messages = ["^.*API has not been used.*$"]
@@ -97,13 +109,11 @@ connection "gcp" {
 }
 ```
 
-**NOTE:** The `credential_file` property has been deprecated and will be removed in the next major version. Please use `credentials` instead.
-
 ## Advanced configuration options
 
 By default, the GCP plugin uses your [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) to connect to GCP. If you have not set up ADC, simply run `gcloud auth application-default login`. This command will prompt you to log in, and then will download the application default credentials to ~/.config/gcloud/application_default_credentials.json.
 
-For users with multiple GCP project and more complex authentication use cases, here are some examples of advanced configuration options:
+For users with multiple GCP projects and more complex authentication use cases, here are some examples of advanced configuration options:
 
 ### Use a service account
 
@@ -114,6 +124,18 @@ connection "gcp_my_other_project" {
   plugin      = "gcp"
   project     = "my-other-project"
   credentials = "/home/me/my-service-account-creds.json"
+}
+```
+
+### Use impersonation access token
+
+Generate an impersonate access token using: [gcloud CLI command](https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#gcloud_2).
+
+```hcl
+connection "gcp_my_other_project" {
+  plugin                   = "gcp"
+  project                  = "my-other-project"
+  impersonate_access_token = "ya29.c.c0ASRK0GZ7mv8lIV0iiudmiGBs9m1gqGfBYZzV...aMYJd"
 }
 ```
 
@@ -214,10 +236,6 @@ connection "gcp_all" {
 
 ```sh
 export CLOUDSDK_CORE_PROJECT=myproject
+export GOOGLE_CLOUD_QUOTA_PROJECT=billingproject
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/creds.json
 ```
-
-## Get involved
-
-- Open source: https://github.com/turbot/steampipe-plugin-gcp
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)

@@ -119,13 +119,13 @@ func tableGcpPubSubSubscription(ctx context.Context) *plugin.Table {
 				Name:        "retry_policy_maximum_backoff",
 				Description: "The maximum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 600 seconds.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("PushConfig.RetryPolicy.MaximumBackoff"),
+				Transform:   transform.FromField("RetryPolicy.MaximumBackoff"),
 			},
 			{
 				Name:        "retry_policy_minimum_backoff",
 				Description: "The minimum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 10 seconds.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("PushConfig.RetryPolicy.MinimumBackoff"),
+				Transform:   transform.FromField("RetryPolicy.MinimumBackoff"),
 			},
 			{
 				Name:        "iam_policy",
@@ -197,8 +197,8 @@ func listPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -236,8 +236,8 @@ func getPubSubSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

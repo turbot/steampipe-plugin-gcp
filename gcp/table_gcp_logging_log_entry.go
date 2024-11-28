@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/turbot/go-kit/types"
@@ -30,10 +31,10 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				{Name: "log_name", Require: plugin.Optional},
 				{Name: "span_id", Require: plugin.Optional},
 				{Name: "text_payload", Require: plugin.Optional},
-				{Name: "receive_timestamp", Require: plugin.Optional},
-				{Name: "timestamp", Require: plugin.Optional},
+				{Name: "receive_timestamp", Require: plugin.Optional, Operators: []string{"=", ">", "<", ">=", "<="}},
+				{Name: "timestamp", Require: plugin.Optional, Operators: []string{"=", ">", "<", ">=", "<="}},
 				{Name: "trace", Require: plugin.Optional},
-				{Name: "log_entry_operation_id", Require: plugin.Optional},
+				{Name: "operation_id", Require: plugin.Optional},
 				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
 			},
 		},
@@ -49,34 +50,16 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "log_entry_operation_first",
-				Description: "Set this to True if this is the first log entry in the operation.",
-				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("Operation.First"),
-			},
-			{
-				Name:        "log_entry_operation_last",
-				Description: "Set this to True if this is the last log entry in the operation.",
-				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("Operation.Last"),
-			},
-			{
 				Name:        "filter",
 				Type:        proto.ColumnType_STRING,
 				Description: "The filter pattern for the search.",
 				Transform:   transform.FromQual("filter"),
 			},
 			{
-				Name:        "log_entry_operation_id",
+				Name:        "operation_id",
 				Description: "An arbitrary operation identifier. Log entries with the same identifier are assumed to be part of the same operation.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Operation.Id"),
-			},
-			{
-				Name:        "log_entry_operation_producer",
-				Description: "An arbitrary producer identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Operation.Producer"),
 			},
 			{
 				Name:        "receive_timestamp",
@@ -120,32 +103,45 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
-				Name:        "split_index",
-				Description: "The index of this LogEntry in the sequence of split log entries.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("Split.Index"),
-			},
-			{
-				Name:        "total_splits",
-				Description: "The total number of log entries that the original LogEntry was split into.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("Split.TotalSplits"),
-			},
-			{
-				Name:        "split_uid",
-				Description: "A globally unique identifier for all log entries in a sequence of split log entries.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Split.Uid"),
-			},
-			{
-				Name:        "resource_labels",
-				Description: "Values for all of the labels listed in the associated monitored resource descriptor.",
+				Name:        "json_payload",
+				Description: "The log entry payload, represented as a structure that is expressed as a JSON object.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Resource.Labels"),
+				Transform:   transform.FromP(covertLogEntryByteArrayToJsonObject, "JsonPayload"),
+			},
+			{
+				Name:        "proto_payload",
+				Description: "The log entry payload, represented as a protocol buffer. Some Google Cloud Platform services use this field for their log entry payloads. The following protocol buffer types are supported; user-defined types are not supported: 'type.googleapis.com/google.cloud.audit.AuditLog' 'type.googleapis.com/google.appengine.logging.v1.RequestLog'",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromP(covertLogEntryByteArrayToJsonObject, "ProtoPayload"),
+			},
+			{
+				Name:        "operation",
+				Description: "Information about an operation associated with the log entry, if applicable.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "resource",
+				Description: "The monitored resource that produced this log entry. Example: a log entry that reports a database error would be associated with the monitored resource designating the particular database that reported the error.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "split",
+				Description: "Information indicating this LogEntry is part of a sequence of multiple log entries split from a single LogEntry.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "source_location",
 				Description: "Source code location information associated with the log entry, if any.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "metadata",
+				Description: "Auxiliary metadata for a MonitoredResource object. MonitoredResource objects contain the minimum set of information to uniquely identify a monitored resource instance.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "labels",
+				Description: "A map of key, value pairs that provides additional information about the log entry. The labels can be user-defined or system-defined.User-defined labels are arbitrary key, value pairs that you can use to classify logs. System-defined labels are defined by GCP services for platform logs.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -155,6 +151,12 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("InsertId"),
+			},
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Labels"),
 			},
 
 			// Standard GCP columns
@@ -168,7 +170,7 @@ func tableGcpLoggingLogEntry(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -186,8 +188,9 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Max limit isn't mentioned in the documentation
-	// Default limit is set as 1000
-	pageSize := types.Int64(1000)
+	// Default limit is set as 10000
+	// 10000 seems to be a balanced limit, based on initial tests for retrieving 140k log entries: 5000 (124s), 10000 (88s), 20000 (84s).
+	pageSize := types.Int64(10000)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < *pageSize {
@@ -196,8 +199,8 @@ func listGcpLoggingLogEntries(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -256,8 +259,8 @@ func getGcpLoggingLogEntry(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +304,7 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 		{"span_id", "spanId", "string"},
 		{"text_payload", "textPayload", "string"},
 		{"trace", "trace", "string"},
-		{"log_entry_operation_id", "operation.id", "string"},
+		{"operation_id", "operation.id", "string"},
 		{"receive_timestamp", "receiveTimestamp", "timestamp"},
 		{"timestamp", "timestamp", "timestamp"},
 	}
@@ -330,14 +333,73 @@ func buildLoggingLogEntryFilterParam(equalQuals plugin.KeyColumnQualMap) string 
 						filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetStringValue() + "\""
 					}
 				case "timestamp":
+					propertyPath := filterQualItem.PropertyPath
 					if filter == "" {
-						filter = filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						switch qual.Operator {
+						case "=":
+							filter = propertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">":
+							filter = propertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<":
+							filter = propertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">=":
+							filter = propertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<=":
+							filter = propertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						}
 					} else {
-						filter = filter + " AND " + filterQualItem.PropertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						switch qual.Operator {
+						case "=":
+							filter = filter + " AND " + propertyPath + " = \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">":
+							filter = filter + " AND " + propertyPath + " > \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<":
+							filter = filter + " AND " + propertyPath + " < \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case ">=":
+							filter = filter + " AND " + propertyPath + " >= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						case "<=":
+							filter = filter + " AND " + propertyPath + " <= \"" + value.GetTimestampValue().AsTime().Format(time.RFC3339) + "\""
+						}
 					}
 				}
 			}
 		}
 	}
 	return filter
+}
+
+//// TRANSFORM FUNCTION
+
+func covertLogEntryByteArrayToJsonObject(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	entry := d.HydrateItem.(*logging.LogEntry)
+	param := d.Param.(string)
+
+	var protoPlayload interface{}
+	var jsonPayload interface{}
+
+	a, err := entry.ProtoPayload.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	b, err := entry.JsonPayload.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(a, &protoPlayload)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.covertLogEntryByteArrayToJsonObject.protoPlayload", err)
+	}
+
+	err = json.Unmarshal(b, &jsonPayload)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_logging_log_entry.covertLogEntryByteArrayToJsonObject.jsonPayload", err)
+	}
+
+	payload := map[string]interface{}{
+		"JsonPayload":  jsonPayload,
+		"ProtoPayload": protoPlayload,
+	}
+
+	return payload[param], nil
 }

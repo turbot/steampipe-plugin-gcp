@@ -6,6 +6,8 @@ on:
       - 'v*'
 
 jobs:
-  registry_publish_workflow:
-    uses: turbot/steampipe-workflows/.github/workflows/registry-publish.yml@main
+  registry_publish_workflow_ghcr:
+    uses: turbot/steampipe-workflows/.github/workflows/registry-publish-ghcr.yml@main
     secrets: inherit
+    with:
+      releaseTimeout: 60m

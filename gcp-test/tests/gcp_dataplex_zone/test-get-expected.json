@@ -1,0 +1,7 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "lake_name": "{{ output.lake_name.value }}",
+    "name": "{{ output.resource_id.value }}"
+  }
+]

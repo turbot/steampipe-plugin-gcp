@@ -75,7 +75,7 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -102,8 +102,8 @@ func getBillingAccount(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 		// Fetch BillingInfo for the project, to get the billing account name
 		// Get project details
-		getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-		projectId, err := getProjectCached(ctx, d, h)
+
+		projectId, err := getProject(ctx, d, h)
 		if err != nil {
 			plugin.Logger(ctx).Error("gcp_billing_account.getBillingAccount", "cache_err", err)
 			return nil, err
@@ -154,8 +154,8 @@ func getBillingAccountIamPolicy(ctx context.Context, d *plugin.QueryData, h *plu
 func getBillingAccountAka(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

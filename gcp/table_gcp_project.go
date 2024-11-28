@@ -68,6 +68,13 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 				Hydrate:     getProjectAccessApprovalSettings,
 				Transform:   transform.FromValue(),
 			},
+			{
+				Name:        "ancestors",
+				Description: "The ancestors of the project in the resource hierarchy, from bottom to top.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getProjectAncestors,
+				Transform:   transform.FromValue(),
+			},
 
 			// Steampipe standard columns
 			{
@@ -99,12 +106,13 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "service_err", err)
 		return nil, err
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +121,7 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 	resp, err := service.Projects.List().Filter("id=" + project).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "api_err", err)
 		return nil, err
 	}
 
@@ -144,14 +153,9 @@ func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, 
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
+	projectId := h.Item.(*cloudresourcemanager.Project).ProjectId
 
-	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + project + "/accessApprovalSettings").Do()
+	resp, err := service.Projects.GetAccessApprovalSettings("projects/" + projectId + "/accessApprovalSettings").Do()
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			return nil, nil
@@ -160,6 +164,28 @@ func getProjectAccessApprovalSettings(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 	return resp, nil
+}
+
+func getProjectAncestors(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
+	service, err := CloudResourceManagerService(ctx, d)
+	if err != nil {
+		plugin.Logger(ctx).Error("gcp_project.getProjectAncestors", "connection_error", err)
+		return nil, err
+	}
+
+	// Get project details
+	projectId := h.Item.(*cloudresourcemanager.Project).ProjectId
+
+	resp, err := service.Projects.GetAncestry(projectId, &cloudresourcemanager.GetAncestryRequest{}).Do()
+	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil, nil
+		}
+		plugin.Logger(ctx).Error("gcp_project.getProjectAncestors", "api_err", err)
+		return nil, err
+	}
+	return resp.Ancestor, nil
 }
 
 func projectSelfLink(_ context.Context, d *transform.TransformData) (interface{}, error) {

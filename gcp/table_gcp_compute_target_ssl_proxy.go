@@ -139,8 +139,8 @@ func listComputeTargetSslProxies(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -178,8 +178,8 @@ func getComputeTargetSslProxy(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

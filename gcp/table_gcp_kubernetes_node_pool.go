@@ -133,7 +133,7 @@ func tableGcpKubernetesNodePool(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -148,6 +148,13 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 	// Get the details of Cluster
 	cluster := h.Item.(*container.Cluster)
 
+	// This operation is not allowed if the cluster has Autopilot Enabled.
+	// We are getting the error Error: gcp: googleapi: Error 400: Autopilot node pools cannot be accessed or modified.
+
+	if cluster.Autopilot != nil && cluster.Autopilot.Enabled {
+		return nil, nil
+	}
+
 	// Create Service Connection
 	service, err := ContainerService(ctx, d)
 	if err != nil {
@@ -155,8 +162,8 @@ func listKubernetesNodePools(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -186,8 +193,8 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +212,11 @@ func getKubernetesNodePool(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	resp, err := service.Projects.Locations.Clusters.NodePools.Get(parent).Do()
 	if err != nil {
+		// This operation is not allowed if the cluster has Autopilot Enabled.
+		// We are getting the error Error: gcp: googleapi: Error 400: Autopilot node pools cannot be accessed or modified.
+		if strings.Contains(err.Error(), "Autopilot node pools cannot be accessed or modified") {
+			return nil, nil
+		}
 		return nil, err
 	}
 

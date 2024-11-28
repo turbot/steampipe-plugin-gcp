@@ -57,21 +57,25 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 				Name:        "end_time",
 				Description: "Specifies the time when the backup operation completed.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("EndTime").NullIfZero(),
 			},
 			{
 				Name:        "enqueued_time",
 				Description: "Specifies the time when the run was enqueued.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("EnqueuedTime").NullIfZero(),
 			},
 			{
 				Name:        "start_time",
 				Description: "Specifies the time when the backup operation actually started.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("StartTime").NullIfZero(),
 			},
 			{
 				Name:        "window_start_time",
 				Description: "Specifies the start time of the backup window during which this the backup was attempted.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("WindowStartTime").NullIfZero(),
 			},
 			{
 				Name:        "self_link",
@@ -124,7 +128,7 @@ func tableGcpSQLBackup(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -156,8 +160,8 @@ func listSQLBackups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -195,8 +199,8 @@ func getSQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -217,8 +221,8 @@ func getSQLBackupAka(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	backup := h.Item.(*sqladmin.BackupRun)
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

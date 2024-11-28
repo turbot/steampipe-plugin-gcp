@@ -45,7 +45,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "fingerprint",
-				Description: "The fingerprint of the named ports.",
+				Description: "The fingerprint of the instance group.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -89,7 +89,7 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "zone",
-				Description: "URL of the zone where the instance group resides.",
+				Description: "The URL of the zone where the instance group resides.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -148,7 +148,6 @@ func tableGcpComputeInstanceGroup(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	// Max limit is set as per documentation
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
@@ -159,8 +158,7 @@ func listComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -202,8 +200,7 @@ func getComputeInstanceGroup(ctx context.Context, d *plugin.QueryData, h *plugin
 	plugin.Logger(ctx).Trace("getComputeInstanceGroup")
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -245,8 +242,8 @@ func getComputeInstanceGroupInstances(ctx context.Context, d *plugin.QueryData, 
 	instanceGroup := h.Item.(*compute.InstanceGroup)
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -259,14 +256,23 @@ func getComputeInstanceGroupInstances(ctx context.Context, d *plugin.QueryData, 
 		return nil, err
 	}
 
-	resp, err := service.InstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Zone)), instanceGroup.Name, &compute.InstanceGroupsListInstancesRequest{}).Do()
-
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
-		return nil, err
+	// Regional instance groups do not have any zone specified but a region instead,
+	// and querying their instances must be done with the regional endpoint
+	if instanceGroup.Zone == "" {
+		resp, err := service.RegionInstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Region)), instanceGroup.Name, &compute.RegionInstanceGroupsListInstancesRequest{}).Do()
+		if err != nil {
+			plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
+			return nil, err
+		}
+		return &resp.Items, nil
+	} else {
+		resp, err := service.InstanceGroups.ListInstances(project, getLastPathElement(types.SafeString(instanceGroup.Zone)), instanceGroup.Name, &compute.InstanceGroupsListInstancesRequest{}).Do()
+		if err != nil {
+			plugin.Logger(ctx).Error("gcp_compute_instance_group.getComputeInstanceGroupInstances", "api_err", err)
+			return nil, err
+		}
+		return &resp.Items, nil
 	}
-
-	return &resp.Items, nil
 }
 
 //// TRANSFORM FUNCTIONS

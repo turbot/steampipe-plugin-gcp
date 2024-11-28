@@ -227,7 +227,7 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The gcp project queried.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getProject).WithCache(),
+				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -240,8 +240,8 @@ func listComputeImageProjects(ctx context.Context, d *plugin.QueryData, h *plugi
 	plugin.Logger(ctx).Trace("listComputeImageProjects")
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -386,8 +386,8 @@ func getComputeImageIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

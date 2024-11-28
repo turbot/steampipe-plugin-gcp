@@ -14,8 +14,10 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"golang.org/x/oauth2"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 )
@@ -48,30 +50,37 @@ func lastPathElement(_ context.Context, d *transform.TransformData) (interface{}
 	return getLastPathElement(types.SafeString(d.Value)), nil
 }
 
-func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	cacheKey := "getGCPProjectInfo"
+// if the caching is required other than per connection, build a cache key for the call and use it in Memoize
+// since getProject is a call, caching should be per connection
+var getProjectMemoized = plugin.HydrateFunc(getProjectUncached).Memoize(memoize.WithCacheKeyFunction(getProjectCacheKey))
+
+// Build a cache key for the call to getProject.
+func getProjectCacheKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	key := fmt.Sprintf("getGCPProjectInfo%s", "")
+	return key, nil
+}
+
+func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (any, error) {
+	projectId, err := getProjectMemoized(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	return projectId, nil
+}
+
+func getProjectUncached(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	var err error
 	var projectData *projectInfo
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
-		projectData = cachedData.(*projectInfo)
-	} else {
-		projectData, err = activeProject(ctx, d)
-		if err != nil {
-			return nil, err
-		}
-		// save to extension cache
-		d.ConnectionManager.Cache.Set(cacheKey, projectData)
+	projectData, err = activeProject(ctx, d)
+	if err != nil {
+		return nil, err
 	}
+
 	return projectData.Project, nil
 }
 
 func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, error) {
-	// have we already created and cached the session?
-	serviceCacheKey := "gcp_project_id"
-
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*projectInfo), nil
-	}
 
 	var err error
 	var projectData *projectInfo
@@ -108,8 +117,6 @@ func activeProject(ctx context.Context, d *plugin.QueryData) (*projectInfo, erro
 	if projectData == nil {
 		return nil, fmt.Errorf("an active project must be set")
 	}
-
-	d.ConnectionManager.Cache.Set(serviceCacheKey, projectData)
 
 	return projectData, nil
 }
@@ -181,16 +188,19 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 	gcpConfig := GetConfig(connection)
 	opts := []option.ClientOption{}
 
-	// 'credential_file' in connection config is DEPRECATED, and will be removed in future release
-	// use `credentials` instead
 	if gcpConfig.Credentials != nil {
 		contents, err := pathOrContents(*gcpConfig.Credentials)
 		if err != nil {
 			panic(err)
 		}
 		opts = append(opts, option.WithCredentialsJSON([]byte(contents)))
-	} else if gcpConfig.CredentialFile != nil {
-		opts = append(opts, option.WithCredentialsFile(*gcpConfig.CredentialFile))
+	}
+	if gcpConfig.ImpersonateAccessToken != nil {
+		tokenConfig := oauth2.Token{
+			AccessToken: *gcpConfig.ImpersonateAccessToken,
+		}
+		staticTokenSource := oauth2.StaticTokenSource(&tokenConfig)
+		opts = append(opts, option.WithTokenSource(staticTokenSource))
 	}
 
 	if gcpConfig.ImpersonateServiceAccount != nil {
@@ -204,6 +214,19 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 
 		opts = append(opts, option.WithTokenSource(ts))
 	}
+
+	// check if quota project is set via env var
+	quotaProject := os.Getenv("GOOGLE_CLOUD_QUOTA_PROJECT")
+
+	// check if quota project is set in config
+	if gcpConfig.QuotaProject != nil {
+		quotaProject = *gcpConfig.QuotaProject
+	}
+
+	if quotaProject != "" {
+		opts = append(opts, option.WithQuotaProject(quotaProject))
+	}
+
 	return opts
 }
 
@@ -392,4 +415,16 @@ var GcpFilterOperatorMap = map[string]string{
 	"<":  "<",
 	"<=": "<", // Filter ((property=value) OR (property<value))
 	">=": ">", // Filter ((property=value) OR (property>value))
+}
+
+func extractLastPartSeparatedByBackslash(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	data := types.SafeString(d.Value)
+
+	if data == "" {
+		return nil, nil
+	}
+
+	splitStr := strings.Split(data, "/")
+
+	return splitStr[len(splitStr)-1], nil
 }

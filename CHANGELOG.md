@@ -1,3 +1,218 @@
+## v1.2.0 [2024-11-04]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_instance_group_manager](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_instance_group_manager) ([#669](https://github.com/turbot/steampipe-plugin-gcp/pull/669)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Enhancements_
+
+- Added `labels` and `tags` columns to the `gcp_compute_global_forwarding_rule` table. ([#678](https://github.com/turbot/steampipe-plugin-gcp/pull/678)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Added `database_installed_version` and `maintenance_version` columns to the `gcp_sql_database_instance` table. ([#677](https://github.com/turbot/steampipe-plugin-gcp/pull/677)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Bug fixes_
+
+- Fixed the `gcp_compute_instance_group` table to correctly return values for the `instances` column of regional instance groups. ([#670](https://github.com/turbot/steampipe-plugin-gcp/pull/670)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Fixed the `kubernetes_node_pool` table to correctly return data instead of an error for node pools with auto-pilot disabled. ([#668](https://github.com/turbot/steampipe-plugin-gcp/pull/668)) (Thanks [@multani](https://github.com/multani) for the contribution!)
+
+## v1.0.0 [2024-10-22]
+
+There are no significant changes in this plugin version; it has been released to align with [Steampipe's v1.0.0](https://steampipe.io/changelog/steampipe-cli-v1-0-0) release. This plugin adheres to [semantic versioning](https://semver.org/#semantic-versioning-specification-semver), ensuring backward compatibility within each major version.
+
+_Breaking changes_
+
+- The `credential_file` argument in the configuration file has now been removed. We recommend using the `credentials` argument instead, which can take the same file path as the `credential_file` argument. ([#672](https://github.com/turbot/steampipe-plugin-gcp/pull/672))
+
+## v0.57.0 [2024-09-13]
+
+_What's new?_
+
+- New tables added
+  - [gcp_composer_environment](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_composer_environment) ([#649](https://github.com/turbot/steampipe-plugin-gcp/pull/649))
+  - [gcp_dataplex_lake](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_lake) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataplex_zone](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_zone) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataplex_task](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_task) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataplex_asset](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataplex_asset) ([#642](https://github.com/turbot/steampipe-plugin-gcp/pull/642))
+  - [gcp_dataproc_metastore_service](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_dataproc_metastore_service) ([#654](https://github.com/turbot/steampipe-plugin-gcp/pull/654))
+  - [gcp_vpc_access_connector](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_vpc_access_connector) ([#647](https://github.com/turbot/steampipe-plugin-gcp/pull/647))
+
+_Enhancements_
+
+- Added `connection_info` column to the `gcp_alloydb_instance` table. ([#651](https://github.com/turbot/steampipe-plugin-gcp/pull/651))
+
+_Bug fixes_
+
+- Removed the `name` column from the `gcp_bigquery_table` table since the API response does not include this field. ([#648](https://github.com/turbot/steampipe-plugin-gcp/pull/648))
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.22`. ([#635](https://github.com/turbot/steampipe-plugin-gcp/pull/635))
+- Recompiled plugin with [steampipe-plugin-sdk v5.10.4](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5104-2024-08-29) that fixes logging in the plugin export tool. ([#635](https://github.com/turbot/steampipe-plugin-gcp/pull/635))
+
+## v0.56.0 [2024-07-31]
+
+_Breaking changes_
+
+- Removed the following columns in `gcp_cloudfunctions_function` table to align with the new API response structure: ([#612](https://github.com/turbot/steampipe-plugin-gcp/pull/612))
+  - `environment_variables`
+  - `source_upload_url`
+  - `version_id`
+
+_What's new?_
+
+- Added the `impersonate_access_token` config argument to support plugin authentication by using a pre-generated temporary access token. ([#621](https://github.com/turbot/steampipe-plugin-gcp/pull/621))
+
+_Enhancements_
+
+- Added 17 new columns to the `gcp_cloudfunctions_function` table. ([#612](https://github.com/turbot/steampipe-plugin-gcp/pull/612))
+
+_Bug fixes_
+
+- Fixed the cache key issue in the `SecretManager` service client creation. ([#624](https://github.com/turbot/steampipe-plugin-gcp/pull/624))
+
+## v0.55.0 [2024-07-22]
+
+_Enhancements_
+
+- Added column `create_time `to `gcp_sql_database_instance` table. ([#615](https://github.com/turbot/steampipe-plugin-gcp/pull/615))
+
+_Bug fixes_
+
+- Fixed the `gcp_alloydb_cluster` and `gcp_alloydb_instance` tables to correctly return values for `project` column instead of `null`. ([#617](https://github.com/turbot/steampipe-plugin-gcp/pull/617))
+
+## v0.54.1 [2024-07-04]
+
+_Bug fixes_
+
+- Fixed the export tool of the plugin to return a non-zero error code instead of 0 whenever an error occurred. ([#79](https://github.com/turbot/steampipe-export/pull/79))
+
+## v0.54.0 [2024-07-01]
+
+_Bug fixes_
+
+- Reverted the Export CLI behaviour to return `<nil>` for `null` values instead of `empty`. ([#77](https://github.com/turbot/steampipe-export/issues/77))
+
+## v0.53.0 [2024-06-14]
+
+_What's new?_
+
+- New tables added
+  - [gcp_alloydb_cluster](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_alloydb_cluster) ([#597](https://github.com/turbot/steampipe-plugin-gcp/pull/597))
+  - [gcp_alloydb_instance](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_alloydb_cluster) ([#597](https://github.com/turbot/steampipe-plugin-gcp/pull/597))
+  - [gcp_secret_manager_secret](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_secret_manager_secret) ([#593](https://github.com/turbot/steampipe-plugin-gcp/pull/593))
+
+_Bug fixes_
+
+- Fixed the `gcp_sql_database` table to skip SQL database instances that are not in the `running` state. ([#586](https://github.com/turbot/steampipe-plugin-gcp/pull/586))
+- Fixed the `gcp_kubernetes_node_pool` table to skip clusters that have `autopilot` mode enabled. ([#591](https://github.com/turbot/steampipe-plugin-gcp/pull/591))
+
+## v0.52.0 [2024-05-13]
+
+_Enhancements_
+
+- The `project` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple GCP projects. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#580](https://github.com/turbot/steampipe-plugin-gcp/pull/580))
+- Added the `version` flag to the plugin's Export tool. ([#65](https://github.com/turbot/steampipe-export/pull/65))
+
+_Bug fixes_
+
+- Fixed the table `gcp_cloudfunctions_function` to list `gen2` cloud functions. ([#568](https://github.com/turbot/steampipe-plugin-gcp/pull/568)) (Thanks [@ashutoshmore658](https://github.com/ashutoshmore658) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.10.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- Recompiled plugin with [github.com/hashicorp/go-getter v1.7.4](https://github.com/hashicorp/go-getter/releases/tag/v1.7.4). ([#570](https://github.com/turbot/steampipe-plugin-gcp/pull/570))
+
+## v0.51.1 [2024-04-12]
+
+_Bug fixes_
+
+- Fixed the plugin's Postgres FDW Extension crash [issue](https://github.com/turbot/steampipe-postgres-fdw/issues/434).
+
+## v0.51.0 [2024-04-05]
+
+_What's new?_
+
+- New tables added
+  - [gcp_tag_binding](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_tag_binding) ([#560](https://github.com/turbot/steampipe-plugin-gcp/pull/560))
+
+## v0.50.0 [2024-03-29]
+
+_What's new?_
+
+- New tables added
+  - [gcp_vertex_ai_model](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_vertex_ai_model) ([#555](https://github.com/turbot/steampipe-plugin-gcp/pull/555))
+
+_Enhancements_
+
+- Added support for `quota_project` config arg to provide users the ability to set the `project ID` used for billing and quota. ([#556](https://github.com/turbot/steampipe-plugin-gcp/pull/556))
+
+_Bug fixes_
+
+- Fixed the `retry_policy_maximum_backoff` and `retry_policy_minimum_backoff` columns of `gcp_pubsub_subscription` table to correctly return data. ([#552](https://github.com/turbot/steampipe-plugin-gcp/pull/552)) (Thanks to [@mvanholsteijn](https://github.com/mvanholsteijn) for the contribution!)
+
+## v0.49.0 [2024-02-02]
+
+_What's new?_
+
+- New tables added
+  - [gcp_app_engine_application](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_app_engine_application) ([#537](https://github.com/turbot/steampipe-plugin-gcp/pull/537))
+  - [gcp_compute_machine_image](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_machine_image) ([#519](https://github.com/turbot/steampipe-plugin-gcp/pull/519))
+
+## v0.48.0 [2024-01-22]
+
+_What's new?_
+
+- New tables added
+  - [gcp_cloud_asset](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_asset) ([#532](https://github.com/turbot/steampipe-plugin-gcp/pull/532))
+
+_Enhancements_
+
+- Added column `iam_policy `to `gcp_cloud_run_service` table. ([#531](https://github.com/turbot/steampipe-plugin-gcp/pull/531))
+- Optimized the `gcp_logging_log_entry` table result or result timing by applying a timestamp filter. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
+- Added the `json_payload`, `proto_payload`, `metadata`, `resource`, `operation`, and `tags` columns to `gcp_logging_log_entry` table. ([#508](https://github.com/turbot/steampipe-plugin-gcp/pull/508))
+
+_Bug fixes_
+
+- Fixed the `addons_config`, `network_config` and `network_policy` column of `gcp_kubernetes_cluster` table to correctly return data instead of null. ([#530](https://github.com/turbot/steampipe-plugin-gcp/pull/530))
+- Fixed the `end_time` column of the `gcp_sql_backup` table to return `null` instead of an error when end time is unavailable for a SQL backup. ([#534](https://github.com/turbot/steampipe-plugin-gcp/pull/534))
+- Fixed the `enqueued_time`, `start_time` and `window_start_time` columns of the `gcp_sql_backup` table to return `null` instead of an error when timestamp is unavailable for a SQL backup. ([#536](https://github.com/turbot/steampipe-plugin-gcp/pull/536))
+
+## v0.47.0 [2023-12-12]
+
+_What's new?_
+
+- The plugin can now be downloaded and used with the [Steampipe CLI](https://steampipe.io/install/steampipe.sh), as a [Postgres FDW](https://steampipe.io/install/postgres.sh), as a [SQLite extension](https://steampipe.io/install/sqlite.sh) and as a standalone [exporter](https://steampipe.io/install/export.sh).
+- The table docs have been updated to provide corresponding example queries for Postgres FDW and SQLite extension.
+- Docs license updated to match Steampipe [CC BY-NC-ND license](https://github.com/turbot/steampipe-plugin-gcp/blob/main/docs/LICENSE).
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.8.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v580-2023-12-11) that includes plugin server enacapsulation for in-process and GRPC usage, adding Steampipe Plugin SDK version to `_ctx` column, and fixing connection and potential divide-by-zero bugs. ([#521](https://github.com/turbot/steampipe-plugin-gcp/pull/521))
+
+## v0.46.0 [2023-11-16]
+
+_What's new?_
+
+- New tables added
+  - [gcp_aiplatform_endpoints](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_aiplatform_endpoints) ([#513](https://github.com/turbot/steampipe-plugin-gcp/pull/513))
+
+_Bug fixes_
+
+- Fixed the `retention_policy` column of `gcp_storage_bucket` table to correctly return data instead of null. ([#502](https://github.com/turbot/steampipe-plugin-gcp/pull/502))
+
+## v0.45.0 [2023-10-04]
+
+_What's new?_
+
+- New tables added
+  - [gcp_cloud_run_service](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_run_service) ([#497](https://github.com/turbot/steampipe-plugin-gcp/pull/497))
+  - [gcp_artifact_registry_repository](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_artifact_registry_repository) ([#496](https://github.com/turbot/steampipe-plugin-gcp/pull/496))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.6.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v562-2023-10-03) which prevents nil pointer reference errors for implicit hydrate configs. ([#498](https://github.com/turbot/steampipe-plugin-gcp/pull/498))
+
 ## v0.44.0 [2023-10-02]
 
 _Dependencies_

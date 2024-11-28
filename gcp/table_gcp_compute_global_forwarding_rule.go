@@ -160,8 +160,19 @@ func tableGcpComputeGlobalForwardingRule(ctx context.Context) *plugin.Table {
 				Description: "A list of ports can be configured.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "labels",
+				Description: "A list of labels attached to this resource.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// standard steampipe columns
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Labels"),
+			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -228,8 +239,8 @@ func listComputeGlobalForwardingRules(ctx context.Context, d *plugin.QueryData, 
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -265,8 +276,8 @@ func getComputeGlobalForwardingRule(ctx context.Context, d *plugin.QueryData, h 
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

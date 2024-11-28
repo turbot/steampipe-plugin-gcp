@@ -2,6 +2,8 @@ package gcp
 
 import (
 	"context"
+	"encoding/json"
+	"reflect"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -201,6 +203,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Name:        "addons_config",
 				Description: "Configurations for the various addons available to run in the cluster.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(gcpKubernetesClusterAddonConfig),
 			},
 			{
 				Name:        "authenticator_groups_config",
@@ -256,6 +259,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Name:        "network_config",
 				Description: "Configuration for cluster networking.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(gcpKubernetesClusterNetworkConfig),
 			},
 			{
 				Name:        "network_policy",
@@ -266,6 +270,7 @@ func tableGcpKubernetesCluster(ctx context.Context) *plugin.Table {
 				Name:        "node_config",
 				Description: "Parameters used in creating the cluster's nodes.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(gcpKubernetesClusterNodeConfig),
 			},
 			{
 				Name:        "node_pools",
@@ -356,8 +361,8 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -387,8 +392,8 @@ func getKubernetesCluster(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// Get project details
-	getProjectCached := plugin.HydrateFunc(getProject).WithCache()
-	projectId, err := getProjectCached(ctx, d, h)
+
+	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
@@ -428,6 +433,36 @@ func gcpKubernetesClusterTurbotData(ctx context.Context, d *transform.TransformD
 	return result[d.Param.(string)], nil
 }
 
+func gcpKubernetesClusterAddonConfig(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	cluster := d.HydrateItem.(*container.Cluster)
+
+	result := make(map[string]interface{})
+	extractNonNilFields(reflect.ValueOf(cluster.AddonsConfig), result)
+	jsonResult, _ := json.MarshalIndent(result, "", "    ")
+
+	return string(jsonResult), nil
+}
+
+func gcpKubernetesClusterNetworkConfig(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	cluster := d.HydrateItem.(*container.Cluster)
+
+	result := make(map[string]interface{})
+	extractNonNilFields(reflect.ValueOf(cluster.NetworkConfig), result)
+	jsonResult, _ := json.MarshalIndent(result, "", "    ")
+
+	return string(jsonResult), nil
+}
+
+func gcpKubernetesClusterNodeConfig(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	cluster := d.HydrateItem.(*container.Cluster)
+
+	result := make(map[string]interface{})
+	extractNonNilFields(reflect.ValueOf(cluster.NodeConfig), result)
+	jsonResult, _ := json.MarshalIndent(result, "", "    ")
+
+	return string(jsonResult), nil
+}
+
 func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("gcpKubernetesClusterLocationType")
 	cluster := d.HydrateItem.(*container.Cluster)
@@ -438,4 +473,42 @@ func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.Transfor
 		return "REGIONAL", nil
 	}
 	return "ZONAL", nil
+}
+
+//// UTILITY FUNCTION
+
+func extractNonNilFields(val reflect.Value, result map[string]interface{}) {
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return
+	}
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		typeField := val.Type().Field(i)
+
+		fieldName := typeField.Name
+
+		if field.Kind() == reflect.Ptr {
+			if !field.IsNil() {
+				// Create a nested map for each non-nil struct
+				nestedMap := make(map[string]interface{})
+				result[fieldName] = nestedMap
+				extractNonNilFields(field, nestedMap)
+			} else {
+				if fieldName != "NullFields" && fieldName != "ForceSendFields" {
+					// If the pointer is nil, create an empty map
+					result[fieldName] = make(map[string]interface{})
+				}
+			}
+		} else {
+			if fieldName != "NullFields" && fieldName != "ForceSendFields" {
+				// For non-pointer types, add directly to the map
+				result[fieldName] = field.Interface()
+			}
+		}
+	}
 }
