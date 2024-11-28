@@ -26,20 +26,27 @@ func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 	return func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, err error) bool {
 		gcpConfig := GetConfig(d.Connection)
 
-		if gerr, ok := err.(*googleapi.Error); ok {
+		logger := plugin.Logger(ctx)
+		logger.Trace("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "err.Error()", err.Error())
 
-			// Add to support regex match as per error message
-			for _, pattern := range gcpConfig.IgnoreErrorMessages {
-				re := regexp.MustCompile(pattern)
-				result := re.MatchString(gerr.Message)
-				if result {
-					return true
-				}
+		// Add to support regex match as per error message
+		for _, pattern := range gcpConfig.IgnoreErrorMessages {
+			logger.Trace("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "message_pattern", pattern)
+			// TODO: maybe compile these at the connection level for performance reasons
+			re := regexp.MustCompile(pattern)
+			result := re.MatchString(err.Error())
+			if result {
+				logger.Debug("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "ignore_error_message", err.Error())
+				return true
 			}
+		}
 
+		if gerr, ok := err.(*googleapi.Error); ok {
 			// Added to support regex in not found errors
 			for _, pattern := range gcpConfig.IgnoreErrorCodes {
+				logger.Trace("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "code_pattern", pattern)
 				if ok, _ := path.Match(pattern, types.ToString(gerr.Code)); ok {
+					logger.Debug("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "ignore_error_code", err.Error())
 					return true
 				}
 			}
