@@ -9,8 +9,9 @@ type gcpConfig struct {
 	Credentials               *string  `hcl:"credentials"`
 	ImpersonateAccessToken    *string  `hcl:"impersonate_access_token"`
 	ImpersonateServiceAccount *string  `hcl:"impersonate_service_account"`
-	IgnoreErrorCodes          []string `hcl:"ignore_error_codes,optional"`
-	QuotaProject              *string  `hcl:"quota_project,optional"`
+  	QuotaProject              *string  `hcl:"quota_project,optional"`
+	IgnoreErrorMessages       []string `hcl:"ignore_error_messages"`
+	IgnoreErrorCodes          []string `hcl:"ignore_error_codes"`
 }
 
 func ConfigInstance() interface{} {

@@ -31,6 +31,9 @@ connection "gcp" {
   # If neither is specified, billing and quota are tracked against the project associated with the credentials used for authentication.
   # quota_project = "YOUR_QUOTA_PROJECT_ID"
 
+  # `ignore_error_messages` (optional) - List of additional GCP error message pattern to ignore for all queries.
+  #  ignore_error_messages = ["^.*API has not been used.*$"]
+
   # `ignore_error_codes` (optional) - List of additional GCP error codes to ignore for all queries.
   # By default, common not found error codes are ignored and will still be ignored even if this argument is not set.
   # Refer https://cloud.google.com/resource-manager/docs/core_errors#Global_Errors for more information on GCP error codes
