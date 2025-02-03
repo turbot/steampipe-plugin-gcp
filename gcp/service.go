@@ -34,6 +34,7 @@ import (
 	"google.golang.org/api/monitoring/v3"
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
+	run1 "google.golang.org/api/run/v1"
 	"google.golang.org/api/run/v2"
 	"google.golang.org/api/secretmanager/v1"
 	"google.golang.org/api/serviceusage/v1"
@@ -344,6 +345,27 @@ func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, er
 
 	// so it was not in cache - create service
 	svc, err := run.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// CloudRunService returns the service connection for GCP Cloud Run service
+func CloudRunServiceV1(ctx context.Context, d *plugin.QueryData) (*run1.APIService, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "CloudRunServiceV1"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*run1.APIService), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := run1.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

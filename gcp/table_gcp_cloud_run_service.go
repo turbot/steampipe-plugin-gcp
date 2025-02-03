@@ -31,7 +31,7 @@ func tableGcpCloudRunService(ctx context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildComputeLocationList,
+		GetMatrixItemFunc: BuildCloudRunLocationList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
