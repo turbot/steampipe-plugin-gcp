@@ -72,6 +72,13 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromConstant("global"),
 			},
+			{
+				Name:        "project",
+				Description: ColumnDescriptionProject + " (Deprecated)",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getProject,
+				Transform:   transform.FromValue(),
+			},
 		},
 	}
 }
