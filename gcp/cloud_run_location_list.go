@@ -43,7 +43,6 @@ func BuildCloudRunLocationList(ctx context.Context, d *plugin.QueryData) []map[s
 	// validate location list
 	matrix := make([]map[string]interface{}, len(resp.Locations))
 	for i, location := range resp.Locations {
-		plugin.Logger(ctx).Error("Service location:", location.LocationId )
 		matrix[i] = map[string]interface{}{matrixKeyLocation: location.LocationId}
 	}
 	d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
