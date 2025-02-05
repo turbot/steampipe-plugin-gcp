@@ -31,9 +31,9 @@ func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 		// Add to support regex match as per error message
 		for _, pattern := range gcpConfig.IgnoreErrorMessages {
 			// Validate regex pattern
-			re, err := regexp.Compile(pattern)
-			if err != nil {
-				panic(err.Error() + " the regex pattern configured in 'ignore_error_messages' is invalid. Edit your connection configuration file and then restart Steampipe")
+			re, er := regexp.Compile(pattern)
+			if er != nil {
+				panic(er.Error() + " the regex pattern configured in 'ignore_error_messages' is invalid. Edit your connection configuration file and then restart Steampipe")
 			}
 			result := re.MatchString(err.Error())
 			if result {
