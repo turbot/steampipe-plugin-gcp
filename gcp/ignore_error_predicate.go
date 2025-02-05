@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"path"
+	"regexp"
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
@@ -20,27 +21,36 @@ func isIgnorableError(notFoundErrors []string) plugin.ErrorPredicate {
 	}
 }
 
-// shouldIgnoreErrorPluginDefault:: Plugin level default function to ignore a set errors for hydrate functions based on "ignore_error_codes" config argument
+// shouldIgnoreErrorPluginDefault:: Plugin level default function to ignore a set errors for hydrate functions based on "ignore_error_codes" and "ignore_error_messages" config argument
 func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 	return func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, err error) bool {
-		if !hasIgnoredErrorCodes(d.Connection) {
-			return false
+		gcpConfig := GetConfig(d.Connection)
+
+		logger := plugin.Logger(ctx)
+
+		// Add to support regex match as per error message
+		for _, pattern := range gcpConfig.IgnoreErrorMessages {
+			// Validate regex pattern
+			re, er := regexp.Compile(pattern)
+			if er != nil {
+				panic(er.Error() + " the regex pattern configured in 'ignore_error_messages' is invalid. Edit your connection configuration file and then restart Steampipe")
+			}
+			result := re.MatchString(err.Error())
+			if result {
+				logger.Debug("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "ignore_error_message", err.Error())
+				return true
+			}
 		}
 
-		gcpConfig := GetConfig(d.Connection)
 		if gerr, ok := err.(*googleapi.Error); ok {
 			// Added to support regex in not found errors
 			for _, pattern := range gcpConfig.IgnoreErrorCodes {
 				if ok, _ := path.Match(pattern, types.ToString(gerr.Code)); ok {
+					logger.Debug("ignore_error_predicate.shouldIgnoreErrorPluginDefault", "ignore_error_code", err.Error())
 					return true
 				}
 			}
 		}
 		return false
 	}
-}
-
-func hasIgnoredErrorCodes(connection *plugin.Connection) bool {
-	gcpConfig := GetConfig(connection)
-	return len(gcpConfig.IgnoreErrorCodes) > 0
 }
