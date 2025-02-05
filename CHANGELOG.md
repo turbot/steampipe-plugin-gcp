@@ -1,3 +1,18 @@
+## v1.3.0 [2025-02-05]
+
+_What's new?_
+
+- New tables added
+ - [gcp_redis_cluster](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_redis_cluster) ([#679](https://github.com/turbot/steampipe-plugin-gcp/pull/679)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+ - [gcp_organization_project](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_organization_project) ([#663](https://github.com/turbot/steampipe-plugin-gcp/pull/663)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+ - [gcp_cloud_run_job](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_cloud_run_job) ([#673](https://github.com/turbot/steampipe-plugin-gcp/pull/673)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Added `ignore_error_messages` config arg to provide users the ability to set a list of additional GCP error mesaages to ignore while running queries. For more information, please see [GCP plugin configuration](https://hub.steampipe.io/plugins/turbot/gcp#configuration).
+
+_Bug fixes_
+
+- Fixed the `unsupported region northamerica-south1` error while querying the `gcp_cloud_run_service` table. ([#707](https://github.com/turbot/steampipe-plugin-gcp/pull/707))
+- Fixed the `akas` column of `gcp_redis_cluster` and `gcp_redis_instance` tables to correctly return data instead of `null`. ([#687](https://github.com/turbot/steampipe-plugin-gcp/pull/687))
+
 ## v1.2.0 [2024-11-04]
 
 _What's new?_
