@@ -74,7 +74,7 @@ func tableGcpBillingAccount(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "project",
-				Description: ColumnDescriptionProject + " (Deprecated)",
+				Description: "[Deprecated] The GCP Project in which the resource is located.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getProject,
 				Transform:   transform.FromValue(),
