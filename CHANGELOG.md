@@ -1,3 +1,17 @@
+## v1.4.0 [2025-02-12]
+
+_Enhancements_
+
+- Added column `billing_information` to `gcp_organization_project` and `gcp_project` tables. ([#665](https://github.com/turbot/steampipe-plugin-gcp/pull/665)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Bug fixes_
+
+- Fixed the `gcp_cloud_run_job` table to correctly return data from the service supported regions instead of returning a `permission denied` error. ([#713](https://github.com/turbot/steampipe-plugin-gcp/pull/713))
+
+_Deprecated_
+
+- The `project` column in the `gcp_billing_account` table is now deprecated and will be removed in the next major version. ([#665](https://github.com/turbot/steampipe-plugin-gcp/pull/665)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
 ## v1.3.0 [2025-02-05]
 
 _What's new?_
