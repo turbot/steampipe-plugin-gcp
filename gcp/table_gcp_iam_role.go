@@ -2,9 +2,9 @@ package gcp
 
 import (
 	"context"
+	"slices"
 	"strings"
 
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -133,9 +133,9 @@ func listIamRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 	project := projectId.(string)
 
-	showDeleted := helpers.StringSliceContains(d.QueryContext.Columns, "deleted")
+	showDeleted := slices.Contains(d.QueryContext.Columns, "deleted")
 	view := "BASIC"
-	if helpers.StringSliceContains(d.QueryContext.Columns, "included_permissions") {
+	if slices.Contains(d.QueryContext.Columns, "included_permissions") {
 		view = "FULL"
 	}
 
