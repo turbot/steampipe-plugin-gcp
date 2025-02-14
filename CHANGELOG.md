@@ -1,3 +1,10 @@
+## v1.5.0 [2025-02-15]
+
+_Dependencies_
+
+- Recompiled plugin with `Go v1.231.1`. ([#714](https://github.com/turbot/steampipe-plugin-gcp/pull/714))
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.3](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5113-2025-02-11) ([#714](https://github.com/turbot/steampipe-plugin-gcp/pull/714))
+
 ## v1.4.0 [2025-02-12]
 
 _Enhancements_
