@@ -394,7 +394,7 @@ func cloudRunServiceSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin
 	projectID := strings.Split(data.Name, "/")[1]
 	name := strings.Split(data.Name, "/")[5]
 
-	selfLink := "https://run.googleapis.com/v2/projects/" + projectID + "/regions/" + location + "/repositories/" + name
+	selfLink := "https://run.googleapis.com/v2/projects/" + projectID + "/locations/" + location + "/services/" + name
 
 	return selfLink, nil
 }
@@ -413,7 +413,7 @@ func cloudRunServiceData(ctx context.Context, h *transform.TransformData) (inter
 		"Project":  projectID,
 		"Title":    name,
 		"Location": location,
-		"Akas":     []string{"gcp://run.googleapis.com/projects/" + projectID + "/repositories/" + name},
+		"Akas":     []string{"gcp://run.googleapis.com/projects/" + projectID + "/services/" + name},
 	}
 
 	return turbotData[param], nil

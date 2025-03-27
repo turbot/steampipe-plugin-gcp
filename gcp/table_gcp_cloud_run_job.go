@@ -370,7 +370,7 @@ func cloudRunJobSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	projectID := strings.Split(data.Name, "/")[1]
 	name := strings.Split(data.Name, "/")[5]
 
-	selfLink := "https://run.googleapis.com/v2/projects/" + projectID + "/regions/" + location + "/repositories/" + name
+	selfLink := "https://run.googleapis.com/v2/projects/" + projectID + "/locations/" + location + "/jobs/" + name
 
 	return selfLink, nil
 }
@@ -389,7 +389,7 @@ func cloudRunJobData(ctx context.Context, h *transform.TransformData) (interface
 		"Project":  projectID,
 		"Title":    name,
 		"Location": location,
-		"Akas":     []string{"gcp://run.googleapis.com/projects/" + projectID + "/repositories/" + name},
+		"Akas":     []string{"gcp://run.googleapis.com/projects/" + projectID + "/jobs/" + name},
 	}
 
 	return turbotData[param], nil
