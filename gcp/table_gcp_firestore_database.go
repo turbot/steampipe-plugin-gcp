@@ -169,7 +169,7 @@ func listFirestoreDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// List databases
 	parent := "projects/" + project
-	resp, err := service.Projects.Databases.List(parent).Do()
+	resp, err := service.Projects.Databases.List(parent).ShowDeleted(true).Do()
 	if err != nil {
 		return nil, err
 	}
