@@ -228,24 +228,3 @@ func firestoreDatabaseSelfLink(_ context.Context, d *transform.TransformData) (i
 	selfLink := "https://firestore.googleapis.com/v1/" + data.Name
 	return selfLink, nil
 }
-
-// FirestoreDatabaseService returns the service connection for GCP Firestore service
-func FirestoreDatabaseService(ctx context.Context, d *plugin.QueryData) (*firestore.Service, error) {
-	// Have we already created and cached the service?
-	serviceCacheKey := "FirestoreDatabaseService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*firestore.Service), nil
-	}
-
-	// To get config arguments from plugin config file
-	opts := setSessionConfig(ctx, d.Connection)
-
-	// Create service
-	svc, err := firestore.NewService(ctx, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
-	return svc, nil
-}

@@ -28,6 +28,7 @@ import (
 	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/essentialcontacts/v1"
+	"google.golang.org/api/firestore/v1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/metastore/v1"
@@ -639,6 +640,27 @@ func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) 
 
 	// so it was not in cache - create service
 	svc, err := dns.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// FirestoreDatabaseService returns the service connection for GCP Firestore service
+func FirestoreDatabaseService(ctx context.Context, d *plugin.QueryData) (*firestore.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "FirestoreDatabaseService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*firestore.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := firestore.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
