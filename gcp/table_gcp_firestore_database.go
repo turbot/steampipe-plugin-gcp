@@ -152,7 +152,7 @@ func tableGcpFirestoreDatabase(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listFirestoreDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listFirestoreDatabases")
+	plugin.Logger(ctx).Trace("gcp_firestore_database.listFirestoreDatabases")
 
 	// Create Service Connection
 	service, err := FirestoreDatabaseService(ctx, d)
@@ -166,11 +166,13 @@ func listFirestoreDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 	project := projectId.(string)
+	plugin.Logger(ctx).Debug("gcp_firestore_database.listFirestoreDatabases", "project_id", project)
 
 	// List databases
 	parent := "projects/" + project
 	resp, err := service.Projects.Databases.List(parent).ShowDeleted(true).Do()
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_firestore_database.listFirestoreDatabases", "api", err)
 		return nil, err
 	}
 
@@ -188,7 +190,7 @@ func listFirestoreDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 //// HYDRATE FUNCTIONS
 
 func getFirestoreDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getFirestoreDatabase")
+	plugin.Logger(ctx).Trace("gcp_firestore_database.getFirestoreDatabase")
 
 	// Create Service Connection
 	service, err := FirestoreDatabaseService(ctx, d)
@@ -202,6 +204,7 @@ func getFirestoreDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		return nil, err
 	}
 	project := projectId.(string)
+	plugin.Logger(ctx).Debug("gcp_firestore_database.getFirestoreDatabase", "project_id", project)
 
 	name := d.EqualsQuals["name"].GetStringValue()
 	if name == "" {
@@ -216,7 +219,7 @@ func getFirestoreDatabase(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	// Get database info
 	database, err := service.Projects.Databases.Get(name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("getFirestoreDatabase", "error", err)
+		plugin.Logger(ctx).Error("gcp_firestore_database.getFirestoreDatabase", "api", err)
 		return nil, err
 	}
 
