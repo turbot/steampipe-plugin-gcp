@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/query_cache"
 
 	"google.golang.org/api/firestore/v1"
 )
@@ -23,8 +24,18 @@ func tableGcpFirestoreDatabase(ctx context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listFirestoreDatabases,
+			KeyColumns: []*plugin.KeyColumn{
+				{Name: "show_deleted", Require: plugin.Optional, CacheMatch: query_cache.CacheMatchExact},
+			},
 		},
 		Columns: []*plugin.Column{
+			{
+				Name:        "show_deleted",
+				Type:        proto.ColumnType_BOOL,
+				Description: "Should deleted databases be shown?",
+				Transform:   transform.FromQual("show_deleted"),
+				Default:     false,
+			},
 			{
 				Name:        "app_engine_integration_mode",
 				Description: "The App Engine integration mode to use for this database.",
@@ -166,9 +177,15 @@ func listFirestoreDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 	project := projectId.(string)
 
+	// Get showDeleted qual
+	showDeleted := false
+	if v, ok := d.EqualsQuals["show_deleted"]; ok {
+		showDeleted = v.GetBoolValue()
+	}
+
 	// List databases
 	parent := "projects/" + project
-	resp, err := service.Projects.Databases.List(parent).ShowDeleted(true).Do()
+	resp, err := service.Projects.Databases.List(parent).ShowDeleted(showDeleted).Do()
 	if err != nil {
 		plugin.Logger(ctx).Error("gcp_firestore_database.listFirestoreDatabases", "api", err)
 		return nil, err
