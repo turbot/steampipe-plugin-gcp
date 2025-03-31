@@ -31,11 +31,6 @@ func tableGcpFirestoreDatabase(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "cmek_config",
-				Description: "The CMEK (Customer Managed Encryption Key) configuration for the database.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "concurrency_mode",
 				Description: "The concurrency control mode to use for this database.",
 				Type:        proto.ColumnType_STRING,
@@ -93,11 +88,6 @@ func tableGcpFirestoreDatabase(ctx context.Context) *plugin.Table {
 				Transform:   transform.From(firestoreDatabaseSelfLink),
 			},
 			{
-				Name:        "source_info",
-				Description: "Information about the provenance of this database.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "type",
 				Description: "The type of the database. Can be FIRESTORE_NATIVE or DATASTORE_MODE.",
 				Type:        proto.ColumnType_STRING,
@@ -116,6 +106,16 @@ func tableGcpFirestoreDatabase(ctx context.Context) *plugin.Table {
 				Name:        "version_retention_period",
 				Description: "The period during which past versions of data are retained in the database.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "cmek_config",
+				Description: "The CMEK (Customer Managed Encryption Key) configuration for the database.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "source_info",
+				Description: "Information about the provenance of this database.",
+				Type:        proto.ColumnType_JSON,
 			},
 
 			// Standard steampipe columns
