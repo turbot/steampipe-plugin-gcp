@@ -32,7 +32,7 @@ func tableGcpFirestoreDatabase(ctx context.Context) *plugin.Table {
 			{
 				Name:        "show_deleted",
 				Type:        proto.ColumnType_BOOL,
-				Description: "Should deleted databases be shown?",
+				Description: "Set to true to include deleted databases in the query results. By default, deleted databases are excluded.",
 				Transform:   transform.FromQual("show_deleted"),
 				Default:     false,
 			},
