@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_vertex_ai_model - Query GCP Vertex AI Models using SQL"
 description: "Allows users to query GCP Vertex AI Models, specifically the detailed information about each model in the Google Cloud project."
+folder: "Vertex AI"
 ---
 
 # Table: gcp_vertex_ai_model - Query GCP Vertex AI Models using SQL

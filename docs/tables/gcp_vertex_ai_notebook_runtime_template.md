@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_vertex_ai_notebook_runtime_template - Query GCP Vertex AI Notebook Runtime Templates using SQL"
 description: "Allows users to query GCP Vertex AI Notebook Runtime Templates, providing detailed information on configuration, machine specs, networking, and other related details."
+folder: "Vertex AI"
 ---
 
 # Table: gcp_vertex_ai_notebook_runtime_template - Query GCP Vertex AI Notebook Runtime Templates using SQL

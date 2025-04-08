@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_cloudfunctions_function - Query Google Cloud Platform Cloud Functions using SQL"
 description: "Allows users to query Cloud Functions in Google Cloud Platform, specifically the configuration, status, and metadata of each function, providing insights into the function's behavior and usage."
+folder: "Cloud Functions"
 ---
 
 # Table: gcp_cloudfunctions_function - Query Google Cloud Platform Cloud Functions using SQL

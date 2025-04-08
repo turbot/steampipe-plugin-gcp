@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_monitoring_notification_channel - Query GCP Monitoring Notification Channels using SQL"
 description: "Allows users to query GCP Monitoring Notification Channels, specifically to retrieve channel-specific details such as type, display name, labels, and verification status."
+folder: "Cloud Monitoring"
 ---
 
 # Table: gcp_monitoring_notification_channel - Query GCP Monitoring Notification Channels using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_service_account_key - Query Google Cloud Platform Service Account Keys using SQL"
 description: "Allows users to query Service Account Keys in Google Cloud Platform, providing details about the keys associated with service accounts."
+folder: "Service Account"
 ---
 
 # Table: gcp_service_account_key - Query Google Cloud Platform Service Account Keys using SQL

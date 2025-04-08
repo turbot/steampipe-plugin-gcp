@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_cloud_identity_group_membership - Query GCP Cloud Identity Group Memberships using SQL"
 description: "Allows users to query GCP Cloud Identity Group Memberships, specifically the details of a group's members, providing insights into the group's structure and member roles."
+folder: "Cloud Identity"
 ---
 
 # Table: gcp_cloud_identity_group_membership - Query GCP Cloud Identity Group Memberships using SQL

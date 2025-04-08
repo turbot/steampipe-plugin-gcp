@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_app_engine_application - Query App Engine Application using SQL"
 description: "Allows users to query App Engine Application in Google Cloud Platform (GCP), specifically the details about the application, including their name, location, service account, storage bucket, database type and serving_status."
+folder: "App Engine"
 ---
 
 # Table: gcp_app_engine_application - Query App Engine Application using SQL

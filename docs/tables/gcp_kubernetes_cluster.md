@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_kubernetes_cluster - Query Google Cloud Platform Kubernetes Clusters using SQL"
 description: "Allows users to query Kubernetes Clusters in Google Cloud Platform, specifically providing details about the cluster configurations, node pools, network settings, and more."
+folder: "GKE"
 ---
 
 # Table: gcp_kubernetes_cluster - Query Google Cloud Platform Kubernetes Clusters using SQL

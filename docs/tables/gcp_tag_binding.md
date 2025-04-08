@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_tag_binding - Query GCP Tag Bindings using SQL"
 description: "Allows users to query GCP Tag Bindings, specifically the detailed information about each tag binding in the Google Cloud project."
+folder: "Resource Tags"
 ---
 
 # Table: gcp_tag_binding - Query GCP Tag Bindings using SQL

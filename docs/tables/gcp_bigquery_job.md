@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_bigquery_job - Query GCP BigQuery Jobs using SQL"
 description: "Allows users to query BigQuery Jobs in Google Cloud Platform (GCP), providing insights into job configuration, statistics, and status."
+folder: "BigQuery"
 ---
 
 # Table: gcp_bigquery_job - Query GCP BigQuery Jobs using SQL

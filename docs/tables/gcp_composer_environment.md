@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_composer_environment - Query GCP Composer Environments using SQL"
 description: "Allows users to query GCP Composer environments, providing detailed information on environment configurations, resources, and associated services."
+folder: "Cloud Composer"
 ---
 
 # Table: gcp_composer_environment - Query GCP Composer Environments using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dns_managed_zone - Query Google Cloud DNS Managed Zones using SQL"
 description: "Allows users to query Google Cloud DNS Managed Zones, specifically the configuration and status details, providing insights into DNS management and potential configuration issues."
+folder: "Cloud DNS"
 ---
 
 # Table: gcp_dns_managed_zone - Query Google Cloud DNS Managed Zones using SQL

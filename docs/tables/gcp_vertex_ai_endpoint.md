@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_vertex_ai_endpoint - Query GCP Vertex AI Endpoints using SQL"
 description: "Allows users to query GCP Vertex AI Endpoints, specifically the detailed information about each endpoint in the Google Cloud project."
+folder: "Vertex AI"
 ---
 
 # Table: gcp_vertex_ai_endpoint - Query GCP Vertex AI Endpoints using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_logging_sink - Query GCP Logging Sinks using SQL"
 description: "Allows users to query GCP Logging Sinks, providing a comprehensive view of the logging sinks configured in the Google Cloud environment."
+folder: "Cloud Logging"
 ---
 
 # Table: gcp_logging_sink - Query GCP Logging Sinks using SQL

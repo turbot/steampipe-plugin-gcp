@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dataproc_metastore_service - Query GCP Dataproc Metastore Services using SQL"
 description: "Allows users to query GCP Dataproc Metastore services, providing detailed information on service configurations, networking, and scaling settings."
+folder: "Dataproc"
 ---
 
 # Table: gcp_dataproc_metastore_service - Query GCP Dataproc Metastore Services using SQL

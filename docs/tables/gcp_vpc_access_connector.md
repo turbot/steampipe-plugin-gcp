@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_vpc_access_connector - Query GCP VPC Access Connectors using SQL"
 description: "Allows users to query GCP VPC Access Connectors, providing detailed information on connector configurations, associated projects, and network settings."
+folder: "VPC Access"
 ---
 
 # Table: gcp_vpc_access_connector - Query GCP VPC Access Connectors using SQL

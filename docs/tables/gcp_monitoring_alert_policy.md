@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_monitoring_alert_policy - Query Google Cloud Monitoring Alert Policies using SQL"
 description: "Allows users to query Google Cloud Monitoring Alert Policies, specifically providing insights into policy details, conditions, and notification channels."
+folder: "Cloud Monitoring"
 ---
 
 # Table: gcp_monitoring_alert_policy - Query Google Cloud Monitoring Alert Policies using SQL

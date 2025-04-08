@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_cloud_run_job - Query GCP Cloud Run Jobs using SQL"
 description: "Allows users to query GCP Cloud Run Jobs, specifically the configurations and executions, providing insights into the application's deployment history."
+folder: "Cloud Run"
 ---
 
 # Table: gcp_cloud_run_job - Query GCP Cloud Run Jobs using SQL

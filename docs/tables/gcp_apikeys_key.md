@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_apikeys_key - Query GCP API Keys using SQL"
 description: "Allows users to query API Keys in GCP, specifically the details of each API key and its associated metadata, providing insights into key usage and permissions."
+folder: "API Keys"
 ---
 
 # Table: gcp_apikeys_key - Query GCP API Keys using SQL

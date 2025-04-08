@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_kms_key_ring - Query Google Cloud Key Management Service Key Rings using SQL"
 description: "Allows users to query Google Cloud KMS Key Rings, providing detailed information about each key ring including its name, creation time, and location."
+folder: "KMS"
 ---
 
 # Table: gcp_kms_key_ring - Query Google Cloud Key Management Service Key Rings using SQL

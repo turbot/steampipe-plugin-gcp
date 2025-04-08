@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_logging_log_entry - Query Google Cloud Logging Log Entries using SQL"
 description: "Allows users to query Log Entries in Google Cloud Logging, providing insights into system events, application behavior, and user actions."
+folder: "Cloud Logging"
 ---
 
 # Table: gcp_logging_log_entry - Query Google Cloud Logging Log Entries using SQL

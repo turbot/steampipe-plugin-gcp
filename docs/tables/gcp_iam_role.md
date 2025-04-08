@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_iam_role - Query Google Cloud IAM Roles using SQL"
 description: "Allows users to query IAM Roles in Google Cloud, specifically the role name, title, description, permissions, and stage, providing insights into role-specific details and permissions."
+folder: "IAM"
 ---
 
 # Table: gcp_iam_role - Query Google Cloud IAM Roles using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_iam_policy - Query Google Cloud IAM Policies using SQL"
 description: "Allows users to query IAM Policies in Google Cloud, specifically the policy bindings and members, providing insights into access control and permissions."
+folder: "IAM"
 ---
 
 # Table: gcp_iam_policy - Query Google Cloud IAM Policies using SQL

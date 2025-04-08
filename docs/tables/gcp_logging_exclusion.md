@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_logging_exclusion - Query Google Cloud Platform Logging Exclusions using SQL"
 description: "Allows users to query Logging Exclusions in Google Cloud Platform, specifically the filters and details of the excluded logs, providing insights into log management and potential security implications."
+folder: "Cloud Logging"
 ---
 
 # Table: gcp_logging_exclusion - Query Google Cloud Platform Logging Exclusions using SQL

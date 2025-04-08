@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_kubernetes_node_pool - Query GCP Kubernetes Node Pools using SQL"
 description: "Allows users to query GCP Kubernetes Node Pools, providing details on configuration and status of each node pool within the cluster."
+folder: "GKE"
 ---
 
 # Table: gcp_kubernetes_node_pool - Query GCP Kubernetes Node Pools using SQL

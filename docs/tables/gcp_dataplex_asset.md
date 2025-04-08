@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dataplex_asset - Query GCP Dataplex Assets using SQL"
 description: "Allows users to query GCP Dataplex assets, providing detailed information on asset configurations, discovery status, and associated resources."
+folder: "Dataplex"
 ---
 
 # Table: gcp_dataplex_asset - Query GCP Dataplex Assets using SQL

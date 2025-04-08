@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dns_policy - Query Google Cloud DNS Policies using SQL"
 description: "Allows users to query Google Cloud DNS Policies, providing insights into policy configurations and settings."
+folder: "Cloud DNS"
 ---
 
 # Table: gcp_dns_policy - Query Google Cloud DNS Policies using SQL

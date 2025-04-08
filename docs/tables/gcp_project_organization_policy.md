@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_project_organization_policy - Query GCP Project Organization Policies using SQL"
 description: "Allows users to query Project Organization Policies in GCP, specifically the policy details, providing insights into organization level policies and their impact on the project."
+folder: "Organization"
 ---
 
 # Table: gcp_project_organization_policy - Query GCP Project Organization Policies using SQL

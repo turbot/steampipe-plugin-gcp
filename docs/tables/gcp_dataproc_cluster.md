@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dataproc_cluster - Query Google Cloud Platform Dataproc Clusters using SQL"
 description: "Allows users to query Google Cloud Platform Dataproc Clusters, providing insights into cluster configurations, status, and associated metadata."
+folder: "Dataproc"
 ---
 
 # Table: gcp_dataproc_cluster - Query Google Cloud Platform Dataproc Clusters using SQL

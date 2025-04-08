@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_alloydb_cluster - Query Google Cloud Platform AlloyDB Clusters using SQL"
 description: "Allows users to query Google Cloud Platform AlloyDB Clusters, providing insights into cluster configurations, status, and associated metadata."
+folder: "AlloyDB"
 ---
 
 # Table: gcp_alloydb_cluster - Query Google Cloud Platform AlloyDB Clusters using SQL
