@@ -1,3 +1,13 @@
+## v1.6.0 [2025-04-14]
+
+_Enhancements_
+
+- Added `folder` metadata to the documentation of all the GCP tables for improved organization on the Steampipe Hub. ([#740](https://github.com/turbot/steampipe-plugin-gcp/pull/740))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.5](https://github.com/turbot/steampipe-plugin-sdk/releases/tag/v5.11.5) ([#737](https://github.com/turbot/steampipe-plugin-gcp/pull/737))
+
 ## v1.5.0 [2025-02-15]
 
 _Dependencies_
