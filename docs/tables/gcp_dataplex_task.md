@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dataplex_task - Query GCP Dataplex Tasks using SQL"
 description: "Allows users to query GCP Dataplex Tasks, providing detailed information about each task's configuration, execution, and status."
+folder: "Dataplex"
 ---
 
 # Table: gcp_dataplex_task - Query GCP Dataplex Tasks using SQL

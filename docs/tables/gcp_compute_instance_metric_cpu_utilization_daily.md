@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_instance_metric_cpu_utilization_daily - Query GCP Compute Engine Instances using SQL"
 description: "Allows users to query daily CPU utilization metrics of GCP Compute Engine Instances, providing insights into their performance and resource usage patterns."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_instance_metric_cpu_utilization_daily - Query GCP Compute Engine Instances using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_resource_policy - Query GCP Compute Engine Resource Policies using SQL"
 description: "Allows users to query Resource Policies in Google Cloud's Compute Engine, providing insights into the rules that schedule disk snapshot and VM operations."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_resource_policy - Query GCP Compute Engine Resource Policies using SQL

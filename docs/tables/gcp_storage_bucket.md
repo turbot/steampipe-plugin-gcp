@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_storage_bucket - Query Google Cloud Storage Buckets using SQL"
 description: "Allows users to query Google Cloud Storage Buckets, providing detailed information about each bucket's configuration, access controls, and associated metadata."
+folder: "Cloud Storage"
 ---
 
 # Table: gcp_storage_bucket - Query Google Cloud Storage Buckets using SQL

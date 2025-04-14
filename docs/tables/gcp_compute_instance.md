@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_instance - Query Google Compute Engine Instances using SQL"
 description: "Allows users to query Google Compute Engine Instances, providing detailed information about each instance's configuration, status, and associated resources."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_instance - Query Google Compute Engine Instances using SQL

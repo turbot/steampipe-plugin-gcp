@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_kms_key_version - Query Google Cloud KMS Key Versions using SQL"
 description: "Allows users to query Google Cloud KMS Key Versions, specifically the key version details, providing insights into key management and security compliance."
+folder: "KMS"
 ---
 
 # Table: gcp_kms_key_version - Query Google Cloud KMS Key Versions using SQL

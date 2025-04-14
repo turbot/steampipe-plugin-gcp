@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_storage_object - Query Google Cloud Storage Objects using SQL"
 description: "Allows users to query Google Cloud Storage Objects, specifically the metadata and details of each object stored in Google Cloud Storage."
+folder: "Cloud Storage"
 ---
 
 # Table: gcp_storage_object - Query Google Cloud Storage Objects using SQL

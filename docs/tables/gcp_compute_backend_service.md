@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_backend_service - Query Google Cloud Compute Engine Backend Services using SQL"
 description: "Allows users to query Google Cloud Compute Engine Backend Services, specifically providing insights into the configuration and status of these services."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_backend_service - Query Google Cloud Compute Engine Backend Services using SQL

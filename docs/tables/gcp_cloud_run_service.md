@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_cloud_run_service - Query GCP Cloud Run Services using SQL"
 description: "Allows users to query GCP Cloud Run Services, specifically the configurations, revisions, and routes, providing insights into the application's traffic flow and deployment history."
+folder: "Cloud Run"
 ---
 
 # Table: gcp_cloud_run_service - Query GCP Cloud Run Services using SQL

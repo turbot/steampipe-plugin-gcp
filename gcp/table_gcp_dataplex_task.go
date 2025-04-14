@@ -16,7 +16,7 @@ import (
 func tableGcpDataplexTask(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_dataplex_task",
-		Description: "GCP Dataplex Lake",
+		Description: "GCP Dataplex Task",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDataplexTask,

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_secret_manager_secret - Query Google Cloud Platform Secret Manager Secrets using SQL"
 description: "Allows users to query Secret Manager secrets in Google Cloud Platform, providing details about the secrets stored within Secret Manager."
+folder: "Secret Manager"
 ---
 
 # Table: gcp_secret_manager_secret - Query Google Cloud Platform Secret Manager Secrets using SQL

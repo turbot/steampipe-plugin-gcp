@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database_instance_metric_connections - Query Google Cloud SQL Database Instance Connections using SQL"
 description: "Allows users to query Google Cloud SQL Database Instance Connections, specifically the current client connections to a Cloud SQL database instance, providing insights into connection patterns and potential issues."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database_instance_metric_connections - Query Google Cloud SQL Database Instance Connections using SQL

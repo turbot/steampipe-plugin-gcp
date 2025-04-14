@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_url_map - Query Google Cloud Compute Engine URL Maps using SQL"
 description: "Allows users to query URL Maps in Google Cloud Compute Engine, providing details about the routing rules and host rules."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_url_map - Query Google Cloud Compute Engine URL Maps using SQL

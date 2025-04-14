@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_logging_metric - Query Google Cloud Platform Logging Metrics using SQL"
 description: "Allows users to query Logging Metrics in Google Cloud Platform, specifically retrieving information about user-defined metrics based on logs, which can be used for monitoring and automating responses to specific log entries."
+folder: "Cloud Logging"
 ---
 
 # Table: gcp_logging_metric - Query Google Cloud Platform Logging Metrics using SQL

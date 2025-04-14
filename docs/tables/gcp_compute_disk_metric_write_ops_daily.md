@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_disk_metric_write_ops_daily - Query GCP Compute Engine Disk Metrics using SQL"
 description: "Allows users to query Compute Engine Disk Metrics in GCP, specifically the daily write operations count, providing insights into disk usage and potential efficiency improvements."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_disk_metric_write_ops_daily - Query GCP Compute Engine Disk Metrics using SQL

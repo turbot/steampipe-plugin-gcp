@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_firewall - Query Google Cloud Compute Engine Firewalls using SQL"
 description: "Allows users to query Google Cloud Compute Engine Firewalls, providing insights into firewall rules and their configurations."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_firewall - Query Google Cloud Compute Engine Firewalls using SQL

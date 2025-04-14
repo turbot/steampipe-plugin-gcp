@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database_instance_metric_cpu_utilization_hourly - Query Google Cloud SQL Database Instances using SQL"
 description: "Allows users to query Google Cloud SQL Database Instances, specifically hourly CPU utilization metrics, providing insights into resource usage and potential performance bottlenecks."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database_instance_metric_cpu_utilization_hourly - Query Google Cloud SQL Database Instances using SQL

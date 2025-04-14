@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_redis_instance - Query Google Cloud Platform Memorystore Redis Instances using SQL"
 description: "Allows users to query Memorystore Redis Instances on Google Cloud Platform, providing detailed information about each instance."
+folder: "Memorystore"
 ---
 
 # Table: gcp_redis_instance - Query Google Cloud Platform Memorystore Redis Instances using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_audit_policy - Query Google Cloud Platform Audit Policies using SQL"
 description: "Allows users to query Audit Policies in Google Cloud Platform, specifically the settings and configurations of all audit policies, providing insights into compliance and security posture."
+folder: "Audit Policy"
 ---
 
 # Table: gcp_audit_policy - Query Google Cloud Platform Audit Policies using SQL

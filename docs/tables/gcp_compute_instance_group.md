@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_instance_group - Query Google Cloud Compute Engine Instance Groups using SQL"
 description: "Allows users to query Google Cloud Compute Engine Instance Groups, providing insights into the configuration, status, and properties of these groups."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_instance_group - Query Google Cloud Compute Engine Instance Groups using SQL

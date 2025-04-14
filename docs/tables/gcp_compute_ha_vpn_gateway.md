@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_ha_vpn_gateway - Query GCP Compute HA VPN Gateways using SQL"
 description: "Allows users to query HA VPN Gateways in GCP Compute, specifically providing details about the gateways such as their ID, name, creation timestamp, and associated network details."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_ha_vpn_gateway - Query GCP Compute HA VPN Gateways using SQL

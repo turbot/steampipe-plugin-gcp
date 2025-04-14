@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_router - Query Google Cloud Platform Compute Routers using SQL"
 description: "Allows users to query Compute Routers in Google Cloud Platform, providing insights into the configuration and status of cloud routers within a project."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_router - Query Google Cloud Platform Compute Routers using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_bigquery_dataset - Query Google Cloud Platform BigQuery Datasets using SQL"
 description: "Allows users to query BigQuery Datasets in Google Cloud Platform, providing insights into dataset configurations and access controls."
+folder: "BigQuery"
 ---
 
 # Table: gcp_bigquery_dataset - Query Google Cloud Platform BigQuery Datasets using SQL

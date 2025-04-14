@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_bigquery_table - Query BigQuery Tables using SQL"
 description: "Allows users to query BigQuery Tables in Google Cloud Platform (GCP), specifically the table details including creation time, expiration time, labels, and more."
+folder: "BigQuery"
 ---
 
 # Table: gcp_bigquery_table - Query BigQuery Tables using SQL

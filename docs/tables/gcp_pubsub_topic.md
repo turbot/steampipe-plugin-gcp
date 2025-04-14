@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_pubsub_topic - Query GCP PubSub Topics using SQL"
 description: "Allows users to query GCP PubSub Topics, specifically returning details such as topic name, project ID, and subscription information, providing insights into topic configurations and subscription details."
+folder: "Pub/Sub"
 ---
 
 # Table: gcp_pubsub_topic - Query GCP PubSub Topics using SQL

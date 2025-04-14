@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_global_address - Query Google Cloud Compute Engine Global Addresses using SQL"
 description: "Allows users to query Google Cloud Compute Engine Global Addresses, providing detailed information about the allocation method, network tier, and purpose of each address."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_global_address - Query Google Cloud Compute Engine Global Addresses using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_billing_budget - Query GCP Billing Budgets using SQL"
 description: "Allows users to query Billing Budgets in Google Cloud Platform, specifically the budget amount, associated projects, and alert thresholds, providing insights into budget management and cost control."
+folder: "Billing"
 ---
 
 # Table: gcp_billing_budget - Query GCP Billing Budgets using SQL

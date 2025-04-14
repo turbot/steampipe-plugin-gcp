@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_vpn_tunnel - Query GCP Compute VPN Tunnels using SQL"
 description: "Allows users to query GCP Compute VPN Tunnels, providing details about the VPN Tunnels in Google Cloud Platform's Compute service."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_vpn_tunnel - Query GCP Compute VPN Tunnels using SQL

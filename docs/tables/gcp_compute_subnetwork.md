@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_subnetwork - Query Google Cloud Compute Engine Subnetworks using SQL"
 description: "Allows users to query Google Cloud Compute Engine Subnetworks, providing insights into the configuration and status of each subnetwork."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_subnetwork - Query Google Cloud Compute Engine Subnetworks using SQL

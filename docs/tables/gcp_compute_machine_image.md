@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_machine_image - Query Google Cloud Platform Compute Machine Image using SQL"
 description: "Allows users to query Compute Machine Images in Google Cloud Platform, providing detailed information about available machine images and their specifications."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_machine_image - Query Google Cloud Platform Compute Machine Image using SQL

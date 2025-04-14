@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_network - Query Google Cloud Platform Compute Networks using SQL"
 description: "Allows users to query Compute Networks in Google Cloud Platform, specifically providing insights into network configurations, including subnetworks, firewall rules, and routing information."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_network - Query Google Cloud Platform Compute Networks using SQL

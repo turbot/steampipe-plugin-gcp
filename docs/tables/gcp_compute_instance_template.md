@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_instance_template - Query Google Cloud Compute Engine Instance Templates using SQL"
 description: "Allows users to query Instance Templates in Google Cloud Compute Engine, specifically providing details about the configuration of virtual machine instances in an instance group."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_instance_template - Query Google Cloud Compute Engine Instance Templates using SQL

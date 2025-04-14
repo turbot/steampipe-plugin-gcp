@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_node_group - Query Google Cloud Platform Compute Node Groups using SQL"
 description: "Allows users to query Compute Node Groups in Google Cloud Platform, providing insights into the configuration, status, and metadata of node groups."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_node_group - Query Google Cloud Platform Compute Node Groups using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_project - Query Google Cloud Platform Projects using SQL"
 description: "Allows users to query Projects in Google Cloud Platform, specifically providing details about the project's ID, name, labels, and lifecycle state."
+folder: "Project"
 ---
 
 # Table: gcp_project - Query Google Cloud Platform Projects using SQL

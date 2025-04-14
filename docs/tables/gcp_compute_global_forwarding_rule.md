@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_global_forwarding_rule - Query GCP Compute Global Forwarding Rules using SQL"
 description: "Allows users to query GCP Compute Global Forwarding Rules, providing insights into network traffic routing and load balancing configurations."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_global_forwarding_rule - Query GCP Compute Global Forwarding Rules using SQL

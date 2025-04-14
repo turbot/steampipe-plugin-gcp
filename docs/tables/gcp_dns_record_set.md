@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dns_record_set - Query GCP DNS Record Sets using SQL"
 description: "Allows users to query DNS Record Sets in Google Cloud Platform (GCP), specifically the details of each record set, providing insights into DNS configurations and potential anomalies."
+folder: "Cloud DNS"
 ---
 
 # Table: gcp_dns_record_set - Query GCP DNS Record Sets using SQL

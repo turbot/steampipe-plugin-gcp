@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dataplex_lake - Query GCP Dataplex Lakes using SQL"
 description: "Allows users to query GCP Dataplex Lakes, providing detailed information about each lake's configuration, status, and metadata."
+folder: "Dataplex"
 ---
 
 # Table: gcp_dataplex_lake - Query GCP Dataplex Lakes using SQL

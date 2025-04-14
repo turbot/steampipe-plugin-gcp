@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_artifact_registry_repository - Query Artifact Registry Repositories using SQL"
 description: "Allows users to query Artifact Registry Repositories in Google Cloud Platform (GCP), specifically the details about the repositories, including their name, location, format, and creation time."
+folder: "Artifact Registry"
 ---
 
 # Table: gcp_artifact_registry_repository - Query Artifact Registry Repositories using SQL

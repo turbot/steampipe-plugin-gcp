@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_organization - Query GCP Organizations using SQL"
 description: "Allows users to query GCP Organizations, specifically their metadata, providing insights into their configuration and governance."
+folder: "Organization"
 ---
 
 # Table: gcp_organization - Query GCP Organizations using SQL

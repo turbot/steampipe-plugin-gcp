@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_project_metadata - Query Google Cloud Compute Engine Project Metadata using SQL"
 description: "Allows users to query Project Metadata in Google Cloud Compute Engine, specifically the project-wide metadata that includes common instance metadata and enable-oslogin metadata."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_project_metadata - Query Google Cloud Compute Engine Project Metadata using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_billing_account - Query GCP Billing Accounts using SQL"
 description: "Allows users to query GCP Billing Accounts, providing insights into the billing information, payment status, and open status of each account."
+folder: "Billing"
 ---
 
 # Table: gcp_billing_account - Query GCP Billing Accounts using SQL

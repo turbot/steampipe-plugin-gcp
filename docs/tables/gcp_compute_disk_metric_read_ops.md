@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_disk_metric_read_ops - Query Google Cloud Compute Engine Disk Read Operations using SQL"
 description: "Allows users to query Disk Read Operations in Google Cloud's Compute Engine, specifically the number of read operations completed, providing insights into disk usage and potential performance issues."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_disk_metric_read_ops - Query Google Cloud Compute Engine Disk Read Operations using SQL

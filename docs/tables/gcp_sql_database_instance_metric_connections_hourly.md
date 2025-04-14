@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database_instance_metric_connections_hourly - Query GCP SQL Database Instances using SQL"
 description: "Allows users to query GCP SQL Database Instances, specifically the hourly metric connections, providing insights into database connection patterns and potential issues."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database_instance_metric_connections_hourly - Query GCP SQL Database Instances using SQL

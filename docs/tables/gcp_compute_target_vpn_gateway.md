@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_target_vpn_gateway - Query GCP Compute Engine Target VPN Gateways using SQL"
 description: "Allows users to query Target VPN Gateways in GCP Compute Engine, enabling insights into the VPN gateways that funnel traffic between your virtual network and your on-premises network."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_target_vpn_gateway - Query GCP Compute Engine Target VPN Gateways using SQL

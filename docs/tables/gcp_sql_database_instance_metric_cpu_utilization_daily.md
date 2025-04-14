@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database_instance_metric_cpu_utilization_daily - Query GCP SQL Database Instance Metrics using SQL"
 description: "Allows users to query SQL Database Instance Metrics in GCP, specifically the daily CPU utilization, providing insights into resource usage patterns and potential performance bottlenecks."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database_instance_metric_cpu_utilization_daily - Query GCP SQL Database Instance Metrics using SQL

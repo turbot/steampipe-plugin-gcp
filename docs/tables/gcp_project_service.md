@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_project_service - Query Google Cloud Platform Project Services using SQL"
 description: "Allows users to query Project Services in Google Cloud Platform, specifically to get details about the enabled APIs and services for each project."
+folder: "Project"
 ---
 
 # Table: gcp_project_service - Query Google Cloud Platform Project Services using SQL

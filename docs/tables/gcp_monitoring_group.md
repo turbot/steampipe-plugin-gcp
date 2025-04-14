@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_monitoring_group - Query GCP Monitoring Groups using SQL"
 description: "Allows users to query Monitoring Groups in GCP, providing insights into various group configurations and their associated metrics."
+folder: "Cloud Monitoring"
 ---
 
 # Table: gcp_monitoring_group - Query GCP Monitoring Groups using SQL

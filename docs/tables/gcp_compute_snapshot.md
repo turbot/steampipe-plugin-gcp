@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_snapshot - Query Compute Engine Snapshots using SQL"
 description: "Allows users to query Compute Engine Snapshots in Google Cloud Platform (GCP), specifically the snapshot's ID, name, description, status, and other metadata, providing insights into disk snapshot usage and management."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_snapshot - Query Compute Engine Snapshots using SQL

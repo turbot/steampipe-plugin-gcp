@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_pubsub_subscription - Query Google Cloud Pub/Sub Subscriptions using SQL"
 description: "Allows users to query Google Cloud Pub/Sub Subscriptions, specifically providing details on subscription configuration, including topics, acknowledgement deadlines, and retention policies."
+folder: "Pub/Sub"
 ---
 
 # Table: gcp_pubsub_subscription - Query Google Cloud Pub/Sub Subscriptions using SQL

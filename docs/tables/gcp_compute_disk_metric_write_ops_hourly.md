@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_disk_metric_write_ops_hourly - Query Google Cloud Compute Engine Disks using SQL"
 description: "Allows users to query Google Cloud Compute Engine Disks, specifically the hourly write operations metrics, providing insights into disk usage patterns and potential performance issues."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_disk_metric_write_ops_hourly - Query Google Cloud Compute Engine Disks using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_pubsub_snapshot - Query Google Cloud Pub/Sub Snapshots using SQL"
 description: "Allows users to query Google Cloud Pub/Sub Snapshots, providing detailed information about each snapshot in the Google Cloud project."
+folder: "Pub/Sub"
 ---
 
 # Table: gcp_pubsub_snapshot - Query Google Cloud Pub/Sub Snapshots using SQL

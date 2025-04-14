@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database - Query Google Cloud SQL Databases using SQL"
 description: "Allows users to query Google Cloud SQL Databases, providing detailed information about the database's configuration, status, and associated instances."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database - Query Google Cloud SQL Databases using SQL

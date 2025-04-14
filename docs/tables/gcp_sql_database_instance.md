@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database_instance - Query Google Cloud SQL Database Instances using SQL"
 description: "Allows users to query Google Cloud SQL Database Instances, providing insights into the configuration, status, and performance of each instance."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database_instance - Query Google Cloud SQL Database Instances using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_instance_group_manager - Query Google Cloud Compute Engine Instance Group Managers using SQL"
 description: "Allows users to query Google Cloud Compute Engine Instance Group Managers, providing insights into the configuration, status, and properties of these group managers."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_instance_group_manager - Query Google Cloud Compute Engine Instance Group Managers using SQL

@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_ssl_policy - Query GCP Compute SSL Policies using SQL"
 description: "Allows users to query SSL Policies in GCP Compute, providing insights into the SSL policies and their configurations."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_ssl_policy - Query GCP Compute SSL Policies using SQL

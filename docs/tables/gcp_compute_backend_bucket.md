@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_backend_bucket - Query Google Cloud Compute Backend Buckets using SQL"
 description: "Allows users to query Backend Buckets in Google Cloud Compute, providing insights into the configuration, status, and other metadata related to backend buckets."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_backend_bucket - Query Google Cloud Compute Backend Buckets using SQL

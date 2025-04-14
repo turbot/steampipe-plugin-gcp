@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_route - Query Google Cloud Compute Routes using SQL"
 description: "Allows users to query Google Cloud Compute Routes, providing details on the paths that network traffic takes from a virtual machine (VM) instance to other destinations."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_route - Query Google Cloud Compute Routes using SQL

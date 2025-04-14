@@ -15,7 +15,7 @@ import (
 func tableGcpDataprocMetastoreService(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_dataproc_metastore_service",
-		Description: "Gcp Dataproc Metastore Service",
+		Description: "GCP Dataproc Metastore Service",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDataprocMetastoreService,

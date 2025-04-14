@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_target_pool - Query Google Cloud Compute Target Pools using SQL"
 description: "Allows users to query Google Cloud Compute Target Pools, providing insights into the state, region, and session affinity of each target pool."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_target_pool - Query Google Cloud Compute Target Pools using SQL

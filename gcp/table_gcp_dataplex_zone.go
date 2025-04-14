@@ -16,7 +16,7 @@ import (
 func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_dataplex_zone",
-		Description: "GCP Dataplex Lake",
+		Description: "GCP Dataplex Zone",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDataplexZone,

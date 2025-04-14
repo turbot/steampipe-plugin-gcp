@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_alloydb_instance - Query Google Cloud Platform AlloyDB Instances using SQL"
 description: "Allows users to query Google Cloud Platform AlloyDB Instances, offering insights into instance configurations, status, and associated metadata."
+folder: "AlloyDB"
 ---
 
 # Table: gcp_alloydb_instance - Query Google Cloud Platform AlloyDB Instances using SQL

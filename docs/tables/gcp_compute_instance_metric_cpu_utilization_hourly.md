@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_instance_metric_cpu_utilization_hourly - Query GCP Compute Engine Instance Metrics using SQL"
 description: "Allows users to query Compute Engine Instance Metrics in GCP, specifically the hourly CPU utilization, providing insights into compute resource usage and potential performance bottlenecks."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_instance_metric_cpu_utilization_hourly - Query GCP Compute Engine Instance Metrics using SQL

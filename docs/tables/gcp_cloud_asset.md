@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_cloud_asset - Query GCP Cloud Asset using SQL"
 description: "Allows users to query GCP Cloud Asset, specifically visibility and control over their cloud resources, ensuring that they can manage these assets effectively in terms of security, compliance, and operational efficiency."
+folder: "Cloud Asset"
 ---
 
 # Table: gcp_cloud_asset - Query GCP Cloud Asset using SQL

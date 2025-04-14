@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_kms_key - Query Google Cloud KMS Keys using SQL"
 description: "Allows users to query Google Cloud KMS Keys, providing insights into key management and encryption details."
+folder: "KMS"
 ---
 
 # Table: gcp_kms_key - Query Google Cloud KMS Keys using SQL

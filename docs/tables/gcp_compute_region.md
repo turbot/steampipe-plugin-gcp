@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_region - Query Google Cloud Platform Compute Regions using SQL"
 description: "Allows users to query Google Cloud Platform Compute Regions, providing insights into the regional resources available for deploying computing resources."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_region - Query Google Cloud Platform Compute Regions using SQL

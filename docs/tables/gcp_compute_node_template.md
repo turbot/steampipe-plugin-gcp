@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_node_template - Query Google Cloud Compute Node Templates using SQL"
 description: "Allows users to query Google Cloud Compute Node Templates, providing detailed information about node templates within a GCP project."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_node_template - Query Google Cloud Compute Node Templates using SQL

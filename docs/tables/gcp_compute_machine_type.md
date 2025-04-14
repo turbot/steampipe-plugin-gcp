@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_machine_type - Query Google Cloud Platform Compute Machine Types using SQL"
 description: "Allows users to query Compute Machine Types in Google Cloud Platform, providing detailed information about available machine types and their specifications."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_machine_type - Query Google Cloud Platform Compute Machine Types using SQL

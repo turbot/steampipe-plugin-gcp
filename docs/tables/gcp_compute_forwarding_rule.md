@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_forwarding_rule - Query GCP Compute Forwarding Rules using SQL"
 description: "Allows users to query GCP Compute Forwarding Rules, providing information about their configurations and operational status."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_forwarding_rule - Query GCP Compute Forwarding Rules using SQL

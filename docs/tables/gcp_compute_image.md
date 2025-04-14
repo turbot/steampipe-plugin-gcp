@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_image - Query Google Cloud Compute Engine Images using SQL"
 description: "Allows users to query Google Cloud Compute Engine Images, providing detailed information about each image, including its creation timestamp, description, disk size, and more."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_image - Query Google Cloud Compute Engine Images using SQL

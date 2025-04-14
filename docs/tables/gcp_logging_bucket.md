@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_logging_bucket - Query Google Cloud Platform Logging Buckets using SQL"
 description: "Allows users to query Logging Buckets in Google Cloud Platform, specifically the configuration and metadata, providing insights into logging data retention and management."
+folder: "Cloud Logging"
 ---
 
 # Table: gcp_logging_bucket - Query Google Cloud Platform Logging Buckets using SQL

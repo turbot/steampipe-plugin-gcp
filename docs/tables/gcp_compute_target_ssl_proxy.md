@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_target_ssl_proxy - Query GCP Compute Engine Target SSL Proxies using SQL"
 description: "Allows users to query Target SSL Proxies in GCP Compute Engine, providing insights into the configuration and status of these proxies."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_target_ssl_proxy - Query GCP Compute Engine Target SSL Proxies using SQL

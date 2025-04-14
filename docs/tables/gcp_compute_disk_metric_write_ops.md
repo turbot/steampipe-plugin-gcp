@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_disk_metric_write_ops - Query GCP Compute Disks using SQL"
 description: "Allows users to query GCP Compute Disks, specifically focusing on write operations metrics, providing valuable insights into disk usage and performance."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_disk_metric_write_ops - Query GCP Compute Disks using SQL

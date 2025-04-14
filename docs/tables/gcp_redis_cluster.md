@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_redis_cluster - Query Google Cloud Platform Memorystore Redis Clusters using SQL"
 description: "Allows users to query Memorystore Redis Clusters on Google Cloud Platform, providing detailed information about each cluster."
+folder: "Memorystore"
 ---
 
 # Table: gcp_redis_cluster - Query Google Cloud Platform Memorystore Redis Clusters using SQL

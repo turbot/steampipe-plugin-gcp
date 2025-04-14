@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_backup - Query Google Cloud SQL Backups using SQL"
 description: "Allows users to query Google Cloud SQL Backups, specifically the backup details, providing insights into backup configurations, timings, and statuses."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_backup - Query Google Cloud SQL Backups using SQL

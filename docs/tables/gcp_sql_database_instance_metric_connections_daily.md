@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_sql_database_instance_metric_connections_daily - Query GCP SQL Database Instance Metrics using SQL"
 description: "Allows users to query GCP SQL Database Instance Metrics, specifically daily connection metrics for Google Cloud SQL instances, providing insights into database connection patterns and potential anomalies."
+folder: "SQL"
 ---
 
 # Table: gcp_sql_database_instance_metric_connections_daily - Query GCP SQL Database Instance Metrics using SQL

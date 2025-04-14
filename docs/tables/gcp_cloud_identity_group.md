@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_cloud_identity_group - Query Google Cloud Platform Cloud Identity Groups using SQL"
 description: "Allows users to query Cloud Identity Groups in Google Cloud Platform, specifically the details of each group including its name, description, dynamic settings, and labels."
+folder: "Cloud Identity"
 ---
 
 # Table: gcp_cloud_identity_group - Query Google Cloud Platform Cloud Identity Groups using SQL

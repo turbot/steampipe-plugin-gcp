@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_zone - Query Google Cloud Compute Engine Zones using SQL"
 description: "Allows users to query Google Cloud Compute Engine Zones, providing information on each zone's status, region, and available CPU platforms."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_zone - Query Google Cloud Compute Engine Zones using SQL

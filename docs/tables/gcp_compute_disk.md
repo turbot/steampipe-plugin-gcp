@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_disk - Query Google Cloud Compute Engine Disks using SQL"
 description: "Allows users to query Google Cloud Compute Engine Disks, specifically providing detailed information about each disk, including its size, type, and associated instances."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_disk - Query Google Cloud Compute Engine Disks using SQL

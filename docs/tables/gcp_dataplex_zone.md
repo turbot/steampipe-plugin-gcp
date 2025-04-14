@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_dataplex_zone - Query GCP Dataplex Zones using SQL"
 description: "Allows users to query GCP Dataplex Zones, providing detailed information about each zone's configuration, status, and associated lake."
+folder: "Dataplex"
 ---
 
 # Table: gcp_dataplex_zone - Query GCP Dataplex Zones using SQL

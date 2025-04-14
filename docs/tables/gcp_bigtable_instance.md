@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_bigtable_instance - Query Google Cloud BigTable Instances using SQL"
 description: "Allows users to query Google Cloud BigTable Instances, specifically the details about each instance like its ID, name, project, number of nodes, storage type, etc."
+folder: "Bigtable"
 ---
 
 # Table: gcp_bigtable_instance - Query Google Cloud BigTable Instances using SQL
