@@ -1,7 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_address - Query Google Cloud Compute Engine Addresses using SQL"
 description: "Allows users to query Addresses in Google Cloud Compute Engine, specifically details related to their configuration, status, and associated resources."
-folder: "Compute Engine"
+folder: "Compute"
 ---
 
 # Table: gcp_compute_address - Query Google Cloud Compute Engine Addresses using SQL

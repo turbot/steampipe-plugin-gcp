@@ -1,7 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_autoscaler - Query GCP Compute Autoscalers using SQL"
 description: "Allows users to query GCP Compute Autoscalers, providing insights into autoscaling configurations and operational status."
-folder: "Compute Engine"
+folder: "Compute"
 ---
 
 # Table: gcp_compute_autoscaler - Query GCP Compute Autoscalers using SQL
