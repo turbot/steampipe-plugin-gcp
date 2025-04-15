@@ -279,7 +279,7 @@ func artifactRegistryRepositorySelfLink(ctx context.Context, d *plugin.QueryData
 	projectID := strings.Split(data.Name, "/")[1]
 	name := strings.Split(data.Name, "/")[5]
 
-	selfLink := "https://artifactregistry.googleapis.com/v1/projects/" + projectID + "/regions/" + location + "/repositories/" + name
+	selfLink := "https://artifactregistry.googleapis.com/v1/projects/" + projectID + "/locations/" + location + "/repositories/" + name
 
 	return selfLink, nil
 }
