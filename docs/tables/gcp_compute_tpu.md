@@ -1,26 +1,23 @@
 ---
 title: "Steampipe Table: gcp_compute_tpu - Query Google Cloud TPUs using SQL"
-description: "Allows users to query Google Cloud TPUs, providing insights into TPU node configurations, states, and associated metadata."
+description: "Allows users to query Google Cloud TPUs, specifically providing detailed information about TPU node configurations, states, network settings, and associated metadata."
 folder: "Compute"
 ---
 
 # Table: gcp_compute_tpu - Query Google Cloud TPUs using SQL
 
-Google Cloud TPUs (Tensor Processing Units) are specialized hardware accelerators designed to speed up specific machine learning workloads. They are particularly optimized for TensorFlow, Google's open-source machine learning framework. TPUs can significantly accelerate machine learning training and inference for your applications.
+Google Cloud TPUs (Tensor Processing Units) are specialized hardware accelerators designed to speed up specific machine learning workloads. They are particularly optimized for TensorFlow, Google's open-source machine learning framework. TPUs provide high-performance, custom-developed ASICs (Application-Specific Integrated Circuits) that can significantly accelerate machine learning training and inference for your applications.
 
 ## Table Usage Guide
 
-The `gcp_compute_tpu` table provides insights into TPU nodes within Google Cloud Platform. As a machine learning engineer or data scientist, explore TPU-specific details through this table, including node configurations, operational states, and associated metadata. You can use this table to gather information about your TPU resources, such as:
-
-- Identifying TPU nodes in specific states
-- Monitoring TPU node health and performance
-- Verifying TPU configurations and network settings
-- Tracking TPU resource utilization and scheduling
+The `gcp_compute_tpu` table provides insights into TPU nodes within Google Cloud Platform. As a machine learning engineer or data scientist, explore TPU-specific details through this table to monitor and manage your machine learning infrastructure effectively. Use it to track TPU node states, verify configurations, and ensure optimal resource utilization across your machine learning workloads.
 
 ## Examples
 
 ### Basic info
-```sql
+Explore the fundamental details of your TPU nodes to understand their current state and configuration. This can help in managing and monitoring your machine learning infrastructure effectively.
+
+```sql+postgres
 select
   name,
   id,
@@ -31,8 +28,21 @@ from
   gcp_compute_tpu;
 ```
 
-### List TPUs that are not running
-```sql
+```sql+sqlite
+select
+  name,
+  id,
+  state,
+  accelerator_type,
+  zone
+from
+  gcp_compute_tpu;
+```
+
+### List non-operational TPU nodes
+Identify TPU nodes that are not in a ready state to help troubleshoot potential issues and maintain optimal resource availability for your machine learning workloads.
+
+```sql+postgres
 select
   name,
   state,
@@ -44,8 +54,22 @@ where
   state != 'READY';
 ```
 
-### List TPUs by accelerator type
-```sql
+```sql+sqlite
+select
+  name,
+  state,
+  health_description,
+  zone
+from
+  gcp_compute_tpu
+where
+  state != 'READY';
+```
+
+### TPU distribution by accelerator type
+Analyze the distribution of TPU nodes across different accelerator types to understand your resource allocation and assist with capacity planning for machine learning workloads.
+
+```sql+postgres
 select
   accelerator_type,
   count(*) as count,
@@ -56,23 +80,47 @@ group by
   accelerator_type;
 ```
 
-### Get network configuration details for each TPU
-```sql
+```sql+sqlite
+select
+  accelerator_type,
+  count(*) as count,
+  group_concat(name) as tpu_names
+from
+  gcp_compute_tpu
+group by
+  accelerator_type;
+```
+
+### Network configuration analysis
+Examine the network settings of your TPU nodes to verify connectivity configurations and ensure proper network security settings are in place.
+
+```sql+postgres
 select
   name,
   network,
   cidr_block,
-  network_endpoint
+  network_endpoints
 from
   gcp_compute_tpu;
 ```
 
-### List TPUs with their creation time and runtime version
-```sql
+```sql+sqlite
+select
+  name,
+  network,
+  cidr_block,
+  network_endpoints
+from
+  gcp_compute_tpu;
+```
+
+### TPU nodes by creation time
+Track when your TPU nodes were created to understand resource provisioning patterns and manage lifecycle effectively.
+
+```sql+postgres
 select
   name,
   create_time,
-  runtime_version,
   zone
 from
   gcp_compute_tpu
@@ -80,8 +128,21 @@ order by
   create_time;
 ```
 
-### Get TPUs with their associated service accounts
-```sql
+```sql+sqlite
+select
+  name,
+  create_time,
+  zone
+from
+  gcp_compute_tpu
+order by
+  create_time;
+```
+
+### TPU nodes with service accounts
+Identify TPU nodes that have associated service accounts to audit security configurations and ensure appropriate access controls are in place.
+
+```sql+postgres
 select
   name,
   service_account,
@@ -92,8 +153,21 @@ where
   service_account is not null;
 ```
 
-### List TPUs with their tags
-```sql
+```sql+sqlite
+select
+  name,
+  service_account,
+  zone
+from
+  gcp_compute_tpu
+where
+  service_account is not null;
+```
+
+### Tagged TPU nodes
+List TPU nodes with associated tags to understand your resource organization and management strategies.
+
+```sql+postgres
 select
   name,
   tags,
@@ -104,8 +178,21 @@ where
   tags is not null;
 ```
 
-### Get TPUs with scheduling configurations
-```sql
+```sql+sqlite
+select
+  name,
+  tags,
+  zone
+from
+  gcp_compute_tpu
+where
+  tags is not null;
+```
+
+### TPU nodes with scheduling configurations
+Analyze TPU nodes with specific scheduling configurations to optimize resource utilization and manage costs effectively.
+
+```sql+postgres
 select
   name,
   scheduling_config,
@@ -116,8 +203,21 @@ where
   scheduling_config is not null;
 ```
 
-### List TPUs with any reported symptoms
-```sql
+```sql+sqlite
+select
+  name,
+  scheduling_config,
+  zone
+from
+  gcp_compute_tpu
+where
+  scheduling_config is not null;
+```
+
+### TPU nodes with health issues
+Monitor TPU nodes that are reporting symptoms or health issues to maintain optimal performance and reliability of your machine learning infrastructure.
+
+```sql+postgres
 select
   name,
   symptoms,
@@ -129,12 +229,39 @@ where
   symptoms is not null;
 ```
 
-### Get TPU distribution across zones
-```sql
+```sql+sqlite
+select
+  name,
+  symptoms,
+  health_description,
+  zone
+from
+  gcp_compute_tpu
+where
+  symptoms is not null;
+```
+
+### Geographic distribution of TPU nodes
+Analyze the distribution of TPU nodes across different zones to understand your regional resource allocation and ensure appropriate availability for your machine learning workloads.
+
+```sql+postgres
 select
   zone,
   count(*) as tpu_count,
   array_agg(name) as tpu_names
+from
+  gcp_compute_tpu
+group by
+  zone
+order by
+  tpu_count desc;
+```
+
+```sql+sqlite
+select
+  zone,
+  count(*) as tpu_count,
+  group_concat(name) as tpu_names
 from
   gcp_compute_tpu
 group by
