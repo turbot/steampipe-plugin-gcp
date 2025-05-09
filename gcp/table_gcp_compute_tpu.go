@@ -94,7 +94,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "labels",
 				Description: "Resource labels to represent user provided metadata.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpTpuTags),
 			},
 			{
 				Name:        "zone",
@@ -121,7 +120,7 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: "A map of tags for the resource.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gcpTpuTags),
+				Transform:   transform.FromField("Labels"),
 			},
 
 			// Standard steampipe columns
@@ -203,8 +202,7 @@ func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, nil
 	}
 
-	req := service.Projects.Locations.Nodes.Get(name)
-	node, err := req.Do()
+	node, err := service.Projects.Locations.Nodes.Get(name).Do()
 	if err != nil {
 		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "api_error", err)
 		return nil, err
@@ -214,16 +212,6 @@ func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 }
 
 //// TRANSFORM FUNCTIONS
-
-func gcpTpuTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	node := d.HydrateItem.(*tpu.Node)
-
-	if node.Labels == nil {
-		return nil, nil
-	}
-
-	return node.Labels, nil
-}
 
 func gcpTpuTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	node := d.HydrateItem.(*tpu.Node)
