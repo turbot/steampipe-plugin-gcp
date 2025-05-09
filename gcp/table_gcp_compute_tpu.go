@@ -102,13 +102,20 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromP(gcpTpuTurbotData, "Zone"),
 			},
-
-			// Tags
 			{
-				Name:        "tags_src",
-				Description: "A list of tags attached to the TPU node.",
+				Name:        "network_config",
+				Description: "The network configuration for the TPU node.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Labels"),
+			},
+			{
+				Name:        "accelerator_config",
+				Description: "The accelerator configuration for the TPU node.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "shielded_instance_config",
+				Description: "The shielded instance configuration for the TPU node.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "tags",
@@ -159,8 +166,8 @@ func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		return nil, err
 	}
 
-	zone := d.EqualsQualString(matrixKeyZone)
-	parent := "projects/" + projectId.(string) + "/locations/" + zone
+	// Use locations/- to get all TPUs across all regions in a single request
+	parent := "projects/" + projectId.(string) + "/locations/-"
 
 	resp := service.Projects.Locations.Nodes.List(parent)
 	if err := resp.Pages(ctx, func(page *tpu.ListNodesResponse) error {
@@ -174,11 +181,6 @@ func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
-		// Handle 403 errors gracefully for unsupported zones
-		if strings.Contains(err.Error(), "403") {
-			plugin.Logger(ctx).Debug("listComputeTpus", "Skip unsupported zone", zone)
-			return nil, nil
-		}
 		return nil, err
 	}
 
@@ -204,11 +206,6 @@ func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	req := service.Projects.Locations.Nodes.Get(name)
 	node, err := req.Do()
 	if err != nil {
-		// Handle 403 errors gracefully for unsupported zones
-		if strings.Contains(err.Error(), "403") {
-			plugin.Logger(ctx).Debug("getComputeTpu", "Skip unsupported zone", name)
-			return nil, nil
-		}
 		plugin.Logger(ctx).Debug("getComputeTpu", "Error", err)
 		return nil, err
 	}
