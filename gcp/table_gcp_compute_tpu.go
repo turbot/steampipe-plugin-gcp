@@ -26,7 +26,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 			Hydrate: listComputeTpus,
 			Tags:    map[string]string{"service": "tpu", "action": "ListNodes"},
 		},
-		GetMatrixItemFunc: BuildTpuZoneList,
 		Columns: []*plugin.Column{
 			// Key columns
 			{
@@ -95,6 +94,7 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "labels",
 				Description: "Resource labels to represent user provided metadata.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(gcpTpuTags),
 			},
 			{
 				Name:        "zone",
@@ -152,17 +152,17 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listComputeTpus")
-
 	// Create Service Connection
 	service, err := TPUService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "connection_error", err)
 		return nil, err
 	}
 
 	// Get project details
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "project_error", err)
 		return nil, err
 	}
 
@@ -181,6 +181,7 @@ func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "api_error", err)
 		return nil, err
 	}
 
@@ -190,11 +191,10 @@ func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 //// HYDRATE FUNCTIONS
 
 func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getComputeTpu")
-
 	// Create Service Connection
 	service, err := TPUService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "connection_error", err)
 		return nil, err
 	}
 
@@ -206,7 +206,7 @@ func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	req := service.Projects.Locations.Nodes.Get(name)
 	node, err := req.Do()
 	if err != nil {
-		plugin.Logger(ctx).Debug("getComputeTpu", "Error", err)
+		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "api_error", err)
 		return nil, err
 	}
 
