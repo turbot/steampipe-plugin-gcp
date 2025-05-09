@@ -11,8 +11,6 @@ import (
 	tpu "google.golang.org/api/tpu/v2"
 )
 
-const matrixKeyZone = "zone"
-
 func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_tpu",
