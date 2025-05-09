@@ -36,7 +36,7 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 			{
 				Name:        "id",
 				Description: "The unique identifier for the TPU node.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "description",
@@ -51,6 +51,11 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 			{
 				Name:        "state",
 				Description: "The current state of the TPU node.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "health",
+				Description: "The health status of the TPU node.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -79,6 +84,16 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
+				Name:        "api_version",
+				Description: "The API version that created this node.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "runtime_version",
+				Description: "The runtime version running in the node.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "scheduling_config",
 				Description: "Sets the scheduling options for the TPU instance.",
 				Type:        proto.ColumnType_JSON,
@@ -91,6 +106,31 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 			{
 				Name:        "labels",
 				Description: "Resource labels to represent user provided metadata.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "metadata",
+				Description: "Custom metadata to apply to the TPU node.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "multislice_node",
+				Description: "Whether the Node belongs to a Multislice group.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "queued_resource",
+				Description: "The qualified name of the QueuedResource that requested this Node.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "data_disks",
+				Description: "The additional data disks for the Node.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "symptoms",
+				Description: "The Symptoms that have occurred to the TPU Node.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
