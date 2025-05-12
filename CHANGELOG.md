@@ -1,3 +1,15 @@
+## v1.7.0 [2025-05-12]
+
+_What's new?_
+
+- New tables added
+ - [gcp_compute_tpu](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_tpu) ([#748](https://github.com/turbot/steampipe-plugin-gcp/pull/748)) 
+ - [gcp_firestore_database](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_firestore_database) ([#732](https://github.com/turbot/steampipe-plugin-gcp/pull/732)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Bug fixes_
+
+- Fixed the `self_link` column of `gcp_artifact_registry_repository`, `gcp_cloud_run_job` and `gcp_cloud_run_service` tables to reflect the correct resource links. ([#731](https://github.com/turbot/steampipe-plugin-gcp/pull/731)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
 ## v1.6.0 [2025-04-14]
 
 _Enhancements_
