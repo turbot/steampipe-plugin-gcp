@@ -40,6 +40,7 @@ import (
 	"google.golang.org/api/secretmanager/v1"
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/storage/v1"
+	"google.golang.org/api/tpu/v2"
 	"google.golang.org/api/vpcaccess/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
@@ -890,6 +891,27 @@ func VPCAccessService(ctx context.Context, d *plugin.QueryData) (*vpcaccess.Serv
 
 	// so it was not in cache - create service
 	svc, err := vpcaccess.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// TPUService returns the service connection for GCP TPU service
+func TPUService(ctx context.Context, d *plugin.QueryData) (*tpu.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "TPUService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*tpu.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := tpu.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
