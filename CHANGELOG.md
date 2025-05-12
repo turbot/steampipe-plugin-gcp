@@ -3,8 +3,8 @@
 _What's new?_
 
 - New tables added
- - [gcp_compute_tpu](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_tpu) ([#748](https://github.com/turbot/steampipe-plugin-gcp/pull/748)) 
- - [gcp_firestore_database](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_firestore_database) ([#732](https://github.com/turbot/steampipe-plugin-gcp/pull/732)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+  - [gcp_compute_tpu](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_tpu) ([#748](https://github.com/turbot/steampipe-plugin-gcp/pull/748)) 
+  - [gcp_firestore_database](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_firestore_database) ([#732](https://github.com/turbot/steampipe-plugin-gcp/pull/732)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
 
 _Bug fixes_
 
