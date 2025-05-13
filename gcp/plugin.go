@@ -77,6 +77,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_apikeys_key":                                         tableGcpApiKeysKey(ctx),
 			"gcp_app_engine_application":                              tableGcpAppEngineApplication(ctx),
 			"gcp_artifact_registry_repository":                        tableGcpArtifactRegistryRepository(ctx),
+			"gcp_audit_log_config":                                    tableGcpAuditLogConfig(ctx),
 			"gcp_audit_policy":                                        tableGcpAuditPolicy(ctx),
 			"gcp_bigquery_dataset":                                    tableGcpBigQueryDataset(ctx),
 			"gcp_bigquery_job":                                        tableGcpBigQueryJob(ctx),
