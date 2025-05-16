@@ -301,22 +301,3 @@ func gcpCloudbuildv2ConnectionLocation(_ context.Context, d *transform.Transform
 	}
 	return parts[3], nil
 }
-
-func gcpCloudbuildv2ConnectionProject(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	connection := d.HydrateItem.(*cloudbuild.Connection)
-	parts := strings.Split(connection.Name, "/")
-	if len(parts) < 4 {
-		plugin.Logger(context.Background()).Warn("gcpCloudbuildv2ConnectionProject", "malformed_resource_name", connection.Name)
-		return nil, nil
-	}
-	return parts[1], nil
-}
-
-func gcpCloudbuildv2ConnectionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	connection := d.HydrateItem.(*cloudbuild.Connection)
-	parts := strings.Split(connection.Name, "/")
-	if len(parts) < 6 {
-		return nil, nil
-	}
-	return parts[5], nil
-}
