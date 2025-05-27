@@ -238,11 +238,12 @@ func getGcpServiceAccountKeyTurbotData(ctx context.Context, d *transform.Transfo
 	splitName := strings.Split(serviceAccountKey.Name, "/")
 	akas := []string{"gcp://iam.googleapis.com/" + serviceAccountKey.Name}
 
-	if d.Param.(string) == "Title" {
+	switch d.Param.(string) {
+	case "Title":
 		return splitName[5], nil
-	} else if d.Param.(string) == "ServiceAccountName" {
+	case "ServiceAccountName":
 		return splitName[3], nil
-	} else {
+	default:
 		return akas, nil
 	}
 }

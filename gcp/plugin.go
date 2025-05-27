@@ -42,17 +42,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Scope:          []string{"connection", "service", "action"},
 				Where:          "service = 'bigquery' and (action = 'datasets.list' or action = 'datasets.get')",
 			},
-		},
-		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
-			{
-				Name:    "project",
-				Hydrate: getProject,
-			},
-		},
-		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
-			NewInstance: ConfigInstance,
-		},
-		RateLimiters: []*rate_limiter.Definition{
 			// API Requests per 100 seconds: 5,000
 			// https://cloud.google.com/memorystore/docs/redis/quotas#per-second_api_requests_quota
 			{
@@ -85,6 +74,15 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'rediscluster' and action = 'GetCluster'",
 			},
+		},
+		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
+			{
+				Name:    "project",
+				Hydrate: getProject,
+			},
+		},
+		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
+			NewInstance: ConfigInstance,
 		},
 		TableMap: map[string]*plugin.Table{
 			"gcp_alloydb_cluster":                                     tableGcpAlloyDBCluster(ctx),
