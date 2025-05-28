@@ -18,6 +18,7 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"cluster_name", "instance_display_name"}),
 			Hydrate:    getAlloydbInstance,
+			Tags:       map[string]string{"service": "alloydb", "action": "instances.get"},
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listAlloydbClusters,
@@ -26,6 +27,7 @@ func tableGcpAlloyDBInstance(ctx context.Context) *plugin.Table {
 				{Name: "location", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "cluster_name", Require: plugin.Optional, Operators: []string{"="}},
 			},
+			Tags: map[string]string{"service": "alloydb", "action": "instances.list"},
 		},
 		GetMatrixItemFunc: BuildAlloyDBLocationList,
 		Columns: []*plugin.Column{

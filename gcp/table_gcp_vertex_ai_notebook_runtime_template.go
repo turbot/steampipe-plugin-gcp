@@ -21,10 +21,12 @@ func tableGcpVertexAINotebookRuntimeTemplate(ctx context.Context) *plugin.Table 
 			KeyColumns:        plugin.SingleColumn("name"),
 			Hydrate:           getAIPlatformNotebookRuntimeTemplate,
 			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
+			Tags:              map[string]string{"service": "aiplatform", "action": "notebookRuntimeTemplates.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:           listAIPlatformNotebookRuntimeTemplates,
 			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
+			Tags:              map[string]string{"service": "aiplatform", "action": "notebookRuntimeTemplates.list"},
 		},
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Notebook"),
 		Columns: []*plugin.Column{
@@ -235,7 +237,7 @@ func getAIPlatformNotebookRuntimeTemplate(ctx context.Context, d *plugin.QueryDa
 	splitName := strings.Split(name, "/")
 
 	// Validate - name should not be blank and restrict the API call for other locations
-	if len(name) > 3 && splitName[3] != matrixLocation{
+	if len(name) > 3 && splitName[3] != matrixLocation {
 		return nil, nil
 	}
 

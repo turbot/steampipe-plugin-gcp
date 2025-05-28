@@ -9,7 +9,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"github.com/turbot/steampipe-plugin-sdk/v5/query_cache"
 
 	"google.golang.org/api/dataplex/v1"
 )
@@ -21,24 +20,26 @@ func tableGcpDataplexAsset(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDataplexAsset,
+			Tags:       map[string]string{"service": "dataplex", "action": "assets.get"},
 		},
 		List: &plugin.ListConfig{
+			ParentHydrate: listDataplexZones,
 			Hydrate:       listDataplexAssets,
 			KeyColumns: plugin.KeyColumnSlice{
-				// The 'zone_name' is required to query this table. Since Steampipe does not yet support parent hydrate chaining, the Lake is used as the parent of Zone, which means Zone cannot be used as the parent of Asset.
-				{Name: "zone_name", Require: plugin.Required, Operators: []string{"="}, CacheMatch: query_cache.CacheMatchExact},
+				{Name: "lake_name", Require: plugin.Optional, Operators: []string{"="}},
+				{Name: "zone_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
 			},
-			ShouldIgnoreError: isIgnorableError([]string{"404"}),
+			Tags: map[string]string{"service": "dataplex", "action": "assets.list"},
 		},
-		// Build matrix region is not required, because we must have to pass the zone_name or name to get the assets.
+		GetMatrixItemFunc: BuildDataplexLocationList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "User friendly display name.",
 				Type:        proto.ColumnType_STRING,
-				Transform: transform.FromField("DisplayName"),
+				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "name",

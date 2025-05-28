@@ -18,11 +18,11 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeTpu,
-			Tags:       map[string]string{"service": "tpu", "action": "GetNode"},
+			Tags:       map[string]string{"service": "tpu", "action": "nodes.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeTpus,
-			Tags:    map[string]string{"service": "tpu", "action": "ListNodes"},
+			Tags:    map[string]string{"service": "tpu", "action": "nodes.list"},
 		},
 		Columns: []*plugin.Column{
 			// Key columns

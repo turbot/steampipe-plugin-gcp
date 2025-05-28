@@ -21,6 +21,7 @@ func tableGcpCloudRunJob(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getCloudRunJob,
+			Tags:       map[string]string{"service": "run", "action": "jobs.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCloudRunJobs,
@@ -30,6 +31,7 @@ func tableGcpCloudRunJob(ctx context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 			},
+			Tags: map[string]string{"service": "run", "action": "jobs.list"},
 		},
 		GetMatrixItemFunc: BuildCloudRunLocationList,
 		Columns: []*plugin.Column{
