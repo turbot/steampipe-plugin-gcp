@@ -363,7 +363,6 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	// Get project details
-
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
@@ -371,14 +370,13 @@ func listKubernetesClusters(ctx context.Context, d *plugin.QueryData, h *plugin.
 	project := projectId.(string)
 
 	resp, err := service.Projects.Locations.Clusters.List("projects/" + project + "/locations/-").Do()
-	// apply rate limiting
-	d.WaitForListRateLimit(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 
 	for _, cluster := range resp.Clusters {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
 		d.StreamListItem(ctx, cluster)
 	}
 

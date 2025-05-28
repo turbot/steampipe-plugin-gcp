@@ -5,12 +5,11 @@ import (
 	"strings"
 
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
+	"google.golang.org/api/iterator"
 
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"google.golang.org/api/iterator"
 )
 
 func tableGcpVertexAINotebookRuntimeTemplate(ctx context.Context) *plugin.Table {
@@ -171,53 +170,52 @@ func listAIPlatformNotebookRuntimeTemplates(ctx context.Context, d *plugin.Query
 	}
 
 	// Get project details
-
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
-		logger.Error("gcp_vertex_ai_notebook_runtime_template.listAIPlatformNotebookRuntimeTemplates", "cache_error", err)
 		return nil, err
 	}
-
 	project := projectId.(string)
-
-	// Page size should be in range of [0, 100].
-	pageSize := types.Int64(100)
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < *pageSize {
-			pageSize = limit
-		}
-	}
 
 	// Create Service Connection
 	service, err := AIService(ctx, d, "Notebook")
 	if err != nil {
-		logger.Error("gcp_vertex_ai_notebook_runtime_template.listAIPlatformNotebookRuntimeTemplates", "connection_error", err)
+		logger.Error("gcp_vertex_ai_notebook_runtime_template.listAIPlatformNotebookRuntimeTemplates", "service_error", err)
 		return nil, err
+	}
+
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
+	pageSize := int32(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(pageSize) {
+			pageSize = int32(*limit)
+		}
 	}
 
 	req := &aiplatformpb.ListNotebookRuntimeTemplatesRequest{
 		Parent:   "projects/" + project + "/locations/" + location,
-		PageSize: int32(*pageSize),
+		PageSize: pageSize,
 	}
 
+	// Call the API
 	it := service.Notebook.ListNotebookRuntimeTemplates(ctx, req)
-
 	for {
-		template, err := it.Next()
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
 		if err != nil {
-			if strings.Contains(err.Error(), "404") {
-				return nil, nil
-			}
-			if err == iterator.Done {
-				break
-			}
-			logger.Error("gcp_vertex_ai_notebook_runtime_template.listAIPlatformNotebookRuntimeTemplates", err)
+			logger.Error("gcp_vertex_ai_notebook_runtime_template.listAIPlatformNotebookRuntimeTemplates", "api_error", err)
 			return nil, err
 		}
 
-		d.StreamListItem(ctx, template)
+		d.StreamListItem(ctx, resp)
 
+		// Check if context has been cancelled or if the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
 			break
 		}

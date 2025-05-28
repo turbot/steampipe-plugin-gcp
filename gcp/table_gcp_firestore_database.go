@@ -191,12 +191,11 @@ func listFirestoreDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
 	for _, database := range resp.Databases {
 		d.StreamListItem(ctx, database)
-		// Check if context has been cancelled or if the limit has been hit
-		if d.RowsRemaining(ctx) == 0 {
-			break
-		}
 	}
 
 	return nil, nil
