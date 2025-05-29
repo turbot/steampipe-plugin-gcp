@@ -35,7 +35,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// Configuring the rate limiter only for LIST operations will result in hitting rate limits when executing the query "select * from gcp_bigquery_dataset".
 			// This occurs because the table `gcp_bigquery_dataset` includes hydrated calls (getBigQueryDataset). Therefore, it is necessary to configure the rate limiter for both LIST and GET operations.
 			{
-				Name:           "gcp_bigquery_list_datasets",
+				Name:           "gcp_bigquery_list_get_datasets",
 				FillRate:       100,
 				BucketSize:     100,
 				MaxConcurrency: 50,
