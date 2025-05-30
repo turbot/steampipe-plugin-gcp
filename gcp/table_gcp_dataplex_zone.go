@@ -20,6 +20,7 @@ func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDataplexZone,
+			Tags:       map[string]string{"service": "dataplex", "action": "zones.get"},
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listDataplexLakes,
@@ -29,6 +30,7 @@ func tableGcpDataplexZone(ctx context.Context) *plugin.Table {
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
 			},
+			Tags: map[string]string{"service": "dataplex", "action": "zones.list"},
 		},
 		GetMatrixItemFunc: BuildDataplexLocationList,
 		Columns: []*plugin.Column{
@@ -148,7 +150,7 @@ func listDataplexZones(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	lakeName := d.EqualsQualString("lake_name")
 
-	if lakeName != "" && lakeName != lake.Name{
+	if lakeName != "" && lakeName != lake.Name {
 		return nil, nil
 	}
 

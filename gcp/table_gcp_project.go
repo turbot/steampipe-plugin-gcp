@@ -18,6 +18,7 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 		Description: "GCP Project",
 		List: &plugin.ListConfig{
 			Hydrate: listGCPProjects,
+			Tags:    map[string]string{"service": "resourcemanager", "action": "projects.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -131,6 +132,8 @@ func listGCPProjects(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		plugin.Logger(ctx).Error("gcp_project.listGCPProjects", "api_err", err)
 		return nil, err
 	}
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
 
 	for _, project := range resp.Projects {
 		d.StreamListItem(ctx, project)

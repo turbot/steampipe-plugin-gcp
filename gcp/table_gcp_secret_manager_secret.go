@@ -128,25 +128,27 @@ func listGcpSecretManagerSecrets(ctx context.Context, d *plugin.QueryData, h *pl
 	project := projectId.(string)
 
 	resp := service.Projects.Secrets.List("projects/" + project).PageSize(pageSize)
-	if err := resp.Pages(
-		ctx,
-		func(page *secretmanager.ListSecretsResponse) error {
-			for _, secret := range page.Secrets {
-				d.StreamListItem(ctx, secret)
+	if err := resp.Pages(ctx, func(page *secretmanager.ListSecretsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
 
-				// Check if context has been cancelled or if the limit has been hit (if specified)
-				if d.RowsRemaining(ctx) == 0 {
-					return nil
-				}
+		for _, secret := range page.Secrets {
+			d.StreamListItem(ctx, secret)
+
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
+			if d.RowsRemaining(ctx) == 0 {
+				page.NextPageToken = ""
+				return nil
 			}
-			return nil
-		},
-	); err != nil {
+		}
+		return nil
+	}); err != nil {
 		plugin.Logger(ctx).Error("gcp_secret_manager_secret.listGcpSecretManagerSecrets", "api_error", err)
 		return nil, err
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS

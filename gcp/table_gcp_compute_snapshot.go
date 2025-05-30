@@ -18,6 +18,7 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeSnapshot,
+			Tags:       map[string]string{"service": "compute", "action": "snapshots.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeSnapshots,
@@ -29,6 +30,7 @@ func tableGcpComputeSnapshot(ctx context.Context) *plugin.Table {
 				// Boolean columns
 				{Name: "auto_created", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "snapshots.list"},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -226,6 +228,9 @@ func listComputeSnapshots(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	resp := service.Snapshots.List(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.SnapshotList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, snapshot := range page.Items {
 			d.StreamListItem(ctx, snapshot)
 

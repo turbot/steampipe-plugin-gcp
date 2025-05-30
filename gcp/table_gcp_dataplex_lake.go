@@ -20,6 +20,7 @@ func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getDataplexLake,
+			Tags:       map[string]string{"service": "dataplex", "action": "lakes.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listDataplexLakes,
@@ -27,6 +28,7 @@ func tableGcpDataplexLake(ctx context.Context) *plugin.Table {
 				{Name: "display_name", Require: plugin.Optional, Operators: []string{"="}},
 				{Name: "state", Require: plugin.Optional, Operators: []string{"="}},
 			},
+			Tags: map[string]string{"service": "dataplex", "action": "lakes.list"},
 		},
 		GetMatrixItemFunc: BuildDataplexLocationList,
 		Columns: []*plugin.Column{

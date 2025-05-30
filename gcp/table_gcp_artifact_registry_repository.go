@@ -21,9 +21,11 @@ func tableGcpArtifactRegistryRepository(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getArtifactRegistryRepository,
+			Tags:       map[string]string{"service": "artifactregistry", "action": "repositories.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listArtifactRegistryRepositories,
+			Tags:    map[string]string{"service": "artifactregistry", "action": "repositories.list"},
 			KeyColumns: plugin.KeyColumnSlice{
 				{
 					Name:    "location",
@@ -212,6 +214,9 @@ func listArtifactRegistryRepositories(ctx context.Context, d *plugin.QueryData, 
 
 	resp := service.Projects.Locations.Repositories.List(data).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *artifactregistry.ListRepositoriesResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, repo := range page.Repositories {
 			d.StreamListItem(ctx, repo)
 

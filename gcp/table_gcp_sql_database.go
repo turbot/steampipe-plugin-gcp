@@ -25,10 +25,12 @@ func tableGcpSQLDatabase(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "instance_name"}),
 			Hydrate:    getSQLDatabase,
+			Tags:       map[string]string{"service": "cloudsql", "action": "databases.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listSQLDatabases,
 			ParentHydrate: listSQLDatabaseInstances,
+			Tags:          map[string]string{"service": "cloudsql", "action": "databases.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -147,6 +149,8 @@ func listSQLDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	project := projectId.(string)
 
 	resp, err := service.Databases.List(project, instance.Name).Do()
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
 	if err != nil {
 		return nil, err
 	}

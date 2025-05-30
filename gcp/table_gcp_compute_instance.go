@@ -35,6 +35,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				{Name: "deletion_protection", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "start_restricted", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "monitoring", "action": "instances.list"},
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns
@@ -328,6 +329,9 @@ func listComputeInstances(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	resp := service.Instances.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.InstanceAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, instance := range item.Instances {
 				d.StreamListItem(ctx, instance)

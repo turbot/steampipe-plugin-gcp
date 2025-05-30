@@ -19,9 +19,17 @@ func tableGcpPubSubTopic(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getPubSubTopic,
+			Tags:       map[string]string{"service": "pubsub", "action": "topics.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listPubSubTopics,
+			Tags:    map[string]string{"service": "pubsub", "action": "topics.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getPubSubTopicIamPolicy,
+				Tags: map[string]string{"service": "pubsub", "action": "topics.getIamPolicy"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -126,6 +134,9 @@ func listPubSubTopics(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	resp := service.Projects.Topics.List("projects/" + project).PageSize(*pageSize)
 	if err := resp.Pages(ctx, func(page *pubsub.ListTopicsResponse) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, topic := range page.Topics {
 			d.StreamListItem(ctx, topic)
 

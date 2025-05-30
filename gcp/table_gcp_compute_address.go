@@ -21,6 +21,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeAddress,
+			Tags:       map[string]string{"service": "compute", "action": "addresses.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeAddresses,
@@ -31,6 +32,7 @@ func tableGcpComputeAddress(ctx context.Context) *plugin.Table {
 				{Name: "purpose", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "status", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
+			Tags: map[string]string{"service": "compute", "action": "addresses.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -190,6 +192,9 @@ func listComputeAddresses(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	resp := service.Addresses.AggregatedList(project).Filter(filterString).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.AddressAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, address := range item.Addresses {
 				d.StreamListItem(ctx, address)

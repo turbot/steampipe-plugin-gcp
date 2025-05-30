@@ -20,9 +20,11 @@ func tableGcpComputeMachineImage(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeMachineImage,
+			Tags:       map[string]string{"service": "compute", "action": "machineImages.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeMachineImages,
+			Tags:    map[string]string{"service": "compute", "action": "machineImages.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -160,6 +162,9 @@ func listComputeMachineImages(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	resp := service.MachineImages.List(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.MachineImageList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, machineImage := range page.Items {
 			d.StreamListItem(ctx, machineImage)
 

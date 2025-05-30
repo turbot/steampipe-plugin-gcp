@@ -20,9 +20,11 @@ func tableGcpApiKeysKey(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getApiKeysKey,
+			Tags:       map[string]string{"service": "apikeys", "action": "keys.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listApiKeysKeys,
+			Tags:    map[string]string{"service": "apikeys", "action": "keys.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -141,6 +143,9 @@ func listApiKeysKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	if err := resp.Pages(
 		ctx,
 		func(page *apikeys.V2ListKeysResponse) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
 			for _, item := range page.Keys {
 				d.StreamListItem(ctx, item)
 

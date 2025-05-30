@@ -20,12 +20,14 @@ func tableGcpRedisInstance(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"name", "location"}),
 			Hydrate:    getGcpRedisInstance,
+			Tags:       map[string]string{"service": "redis", "action": "instances.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpRedisInstances,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "location", Require: plugin.Optional},
 			},
+			Tags: map[string]string{"service": "redis", "action": "instances.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -271,6 +273,9 @@ func listGcpRedisInstances(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	it := service.ListInstances(ctx, req)
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		resp, err := it.Next()
 		if err != nil {
 			if err == iterator.Done {

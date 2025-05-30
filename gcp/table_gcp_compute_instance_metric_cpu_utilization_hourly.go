@@ -19,6 +19,7 @@ func tableGcpComputeInstanceMetricCpuUtilizationHourly(_ context.Context) *plugi
 			ParentHydrate: listComputeInstances,
 			Hydrate:       listComputeInstanceMetricCpuUtilizationHourly,
 			KeyColumns:    plugin.OptionalColumns([]string{"name"}),
+			Tags:          map[string]string{"service": "monitoring", "action": "timeSeries.list"},
 		},
 		Columns: monitoringMetricColumns([]*plugin.Column{
 			{

@@ -18,9 +18,11 @@ func tableGcpComputeAutoscaler(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeAutoscaler,
+			Tags:       map[string]string{"service": "compute", "action": "autoscalers.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeAutoscaler,
+			Tags:    map[string]string{"service": "compute", "action": "autoscalers.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -173,6 +175,9 @@ func listComputeAutoscaler(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	resp := service.Autoscalers.AggregatedList(project).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.AutoscalerAggregatedList) error {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		for _, item := range page.Items {
 			for _, autoscaler := range item.Autoscalers {
 				d.StreamListItem(ctx, autoscaler)

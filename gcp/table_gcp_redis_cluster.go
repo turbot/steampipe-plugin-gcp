@@ -203,30 +203,43 @@ func listGcpRedisClusters(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 	project := projectId.(string)
 
-	parent := "projects/" + project + "/locations/" + location
+	// Max limit isn't mentioned in the documentation
+	// Default limit is set as 1000
+	pageSize := int32(1000)
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(pageSize) {
+			pageSize = int32(*limit)
+		}
+	}
+
 	req := &clusterpb.ListClustersRequest{
-		Parent: parent,
+		Parent:   "projects/" + project + "/locations/" + location,
+		PageSize: pageSize,
 	}
 
 	it := service.ListClusters(ctx, req)
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			logger.Error("gcp_redis_cluster.listGcpRedisClusters", "api_error", err)
 			return nil, err
 		}
 
 		d.StreamListItem(ctx, resp)
 
-		// Check if context has been cancelled or if the limit has been hit (if specified)
-		// if there is a limit, it will return the number of rows required to reach this limit
+		// Check if context has been cancelled or if the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
-			return nil, nil
+			break
 		}
 	}
+
 	return nil, nil
 }
 
