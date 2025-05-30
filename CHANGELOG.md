@@ -2,7 +2,7 @@
 
 _Enhancements_
 
-Added [rate-limiter](https://steampipe.io/docs/guides/limiter#concurrency--rate-limiting) tags to all hydrate functions to prevent exceeding API rate limits. ([#563](https://github.com/turbot/steampipe-plugin-gcp/pull/563))
+- Added [rate-limiter tags](https://steampipe.io/docs/guides/limiter#concurrency--rate-limiting) to all tables which can be used to smooth request rates and limit the number of parallel requests to avoid hitting API rate limits. ([#563](https://github.com/turbot/steampipe-plugin-gcp/pull/563))
 
 _Dependencies_
 
