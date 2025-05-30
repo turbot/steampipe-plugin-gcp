@@ -1,3 +1,13 @@
+## v1.8.0 [2025-05-30]
+
+_Enhancements_
+
+Added [rate-limiter](https://steampipe.io/docs/guides/limiter#concurrency--rate-limiting) tags to all hydrate functions to prevent exceeding API rate limits. ([#563](https://github.com/turbot/steampipe-plugin-gcp/pull/563))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.6](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5116-2025-05-22) which improves how errors are handled during query execution. ([#758](https://github.com/turbot/steampipe-plugin-gcp/pull/758))
+
 ## v1.7.0 [2025-05-12]
 
 _What's new?_
