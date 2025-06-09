@@ -11,17 +11,17 @@ import (
 	tpu "google.golang.org/api/tpu/v2"
 )
 
-func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
+func tableGcpTpuVM(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_compute_tpu",
-		Description: "[DEPRECATED] GCP Compute TPUs are specialized hardware accelerators designed to speed up specific machine learning workloads.",
+		Name:        "gcp_tpu_vm",
+		Description: "GCP Compute TPUs are specialized hardware accelerators designed to speed up specific machine learning workloads.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeTpu,
+			Hydrate:    getTpuVM,
 			Tags:       map[string]string{"service": "tpu", "action": "nodes.get"},
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listComputeTpus,
+			Hydrate: listTpuVMs,
 			Tags:    map[string]string{"service": "tpu", "action": "nodes.list"},
 		},
 		Columns: []*plugin.Column{
@@ -137,7 +137,7 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "zone",
 				Description: "The GCP zone where the TPU node is located.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpTpuTurbotData, "Zone"),
+				Transform:   transform.FromP(gcpTpuVMTurbotData, "Zone"),
 			},
 			{
 				Name:        "network_config",
@@ -172,7 +172,7 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpTpuTurbotData, "Akas"),
+				Transform:   transform.FromP(gcpTpuVMTurbotData, "Akas"),
 			},
 
 			// Standard GCP columns
@@ -180,7 +180,7 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The GCP project ID.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpTpuTurbotData, "Project"),
+				Transform:   transform.FromP(gcpTpuVMTurbotData, "Project"),
 			},
 		},
 	}
@@ -188,18 +188,18 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listTpuVMs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := TPUService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "connection_error", err)
+		plugin.Logger(ctx).Error("gcp_tpu_vm.listTpuVMs", "connection_error", err)
 		return nil, err
 	}
 
 	// Get project details
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "project_error", err)
+		plugin.Logger(ctx).Error("gcp_tpu_vm.listTpuVMs", "project_error", err)
 		return nil, err
 	}
 
@@ -218,7 +218,7 @@ func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_tpu_vm.listTpuVMs", "api_error", err)
 		return nil, err
 	}
 
@@ -227,11 +227,11 @@ func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 //// HYDRATE FUNCTIONS
 
-func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getTpuVM(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := TPUService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "connection_error", err)
+		plugin.Logger(ctx).Error("gcp_tpu_vm.getTpuVM", "connection_error", err)
 		return nil, err
 	}
 
@@ -242,7 +242,7 @@ func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	node, err := service.Projects.Locations.Nodes.Get(name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_tpu_vm.getTpuVM", "api_error", err)
 		return nil, err
 	}
 
@@ -251,7 +251,7 @@ func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 //// TRANSFORM FUNCTIONS
 
-func gcpTpuTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func gcpTpuVMTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	node := d.HydrateItem.(*tpu.Node)
 	param := d.Param.(string)
 
