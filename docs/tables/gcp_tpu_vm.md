@@ -1,12 +1,12 @@
 ---
 title: "Steampipe Table: gcp_tpu_vm - Query Google Cloud TPU VMs using SQL"
-description: "Allows users to query Google Cloud TPUs, specifically providing detailed information about TPU node configurations, states, network settings, and associated metadata."
+description: "Allows users to query Google Cloud TPU VMs, specifically providing detailed information about TPU node configurations, states, network settings, and associated metadata."
 folder: "TPU"
 ---
 
-# Table: gcp_tpu_vm - Query Google Cloud TPUs using SQL
+# Table: gcp_tpu_vm - Query Google Cloud TPU VMs using SQL
 
-Google Cloud TPUs (Tensor Processing Units) are specialized hardware accelerators designed to speed up specific machine learning workloads. They are particularly optimized for TensorFlow, Google's open-source machine learning framework. TPUs provide high-performance, custom-developed ASICs (Application-Specific Integrated Circuits) that can significantly accelerate machine learning training and inference for your applications.
+Google Cloud TPU VMs (Tensor Processing Units) are specialized hardware accelerators designed to speed up specific machine learning workloads. They are particularly optimized for TensorFlow, Google's open-source machine learning framework. TPUs provide high-performance, custom-developed ASICs (Application-Specific Integrated Circuits) that can significantly accelerate machine learning training and inference for your applications.
 
 ## Table Usage Guide
 
