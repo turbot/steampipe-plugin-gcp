@@ -2,24 +2,17 @@ package gcp
 
 import (
 	"context"
-	"strings"
+	"errors"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-
-	tpu "google.golang.org/api/tpu/v2"
 )
 
 func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_tpu",
 		Description: "[DEPRECATED] GCP Compute TPUs are specialized hardware accelerators designed to speed up specific machine learning workloads.",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeTpu,
-			Tags:       map[string]string{"service": "tpu", "action": "nodes.get"},
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeTpus,
 			Tags:    map[string]string{"service": "tpu", "action": "nodes.list"},
@@ -137,7 +130,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "zone",
 				Description: "The GCP zone where the TPU node is located.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpTpuTurbotData, "Zone"),
 			},
 			{
 				Name:        "network_config",
@@ -172,7 +164,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromP(gcpTpuTurbotData, "Akas"),
 			},
 
 			// Standard GCP columns
@@ -180,7 +171,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 				Name:        "project",
 				Description: "The GCP project ID.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromP(gcpTpuTurbotData, "Project"),
 			},
 		},
 	}
@@ -189,87 +179,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// Create Service Connection
-	service, err := TPUService(ctx, d)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "connection_error", err)
-		return nil, err
-	}
-
-	// Get project details
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "project_error", err)
-		return nil, err
-	}
-
-	// Use locations/- to get all TPUs across all regions in a single request
-	parent := "projects/" + projectId.(string) + "/locations/-"
-
-	resp := service.Projects.Locations.Nodes.List(parent)
-	if err := resp.Pages(ctx, func(page *tpu.ListNodesResponse) error {
-		for _, node := range page.Nodes {
-			d.StreamListItem(ctx, node)
-
-			// Check if context has been cancelled or if the limit has been hit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil
-			}
-		}
-		return nil
-	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.listComputeTpus", "api_error", err)
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getComputeTpu(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// Create Service Connection
-	service, err := TPUService(ctx, d)
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "connection_error", err)
-		return nil, err
-	}
-
-	name := d.EqualsQualString("name")
-	if len(name) < 1 {
-		return nil, nil
-	}
-
-	node, err := service.Projects.Locations.Nodes.Get(name).Do()
-	if err != nil {
-		plugin.Logger(ctx).Error("gcp_compute_tpu.getComputeTpu", "api_error", err)
-		return nil, err
-	}
-
-	return node, nil
-}
-
-//// TRANSFORM FUNCTIONS
-
-func gcpTpuTurbotData(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	node := d.HydrateItem.(*tpu.Node)
-	param := d.Param.(string)
-
-	// Extract project and zone from the node name
-	// Format: projects/{project}/locations/{zone}/nodes/{node}
-	parts := strings.Split(node.Name, "/")
-	if len(parts) != 6 {
-		return nil, nil
-	}
-
-	project := parts[1]
-	zone := parts[3]
-
-	turbotData := map[string]interface{}{
-		"Project": project,
-		"Zone":    zone,
-		"Akas":    []string{"gcp://tpu.googleapis.com/" + node.Name},
-	}
-
-	return turbotData[param], nil
+	err := errors.New("The gcp_compute_tpu table has been deprecated and removed, please use gcp_tpu_vm table instead.")
+	return nil, err
 }

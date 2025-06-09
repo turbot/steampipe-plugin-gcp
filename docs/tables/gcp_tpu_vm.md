@@ -1,7 +1,7 @@
 ---
-title: "Steampipe Table: gcp_tpu_vm - Query Google Cloud TPUs using SQL"
+title: "Steampipe Table: gcp_tpu_vm - Query Google Cloud TPU VMs using SQL"
 description: "Allows users to query Google Cloud TPUs, specifically providing detailed information about TPU node configurations, states, network settings, and associated metadata."
-folder: "Compute"
+folder: "TPU"
 ---
 
 # Table: gcp_tpu_vm - Query Google Cloud TPUs using SQL

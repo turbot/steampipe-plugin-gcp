@@ -14,7 +14,7 @@ import (
 func tableGcpTpuVM(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_tpu_vm",
-		Description: "GCP Compute TPUs are specialized hardware accelerators designed to speed up specific machine learning workloads.",
+		Description: "GCP TPU VMs are specialized hardware accelerators designed to speed up specific machine learning workloads.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getTpuVM,
