@@ -185,6 +185,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_storage_bucket":                                      tableGcpStorageBucket(ctx),
 			"gcp_storage_object":                                      tableGcpStorageObject(ctx),
 			"gcp_tag_binding":                                         tableGcpTagBinding(ctx),
+			"gcp_tpu_vm":                                              tableGcpTpuVM(ctx),
 			"gcp_vertex_ai_endpoint":                                  tableGcpVertexAIEndpoint(ctx),
 			"gcp_vertex_ai_notebook_runtime_template":                 tableGcpVertexAINotebookRuntimeTemplate(ctx),
 			"gcp_vertex_ai_model":                                     tableGcpVertexAIModel(ctx),

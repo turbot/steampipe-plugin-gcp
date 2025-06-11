@@ -1,18 +1,16 @@
 ---
-title: "Steampipe Table: gcp_compute_tpu - Query Google Cloud TPUs using SQL"
-description: "Allows users to query Google Cloud TPUs, specifically providing detailed information about TPU node configurations, states, network settings, and associated metadata."
-folder: "Compute"
+title: "Steampipe Table: gcp_tpu_vm - Query Google Cloud TPU VMs using SQL"
+description: "Allows users to query Google Cloud TPU VMs, specifically providing detailed information about TPU node configurations, states, network settings, and associated metadata."
+folder: "TPU"
 ---
 
-# Table: gcp_compute_tpu - Query Google Cloud TPUs using SQL
+# Table: gcp_tpu_vm - Query Google Cloud TPU VMs using SQL
 
-**Deprecated. Use [gcp_tpu_vm](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_tpu_vm) instead.**
-
-Google Cloud TPUs (Tensor Processing Units) are specialized hardware accelerators designed to speed up specific machine learning workloads. They are particularly optimized for TensorFlow, Google's open-source machine learning framework. TPUs provide high-performance, custom-developed ASICs (Application-Specific Integrated Circuits) that can significantly accelerate machine learning training and inference for your applications.
+Google Cloud TPU VMs (Tensor Processing Units) are specialized hardware accelerators designed to speed up specific machine learning workloads. They are particularly optimized for TensorFlow, Google's open-source machine learning framework. TPUs provide high-performance, custom-developed ASICs (Application-Specific Integrated Circuits) that can significantly accelerate machine learning training and inference for your applications.
 
 ## Table Usage Guide
 
-The `gcp_compute_tpu` table provides insights into TPU nodes within Google Cloud Platform. As a machine learning engineer or data scientist, explore TPU-specific details through this table to monitor and manage your machine learning infrastructure effectively. Use it to track TPU node states, verify configurations, and ensure optimal resource utilization across your machine learning workloads.
+The `gcp_tpu_vm` table provides insights into TPU nodes within Google Cloud Platform. As a machine learning engineer or data scientist, explore TPU-specific details through this table to monitor and manage your machine learning infrastructure effectively. Use it to track TPU node states, verify configurations, and ensure optimal resource utilization across your machine learning workloads.
 
 ## Examples
 
@@ -27,7 +25,7 @@ select
   accelerator_type,
   zone
 from
-  gcp_compute_tpu;
+  gcp_tpu_vm;
 ```
 
 ```sql+sqlite
@@ -38,7 +36,7 @@ select
   accelerator_type,
   zone
 from
-  gcp_compute_tpu;
+  gcp_tpu_vm;
 ```
 
 ### List non-operational TPU nodes
@@ -51,7 +49,7 @@ select
   health_description,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   state != 'READY';
 ```
@@ -63,7 +61,7 @@ select
   health_description,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   state != 'READY';
 ```
@@ -77,7 +75,7 @@ select
   count(*) as count,
   array_agg(name) as tpu_names
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 group by
   accelerator_type;
 ```
@@ -88,7 +86,7 @@ select
   count(*) as count,
   group_concat(name) as tpu_names
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 group by
   accelerator_type;
 ```
@@ -103,7 +101,7 @@ select
   cidr_block,
   network_endpoints
 from
-  gcp_compute_tpu;
+  gcp_tpu_vm;
 ```
 
 ```sql+sqlite
@@ -113,7 +111,7 @@ select
   cidr_block,
   network_endpoints
 from
-  gcp_compute_tpu;
+  gcp_tpu_vm;
 ```
 
 ### TPU nodes by creation time
@@ -125,7 +123,7 @@ select
   create_time,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 order by
   create_time;
 ```
@@ -136,7 +134,7 @@ select
   create_time,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 order by
   create_time;
 ```
@@ -150,7 +148,7 @@ select
   service_account,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   service_account is not null;
 ```
@@ -161,7 +159,7 @@ select
   service_account,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   service_account is not null;
 ```
@@ -175,7 +173,7 @@ select
   tags,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   tags is not null;
 ```
@@ -186,7 +184,7 @@ select
   tags,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   tags is not null;
 ```
@@ -200,7 +198,7 @@ select
   scheduling_config,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   scheduling_config is not null;
 ```
@@ -211,7 +209,7 @@ select
   scheduling_config,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   scheduling_config is not null;
 ```
@@ -226,7 +224,7 @@ select
   health_description,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   symptoms is not null;
 ```
@@ -238,7 +236,7 @@ select
   health_description,
   zone
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 where
   symptoms is not null;
 ```
@@ -252,7 +250,7 @@ select
   count(*) as tpu_count,
   array_agg(name) as tpu_names
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 group by
   zone
 order by
@@ -265,7 +263,7 @@ select
   count(*) as tpu_count,
   group_concat(name) as tpu_names
 from
-  gcp_compute_tpu
+  gcp_tpu_vm
 group by
   zone
 order by
