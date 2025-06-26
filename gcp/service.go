@@ -2,6 +2,11 @@ package gcp
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	redis "cloud.google.com/go/redis/apiv1"
@@ -35,6 +40,8 @@ import (
 	"google.golang.org/api/monitoring/v3"
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
+	adminreports "google.golang.org/api/admin/reports/v1"
+	"golang.org/x/oauth2/google"
 	run1 "google.golang.org/api/run/v1"
 	"google.golang.org/api/run/v2"
 	"google.golang.org/api/secretmanager/v1"
@@ -752,6 +759,62 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 
 	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
 	return svc, nil
+}
+
+// ReportsService returns the service connection for  GCP Admin Reports service,
+func ReportsService(ctx context.Context, d *plugin.QueryData) (*adminreports.Service, error) {
+    const cacheKey = "AdminReportsService"
+    if cached, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+        return cached.(*adminreports.Service), nil
+    }
+
+    // 1. Récupérer la configuration décodée
+    connConfig := GetConfig(d.Connection)
+
+    // 2. Récupérer et valider le chemin vers le JSON du service account
+    if connConfig.Credentials == nil || *connConfig.Credentials == "" {
+        return nil, fmt.Errorf("ReportsService: 'credentials' must be set in connection config")
+    }
+    credsPath := *connConfig.Credentials
+    // Étendre "~" si nécessaire
+    if strings.HasPrefix(credsPath, "~") {
+        home, err := os.UserHomeDir()
+        if err != nil {
+            return nil, fmt.Errorf("ReportsService: cannot resolve home directory: %w", err)
+        }
+        credsPath = filepath.Join(home, credsPath[1:])
+    }
+    data, err := ioutil.ReadFile(credsPath)
+    if err != nil {
+        return nil, fmt.Errorf("ReportsService: unable to read credentials file %q: %w", credsPath, err)
+    }
+
+    // 3. Récupérer et valider l’email d’impersonation
+    if connConfig.ImpersonateUserEmail == nil || *connConfig.ImpersonateUserEmail == "" {
+        return nil, fmt.Errorf("ReportsService: 'impersonate_user_email' must be set in connection config")
+    }
+    impersonatedUser := *connConfig.ImpersonateUserEmail
+
+    // 4. Créer la config JWT pour Admin Reports Audit readonly
+    jwtConfig, err := google.JWTConfigFromJSON(data, adminreports.AdminReportsAuditReadonlyScope)
+    if err != nil {
+        return nil, fmt.Errorf("ReportsService: JWTConfigFromJSON: %w", err)
+    }
+    jwtConfig.Subject = impersonatedUser
+
+    // 5. Créer le client HTTP OAuth2
+    client := jwtConfig.Client(ctx)
+    // (Optionnel) envelopper client.Transport pour logger HTTP si besoin
+
+    // 6. Créer le service Admin Reports
+    svc, err := adminreports.NewService(ctx, option.WithHTTPClient(client))
+    if err != nil {
+        return nil, fmt.Errorf("ReportsService: NewService: %w", err)
+    }
+
+    // 7. Mettre en cache l’instance
+    d.ConnectionManager.Cache.Set(cacheKey, svc)
+    return svc, nil
 }
 
 // ServiceUsageService returns the service connection for GCP Service Usage service

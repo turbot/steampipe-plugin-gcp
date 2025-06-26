@@ -9,6 +9,7 @@ type gcpConfig struct {
 	Credentials               *string  `hcl:"credentials"`
 	ImpersonateAccessToken    *string  `hcl:"impersonate_access_token"`
 	ImpersonateServiceAccount *string  `hcl:"impersonate_service_account"`
+	ImpersonateUserEmail      *string  `hcl:"impersonate_user_email"`
   	QuotaProject              *string  `hcl:"quota_project,optional"`
 	IgnoreErrorMessages       []string `hcl:"ignore_error_messages,optional"`
 	IgnoreErrorCodes          []string `hcl:"ignore_error_codes,optional"`

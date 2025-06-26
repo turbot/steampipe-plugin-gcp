@@ -9,24 +9,6 @@ Use SQL to query infrastructure including servers, networks, databases and more 
 - Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/steampipe-plugin-gcp/issues)
 
-## Quick start
-
-Install the plugin with [Steampipe](https://steampipe.io):
-
-```shell
-steampipe plugin install gcp
-```
-
-Run a query:
-
-```sql
-select
-  name,
-  role_id
-from
-  gcp_iam_role;
-```
-
 ## Engines
 
 This plugin is available for the following engines:
@@ -49,7 +31,7 @@ Prerequisites:
 Clone:
 
 ```sh
-git clone https://github.com/turbot/steampipe-plugin-gcp.git
+git clone git@github.com:1024pix/steampipe-plugin-gcp.git
 cd steampipe-plugin-gcp
 ```
 
@@ -63,7 +45,7 @@ Configure the plugin:
 
 ```sh
 cp config/* ~/.steampipe/config
-vi ~/.steampipe/config/gcp.spc
+nano ~/.steampipe/config/gcp.spc
 ```
 
 Try it!

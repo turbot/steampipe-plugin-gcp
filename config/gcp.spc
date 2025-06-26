@@ -24,6 +24,12 @@ connection "gcp" {
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
 
+  # `impersonate_user_email` (optional) - Email of a Workspace admin to impersonate
+  # when calling Admin Reports API. This must be a super-admin (or role with
+  # appropriate permissions) in your Workspace domain, and the service account
+  # must be configured with domain-wide delegation for Reports API scopes.
+  #impersonate_user_email = "admin@your-domain.com"
+
   # `quota_project` (optional) - The project ID used for billing and quota. When set,
   # this project ID is used to track quota usage and billing for the operations performed with the GCP connection.
   # If `quota_project` is not specified directly, the system will look for the `GOOGLE_CLOUD_QUOTA_PROJECT`
