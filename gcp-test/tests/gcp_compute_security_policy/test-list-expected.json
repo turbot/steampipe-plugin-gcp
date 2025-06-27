@@ -1,0 +1,8 @@
+[
+  {
+    "description": "Test security policy for validation.",
+    "fingerprint": "{{ output.fingerprint.value }}",
+    "name": "{{ resourceName }}",
+    "self_link": "{{ output.self_link.value }}"
+  }
+]
