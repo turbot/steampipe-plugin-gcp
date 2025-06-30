@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	adminreports "google.golang.org/api/admin/reports/v1"
 )
 
 // tableGcpAdminReportsTokenActivity définit la table Steampipe pour l’Admin Reports API, activités “token”.
@@ -42,6 +43,12 @@ func tableGcpAdminReportsTokenActivity(ctx context.Context) *plugin.Table {
     			Description: "Nom de l’événement",
     			Type:        proto.ColumnType_STRING,
     			Transform:   transform.FromField("Events").Transform(extractEventNames),
+			},
+			{
+    			Name:        "app_name",
+    			Description: "Nom de l’application",
+    			Type:        proto.ColumnType_STRING,
+    			Transform:   transform.FromField("Events").Transform(extractAppName),
 			},
 			{
 				Name:        "unique_qualifier",
@@ -199,5 +206,27 @@ func listGcpAdminReportsTokenActivities(ctx context.Context, d *plugin.QueryData
         }
     }
 
+    return nil, nil
+}
+
+func extractAppName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+    // HydrateItem est l’objet *adminreports.Activity
+    activity, ok := d.HydrateItem.(*adminreports.Activity)
+    if !ok {
+        return nil, nil
+    }
+    // Parcourir tous les événements de l’activité
+    for _, event := range activity.Events {
+        if event.Parameters != nil {
+            // Parcourir les paramètres de cet événement
+            for _, p := range event.Parameters {
+                if p.Name == "app_name" {
+                    // Retourner la valeur telle quelle (string)
+                    return p.Value, nil
+                }
+            }
+        }
+    }
+    // Si on n’a pas trouvé, retourner nil
     return nil, nil
 }
