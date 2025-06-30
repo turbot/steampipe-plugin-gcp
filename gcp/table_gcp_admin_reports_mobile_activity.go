@@ -39,9 +39,9 @@ func tableGcpAdminReportsMobileActivity(ctx context.Context) *plugin.Table {
 			},
 			{
     			Name:        "event_name",
-    			Description: "Nom de l’événement",
+    			Description: "Nom de l’événement/des événements",
     			Type:        proto.ColumnType_STRING,
-    			Transform:   transform.FromField("Events").Transform(extractEventNames),
+    			Transform:   transform.FromField("Events").Transform(extractFirstEventName),
 			},
 			{
 				Name:        "unique_qualifier",
@@ -134,18 +134,7 @@ func listGcpAdminReportsMobileActivities(ctx context.Context, d *plugin.QueryDat
 
     // 2.
 
-    if quals := d.Quals["event_name"]; quals != nil {
-    for _, q := range quals.Quals {
-        if q.Value != nil {
-            eventName := q.Value.GetStringValue()
-            if eventName != "" {
-                // Utiliser EventName au lieu de Filters 
-                call.EventName(eventName)
-                break
-            }
-        }
-    }
-}
+
 
     // 3. Pagination
     pageToken := ""
