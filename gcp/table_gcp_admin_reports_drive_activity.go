@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	adminreports "google.golang.org/api/admin/reports/v1"
 )
 
 // tableGcpAdminReportsDriveActivity définit la table Steampipe pour l’Admin Reports API, activités “drive”.
@@ -36,6 +37,12 @@ func tableGcpAdminReportsDriveActivity(ctx context.Context) *plugin.Table {
 				Description: "Adresse email de l'acteur (Actor.Email)",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Actor.Email"),
+			},
+			{
+				Name:        "file_name",
+				Description: "Nom du fichier",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Events").Transform(extractFileName),
 			},
 			{
     			Name:        "event_name",
@@ -182,5 +189,27 @@ func listGcpAdminReportsDriveActivities(ctx context.Context, d *plugin.QueryData
         }
     }
 
+    return nil, nil
+}
+
+func extractFileName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+    // HydrateItem est l’objet *adminreports.Activity
+    activity, ok := d.HydrateItem.(*adminreports.Activity)
+    if !ok {
+        return nil, nil
+    }
+    // Parcourir tous les événements de l’activité
+    for _, event := range activity.Events {
+        if event.Parameters != nil {
+            // Parcourir les paramètres de cet événement
+            for _, p := range event.Parameters {
+                if p.Name == "doc_title" {
+                    // Retourner la valeur telle quelle (string)
+                    return p.Value, nil
+                }
+            }
+        }
+    }
+    // Si on n’a pas trouvé, retourner nil
     return nil, nil
 }
