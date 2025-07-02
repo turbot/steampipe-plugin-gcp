@@ -1,108 +1,108 @@
 package gcp
 
 import (
-	"context"
-	"time"
+	    "context"
+	    "time"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	adminreports "google.golang.org/api/admin/reports/v1"
+	    "github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	    "github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	    "github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	    adminreports "google.golang.org/api/admin/reports/v1"
 )
 
-// tableGcpAdminReportsTokenActivity définit la table Steampipe pour l’Admin Reports API, activités “token”.
+//// TABLE DEFINITION
+
 func tableGcpAdminReportsTokenActivity(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_admin_reports_token_activity",
-		Description: "GCP Admin Reports API - activité de connexion (token)",
-		List: &plugin.ListConfig{
-			Hydrate: listGcpAdminReportsTokenActivities,
-			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "time", Require: plugin.Optional, Operators: []string{">", ">=", "<", "<=", "="}},
-				{Name: "actor_email", Require: plugin.Optional},
-				{Name: "ip_address", Require: plugin.Optional},
-				{Name: "event_name", Require: plugin.Optional},
-			},
-			Tags: map[string]string{"service": "admin", "product": "reports", "action": "activities.list"},
-		},
-		Columns: []*plugin.Column{
-			{
-				Name:        "time",
-				Description: "Horodatage de l'activité (ID.Time) au format RFC3339",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("Id.Time"),
-			},
-			{
-				Name:        "actor_email",
-				Description: "Adresse email de l'acteur (Actor.Email)",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Actor.Email"),
-			},
-			{
-    			Name:        "event_name",
-    			Description: "Nom de l’événement",
-    			Type:        proto.ColumnType_STRING,
-    			Transform:   transform.FromField("Events").Transform(extractEventNames),
-			},
-			{
-    			Name:        "app_name",
-    			Description: "Nom de l’application",
-    			Type:        proto.ColumnType_STRING,
-    			Transform:   transform.FromField("Events").Transform(extractAppName),
-			},
-			{
-				Name:        "unique_qualifier",
-				Description: "Identifiant unique qualifiant cette activité (ID.UniqueQualifier)",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id.UniqueQualifier"),
-			},
-			{
-				Name:        "application_name",
-				Description: "Nom de l’application du rapport (ici toujours 'token')",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id.ApplicationName"),
-			},
-			{
-				Name:        "actor_profile_id",
-				Description: "Profile ID de l'acteur (Actor.ProfileId)",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Actor.ProfileId"),
-			},
-			{
-				Name:        "actor_caller_type",
-				Description: "Type de caller (Actor.CallerType)",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Actor.CallerType"),
-			},
-			{
-				Name:        "ip_address",
-				Description: "Adresse IP associée à l’activité (IpAddress)",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("IpAddress"),
-			},
-			{
-				Name:        "events",
-				Description: "Liste des événements détaillés (Events) pour cette activité, en JSON",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Events"),
-			},
-			{
-				Name:        "title",
-				Description: "Titre de l’activité (Time + Actor Email)",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id.Time").Transform(convertTimeToString).Transform(formatTitleWithActorEmail),
-			},
+		    Name:        "gcp_admin_reports_token_activity",
+		    Description: "GCP Admin Reports API - Token activity events",
+		    
+            List: &plugin.ListConfig{
+			        Hydrate: listGcpAdminReportsTokenActivities,
+			        KeyColumns: plugin.KeyColumnSlice{
+				        {Name: "time", Require: plugin.Optional, Operators: []string{">", ">=", "<", "<=", "="}},
+				        {Name: "actor_email", Require: plugin.Optional},
+				        {Name: "ip_address", Require: plugin.Optional},
+				        {Name: "event_name", Require: plugin.Optional},
+			        },
+			        Tags: map[string]string{"service": "admin", "product": "reports", "action": "activities.list"},
+		    },
+		    Columns: []*plugin.Column{
+			        {
+				            Name:        "time",
+				            Description: "Timestamp of the activity (Id.Time) in RFC3339 format",
+				            Type:        proto.ColumnType_TIMESTAMP,
+				            Transform:   transform.FromField("Id.Time"),
+			        },
+			        {
+				            Name:        "actor_email",
+				            Description: "Email address of the actor (Actor.Email)",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("Actor.Email"),
+			        },
+			        {
+    			            Name:        "event_name",
+    			            Description: "List of event names for this activity",
+    			            Type:        proto.ColumnType_STRING,
+    			            Transform:   transform.FromField("Events").Transform(extractEventNames),
+			        },
+			        {
+    			            Name:        "app_name",
+    			            Description: "Name of the application",
+    			            Type:        proto.ColumnType_STRING,
+    			            Transform:   transform.FromField("Events").Transform(extractAppName),
+			        },
+			        {
+				            Name:        "unique_qualifier",
+				            Description: "Unique qualifier ID for this activity (Id.UniqueQualifier)",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("Id.UniqueQualifier"),
+			        },
+			        {
+				            Name:        "application_name",
+				            Description: "Name of the report application (Id.ApplicationName)",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("Id.ApplicationName"),
+			        },
+			        {
+				            Name:        "actor_profile_id",
+				            Description: "Profile ID of the actor (Actor.ProfileId)",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("Actor.ProfileId"),
+			        },
+			        {
+				            Name:        "actor_caller_type",
+				            Description: "Caller type of the actor (Actor.CallerType)",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("Actor.CallerType"),
+			        },
+			        {
+				            Name:        "ip_address",
+				            Description: "IP address associated with the activity (IpAddress)",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("IpAddress"),
+			        },
+			        {
+				            Name:        "events",
+				            Description: "Full JSON array of detailed events (Events)",
+				            Type:        proto.ColumnType_JSON,
+				            Transform:   transform.FromField("Events"),
+			        },
+			        {
+				            Name:        "title",
+				            Description: "Concatenation of time and actor email",
+				            Type:        proto.ColumnType_STRING,
+				            Transform:   transform.FromField("Id.Time").Transform(convertTimeToString).Transform(formatTitleWithActorEmail),
+			        },
 			
-		},
+		    },
 	}
 }
 
 
 
-//// HYDRATE FUNCTIONS
+//// LIST FUNCTION
 
-// listGcpAdminReportsTokenActivities liste les activités "token"
-// Elle gère les qualifiers : time (via StartTime/EndTime), actor_email, ip_address, event_names.
 func listGcpAdminReportsTokenActivities(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
     // Création du service Reports API
     service, err := ReportsService(ctx, d)
@@ -113,18 +113,15 @@ func listGcpAdminReportsTokenActivities(ctx context.Context, d *plugin.QueryData
 
     call := service.Activities.List("all", "token")
 
-    // 1. Gestion de la plage temporelle
-    now := time.Now()
-    startTime := now.Add(-180 * 24 * time.Hour)
-    endTime := now
+    // If the user supplied a time qualifier, translate it to StartTime/EndTime parameters
     if quals := d.Quals["time"]; quals != nil {
+        var startTime, endTime time.Time
         for _, q := range quals.Quals {
-            if q.Value != nil && q.Value.GetTimestampValue() != nil {
-                t := q.Value.GetTimestampValue().AsTime()
+            if ts := q.Value.GetTimestampValue(); ts != nil {
+                t := ts.AsTime()
                 switch q.Operator {
                 case "=":
-                    startTime = t
-                    endTime = t
+                    startTime, endTime = t, t
                 case ">":
                     startTime = t.Add(time.Nanosecond)
                 case ">=":
@@ -136,39 +133,22 @@ func listGcpAdminReportsTokenActivities(ctx context.Context, d *plugin.QueryData
                 }
             }
         }
-    }
-    if !startTime.After(endTime) {
-        call.StartTime(startTime.Format(time.RFC3339))
-        call.EndTime(endTime.Format(time.RFC3339))
-    } else {
-        return nil, nil
-    }
-
-    // 2.
-
-    if quals := d.Quals["event_name"]; quals != nil {
-    for _, q := range quals.Quals {
-        if q.Value != nil {
-            eventName := q.Value.GetStringValue()
-            if eventName != "" {
-                // Utiliser EventName au lieu de Filters 
-                call.EventName(eventName)
-                break
-            }
+        if !startTime.IsZero() {
+            call.StartTime(startTime.Format(time.RFC3339))
+        }
+        if !endTime.IsZero() {
+            call.EndTime(endTime.Format(time.RFC3339))
         }
     }
-}
 
-    // 3. Pagination
+    // Pagination setup
     pageToken := ""
     const apiMaxPageSize = 1000
-    // Déterminer taille de la première page
+
+    // Determine initial page size based on SQL LIMIT
     var initialPageSize int64 = apiMaxPageSize
-    if d.QueryContext.Limit != nil {
-        limit := *d.QueryContext.Limit
-        if limit < initialPageSize {
-            initialPageSize = limit
-        }
+    if limit := d.QueryContext.Limit; limit != nil && *limit < initialPageSize {
+        initialPageSize = *limit
     }
     call.MaxResults(initialPageSize)
 
@@ -178,23 +158,24 @@ func listGcpAdminReportsTokenActivities(ctx context.Context, d *plugin.QueryData
         }
         resp, err := call.Do()
         if err != nil {
-            plugin.Logger(ctx).Error("gcp_admin_reports_token_activity.list", "api_error", err)
+            plugin.Logger(ctx).Error("gcp_admin_reports_admin_activity.list", "api_error", err)
             return nil, err
         }
-        if resp.Items != nil {
-            for _, activity := range resp.Items {
-                d.StreamListItem(ctx, activity)
-                if d.RowsRemaining(ctx) == 0 {
-                    return nil, nil
-                }
+        // Stream items
+        for _, activity := range resp.Items {
+            d.StreamListItem(ctx, activity)
+            if d.RowsRemaining(ctx) == 0 {
+                return nil, nil
             }
         }
+        // Check for next page
         if resp.NextPageToken == "" {
             break
         }
         pageToken = resp.NextPageToken
-        // Ajuster la taille pour la prochaine page selon la limite SQL restante
-        if d.QueryContext.Limit != nil {
+
+        // Adjust next page size for remaining rows
+        if limit := d.QueryContext.Limit; limit != nil {
             remaining := d.RowsRemaining(ctx)
             if remaining > 0 && remaining < apiMaxPageSize {
                 call.MaxResults(int64(remaining))
@@ -210,23 +191,18 @@ func listGcpAdminReportsTokenActivities(ctx context.Context, d *plugin.QueryData
 }
 
 func extractAppName(_ context.Context, d *transform.TransformData) (interface{}, error) {
-    // HydrateItem est l’objet *adminreports.Activity
     activity, ok := d.HydrateItem.(*adminreports.Activity)
     if !ok {
         return nil, nil
     }
-    // Parcourir tous les événements de l’activité
     for _, event := range activity.Events {
         if event.Parameters != nil {
-            // Parcourir les paramètres de cet événement
             for _, p := range event.Parameters {
                 if p.Name == "app_name" {
-                    // Retourner la valeur telle quelle (string)
                     return p.Value, nil
                 }
             }
         }
     }
-    // Si on n’a pas trouvé, retourner nil
     return nil, nil
 }

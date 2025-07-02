@@ -24,7 +24,7 @@ connection "gcp" {
   # If not set, no impersonation is done.
   #impersonate_service_account = "YOUR_SERVICE_ACCOUNT"
 
-  # `impersonate_user_email` (optional) - Email of a Workspace admin to impersonate
+  # `impersonate_user_email` (optional) - Email of a user to impersonate
   # when calling Admin Reports API. This must be a super-admin (or role with
   # appropriate permissions) in your Workspace domain, and the service account
   # must be configured with domain-wide delegation for Reports API scopes.

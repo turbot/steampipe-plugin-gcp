@@ -764,19 +764,20 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 // ReportsService returns the service connection for  GCP Admin Reports service,
 func ReportsService(ctx context.Context, d *plugin.QueryData) (*adminreports.Service, error) {
     const cacheKey = "AdminReportsService"
+    // 0. Return cached client if already initialized
     if cached, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
         return cached.(*adminreports.Service), nil
     }
 
-    // 1. Récupérer la configuration décodée
+    // 1. Decode the connection configuration
     connConfig := GetConfig(d.Connection)
 
-    // 2. Récupérer et valider le chemin vers le JSON du service account
+    // 2. Validate the path to the service account JSON
     if connConfig.Credentials == nil || *connConfig.Credentials == "" {
         return nil, fmt.Errorf("ReportsService: 'credentials' must be set in connection config")
     }
     credsPath := *connConfig.Credentials
-    // Étendre "~" si nécessaire
+    // Expand leading '~' to the user’s home directory
     if strings.HasPrefix(credsPath, "~") {
         home, err := os.UserHomeDir()
         if err != nil {
@@ -784,35 +785,35 @@ func ReportsService(ctx context.Context, d *plugin.QueryData) (*adminreports.Ser
         }
         credsPath = filepath.Join(home, credsPath[1:])
     }
+    // Read the service account JSON file
     data, err := ioutil.ReadFile(credsPath)
     if err != nil {
         return nil, fmt.Errorf("ReportsService: unable to read credentials file %q: %w", credsPath, err)
     }
 
-    // 3. Récupérer et valider l’email d’impersonation
+    // 3. Validate the impersonation email
     if connConfig.ImpersonateUserEmail == nil || *connConfig.ImpersonateUserEmail == "" {
         return nil, fmt.Errorf("ReportsService: 'impersonate_user_email' must be set in connection config")
     }
     impersonatedUser := *connConfig.ImpersonateUserEmail
 
-    // 4. Créer la config JWT pour Admin Reports Audit readonly
+    // 4. Create a JWT config with the readonly scope for Admin Reports
     jwtConfig, err := google.JWTConfigFromJSON(data, adminreports.AdminReportsAuditReadonlyScope)
     if err != nil {
         return nil, fmt.Errorf("ReportsService: JWTConfigFromJSON: %w", err)
     }
     jwtConfig.Subject = impersonatedUser
 
-    // 5. Créer le client HTTP OAuth2
+    // 5. Create an OAuth2 HTTP client
     client := jwtConfig.Client(ctx)
-    // (Optionnel) envelopper client.Transport pour logger HTTP si besoin
-
-    // 6. Créer le service Admin Reports
+    
+    // 6. Instantiate the Admin Reports service
     svc, err := adminreports.NewService(ctx, option.WithHTTPClient(client))
     if err != nil {
         return nil, fmt.Errorf("ReportsService: NewService: %w", err)
     }
 
-    // 7. Mettre en cache l’instance
+    // 7. Cache and return the service client
     d.ConnectionManager.Cache.Set(cacheKey, svc)
     return svc, nil
 }
