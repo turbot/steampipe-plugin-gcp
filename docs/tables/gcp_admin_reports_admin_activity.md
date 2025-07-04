@@ -6,7 +6,7 @@ folder: "Cloud Admin Reports"
 
 # Table: gcp_admin_reports_admin_activity - Query GCP Admin Reports Admin Activity Events using SQL
 
-Google Admin Reports Admin Activity provides audit logs for administrative actions and login events performed in your GSuite domain. This table exposes those records in an SQL interface via Steampipe, enabling security, compliance, and operational investigations.
+Google Admin Reports Admin Activity provides audit logs for administrative actions and login events performed in your GCP/Google Workspace domain. These records enable you to detect privilege or user modifications, to investigate security events, and to monitor compliance.
 
 ## Table Usage Guide
 

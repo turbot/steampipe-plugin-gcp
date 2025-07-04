@@ -764,15 +764,15 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 // ReportsService returns the service connection for  GCP Admin Reports service,
 func ReportsService(ctx context.Context, d *plugin.QueryData) (*adminreports.Service, error) {
     const cacheKey = "AdminReportsService"
-    // 0. Return cached client if already initialized
+    // Return cached client if already initialized
     if cached, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
         return cached.(*adminreports.Service), nil
     }
 
-    // 1. Decode the connection configuration
+    // Decode the connection configuration
     connConfig := GetConfig(d.Connection)
 
-    // 2. Validate the path to the service account JSON
+    // Validate the path to the service account JSON
     if connConfig.Credentials == nil || *connConfig.Credentials == "" {
         return nil, fmt.Errorf("ReportsService: 'credentials' must be set in connection config")
     }
@@ -791,29 +791,29 @@ func ReportsService(ctx context.Context, d *plugin.QueryData) (*adminreports.Ser
         return nil, fmt.Errorf("ReportsService: unable to read credentials file %q: %w", credsPath, err)
     }
 
-    // 3. Validate the impersonation email
+    // Validate the impersonation email
     if connConfig.ImpersonateUserEmail == nil || *connConfig.ImpersonateUserEmail == "" {
         return nil, fmt.Errorf("ReportsService: 'impersonate_user_email' must be set in connection config")
     }
     impersonatedUser := *connConfig.ImpersonateUserEmail
 
-    // 4. Create a JWT config with the readonly scope for Admin Reports
+    // Create a JWT config with the readonly scope for Admin Reports
     jwtConfig, err := google.JWTConfigFromJSON(data, adminreports.AdminReportsAuditReadonlyScope)
     if err != nil {
         return nil, fmt.Errorf("ReportsService: JWTConfigFromJSON: %w", err)
     }
     jwtConfig.Subject = impersonatedUser
 
-    // 5. Create an OAuth2 HTTP client
+    // Create an OAuth2 HTTP client
     client := jwtConfig.Client(ctx)
     
-    // 6. Instantiate the Admin Reports service
+    // Instantiate the Admin Reports service
     svc, err := adminreports.NewService(ctx, option.WithHTTPClient(client))
     if err != nil {
         return nil, fmt.Errorf("ReportsService: NewService: %w", err)
     }
 
-    // 7. Cache and return the service client
+    // Cache and return the service client
     d.ConnectionManager.Cache.Set(cacheKey, svc)
     return svc, nil
 }
