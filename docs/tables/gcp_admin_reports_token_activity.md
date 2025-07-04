@@ -6,7 +6,7 @@ folder: "Cloud Admin Reports"
 
 # Table: gcp_admin_reports_token_activity - Query GCP Admin Reports Token Activity Events using SQL
 
-Google Admin Reports Token Activity captures events related to OAuth and API tokens—such as token creation, refresh, revocation, and invalidation—within your organization. This table exposes those audit records via Steampipe’s SQL interface.
+Google Admin Reports Token Activity captures events related to OAuth and API tokens—such as token authorization (connections to other services using Google account) and revocation. 
 
 ## Table Usage Guide
 
@@ -14,9 +14,9 @@ Use the `gcp_admin_reports_token_activity` table to monitor token lifecycle even
 
 ## Examples
 
-### 1. Recent token creations
+### Basic info
 
-Retrieve token creation events in the last 8 hours:
+Retrieve token activity events in the last 24 hours.
 
 ```sql
 select
@@ -27,12 +27,28 @@ select
 from
   gcp_admin_reports_token_activity
 where
-  time > now() - '8 hours'::interval;
+  time > now() - '1 day'::interval;
 ```
 
-### 2. Token revocations for a user
+### Token activity related to a specific app
 
-Show all token deletion events by [alice@example.com] in the past 2 days:
+Identify event related to the Google Chrome app over the last week.
+
+```sql
+select
+  time,
+  actor_email,
+  event_name
+from
+  gcp_admin_reports_token_activity
+where
+  app_name = 'Google Chrome'
+  and time > now() - '7 days'::interval;
+```
+
+### Token revocations for a user
+
+Show all token deletion events by [alice@example.com] in the past 2 days.
 
 ```sql
 select
@@ -47,51 +63,18 @@ where
   and time > now() - '2 days'::interval;
 ```
 
-### 3. Refresh token events
+### Custom time window audit
 
-Identify event related to the Google Chrome app over the last week:
-
-```sql
-select
-  time,
-  actor_email,
-  event_name
-from
-  gcp_admin_reports_token_activity
-where
-  app_name = 'Google Chrome'
-  and time > now() - '7 days'::interval;
-```
-
-### 4. Custom time window audit
-
-Query token activity between two specific timestamps:
+Query token activity between two specific timestamps.
 
 ```sql
 select
   time,
   actor_email,
-  event_name
+  event_name,
+  app_name
 from
   gcp_admin_reports_token_activity
 where
   time between '2025-06-01T00:00:00Z' and '2025-06-07T23:59:59Z';
-```
-
-### 5. Top token event types in the last month
-
-Aggregate counts of each token event type in the last 30 days:
-
-```sql
-select
-  event_name,
-  count(*) as event_count
-from
-  gcp_admin_reports_token_activity
-where
-  time > now() - '30 days'::interval
-group by
-  event_name
-order by
-  event_count desc;
 ```

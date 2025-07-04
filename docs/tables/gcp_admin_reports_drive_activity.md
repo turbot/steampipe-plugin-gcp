@@ -6,7 +6,7 @@ folder: "Cloud Admin Reports"
 
 # Table: gcp_admin_reports_drive_activity - Query GCP Admin Reports Drive Activity Events using SQL
 
-Google Admin Reports Drive Activity captures detailed events related to Google Drive operations—such as file views, edits, creations, and deletions—performed by users within your organization. This table surfaces those audit records in an easy-to-query SQL interface via Steampipe.
+Google Admin Reports Drive Activity captures detailed events related to Google Drive operations—such as file views, edits, downloads, creations, and deletions—performed by users within your organization.
 
 ## Table Usage Guide
 
@@ -18,10 +18,10 @@ The `gcp_admin_reports_drive_activity` table lets administrators and security te
 
 ## Examples
 
-### 1. List recent Drive activity
-Retrieve Drive events in the last 24 hours, showing user and file names:
+### Basic info
+Retrieve events occuring in the Google Drive of your organization in the last 24 hours, showing user and file names.
 
-```sql+postgres
+```sql
 select
   time,
   actor_email,
@@ -33,10 +33,10 @@ where
   time > now() - interval '1 day';
 ```
 
-### 2. Filter by specific file
-Show Drive edits and views performed on the file Passwords.txt in the last week:
+### Show events related to a specific file
+Show Drive edits and views performed on the file Passwords.txt in the last week.
 
-```sql+postgres
+```sql
 select
   time,
   actor_email,
@@ -50,10 +50,10 @@ where
   and time > now() - '1 week'::interval;
 ```
 
-### 3. Find activities from a specific IP address
-Identify all Drive operations originating from 203.0.113.45:
+### Find activities from a specific IP address
+Identify all Drive operations originating from a specific IP address.
 
-```sql+postgres
+```sql
 select
   time,
   actor_email,
@@ -62,13 +62,13 @@ select
 from
   gcp_admin_reports_drive_activity
 where
-  ip_address = '203.0.113.45';
+  ip_address = '8.8.8.8';
 ```
 
-### 4. Get events within a custom time window
-Query Drive activities between two timestamps:
+### Get events within a custom time window
+Query Drive activities between two timestamps.
 
-```sql+postgres
+```sql
 select
   time,
   actor_email,
@@ -77,13 +77,13 @@ select
 from
   gcp_admin_reports_drive_activity
 where
-  time between '2025-06-15T00:00:00Z' and '2025-06-20T23:59:59Z';
+  time between '2025-06-15T00:00:00Z' and '2025-06-16T23:59:59Z';
 ```
 
-### 5. Top users by activity count
-Aggregate total Drive events per user in the last 5 hours:
+### Top users by activity count
+Aggregate total Drive events per user in the last 5 hours.
 
-```sql+postgres
+```sql
 select
   actor_email,
   count(*) as total_events

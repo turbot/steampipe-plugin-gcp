@@ -1,12 +1,12 @@
 ---
-title: "Steampipe Table: gcp\_admin\_reports\_login\_activity - Query GCP Admin Reports Login Activity Events using SQL"
+title: "Steampipe Table: gcp_admin_reports_login_activity - Query GCP Admin Reports Login Activity Events using SQL"
 description: "Allows users to query login activity events from the GCP Admin Reports API, providing insights into user login behavior and authentication events."
 folder: "Cloud Admin Reports"
 ---
 
 # Table: gcp_admin_reports_login_activity - Query GCP Admin Reports Login Activity Events using SQL
 
-Google Admin Reports Login Activity captures authentication events such as successful and failed logins, MFA completions, and session terminations within your GSuite domain. This table surfaces those audit records in an SQL interface via Steampipe.
+Google Admin Reports Login Activity captures authentication events such as successful and failed logins, MFA completions, and recovery email/phone number edits  within your GSuite domain.
 
 ## Table Usage Guide
 
@@ -14,9 +14,9 @@ The `gcp_admin_reports_login_activity` table is designed for monitoring user aut
 
 ## Examples
 
-### 1. List recent login events
+### Basic info
 
-Retrieve login events in the last 12 hours:
+Retrieve login events in the last 24 hours.
 
 ```sql
 select
@@ -27,12 +27,12 @@ select
 from
   gcp_admin_reports_login_activity
 where
-  time > now() - '12 hours'::interval;
+  time > now() - '1 day'::interval;
 ```
 
-### 2. Filter by specific user failure events
+### Filter by specific user failure events
 
-Show all failed login attempts by [bob@example.com] in the last 7 days:
+Show all failed login attempts by [bob@example.com] in the last 7 days.
 
 ```sql
 select
@@ -47,9 +47,9 @@ where
   and time > now() - '7 days'::interval;
 ```
 
-### 3. Identify passwords changes
+### Identify passwords changes
 
-Find password change events across all users in the last week:
+Find password change events across all users in the last week.
 
 ```sql
 select
@@ -63,9 +63,9 @@ where
   and time > now() - '7 days'::interval;
 ```
 
-### 4. Custom time window analysis
+### Custom time window analysis
 
-Query login activities between two timestamps:
+Query login activities between two timestamps.
 
 ```sql
 select
@@ -78,9 +78,9 @@ where
   time between '2025-06-10T00:00:00Z' and '2025-06-15T23:59:59Z';
 ```
 
-### 5. Top IP addresses by login count
+### Top IP addresses by login count
 
-Identify the top source IPs initiating login events in the last month:
+Identify the top source IPs initiating login events in the last month.
 
 ```sql
 select

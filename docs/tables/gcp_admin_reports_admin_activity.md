@@ -10,31 +10,32 @@ Google Admin Reports Admin Activity provides audit logs for administrative actio
 
 ## Table Usage Guide
 
-The `gcp_admin_reports_admin_activity` table is ideal for tracking admin operations such as login attempts, password changes, and role assignments. Use it to monitor and audit critical administrative events.
+The `gcp_admin_reports_admin_activity` table is ideal for tracking admin operations such as user creation, password changes, and role assignments. Use it to monitor and audit critical administrative events.
 
 > :point_right: Notice that the event_name are inside brackets, it's because we can have several events for the same entry, example : `[CHANGE_PASSWORD CHANGE_PASSWORD_ON_NEXT_LOGIN]`
 
 ## Examples
 
-### 1. List recent admin activities
+### Basic info
 
-Retrieve admin events in the last 24 hours:
+Retrieve events performed by administrators of your GCP/Google Workspace domain in the last 24 hours.
 
 ```sql
 select
   time,
   actor_email,
   event_name,
-  ip_address
+  ip_address,
+  events
 from
   gcp_admin_reports_admin_activity
 where
-  time > now() - '24 hours';
+  time > now() - '1 day'::interval;
 ```
 
-### 2. Filter by event name
+### List all password change events
 
-Show all changes of password:
+Show all changes of password performed by administrators on users.
 
 ```sql
 select
@@ -49,55 +50,37 @@ where
   event_name like '%CHANGE_PASSWORD%';
 ```
 
-### 3. Identify failed login attempts
+### List all user creation events
 
-Find admin login events originating from an unexpected IP range:
+Find user creation events performed by admins originating from an unexpected IP range.
 
 ```sql
 select
   time,
   actor_email,
   ip_address,
+  user_email,
   event_name
 from
   gcp_admin_reports_admin_activity
 where
-  event_name = 'login_failure'
+  event_name = '[CREATE_USER]'
   and ip_address >= '203.0.113.0'
   and ip_address <= '203.0.113.255';
 ```
 
-### 4. Get activities within a custom time window
+### Get activities within a custom time window
 
-Query admin activities between two timestamps:
+Query admin activities between two timestamps.
 
 ```sql
 select
   time,
   actor_email,
   event_name,
-  unique_qualifier
+  events
 from
   gcp_admin_reports_admin_activity
 where
   time between '2025-06-15T00:00:00Z' and '2025-06-20T23:59:59Z';
-```
-
-### 5. Top admin users by activity count
-
-Aggregate total admin events per user in the last month:
-
-```sql
-select
-  actor_email,
-  count(*) as total_events
-from
-  gcp_admin_reports_admin_activity
-where
-  time > now() - '1 month'::interval
-group by
-  actor_email
-order by
-  total_events desc
-limit 10;
 ```
