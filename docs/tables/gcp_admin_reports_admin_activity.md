@@ -41,13 +41,12 @@ select
   time,
   actor_email,
   event_name,
-  param->>'value' as user_email,
+  user_email,
   ip_address
-from gcp_admin_reports_admin_activity,
-lateral jsonb_array_elements(events) as event,
-lateral jsonb_array_elements(event->'parameters') as param
-where event_name like '%CHANGE_PASSWORD%'
-  and param->>'name' = 'USER_EMAIL';
+from 
+  gcp_admin_reports_admin_activity
+where 
+  event_name like '%CHANGE_PASSWORD%';
 ```
 
 ### 3. Identify failed login attempts

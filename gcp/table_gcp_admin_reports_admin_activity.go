@@ -7,6 +7,7 @@ import (
 	    "github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	    "github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	    "github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	    adminreports "google.golang.org/api/admin/reports/v1"
 )
 
 
@@ -60,10 +61,10 @@ func tableGcpAdminReportsAdminActivity(ctx context.Context) *plugin.Table {
 							Transform:   transform.FromField("Id.ApplicationName"),
 					},
 					{
-							Name:        "actor_profile_id",
-							Description: "Profile ID of the actor (Actor.ProfileId)",
+							Name:        "user_email",
+							Description: "Name of the user over which the operation is done (if it exists)",
 							Type:        proto.ColumnType_STRING,
-							Transform:   transform.FromField("Actor.ProfileId"),
+							Transform:   transform.From(extractUserEmail),
 					},
 					{
 							Name:        "actor_caller_type",
@@ -181,4 +182,23 @@ func listGcpAdminReportsAdminActivities(ctx context.Context, d *plugin.QueryData
 	}
 
 	return nil, nil
+}
+
+/// TRANSFORM FUNCTION
+
+func extractUserEmail(_ context.Context, d *transform.TransformData) (interface{}, error) {
+    activity, ok := d.HydrateItem.(*adminreports.Activity)
+    if !ok {
+        return nil, nil
+    }
+    for _, event := range activity.Events {
+        if event.Parameters != nil {
+            for _, p := range event.Parameters {
+                if p.Name == "USER_EMAIL" {
+                    return p.Value, nil
+                }
+            }
+        }
+    }
+    return nil, nil
 }
