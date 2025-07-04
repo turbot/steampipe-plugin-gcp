@@ -1,7 +1,6 @@
 ---
 title: "Steampipe Table: gcp_compute_security_policy - Query Google Cloud Armor Security Policies using SQL"
 description: "Allows users to query Google Cloud Armor Security Policies, providing insights into policy details, rules, and configuration."
-folder: "Compute"
 ---
 
 # Table: gcp_compute_security_policy
@@ -15,7 +14,19 @@ The `gcp_compute_security_policy` table provides insights into Cloud Armor secur
 ### Examples
 
 #### List all security policies
-```sql
+List all Google Cloud Armor security policies in your GCP projects, including their names, IDs, descriptions, and self links.
+
+```sql+postgres
+select
+  name,
+  id,
+  description,
+  self_link
+from
+  gcp_compute_security_policy;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -26,7 +37,23 @@ from
 ```
 
 #### Get a security policy by name
-```sql
+Retrieve details for a specific security policy by its name, including its rules, labels, and associated project.
+
+```sql+postgres
+select
+  name,
+  id,
+  description,
+  rules,
+  labels,
+  project
+from
+  gcp_compute_security_policy
+where
+  name = 'my-security-policy';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -41,7 +68,9 @@ where
 ```
 
 #### List all rules for each security policy
-```sql
+Show the rules defined for each security policy, helping you review policy configurations across your environment.
+
+```sql+postgres
 select
   name,
   rules
@@ -49,19 +78,18 @@ from
   gcp_compute_security_policy;
 ```
 
-#### Find security policies with a specific label
-```sql
+```sql+sqlite
 select
   name,
-  labels
+  rules
 from
-  gcp_compute_security_policy
-where
-  labels ->> 'env' = 'prod';
+  gcp_compute_security_policy;
 ```
 
 #### Show all policies with adaptive protection enabled
-```sql
+Identify security policies that have adaptive protection enabled, which helps protect against advanced DDoS attacks.
+
+```sql+postgres
 select
   name,
   adaptive_protection_config
@@ -69,4 +97,14 @@ from
   gcp_compute_security_policy
 where
   adaptive_protection_config -> 'layer7DdosDefenseConfig' ->> 'enable' = 'true';
+```
+
+```sql+sqlite
+select
+  name,
+  adaptive_protection_config
+from
+  gcp_compute_security_policy
+where
+  json_extract(adaptive_protection_config, '$.layer7DdosDefenseConfig.enable') = 'true';
 ```

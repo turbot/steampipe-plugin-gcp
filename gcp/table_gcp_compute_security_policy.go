@@ -20,9 +20,11 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpComputeSecurityPolicy,
+			Tags:       map[string]string{"service": "compute", "action": "SecurityPolicies.Get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpComputeSecurityPolicies,
+			Tags:    map[string]string{"service": "compute", "action": "SecurityPolicies.List"},
 		},
 		Columns: []*plugin.Column{
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The name of the security policy."},
@@ -48,7 +50,6 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("listGcpComputeSecurityPolicies")
 
 	// Create Service Connection
 	service, err := ComputeService(ctx, d)
