@@ -1,6 +1,7 @@
 ---
 title: "Steampipe Table: gcp_compute_security_policy - Query Google Cloud Armor Security Policies using SQL"
 description: "Allows users to query Google Cloud Armor Security Policies, providing insights into policy details, rules, and configuration."
+folder: "Compute"
 ---
 
 # Table: gcp_compute_security_policy
