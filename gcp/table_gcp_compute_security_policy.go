@@ -58,14 +58,14 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 			{Name: "akas", Type: proto.ColumnType_JSON, Transform: transform.FromP(securityPolicyTurbotData, "Akas"), Description: ColumnDescriptionAkas},
 			{Name: "tags", Type: proto.ColumnType_JSON, Transform: transform.FromField("Labels"), Description: ColumnDescriptionTags},
 
-			// standard gcp columns
+			// standard GCP columns
 			{Name: "project", Type: proto.ColumnType_STRING, Transform: transform.FromP(securityPolicyTurbotData, "Project"), Description: ColumnDescriptionProject},
 			{Name: "location", Type: proto.ColumnType_STRING, Transform: transform.FromConstant("global"), Description: ColumnDescriptionLocation},
 		},
 	}
 }
 
-//// LIST FUNCTION
+//// FETCH FUNCTIONS
 
 func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
@@ -105,7 +105,8 @@ func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h 
 		d.WaitForListRateLimit(ctx)
 		for _, policy := range page.Items {
 			d.StreamListItem(ctx, policy)
-			//
+			// Check if context has been cancelled or if the limit has been hit (if specified)
+			// if there is a limit, it will return the number of rows required to reach this limit
 			if d.RowsRemaining(ctx) == 0 {
 				return nil
 			}
@@ -121,6 +122,7 @@ func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h 
 //// HYDRATE FUNCTIONS
 
 func getGcpComputeSecurityPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Service Connection
 	service, err := ComputeService(ctx, d)
 	if err != nil {
 		return nil, err
