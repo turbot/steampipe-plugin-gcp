@@ -9,6 +9,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/query_cache"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -30,7 +31,7 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 				{Name: "type", Require: plugin.Optional},
 				{Name: "description", Require: plugin.Optional},
 				{Name: "self_link", Require: plugin.Optional},
-				{Name: "filter", Require: plugin.Optional, CacheMatch: "exact"},
+				{Name: "filter", Require: plugin.Optional, CacheMatch: query_cache.CacheMatchExact},
 			},
 			Tags: map[string]string{"service": "compute", "action": "securityPolicies.list"},
 		},
@@ -99,12 +100,13 @@ func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h 
 		filter = buildComputeSecurityPolicyFilterParam(d.Quals)
 	}
 
-	resp := service.SecurityPolicies.List(project).MaxResults(*pageSize).Filter(filter)
+	resp := service.SecurityPolicies.List(project).Filter(filter).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.SecurityPolicyList) error {
 		// apply rate limiting
 		d.WaitForListRateLimit(ctx)
 		for _, policy := range page.Items {
 			d.StreamListItem(ctx, policy)
+
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
 			if d.RowsRemaining(ctx) == 0 {
