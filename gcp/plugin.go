@@ -126,6 +126,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_router":                                      tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                                    tableGcpComputeSnapshot(ctx),
 			"gcp_compute_ssl_policy":                                  tableGcpComputeSslPolicy(ctx),
+			"gcp_compute_security_policy":                             tableGcpComputeSecurityPolicy(ctx),
 			"gcp_compute_subnetwork":                                  tableGcpComputeSubnetwork(ctx),
 			"gcp_compute_target_https_proxy":                          tableGcpComputeTargetHttpsProxy(ctx),
 			"gcp_compute_target_pool":                                 tableGcpComputeTargetPool(ctx),

@@ -1,0 +1,1 @@
+select name, fingerprint, description, self_link from gcp_compute_security_policy where title = '{{ resourceName }}'

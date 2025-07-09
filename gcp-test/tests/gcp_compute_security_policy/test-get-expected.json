@@ -1,0 +1,28 @@
+[
+  {
+    "description": "Test security policy for validation.",
+    "fingerprint": "{{ output.fingerprint.value }}",
+    "location": "global",
+    "name": "{{ resourceName }}",
+    "project": "{{ output.project_id.value }}",
+    "rules": [
+      {
+        "action": "allow",
+        "description": "default rule",
+        "headerAction": {},
+        "kind": "compute#securityPolicyRule",
+        "match": {
+          "config": {
+            "srcIpRanges": [
+              "*"
+            ]
+          },
+          "versionedExpr": "SRC_IPS_V1"
+        },
+        "priority": 2147483647
+      }
+    ],
+    "self_link": "{{ output.self_link.value }}",
+    "type": "CLOUD_ARMOR"
+  }
+]
