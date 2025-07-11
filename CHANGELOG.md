@@ -1,3 +1,19 @@
+## v1.9.0 [2025-07-11]
+
+_Deprecations_
+
+- [gcp_compute_tpu](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_tpu) table has been deprecated. Please use [gcp_tpu_vm](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_tpu_vm) instead. ([#759](https://github.com/turbot/steampipe-plugin-gcp/pull/759))
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_security_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_security_policy) ([#762](https://github.com/turbot/steampipe-plugin-gcp/pull/762))
+  - [gcp_tpu_vm](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_tpu_vm) ([#759](https://github.com/turbot/steampipe-plugin-gcp/pull/759))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.7](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5117-2025-06-04) which resolves an issue where rate limiters were not being applied to hydrate functions correctly. ([#760](https://github.com/turbot/steampipe-plugin-gcp/pull/760))
+
 ## v1.8.0 [2025-05-30]
 
 _Enhancements_
