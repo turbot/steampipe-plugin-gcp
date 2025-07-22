@@ -32,6 +32,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 			},
 			Tags: map[string]string{"service": "compute", "action": "sslPolicies.list"},
 		},
+		GetMatrixItemFunc: BuildComputeLocationListWithGlobal,
 		HydrateConfig: []plugin.HydrateConfig{
 			{
 				Func: getComputeSslPolicy,
@@ -121,7 +122,7 @@ func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant("global"),
+				Transform:   transform.FromMatrixItem(matrixKeyLocation),
 			},
 			{
 				Name:        "project",
@@ -144,6 +145,16 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
+	// Get project details
+	projectId, err := getProject(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+	project := projectId.(string)
+
+	// Get location from matrix item
+	location := d.EqualsQualString(matrixKeyLocation)
+
 	filterQuals := []filterQualMap{
 		{"min_tls_version", "minTlsVersion", "string"},
 		{"profile", "profile", "string"},
@@ -157,6 +168,7 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// Max limit is set as per documentation
 	// https://pkg.go.dev/google.golang.org/api@v0.48.0/compute/v1?utm_source=gopls#SslPoliciesListCall.MaxResults
+
 	pageSize := types.Int64(500)
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
@@ -165,32 +177,44 @@ func listComputeSslPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.
 		}
 	}
 
-	// Get project details
+	if location == "global" {
+		resp := service.SslPolicies.List(project).Filter(filterString).MaxResults(*pageSize)
+		if err := resp.Pages(ctx, func(page *compute.SslPoliciesList) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
 
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
+			for _, sslPolicy := range page.Items {
+				d.StreamListItem(ctx, sslPolicy)
 
-	resp := service.SslPolicies.List(project).Filter(filterString).MaxResults(*pageSize)
-	if err := resp.Pages(ctx, func(page *compute.SslPoliciesList) error {
-		// apply rate limiting
-		d.WaitForListRateLimit(ctx)
-
-		for _, sslPolicy := range page.Items {
-			d.StreamListItem(ctx, sslPolicy)
-
-			// Check if context has been cancelled or if the limit has been hit (if specified)
-			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.RowsRemaining(ctx) == 0 {
-				page.NextPageToken = ""
-				return nil
+				// Check if context has been cancelled or if the limit has been hit
+				if d.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
+			return nil
+		}); err != nil {
+			return nil, err
 		}
-		return nil
-	}); err != nil {
-		return nil, err
+	} else {
+		resp := service.RegionSslPolicies.List(project, location).Filter(filterString).MaxResults(*pageSize)
+		if err := resp.Pages(ctx, func(page *compute.SslPoliciesList) error {
+			// apply rate limiting
+			d.WaitForListRateLimit(ctx)
+
+			for _, sslPolicy := range page.Items {
+				d.StreamListItem(ctx, sslPolicy)
+
+				// Check if context has been cancelled or if the limit has been hit
+				if d.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
+			}
+			return nil
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	return nil, nil
@@ -208,7 +232,6 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Get project details
-
 	projectId, err := getProject(ctx, d, h)
 	if err != nil {
 		return nil, err
@@ -216,10 +239,25 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	project := projectId.(string)
 
 	var name string
+	var location string
+
 	if h.Item != nil {
-		name = h.Item.(*compute.SslPolicy).Name
+		data := h.Item.(*compute.SslPolicy)
+		name = data.Name
+		// Extract location from selfLink
+		parts := strings.Split(data.SelfLink, "/")
+		for i, part := range parts {
+			if part == "regions" && i+1 < len(parts) {
+				location = parts[i+1]
+				break
+			}
+		}
+		if location == "" {
+			location = "global"
+		}
 	} else {
 		name = d.EqualsQuals["name"].GetStringValue()
+		location = d.EqualsQualString(matrixKeyLocation)
 	}
 
 	// Error: json: invalid use of ,string struct tag, trying to unmarshal "projects/<project_name>/global/sslPolicies/" into uint64
@@ -227,9 +265,17 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, nil
 	}
 
-	resp, err := service.SslPolicies.Get(project, name).Do()
-	if err != nil {
-		return nil, err
+	var resp *compute.SslPolicy
+	var getErr error
+
+	if location == "global" {
+		resp, getErr = service.SslPolicies.Get(project, name).Do()
+	} else {
+		resp, getErr = service.RegionSslPolicies.Get(project, location, name).Do()
+	}
+
+	if getErr != nil {
+		return nil, getErr
 	}
 
 	return resp, nil
@@ -242,10 +288,25 @@ func computeSslPolicyTurbotData(_ context.Context, d *transform.TransformData) (
 	param := d.Param.(string)
 
 	project := strings.Split(data.SelfLink, "/")[6]
+	location := "global"
+	parts := strings.Split(data.SelfLink, "/")
+	for i, part := range parts {
+		if part == "regions" && i+1 < len(parts) {
+			location = parts[i+1]
+			break
+		}
+	}
+
+	var akas []string
+	if location == "global" {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/global/sslPolicies/" + data.Name}
+	} else {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + location + "/sslPolicies/" + data.Name}
+	}
 
 	turbotData := map[string]interface{}{
 		"Project": project,
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/sslPolicies/" + data.Name},
+		"Akas":    akas,
 	}
 
 	return turbotData[param], nil
