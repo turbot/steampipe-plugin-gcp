@@ -12,6 +12,18 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+func extractLocationFromSelfLink(selfLink string) string {
+	location := "global"
+	parts := strings.Split(selfLink, "/")
+	for i, part := range parts {
+		if part == "regions" && i+1 < len(parts) {
+			location = parts[i+1]
+			break
+		}
+	}
+	return location
+}
+
 //// TABLE DEFINITION
 
 func tableGcpComputeSslPolicy(ctx context.Context) *plugin.Table {
@@ -244,17 +256,7 @@ func getComputeSslPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	if h.Item != nil {
 		data := h.Item.(*compute.SslPolicy)
 		name = data.Name
-		// Extract location from selfLink
-		parts := strings.Split(data.SelfLink, "/")
-		for i, part := range parts {
-			if part == "regions" && i+1 < len(parts) {
-				location = parts[i+1]
-				break
-			}
-		}
-		if location == "" {
-			location = "global"
-		}
+		location = extractLocationFromSelfLink(data.SelfLink)
 	} else {
 		name = d.EqualsQuals["name"].GetStringValue()
 		location = d.EqualsQualString(matrixKeyLocation)
@@ -288,14 +290,7 @@ func computeSslPolicyTurbotData(_ context.Context, d *transform.TransformData) (
 	param := d.Param.(string)
 
 	project := strings.Split(data.SelfLink, "/")[6]
-	location := "global"
-	parts := strings.Split(data.SelfLink, "/")
-	for i, part := range parts {
-		if part == "regions" && i+1 < len(parts) {
-			location = parts[i+1]
-			break
-		}
-	}
+	location := extractLocationFromSelfLink(data.SelfLink)
 
 	var akas []string
 	if location == "global" {
