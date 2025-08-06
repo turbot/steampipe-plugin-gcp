@@ -110,6 +110,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Name:       "gcp_logging",
 				FillRate:   1,
 				BucketSize: 60,
+				MaxConcurrency: 1,
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'logging' and action in ('logEntries.list', 'logEntries.get', 'buckets.list', 'buckets.get', 'logMetrics.list', 'logMetrics.get', 'exclusions.list', 'exclusions.get', 'sinks.list', 'sinks.get')",
 			},
