@@ -124,14 +124,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'pubsub' and action in ('topics.list', 'topics.get', 'topics.getIamPolicy', 'subscriptions.list', 'subscriptions.get', 'subscriptions.getIamPolicy', 'snapshots.list', 'snapshots.get', 'snapshots.getIamPolicy')",
 			},
 
-			{
-				Name:       "gcp_pubsub",
-				FillRate:   100,
-				BucketSize: 6000,
-				Scope:      []string{"connection", "service", "action"},
-				Where:      "service = 'pubsub' and action in ('topics.list', 'topics.get', 'topics.getIamPolicy', 'subscriptions.list', 'subscriptions.get', 'subscriptions.getIamPolicy', 'snapshots.list', 'snapshots.get', 'snapshots.getIamPolicy')",
-			},
-
 			// IAM v1 API Read requests (for example, getting an allow policy)	6,000 per project per minute
 			// https://cloud.google.com/iam/quotas#quotas
 			// Table: gcp_iam_role, gcp_service_account,
