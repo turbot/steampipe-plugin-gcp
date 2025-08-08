@@ -20,6 +20,7 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getComputeInstance,
+			Tags: map[string]string{"service": "compute", "action": "instances.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeInstances,
@@ -35,7 +36,14 @@ func tableGcpComputeInstance(ctx context.Context) *plugin.Table {
 				{Name: "deletion_protection", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "start_restricted", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
-			Tags: map[string]string{"service": "monitoring", "action": "instances.list"},
+			Tags: map[string]string{"service": "compute", "action": "instances.list"},
+		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func: getComputeInstanceIamPolicy,
+				Tags: map[string]string{"service": "compute", "action": "instances.getIamPolicy"},
+			},
+			
 		},
 		Columns: []*plugin.Column{
 			// commonly used columns

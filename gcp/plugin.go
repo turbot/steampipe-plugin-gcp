@@ -61,6 +61,106 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'rediscluster' and action = 'GetCluster'",
 			},
+
+			// Cloud Resource Manager & Service Usage API rate quota: 1,200 requests/minute per user
+			// Doc: https://cloud.google.com/resource-manager/quotas (see API rate quotas) and https://cloud.google.com/service-usage/quotas
+			// Tables: gcp_project, gcp_organization, gcp_organization_project, gcp_project_organization_policy, gcp_project_service, gcp_iam_policy
+			{
+				Name:       "gcp_resourcemanager",
+				FillRate:   20,
+				BucketSize: 1200,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service in ('resourcemanager', 'serviceusage') and action in ('organizations.get', 'projects.list', 'projects.getIamPolicy', 'services.list', 'services.get')",
+			},
+
+			// Compute Engine API rate quotas are enforced per minute and vary by project and method group.
+			// This limiter targets a conservative 10 rps with a burst of 20 for common read/list methods.
+			// Doc: https://cloud.google.com/compute/api-quota and metrics: https://cloud.google.com/compute/docs/api/compute-api-quota-metrics
+			// Tables: gcp_compute_instance, gcp_compute_disk, gcp_compute_image, gcp_compute_snapshot, gcp_compute_address, gcp_compute_global_address, gcp_compute_network, gcp_compute_subnetwork, gcp_compute_firewall, gcp_compute_route, gcp_compute_ssl_policy, gcp_compute_url_map, gcp_compute_forwarding_rule, gcp_compute_global_forwarding_rule
+			{
+				Name:       "gcp_compute",
+				FillRate:   10,
+				BucketSize: 20,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'compute' and action in ('instances.get', 'instances.list', 'instances.getIamPolicy', 'disks.get', 'disks.list', 'disks.getIamPolicy', 'images.list', 'images.get', 'images.getIamPolicy', 'snapshots.list', 'snapshots.get', 'addresses.list', 'addresses.get', 'globalAddresses.list', 'globalAddresses.get', 'networks.list', 'networks.get', 'subnetworks.list', 'subnetworks.get', 'subnetworks.getIamPolicy', 'firewalls.list', 'firewalls.get', 'sslPolicies.list', 'sslPolicies.get', 'urlMaps.list', 'urlMaps.get', 'forwardingRules.list', 'forwardingRules.get', 'globalForwardingRules.list', 'globalForwardingRules.get')",
+			},
+
+			// Approximately 5000 read requests per second: https://cloud.google.com/storage/docs/request-rate#auto-scaling
+			// Tables: gcp_storage_bucket, gcp_storage_object
+			{
+				Name:       "gcp_storage",
+				FillRate:   5000,
+				BucketSize: 5000,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'storage' and action in ('buckets.list', 'buckets.get', 'buckets.getIamPolicy', 'objects.list', 'objects.get', 'objects.getIamPolicy')",
+			},
+
+			// Secret Manager requests per minute per project: 600
+			// Doc: https://cloud.google.com/secret-manager/quotas#request-rate-quotas
+			// Tables: gcp_secret_manager_secret
+			{
+				Name:       "gcp_secret_manager_secret",
+				FillRate:   10,
+				BucketSize: 600,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'secretmanager' and action in ('secrets.list', 'secrets.get')",
+			},
+
+			// Cloud Logging read requests per minute per project: 60
+			// Doc: https://cloud.google.com/logging/quotas#api-limits
+			// To view your quotas: https://console.cloud.google.com/apis/dashboard (select API → Quotas)
+			// Table: gcp_logging_log_entry, gcp_logging_bucket, gcp_logging_metric, gcp_logging_exclusion, gcp_logging_sink
+			{
+				Name:           "gcp_logging",
+				FillRate:       1,
+				BucketSize:     60,
+				MaxConcurrency: 1,
+				Scope:          []string{"connection", "service", "action"},
+				Where:          "service = 'logging' and action in ('logEntries.list', 'logEntries.get', 'buckets.list', 'buckets.get', 'logMetrics.list', 'logMetrics.get', 'exclusions.list', 'exclusions.get', 'sinks.list', 'sinks.get')",
+			},
+			// Pub/Sub Admin API requests per minute per project: 6,000 (≈100 ops/s)
+			// Doc: https://cloud.google.com/pubsub/quotas
+			// Table: gcp_pubsub_topic, gcp_pubsub_subscription
+			{
+				Name:       "gcp_pubsub",
+				FillRate:   100,
+				BucketSize: 6000,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'pubsub' and action in ('topics.list', 'topics.get', 'topics.getIamPolicy', 'subscriptions.list', 'subscriptions.get', 'subscriptions.getIamPolicy', 'snapshots.list', 'snapshots.get', 'snapshots.getIamPolicy')",
+			},
+
+			// IAM v1 API read requests per project per minute: 6,000 (e.g., getting an allow policy)
+			// Doc: https://cloud.google.com/iam/quotas#quotas
+			// Table: gcp_iam_role, gcp_service_account
+			{
+				Name:       "gcp_iam",
+				FillRate:   100,
+				BucketSize: 6000,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'iam' and action in ('roles.list', 'roles.get', 'serviceAccounts.list', 'serviceAccounts.get', 'serviceAccounts.getIamPolicy', 'serviceAccountKeys.list', 'serviceAccountKeys.get')",
+			},
+
+			// Cloud Functions API read (list/get) requests per minute per user: 60
+			// Doc: https://cloud.google.com/functions/quotas
+			{
+				Name:       "gcp_cloudfunctions_function",
+				FillRate:   1,
+				BucketSize: 60,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'cloudfunctions' and action in ('functions.list', 'functions.get')",
+			},
+
+			// Cloud DNS API calls per 100 seconds per project per region: 60,000
+			// Doc: https://cloud.google.com/dns/quotas#quotas
+			// Login to the console to see the quota: https://console.cloud.google.com/apis/api/dns.googleapis.com/quotas?inv=1&invt=Ab4ulA
+			// Tables: gcp_dns_record_set, gcp_dns_policy, gcp_dns_managed_zone
+			{
+				Name:       "gcp_dns",
+				FillRate:   1000,
+				BucketSize: 60000,
+				Scope:      []string{"connection", "service", "action", "location"},
+				Where:      "service = 'dns' and action in ('managedZones.list', 'managedZones.get', 'policies.list', 'policies.get', 'resourceRecordSets.list', 'resourceRecordSets.get')",
+			},
 		},
 		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
 			{
