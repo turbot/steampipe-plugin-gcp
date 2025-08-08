@@ -62,7 +62,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'rediscluster' and action = 'GetCluster'",
 			},
 
-			// Typical throttles: ~1,200 requests/minute per user.
+			// Cloud Resource Manager & Service Usage API rate quota: 1,200 requests/minute per user
+			// Doc: https://cloud.google.com/resource-manager/quotas (see API rate quotas) and https://cloud.google.com/service-usage/quotas
 			// Tables: gcp_project, gcp_organization, gcp_organization_project, gcp_project_organization_policy, gcp_project_service, gcp_iam_policy
 			{
 				Name:       "gcp_resourcemanager",
@@ -72,8 +73,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service in ('resourcemanager', 'serviceusage') and action in ('organizations.get', 'projects.list', 'projects.getIamPolicy', 'services.list', 'services.get')",
 			},
 
-			// 20 requests/sec per user per project for most list/get calls.
-			// gcp_compute_instance, gcp_compute_disk, gcp_compute_image, gcp_compute_snapshot, gcp_compute_address, gcp_compute_global_address, gcp_compute_network, gcp_compute_subnetwork, gcp_compute_firewall, gcp_compute_route, gcp_compute_ssl_policy, gcp_compute_url_map, gcp_compute_forwarding_rule, gcp_compute_global_forwarding_rule
+			// Compute Engine API rate quotas are enforced per minute and vary by project and method group.
+			// This limiter targets a conservative 10 rps with a burst of 20 for common read/list methods.
+			// Doc: https://cloud.google.com/compute/api-quota and metrics: https://cloud.google.com/compute/docs/api/compute-api-quota-metrics
+			// Tables: gcp_compute_instance, gcp_compute_disk, gcp_compute_image, gcp_compute_snapshot, gcp_compute_address, gcp_compute_global_address, gcp_compute_network, gcp_compute_subnetwork, gcp_compute_firewall, gcp_compute_route, gcp_compute_ssl_policy, gcp_compute_url_map, gcp_compute_forwarding_rule, gcp_compute_global_forwarding_rule
 			{
 				Name:       "gcp_compute",
 				FillRate:   10,
@@ -92,7 +95,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'storage' and action in ('buckets.list', 'buckets.get', 'buckets.getIamPolicy', 'objects.list', 'objects.get', 'objects.getIamPolicy')",
 			},
 
-			// 600 per minute per project: https://cloud.google.com/secret-manager/quotas#request-rate-quotas
+			// Secret Manager requests per minute per project: 600
+			// Doc: https://cloud.google.com/secret-manager/quotas#request-rate-quotas
 			// Tables: gcp_secret_manager_secret
 			{
 				Name:       "gcp_secret_manager_secret",
@@ -102,21 +106,21 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'secretmanager' and action in ('secrets.list', 'secrets.get')",
 			},
 
-			// Number of read requests 60 per minute, per Google Cloud project2, 3
-			// https://cloud.google.com/logging/quotas#api-limits
-			// To view your quotas, go to the [API dashboard](https://console.cloud.google.com/apis/dashboard?inv=1&invt=Ab4ubw), select an API, and then select Quotas.
+			// Cloud Logging read requests per minute per project: 60
+			// Doc: https://cloud.google.com/logging/quotas#api-limits
+			// To view your quotas: https://console.cloud.google.com/apis/dashboard (select API → Quotas)
 			// Table: gcp_logging_log_entry, gcp_logging_bucket, gcp_logging_metric, gcp_logging_exclusion, gcp_logging_sink
 			{
-				Name:       "gcp_logging",
-				FillRate:   1,
-				BucketSize: 60,
+				Name:           "gcp_logging",
+				FillRate:       1,
+				BucketSize:     60,
 				MaxConcurrency: 1,
-				Scope:      []string{"connection", "service", "action"},
-				Where:      "service = 'logging' and action in ('logEntries.list', 'logEntries.get', 'buckets.list', 'buckets.get', 'logMetrics.list', 'logMetrics.get', 'exclusions.list', 'exclusions.get', 'sinks.list', 'sinks.get')",
+				Scope:          []string{"connection", "service", "action"},
+				Where:          "service = 'logging' and action in ('logEntries.list', 'logEntries.get', 'buckets.list', 'buckets.get', 'logMetrics.list', 'logMetrics.get', 'exclusions.list', 'exclusions.get', 'sinks.list', 'sinks.get')",
 			},
-			// 6,000 per minute (100 ops/s): https://cloud.google.com/pubsub/quotas
+			// Pub/Sub Admin API requests per minute per project: 6,000 (≈100 ops/s)
+			// Doc: https://cloud.google.com/pubsub/quotas
 			// Table: gcp_pubsub_topic, gcp_pubsub_subscription
-			// TODO: discuss about the comment provided in issue and the doc URL
 			{
 				Name:       "gcp_pubsub",
 				FillRate:   100,
@@ -125,9 +129,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'pubsub' and action in ('topics.list', 'topics.get', 'topics.getIamPolicy', 'subscriptions.list', 'subscriptions.get', 'subscriptions.getIamPolicy', 'snapshots.list', 'snapshots.get', 'snapshots.getIamPolicy')",
 			},
 
-			// IAM v1 API Read requests (for example, getting an allow policy)	6,000 per project per minute
-			// https://cloud.google.com/iam/quotas#quotas
-			// Table: gcp_iam_role, gcp_service_account,
+			// IAM v1 API read requests per project per minute: 6,000 (e.g., getting an allow policy)
+			// Doc: https://cloud.google.com/iam/quotas#quotas
+			// Table: gcp_iam_role, gcp_service_account
 			{
 				Name:       "gcp_iam",
 				FillRate:   100,
@@ -136,7 +140,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'iam' and action in ('roles.list', 'roles.get', 'serviceAccounts.list', 'serviceAccounts.get', 'serviceAccounts.getIamPolicy', 'serviceAccountKeys.list', 'serviceAccountKeys.get')",
 			},
 
-			// 60 requests/min per user for list/get operations.
+			// Cloud Functions API read (list/get) requests per minute per user: 60
+			// Doc: https://cloud.google.com/functions/quotas
 			{
 				Name:       "gcp_cloudfunctions_function",
 				FillRate:   1,
@@ -145,9 +150,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service = 'cloudfunctions' and action in ('functions.list', 'functions.get')",
 			},
 
+			// Cloud DNS API calls per 100 seconds per project per region: 60,000
+			// Doc: https://cloud.google.com/dns/quotas#quotas
 			// Login to the console to see the quota: https://console.cloud.google.com/apis/api/dns.googleapis.com/quotas?inv=1&invt=Ab4ulA
-			// https://cloud.google.com/dns/quotas#quotas
-			// - DNS API call per project per region 60,000
 			// Tables: gcp_dns_record_set, gcp_dns_policy, gcp_dns_managed_zone
 			{
 				Name:       "gcp_dns",
