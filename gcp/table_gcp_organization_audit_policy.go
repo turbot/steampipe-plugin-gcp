@@ -74,7 +74,10 @@ func listGcpOrganizationAuditPolicies(ctx context.Context, d *plugin.QueryData, 
 	resp, err := service.Organizations.GetIamPolicy("organizations/"+organizationId, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	
 	// apply rate limiting
+	// apply rate limiting
 	d.WaitForListRateLimit(ctx)
+
+	resp, err := service.Organizations.GetIamPolicy("organizations/"+organizationId, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	
 	if err != nil {
 		plugin.Logger(ctx).Error("listGcpOrganizationAuditPolicies", "organization_id", organizationId, "error", err)
