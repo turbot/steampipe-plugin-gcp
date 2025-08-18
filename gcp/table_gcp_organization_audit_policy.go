@@ -22,7 +22,7 @@ func tableGcpOrganizationAuditPolicy(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "organization_id", Require: plugin.Optional},
 			},
-			Tags:          map[string]string{"service": "resourcemanager", "action": "organizations.getIamPolicy"},
+			Tags: map[string]string{"service": "resourcemanager", "action": "organizations.getIamPolicy"},
 		},
 		Columns: []*plugin.Column{
 			{
