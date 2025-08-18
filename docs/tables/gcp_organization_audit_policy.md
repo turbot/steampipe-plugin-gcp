@@ -15,7 +15,6 @@ The `gcp_organization_audit_policy` table provides insights into audit policies 
 ## Examples
 
 ### Basic info
-
 Determine the areas in which different types of logs are created by analyzing the audit policies within the Google Cloud Platform organizations. This is useful for managing and understanding the audit trails in your environment.
 
 ```sql+postgres
@@ -38,7 +37,6 @@ from
 ```
 
 ### List of services which has data write access
-
 Determine the areas in which certain services have data write access. This is useful for understanding potential security risks and ensuring only appropriate services have this level of access.
 
 ```sql+postgres
@@ -66,7 +64,6 @@ where
 ```
 
 ### Get audit policy for a specific organization
-
 Retrieve audit policy details for a specific organization by its ID.
 
 ```sql+postgres
@@ -92,7 +89,6 @@ where
 ```
 
 ### List organizations with admin activity logging enabled
-
 Find organizations that have admin activity logging enabled for audit purposes.
 
 ```sql+postgres
