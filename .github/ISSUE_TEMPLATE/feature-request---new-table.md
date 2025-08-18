@@ -2,7 +2,7 @@
 name: Feature request - New table
 about: Suggest a new table for this project
 title: Add table gcp_<service>_<resource>
-labels: enhancement, new table
+labels: enhancement, new table, steampipe
 assignees: ''
 
 ---
