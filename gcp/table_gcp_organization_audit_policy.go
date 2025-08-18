@@ -32,7 +32,7 @@ func tableGcpOrganizationAuditPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "service",
-				Description: "Specifies a service that will be enabled for audit logging",
+				Description: "Specifies a service that will be enabled for audit logging.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
