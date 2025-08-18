@@ -34,7 +34,7 @@ func tableGcpOrganizationAuditPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "audit_log_configs",
-				Description: "The configuration for logging of each type of permission",
+				Description: "The configuration for logging of each type of permission.",
 				Type:        proto.ColumnType_JSON,
 			},
 
