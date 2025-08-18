@@ -19,6 +19,9 @@ func tableGcpOrganizationAuditPolicy(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listGcpOrganizationAuditPolicies,
 			ParentHydrate: listGCPOrganizations,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "organization_id", Require: plugin.Optional},
+			},
 			Tags:          map[string]string{"service": "resourcemanager", "action": "organizations.getIamPolicy"},
 		},
 		Columns: []*plugin.Column{
@@ -64,6 +67,7 @@ func listGcpOrganizationAuditPolicies(ctx context.Context, d *plugin.QueryData, 
 	// Create Service Connection
 	service, err := CloudResourceManagerService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("gcp_organization_audit_policy.listGcpOrganizationAuditPolicies", "service_error", err)
 		return nil, err
 	}
 
@@ -71,16 +75,18 @@ func listGcpOrganizationAuditPolicies(ctx context.Context, d *plugin.QueryData, 
 	organization := h.Item.(*cloudresourcemanager.Organization)
 	organizationId := getLastPathElement(organization.Name)
 
+	orgId := d.EqualsQuals["organization_id"].GetStringValue()
+	if orgId != "" && orgId != organizationId {
+		return nil, nil
+	}
+
 	resp, err := service.Organizations.GetIamPolicy("organizations/"+organizationId, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
-	
-	// apply rate limiting
+
 	// apply rate limiting
 	d.WaitForListRateLimit(ctx)
 
-	resp, err := service.Organizations.GetIamPolicy("organizations/"+organizationId, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
-	
 	if err != nil {
-		plugin.Logger(ctx).Error("listGcpOrganizationAuditPolicies", "organization_id", organizationId, "error", err)
+		plugin.Logger(ctx).Error("gcp_organization_audit_policy.listGcpOrganizationAuditPolicies", "api_error", err)
 		return nil, err
 	}
 
