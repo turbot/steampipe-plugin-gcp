@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/aiplatform v1.69.0
 	cloud.google.com/go/resourcemanager v1.10.3
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/turbot/go-kit v1.1.0
+	github.com/turbot/go-kit v1.3.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.13.0
 	google.golang.org/api v0.214.0
 )
