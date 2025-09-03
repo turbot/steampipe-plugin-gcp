@@ -36,7 +36,7 @@ from
   json_each(audit_log_configs);
 ```
 
-### List of services which has data write access
+### List of services that have data write access
 Determine the areas in which certain services have data write access. This is useful for understanding potential security risks and ensuring only appropriate services have this level of access.
 
 ```sql+postgres
