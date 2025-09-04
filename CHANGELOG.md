@@ -1,3 +1,10 @@
+## v1.11.0 [2025-09-04]
+
+_What's new?_
+
+- New tables added
+  - [gcp_organization_audit_policy](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_organization_audit_policy) ([#781](https://github.com/turbot/steampipe-plugin-gcp/pull/781))
+
 ## v1.10.0 [2025-07-24]
 
 _Bug fixes_
