@@ -18,9 +18,11 @@ func tableGcpSecretManagerSecret(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
 			Hydrate:    getGcpSecretManagerSecret,
+			Tags: map[string]string{"service": "secretmanager", "action": "secrets.get"},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpSecretManagerSecrets,
+			Tags: map[string]string{"service": "secretmanager", "action": "secrets.list"},
 		},
 		Columns: []*plugin.Column{
 			{

@@ -18,6 +18,7 @@ func tableGcpOrganizationProject(_ context.Context) *plugin.Table {
 		Description: "GCP Organization Project",
 		List: &plugin.ListConfig{
 			Hydrate: listGCPOrganizationProjects,
+			Tags:    map[string]string{"service": "resourcemanager", "action": "projects.list"},
 		},
 		Columns: []*plugin.Column{
 			{
