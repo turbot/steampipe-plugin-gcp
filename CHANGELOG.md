@@ -1,3 +1,9 @@
+## v1.12.0 [2025-09-18]
+
+_Enhancements_
+
+- Added default rate limiter configurations for GCP Resource Manager, Compute Engine, Storage, Secret Manager, Logging, Pub/Sub, IAM, Cloud Functions, and Cloud DNS tables. ([#779](https://github.com/turbot/steampipe-plugin-gcp/pull/779))
+
 ## v1.11.0 [2025-09-04]
 
 _What's new?_
