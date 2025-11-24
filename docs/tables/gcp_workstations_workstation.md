@@ -208,15 +208,7 @@ Identify workstations that have been soft-deleted but not yet permanently remove
 
 ```sql+postgres
 select
-  name,
-  display_name,
-  state,
-  delete_time,
-  location
-from
-  gcp_workstations_workstation
-where
-  delete_time is not null;
+s
 ```
 
 ```sql+sqlite

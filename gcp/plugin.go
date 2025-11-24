@@ -292,6 +292,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_vertex_ai_notebook_runtime_template":                 tableGcpVertexAINotebookRuntimeTemplate(ctx),
 			"gcp_vertex_ai_model":                                     tableGcpVertexAIModel(ctx),
 			"gcp_vpc_access_connector":                                tableGcpVPCAccessConnector(ctx),
+			"gcp_workstations_workstation_cluster":                    tableGcpWorkstationsWorkstationCluster(ctx),
 			"gcp_workstations_workstation":                            tableGcpWorkstationsWorkstation(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108

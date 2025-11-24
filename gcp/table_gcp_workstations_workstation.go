@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -20,11 +19,12 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 		Description: "GCP Workstations workstation",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getGcpWorkstationsWorkstation,
+			Hydrate:    getWorkstationsWorkstation,
 			Tags:       map[string]string{"service": "workstations", "action": "workstations.workstations.get"},
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listGcpWorkstationsWorkstations,
+			ParentHydrate: listWorkstationsWorkstationClusters,
+			Hydrate:       listWorkstationsWorkstations,
 			KeyColumns: plugin.KeyColumnSlice{
 				{
 					Name:    "location",
@@ -43,7 +43,7 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 		},
 		HydrateConfig: []plugin.HydrateConfig{
 			{
-				Func: getGcpWorkstationsWorkstationIamPolicy,
+				Func: getWorkstationsWorkstationIamPolicy,
 				Tags: map[string]string{"service": "workstations", "action": "workstations.workstations.getIamPolicy"},
 			},
 		},
@@ -57,14 +57,14 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 				Name:        "cluster",
 				Description: "The workstation cluster containing this workstation.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpWorkstationsWorkstationTurbotData,
+				Hydrate:     workstationsWorkstationTurbotData,
 				Transform:   transform.FromField("Cluster"),
 			},
 			{
 				Name:        "config",
 				Description: "The workstation configuration associated with this workstation.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpWorkstationsWorkstationTurbotData,
+				Hydrate:     workstationsWorkstationTurbotData,
 				Transform:   transform.FromField("Config"),
 			},
 			{
@@ -125,7 +125,7 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 				Name:        "self_link",
 				Description: "Server-defined URL for the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpWorkstationsWorkstationSelfLink,
+				Hydrate:     workstationsWorkstationSelfLink,
 				Transform:   transform.FromValue(),
 			},
 
@@ -149,7 +149,7 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 				Name:        "iam_policy",
 				Description: "An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getGcpWorkstationsWorkstationIamPolicy,
+				Hydrate:     getWorkstationsWorkstationIamPolicy,
 				Transform:   transform.FromValue(),
 			},
 
@@ -158,7 +158,7 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(gcpWorkstationsWorkstationTitle),
+				Transform:   transform.From(workstationsWorkstationTitle),
 			},
 			{
 				Name:        "tags",
@@ -170,7 +170,7 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     gcpWorkstationsWorkstationTurbotData,
+				Hydrate:     workstationsWorkstationTurbotData,
 				Transform:   transform.FromField("Akas"),
 			},
 
@@ -179,14 +179,14 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpWorkstationsWorkstationTurbotData,
+				Hydrate:     workstationsWorkstationTurbotData,
 				Transform:   transform.FromField("Location"),
 			},
 			{
 				Name:        "project",
 				Description: ColumnDescriptionProject,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     gcpWorkstationsWorkstationTurbotData,
+				Hydrate:     workstationsWorkstationTurbotData,
 				Transform:   transform.FromField("Project"),
 			},
 		},
@@ -195,71 +195,95 @@ func tableGcpWorkstationsWorkstation(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listGcpWorkstationsWorkstations(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listWorkstationsWorkstations(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Get the cluster from parent hydrate
+	cluster := h.Item.(*workstations.WorkstationCluster)
+
+	// Get optional filter values from query
+	locationQual := d.EqualsQualString("location")
+	clusterQual := d.EqualsQualString("cluster")
+	configQual := d.EqualsQualString("config")
+
+	// Extract cluster name from the full resource path
+	// Format: projects/{project}/locations/{location}/workstationClusters/{cluster}
+	clusterParts := strings.Split(cluster.Name, "/")
+	if len(clusterParts) < 6 {
+		return nil, nil
+	}
+
+	clusterName := clusterParts[5]
+	locationName := clusterParts[3]
+
+	// If location qualifier is provided and doesn't match, skip this cluster
+	if locationQual != "" && locationQual != locationName {
+		return nil, nil
+	}
+
+	// If cluster qualifier is provided and doesn't match, skip this cluster
+	if clusterQual != "" && clusterQual != clusterName {
+		return nil, nil
+	}
+
 	// Create Service Connection
 	service, err := WorkstationsService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation.listGcpWorkstationsWorkstations", "service_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation.listWorkstationsWorkstations", "service_error", err)
 		return nil, err
 	}
 
-	// Get project details
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-
-	// Get optional filter values from query
-	location := d.EqualsQualString("location")
-	cluster := d.EqualsQualString("cluster")
-	config := d.EqualsQualString("config")
-
-	// If location not specified, default to "-" for all locations
-	if location == "" {
-		location = "-"
-	}
-
-	// If cluster not specified, default to "-" for all clusters
-	if cluster == "" {
-		cluster = "-"
-	}
-
-	// If config not specified, default to "-" for all configs
-	if config == "" {
-		config = "-"
-	}
-
-	// Max limit is set as per documentation
-	pageSize := types.Int64(500)
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < *pageSize {
-			pageSize = limit
-		}
-	}
-
-	// Construct parent path
-	parent := "projects/" + project + "/locations/" + location + "/workstationClusters/" + cluster + "/workstationConfigs/" + config
-
-	resp := service.Projects.Locations.WorkstationClusters.WorkstationConfigs.Workstations.List(parent).PageSize(*pageSize)
-	if err := resp.Pages(ctx, func(page *workstations.ListWorkstationsResponse) error {
+	// List configs for this cluster
+	// Path format: projects/{project}/locations/{location}/workstationClusters/{cluster}
+	// The List() method already knows to list workstationConfigs, so we just pass the cluster path
+	configsResp := service.Projects.Locations.WorkstationClusters.WorkstationConfigs.List(cluster.Name)
+	if err := configsResp.Pages(ctx, func(configsPage *workstations.ListWorkstationConfigsResponse) error {
 		// apply rate limiting
 		d.WaitForListRateLimit(ctx)
 
-		for _, workstation := range page.Workstations {
-			d.StreamListItem(ctx, workstation)
+		for _, config := range configsPage.WorkstationConfigs {
+			// Extract config name from the full resource path
+			configParts := strings.Split(config.Name, "/")
+			if len(configParts) < 8 {
+				continue
+			}
+			configName := configParts[7]
 
-			// Check if context has been cancelled or if the limit has been hit (if specified)
-			// if there is a limit, it will return the number of rows required to reach this limit
+			// If config qualifier is provided and doesn't match, skip this config
+			if configQual != "" && configQual != configName {
+				continue
+			}
+
+			// List workstations for this config
+			// Path format: projects/{project}/locations/{location}/workstationClusters/{cluster}/workstationConfigs/{config}
+			// The List() method already knows to list workstations, so we just pass the config path
+			workstationsResp := service.Projects.Locations.WorkstationClusters.WorkstationConfigs.Workstations.List(config.Name)
+			if err := workstationsResp.Pages(ctx, func(workstationsPage *workstations.ListWorkstationsResponse) error {
+				// apply rate limiting
+				d.WaitForListRateLimit(ctx)
+
+				for _, workstation := range workstationsPage.Workstations {
+					d.StreamListItem(ctx, workstation)
+
+					// Check if context has been cancelled or if the limit has been hit (if specified)
+					if d.RowsRemaining(ctx) == 0 {
+						workstationsPage.NextPageToken = ""
+						return nil
+					}
+				}
+				return nil
+			}); err != nil {
+				plugin.Logger(ctx).Error("gcp_workstations_workstation.listWorkstationsWorkstations", "list_workstations_error", err, "config", config.Name)
+				// Continue with next config even if this one fails
+			}
+
+			// Check if we've hit the limit
 			if d.RowsRemaining(ctx) == 0 {
-				page.NextPageToken = ""
+				configsPage.NextPageToken = ""
 				return nil
 			}
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation.listGcpWorkstationsWorkstations", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation.listWorkstationsWorkstations", "list_configs_error", err, "cluster", cluster.Name)
 		return nil, err
 	}
 
@@ -268,11 +292,11 @@ func listGcpWorkstationsWorkstations(ctx context.Context, d *plugin.QueryData, h
 
 //// HYDRATE FUNCTIONS
 
-func getGcpWorkstationsWorkstation(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getWorkstationsWorkstation(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := WorkstationsService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation.getGcpWorkstationsWorkstation", "service_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation.getWorkstationsWorkstation", "service_error", err)
 		return nil, err
 	}
 
@@ -302,26 +326,26 @@ func getGcpWorkstationsWorkstation(ctx context.Context, d *plugin.QueryData, h *
 
 	resp, err := service.Projects.Locations.WorkstationClusters.WorkstationConfigs.Workstations.Get(name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation.getGcpWorkstationsWorkstation", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation.getWorkstationsWorkstation", "api_error", err)
 		return nil, err
 	}
 
 	return resp, nil
 }
 
-func getGcpWorkstationsWorkstationIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getWorkstationsWorkstationIamPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	data := h.Item.(*workstations.Workstation)
 
 	// Create Service Connection
 	service, err := WorkstationsService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation.getGcpWorkstationsWorkstationIamPolicy", "service_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation.getWorkstationsWorkstationIamPolicy", "service_error", err)
 		return nil, err
 	}
 
 	resp, err := service.Projects.Locations.WorkstationClusters.WorkstationConfigs.Workstations.GetIamPolicy(data.Name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation.getGcpWorkstationsWorkstationIamPolicy", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation.getWorkstationsWorkstationIamPolicy", "api_error", err)
 		return nil, err
 	}
 
@@ -330,13 +354,13 @@ func getGcpWorkstationsWorkstationIamPolicy(ctx context.Context, d *plugin.Query
 
 //// TRANSFORM FUNCTIONS
 
-func gcpWorkstationsWorkstationSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func workstationsWorkstationSelfLink(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	data := h.Item.(*workstations.Workstation)
 	selfLink := "https://workstations.googleapis.com/v1/" + data.Name
 	return selfLink, nil
 }
 
-func gcpWorkstationsWorkstationTitle(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func workstationsWorkstationTitle(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	data := d.HydrateItem.(*workstations.Workstation)
 
 	if data.DisplayName != "" {
@@ -352,7 +376,7 @@ func gcpWorkstationsWorkstationTitle(_ context.Context, d *transform.TransformDa
 	return data.Name, nil
 }
 
-func gcpWorkstationsWorkstationTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func workstationsWorkstationTurbotData(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	workstation := h.Item.(*workstations.Workstation)
 
 	parts := strings.Split(workstation.Name, "/")
