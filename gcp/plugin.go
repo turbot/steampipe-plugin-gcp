@@ -73,6 +73,27 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Where:      "service in ('resourcemanager', 'serviceusage') and action in ('organizations.get', 'projects.list', 'projects.getIamPolicy', 'services.list', 'services.get')",
 			},
 
+			// Cloud Resource Manager API rate quota: 600 read requests per minute per project (10 per second)
+			// FIXME: Limits are per API consumer project so we need to find a way to take quota_project into account instead of connection
+			// Doc: https://cloud.google.com/resource-manager/docs/limits
+			// APIs: projects.getAccessApprovalSettings, projects.getAncestry
+			// Tables: gcp_project, gcp_organization_project
+			// FillRate and BucketSize set to 10 to match the per-second rate and allow for short bursts within the minute quota.
+			{
+				Name:       "gcp_cloudresourcemanager_projects_get_access_approval_settings",
+				FillRate:   10,
+				BucketSize: 60,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'resourcemanager' and action = 'projects.getAccessApprovalSettings'",
+			},
+			{
+				Name:       "gcp_cloudresourcemanager_projects_get_ancestry",
+				FillRate:   10,
+				BucketSize: 60,
+				Scope:      []string{"connection", "service", "action"},
+				Where:      "service = 'resourcemanager' and action = 'projects.getAncestry'",
+			},
+
 			// Compute Engine API rate quotas are enforced per minute and vary by project and method group.
 			// This limiter targets a conservative 10 rps with a burst of 20 for common read/list methods.
 			// Doc: https://cloud.google.com/compute/api-quota and metrics: https://cloud.google.com/compute/docs/api/compute-api-quota-metrics
