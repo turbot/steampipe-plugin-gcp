@@ -20,7 +20,7 @@ func tableGcpWorkstationsWorkstationCluster(ctx context.Context) *plugin.Table {
 		Description: "GCP Workstations Workstation Cluster",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    workstationsWorkstatioCluster,
+			Hydrate:    workstationsWorkstationCluster,
 			Tags:       map[string]string{"service": "workstations", "action": "workstations.workstationClusters.get"},
 		},
 		List: &plugin.ListConfig{
@@ -127,7 +127,7 @@ func tableGcpWorkstationsWorkstationCluster(ctx context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Tags"),
+				Transform:   transform.FromField("Labels"),
 			},
 			{
 				Name:        "akas",
@@ -219,11 +219,11 @@ func listWorkstationsWorkstationClusters(ctx context.Context, d *plugin.QueryDat
 
 //// HYDRATE FUNCTIONS
 
-func workstationsWorkstatioCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func workstationsWorkstationCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// Create Service Connection
 	service, err := WorkstationsService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation_cluster.workstationsWorkstatioCluster", "service_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation_cluster.workstationsWorkstationCluster", "service_error", err)
 		return nil, err
 	}
 
@@ -251,7 +251,7 @@ func workstationsWorkstatioCluster(ctx context.Context, d *plugin.QueryData, h *
 
 	resp, err := service.Projects.Locations.WorkstationClusters.Get(name).Do()
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_workstations_workstation_cluster.workstationsWorkstatioCluster", "api_error", err)
+		plugin.Logger(ctx).Error("gcp_workstations_workstation_cluster.workstationsWorkstationCluster", "api_error", err)
 		return nil, err
 	}
 

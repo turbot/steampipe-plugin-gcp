@@ -15,13 +15,12 @@ The `gcp_workstations_workstation_cluster` table provides insights into Workstat
 ## Examples
 
 ### Basic info
-Explore the basic details of your Google Cloud Workstations Clusters, including their names, states, and creation times. This information helps you understand the configuration and status of your clusters, which is useful for managing cloud development environments.
+Explore the basic details of your Google Cloud Workstations Clusters, including their names and creation times. This information helps you understand the configuration and status of your clusters, which is useful for managing cloud development environments.
 
 ```sql+postgres
 select
   name,
   display_name,
-  state,
   create_time,
   update_time,
   uid,
@@ -35,7 +34,6 @@ from
 select
   name,
   display_name,
-  state,
   create_time,
   update_time,
   uid,
@@ -45,35 +43,29 @@ from
   gcp_workstations_workstation_cluster;
 ```
 
-### List active clusters
-Identify clusters that are currently in an active state to monitor active development environments and understand resource utilization.
+### List clusters with network configuration
+Identify clusters along with their network and subnetwork configuration to understand how workstations are connected.
 
 ```sql+postgres
 select
   name,
   display_name,
-  state,
   network,
   subnetwork,
   location
 from
-  gcp_workstations_workstation_cluster
-where
-  state = 'ACTIVE';
+  gcp_workstations_workstation_cluster;
 ```
 
 ```sql+sqlite
 select
   name,
   display_name,
-  state,
   network,
   subnetwork,
   location
 from
-  gcp_workstations_workstation_cluster
-where
-  state = 'ACTIVE';
+  gcp_workstations_workstation_cluster;
 ```
 
 ### List clusters that are being updated
@@ -83,7 +75,6 @@ Analyze which clusters are currently reconciling (being updated). This is useful
 select
   name,
   display_name,
-  state,
   reconciling,
   update_time,
   location
@@ -97,7 +88,6 @@ where
 select
   name,
   display_name,
-  state,
   reconciling,
   update_time,
   location
@@ -114,7 +104,6 @@ Discover which clusters exist in a specific location to understand the geographi
 select
   name,
   display_name,
-  state,
   network,
   subnetwork,
   location
@@ -128,7 +117,6 @@ where
 select
   name,
   display_name,
-  state,
   network,
   subnetwork,
   location
@@ -145,7 +133,6 @@ Explore clusters that have private cluster configuration enabled to understand w
 select
   name,
   display_name,
-  state,
   private_cluster_config,
   network,
   subnetwork,
@@ -160,7 +147,6 @@ where
 select
   name,
   display_name,
-  state,
   private_cluster_config,
   network,
   subnetwork,
@@ -178,7 +164,6 @@ Analyze clusters that have status conditions to understand any issues or warning
 select
   name,
   display_name,
-  state,
   conditions,
   location
 from
@@ -191,7 +176,6 @@ where
 select
   name,
   display_name,
-  state,
   conditions,
   location
 from
@@ -207,7 +191,6 @@ Identify clusters that were created recently to track new development environmen
 select
   name,
   display_name,
-  state,
   create_time,
   location
 from
@@ -222,7 +205,6 @@ limit
 select
   name,
   display_name,
-  state,
   create_time,
   location
 from
