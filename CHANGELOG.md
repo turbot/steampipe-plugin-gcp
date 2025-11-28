@@ -1,3 +1,15 @@
+## v1.13.0 [2025-11-28]
+
+_What's new?_
+
+- New tables added
+  - [gcp_workstations_workstation](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_workstations_workstation) ([#806](https://github.com/turbot/steampipe-plugin-gcp/pull/806))
+  - [gcp_workstations_workstation_cluster](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_workstations_workstation_cluster) ([#806](https://github.com/turbot/steampipe-plugin-gcp/pull/806))
+
+_Enhancements_
+
+- Added default rate limiter configuration for tables using GCP Resource Manager APIs. ([#807](https://github.com/turbot/steampipe-plugin-gcp/pull/807)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
 ## v1.12.1 [2025-10-13]
 
 _Dependencies_
