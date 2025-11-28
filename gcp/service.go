@@ -42,6 +42,7 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/tpu/v2"
 	"google.golang.org/api/vpcaccess/v1"
+	"google.golang.org/api/workstations/v1"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -912,6 +913,27 @@ func TPUService(ctx context.Context, d *plugin.QueryData) (*tpu.Service, error) 
 
 	// so it was not in cache - create service
 	svc, err := tpu.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	return svc, nil
+}
+
+// WorkstationsService returns the service connection for GCP Workstations service
+func WorkstationsService(ctx context.Context, d *plugin.QueryData) (*workstations.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "WorkstationsService"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*workstations.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := workstations.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
