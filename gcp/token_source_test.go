@@ -151,10 +151,8 @@ func TestConnectionConfigTokenSource_ExpiryIsShort(t *testing.T) {
 // in oauth2.ReuseTokenSource — the same Reuse-style caching the
 // google.golang.org/api transport applies internally — and verifies that a
 // rotation in Connection.Config is visible to a Token call after the cached
-// token's Expiry has passed. This is the production-shaped regression test
-// for the ExpiredToken-under-rotation bug — the unit tests above bypass the
-// cache and only prove the source returns the right values when invoked
-// directly.
+// token's Expiry has passed. The unit tests above bypass the cache and only
+// prove the source returns the right values when invoked directly.
 //
 // We shrink tokenExpiresInterval to 50ms so the test runs in tens of
 // milliseconds instead of waiting out the production 60s window.

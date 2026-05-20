@@ -21,8 +21,7 @@ import (
 // steampipe-plugin-sdk/plugin/plugin_connection_config.go upsertConnectionData,
 // which calls d.Connection.SetConfig(configStruct) under a write lock). The
 // SDK comment at that site explicitly acknowledges that a query may already be
-// executing with this Connection object — which is the bug this TokenSource
-// fixes for the GCP impersonate_access_token credentials path.
+// executing with this Connection object.
 //
 // An oauth2.StaticTokenSource built once at client construction time captures
 // the original token value. A goroutine holding a GCP API client backed by
@@ -36,10 +35,6 @@ import (
 // goroutines holding the same GCP API client pick up rotated tokens on the
 // next signing operation (modulo the cached token provider TTL we set via
 // Expiry below).
-//
-// This mirrors the connectionConfigCredentialsProvider in
-// steampipe-plugin-aws/aws/credentials_provider.go (AWS-side rollout of the
-// same rotation fix).
 type connectionConfigTokenSource struct {
 	connection *plugin.Connection
 }
