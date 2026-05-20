@@ -1,3 +1,13 @@
+## v1.13.1 [2026-05-20]
+
+_Bug fixes_
+
+- Fixed `ExpiredToken`-style errors on long-running queries when Turbot Pipes rotates GCP impersonated access tokens mid-query. The plugin now reads the connection config via the SDK's `GetConfig` accessor (which holds a read lock) on every API call, so in-flight goroutines pick up rotated credentials. ([#<PR>](https://github.com/turbot/steampipe-plugin-gcp/pull/<PR>))
+
+_Dependencies_
+
+- Upgraded `steampipe-plugin-sdk` to v6.0.0, which adds the `Connection.GetConfig` / `SetConfig` accessors and the per-connection `sync.RWMutex` that the rotation fix above depends on. Plugin builds now require Go 1.26.
+
 ## v1.13.0 [2025-11-28]
 
 _What's new?_

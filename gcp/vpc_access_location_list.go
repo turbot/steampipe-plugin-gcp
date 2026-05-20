@@ -3,7 +3,7 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 	"google.golang.org/api/vpcaccess/v1"
 )
 

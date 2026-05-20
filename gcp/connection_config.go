@@ -1,7 +1,7 @@
 package gcp
 
 import (
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
 type gcpConfig struct {
@@ -20,10 +20,14 @@ func ConfigInstance() interface{} {
 
 // GetConfig :: retrieve and cast connection config from query data
 func GetConfig(connection *plugin.Connection) gcpConfig {
-	if connection == nil || connection.Config == nil {
+	if connection == nil {
 		return gcpConfig{}
 	}
-	config, _ := connection.Config.(gcpConfig)
+	raw := connection.GetConfig()
+	if raw == nil {
+		return gcpConfig{}
+	}
+	config, _ := raw.(gcpConfig)
 	return config
 }
 
