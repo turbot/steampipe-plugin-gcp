@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/turbot/steampipe-plugin-gcp/gcp"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
 func main() {

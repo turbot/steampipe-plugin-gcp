@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Fixed `ExpiredToken`-style errors on long-running queries when Turbot Pipes rotates GCP impersonated access tokens mid-query. The plugin now reads the connection config via the SDK's `GetConfig` accessor (which holds a read lock) on every API call, so in-flight goroutines pick up rotated credentials. ([#<PR>](https://github.com/turbot/steampipe-plugin-gcp/pull/<PR>))
+- Fixed `ExpiredToken`-style errors on long-running queries when Turbot Pipes rotates GCP impersonated access tokens mid-query. The plugin now reads the connection config via the SDK's `GetConfig` accessor (which holds a read lock) on every API call, so in-flight goroutines pick up rotated credentials. ([#824](https://github.com/turbot/steampipe-plugin-gcp/pull/824))
 
 _Dependencies_
 
