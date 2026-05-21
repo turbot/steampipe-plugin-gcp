@@ -3,7 +3,7 @@ package gcp
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
 // Based on the available documentation, there is no indication that the Cloud Run Admin API v1 supports specific locations that v2 does not.

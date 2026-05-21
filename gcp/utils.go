@@ -13,11 +13,10 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"golang.org/x/oauth2"
+	"github.com/turbot/steampipe-plugin-sdk/v6/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v6/memoize"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin/transform"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 )
@@ -196,11 +195,13 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 		opts = append(opts, option.WithCredentialsJSON([]byte(contents)))
 	}
 	if gcpConfig.ImpersonateAccessToken != nil {
-		tokenConfig := oauth2.Token{
-			AccessToken: *gcpConfig.ImpersonateAccessToken,
-		}
-		staticTokenSource := oauth2.StaticTokenSource(&tokenConfig)
-		opts = append(opts, option.WithTokenSource(staticTokenSource))
+		// Use a dynamic TokenSource that re-reads connection.GetConfig() on
+		// every Token() call so in-flight goroutines pick up a rotated
+		// impersonate_access_token. A static source built here would freeze
+		// the original token value at client construction time and surface
+		// as ExpiredToken-style errors after the Pipes-side rotation. See
+		// gcp/token_source.go for the full rationale.
+		opts = append(opts, option.WithTokenSource(&connectionConfigTokenSource{connection: connection}))
 	}
 
 	if gcpConfig.ImpersonateServiceAccount != nil {

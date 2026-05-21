@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v6/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin/transform"
 )
 
 func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
@@ -179,6 +179,6 @@ func tableGcpComputeTpu(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listComputeTpus(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	err := errors.New("The gcp_compute_tpu table has been deprecated and removed, please use gcp_tpu_vm table instead.")
+	err := errors.New("the gcp_compute_tpu table has been deprecated and removed, please use gcp_tpu_vm table instead")
 	return nil, err
 }

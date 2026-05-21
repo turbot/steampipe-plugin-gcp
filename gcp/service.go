@@ -6,7 +6,7 @@ import (
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	redis "cloud.google.com/go/redis/apiv1"
 	rediscluster "cloud.google.com/go/redis/cluster/apiv1"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 	"google.golang.org/api/accessapproval/v1"
 	"google.golang.org/api/alloydb/v1"
 	"google.golang.org/api/apikeys/v2"

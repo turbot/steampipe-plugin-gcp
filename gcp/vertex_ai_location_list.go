@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 	"google.golang.org/api/iterator"
 	"google.golang.org/genproto/googleapis/cloud/location"
 )
