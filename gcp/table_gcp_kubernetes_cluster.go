@@ -481,7 +481,7 @@ func gcpKubernetesClusterLocationType(ctx context.Context, d *transform.Transfor
 //// UTILITY FUNCTION
 
 func extractNonNilFields(val reflect.Value, result map[string]interface{}) {
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		val = val.Elem()
 	}
 
@@ -495,7 +495,7 @@ func extractNonNilFields(val reflect.Value, result map[string]interface{}) {
 
 		fieldName := typeField.Name
 
-		if field.Kind() == reflect.Ptr {
+		if field.Kind() == reflect.Pointer {
 			if !field.IsNil() {
 				// Create a nested map for each non-nil struct
 				nestedMap := make(map[string]interface{})
