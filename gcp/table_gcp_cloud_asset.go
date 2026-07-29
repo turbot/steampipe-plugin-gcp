@@ -38,48 +38,8 @@ func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 			},
 			{
-				Name:        "access_level",
-				Description: "Access levels are used for permitting access to resources based on contextual information about the request. ",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "access_policy",
-				Description: "An access policy is a container for all of your Access Context Manager resources.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
 				Name:        "ancestors",
 				Description: "The ancestry path of an asset in Google Cloud resource hierarchy.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "iam_policy",
-				Description: "A representation of the IAM policy set on a Google Cloud resource.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "org_policy",
-				Description: "A representation of an organization policy.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "os_inventory",
-				Description: "A representation of runtime OS Inventory information.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "related_asset",
-				Description: "One related asset of the current asset.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "resource",
-				Description: "A representation of the resource.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "service_perimeter",
-				Description: "An overview of VPC Service Controls and describes its advantages and capabilities.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -106,11 +66,21 @@ func tableGcpCloudAsset(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCloudAssets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	return listCloudAssetsByContentType(ctx, d, h, "", "gcp_cloud_asset.listCloudAssets", func(ctx context.Context, d *plugin.QueryData, asset *cloudasset.Asset) {
+		d.StreamListItem(ctx, asset)
+	})
+}
+
+// Shared list implementation for all gcp_cloud_asset* tables. The Cloud Asset
+// API returns different asset content depending on the requested content type,
+// and accepts at most one content type per call. An empty contentType requests
+// only basic asset information (name, asset_type, ancestors, update_time).
+func listCloudAssetsByContentType(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, contentType string, logCtx string, stream func(ctx context.Context, d *plugin.QueryData, asset *cloudasset.Asset)) (interface{}, error) {
 
 	// Create Service Connection
 	service, err := CloudAssetService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_asset.listCloudAssets", "service_error", err)
+		plugin.Logger(ctx).Error(logCtx, "service_error", err)
 		return nil, err
 	}
 
@@ -134,12 +104,16 @@ func listCloudAssets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	input := "projects/" + project
 
 	resp := service.Assets.List(input).PageSize(*pageSize)
+	if contentType != "" {
+		resp = resp.ContentType(contentType)
+	}
+
 	if err := resp.Pages(ctx, func(page *cloudasset.ListAssetsResponse) error {
 		// apply rate limiting
 		d.WaitForListRateLimit(ctx)
 
 		for _, item := range page.Assets {
-			d.StreamListItem(ctx, item)
+			stream(ctx, d, item)
 
 			// Check if context has been cancelled or if the limit has been hit (if specified)
 			// if there is a limit, it will return the number of rows required to reach this limit
@@ -150,7 +124,7 @@ func listCloudAssets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 		return nil
 	}); err != nil {
-		plugin.Logger(ctx).Error("gcp_cloud_asset.listCloudAssets", "api_error", err)
+		plugin.Logger(ctx).Error(logCtx, "api_error", err)
 		return nil, err
 	}
 
