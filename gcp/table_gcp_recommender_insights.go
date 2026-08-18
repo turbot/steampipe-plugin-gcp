@@ -19,11 +19,16 @@ import (
 // Reference: https://docs.cloud.google.com/policy-intelligence/docs/service-account-insights#get-a-single-service-account-insight
 func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "gcp_recommender_insights",
+		Name:        "gcp_recommender_insight",
 		Description: "GCP Recommender Insights",
 		List: &plugin.ListConfig{
 			Hydrate: listGcpRecommenderInsights,
 			Tags:    map[string]string{"service": "recommender", "action": "recommender.listInsight"},
+		},
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.SingleColumn("project"),
+			Hydrate:    getGcpRecommenderInsights,
+			Tags:       map[string]string{"service": "recommender", "action": "recommender.listInsight"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -98,7 +103,7 @@ func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("name"),
+				Transform:   transform.FromField("Name"),
 			},
 
 			// standard gcp columns
@@ -135,6 +140,45 @@ func listGcpRecommenderInsights(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 	project := projectId.(string)
 	plugin.Logger(ctx).Trace("listGcpRecommenderInsights", "GCP_PROJECT: ", project)
+
+	parent := fmt.Sprintf("projects/%s/locations/global/insightTypes/google.iam.serviceAccount.Insight", projectId)
+
+	req := &recommenderpb.ListInsightsRequest{
+		// See https://pkg.go.dev/cloud.google.com/go/recommender/apiv1/recommenderpb#ListInsightsRequest
+		Parent: parent,
+	}
+	it := client.ListInsights(ctx, req)
+
+	// apply rate limiting
+	d.WaitForListRateLimit(ctx)
+
+	for {
+		resp, err := it.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		d.StreamListItem(ctx, resp)
+	}
+
+	return nil, nil
+}
+
+func getGcpRecommenderInsights(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	client, err := recommender.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	// Get project id
+	projectId := d.EqualsQuals["project"].GetStringValue()
+	plugin.Logger(ctx).Trace("getGcpRecommenderInsights", "GCP_PROJECT: ", projectId)
 
 	parent := fmt.Sprintf("projects/%s/locations/global/insightTypes/google.iam.serviceAccount.Insight", projectId)
 
