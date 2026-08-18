@@ -315,6 +315,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_vpc_access_connector":                                tableGcpVPCAccessConnector(ctx),
 			"gcp_workstations_workstation_cluster":                    tableGcpWorkstationsWorkstationCluster(ctx),
 			"gcp_workstations_workstation":                            tableGcpWorkstationsWorkstation(ctx),
+			"gcp_recommender_api":                                     tableGcpRecommenderInsights(ctx),
 			/*
 				https://github.com/turbot/steampipe/issues/108
 				"gcp_compute_route":                   tableGcpComputeRoute(ctx),

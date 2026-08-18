@@ -4,6 +4,7 @@ go 1.26.0
 
 require (
 	cloud.google.com/go/aiplatform v1.69.0
+	cloud.google.com/go/recommender v1.13.2
 	cloud.google.com/go/resourcemanager v1.10.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/turbot/go-kit v1.1.0

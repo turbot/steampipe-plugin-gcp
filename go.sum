@@ -454,6 +454,8 @@ cloud.google.com/go/recommender v1.6.0/go.mod h1:+yETpm25mcoiECKh9DEScGzIRyDKpZ0
 cloud.google.com/go/recommender v1.7.0/go.mod h1:XLHs/W+T8olwlGOgfQenXBTbIseGclClff6lhFVe9Bs=
 cloud.google.com/go/recommender v1.8.0/go.mod h1:PkjXrTT05BFKwxaUxQmtIlrtj0kph108r02ZZQ5FE70=
 cloud.google.com/go/recommender v1.9.0/go.mod h1:PnSsnZY7q+VL1uax2JWkt/UegHssxjUVVCrX52CuEmQ=
+cloud.google.com/go/recommender v1.13.2 h1:xDFzlFk5Xp5MXnac468eicKM3MUo6UNdxoYuBMOF1mE=
+cloud.google.com/go/recommender v1.13.2/go.mod h1:XJau4M5Re8F4BM+fzF3fqSjxNJuM66fwF68VCy/ngGE=
 cloud.google.com/go/redis v1.7.0/go.mod h1:V3x5Jq1jzUcg+UNsRvdmsfuFnit1cfe3Z/PGyq/lm4Y=
 cloud.google.com/go/redis v1.8.0/go.mod h1:Fm2szCDavWzBk2cDKxrkmWBqoCiL1+Ctwq7EyqBCA/A=
 cloud.google.com/go/redis v1.9.0/go.mod h1:HMYQuajvb2D0LvMgZmLDZW8V5aOC/WxstZHiy4g8OiA=
