@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/turbot/steampipe-plugin-sdk/v6/grpc/proto"
@@ -25,11 +26,11 @@ func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 			Hydrate: listGcpRecommenderInsights,
 			Tags:    map[string]string{"service": "recommender", "action": "recommender.listInsight"},
 		},
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("project"),
-			Hydrate:    getGcpRecommenderInsights,
-			Tags:       map[string]string{"service": "recommender", "action": "recommender.listInsight"},
-		},
+		// Get: &plugin.GetConfig{
+		// 	KeyColumns: plugin.SingleColumn("project"),
+		// 	Hydrate:    getGcpRecommenderInsights,
+		// 	Tags:       map[string]string{"service": "recommender", "action": "recommender.listInsight"},
+		// },
 		Columns: []*plugin.Column{
 			{
 				Name:        "category",
@@ -50,11 +51,13 @@ func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 				Name:        "etag",
 				Description: "A unique identifier for the current state of an insight. Each time the insight changes, a new etag value is assigned.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromGo().NullIfZero(),
 			},
 			{
 				Name:        "last_refresh_time",
 				Description: "The date when the insight was last refreshed, which indicates the freshness of the data used to generate the insight.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromP(gcpRecommenderInsightData, "LastRefreshTime"),
 			},
 			{
 				Name:        "name",
@@ -65,11 +68,13 @@ func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 				Name:        "observation_period",
 				Description: "The time period leading up to the insight. The source data used to generate the insight ends at lastRefreshTime and begins at lastRefreshTime minus observationPeriod..",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpRecommenderInsightData, "ObservationPeriod"),
 			},
 			{
 				Name:        "state_info",
 				Description: "Insights go through multiple state transitions after they are proposed.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpRecommenderInsightData, "StateInfo"),
 			},
 			{
 				Name:        "target_resources",
@@ -80,16 +85,19 @@ func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 				Name:        "service_account_email",
 				Description: "The email address of the service account.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpRecommenderInsightData, "email"),
 			},
 			{
 				Name:        "service_account_id",
 				Description: "The unique numeric ID of the service account.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpRecommenderInsightData, "serviceAccountId"),
 			},
 			{
 				Name:        "last_authenticated_time",
 				Description: "The most recent time that the service account was authenticated. If the service account does not have any recorded authentications, this field is not included..",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromP(gcpRecommenderInsightData, "lastAuthenticatedTime"),
 			},
 
 			// standard steampipe columns
@@ -103,7 +111,7 @@ func tableGcpRecommenderInsights(ctx context.Context) *plugin.Table {
 				Name:        "akas",
 				Description: ColumnDescriptionAkas,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Name"),
+				Transform:   transform.FromP(gcpRecommenderInsightData, "Akas"),
 			},
 
 			// standard gcp columns
@@ -149,10 +157,10 @@ func listGcpRecommenderInsights(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 	it := client.ListInsights(ctx, req)
 
-	// apply rate limiting
-	d.WaitForListRateLimit(ctx)
-
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		resp, err := it.Next()
 
 		if err == iterator.Done {
@@ -164,6 +172,11 @@ func listGcpRecommenderInsights(ctx context.Context, d *plugin.QueryData, h *plu
 		}
 
 		d.StreamListItem(ctx, resp)
+
+		// Check if context has been cancelled or if the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			break
+		}
 	}
 
 	return nil, nil
@@ -188,10 +201,10 @@ func getGcpRecommenderInsights(ctx context.Context, d *plugin.QueryData, h *plug
 	}
 	it := client.ListInsights(ctx, req)
 
-	// apply rate limiting
-	d.WaitForListRateLimit(ctx)
-
 	for {
+		// apply rate limiting
+		d.WaitForListRateLimit(ctx)
+
 		resp, err := it.Next()
 
 		if err == iterator.Done {
@@ -202,7 +215,13 @@ func getGcpRecommenderInsights(ctx context.Context, d *plugin.QueryData, h *plug
 			return nil, err
 		}
 
+		plugin.Logger(ctx).Trace("getGcpRecommenderInsights", "RESEP: ", fmt.Sprintf("%+v", resp))
 		d.StreamListItem(ctx, resp)
+
+		// Check if context has been cancelled or if the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			break
+		}
 	}
 
 	return nil, nil
@@ -230,4 +249,30 @@ func getRecommenderInsightsTurbotData(ctx context.Context, d *plugin.QueryData, 
 	}
 
 	return turbotData, nil
+}
+
+func gcpRecommenderInsightData(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	insight := d.HydrateItem.(*recommenderpb.Insight)
+	param := d.Param.(string)
+
+	if insight == nil {
+		return nil, nil
+	}
+
+	// Build resource aka
+	akas := []string{insight.Name}
+
+	// Build content
+	content := insight.Content.AsMap()
+
+	data := make(map[string]interface{}, len(content))
+	maps.Copy(data, content)
+
+	data["LastRefreshTime"] = insight.GetLastRefreshTime().AsTime()
+	data["ObservationPeriod"] = insight.GetObservationPeriod().AsDuration().Seconds()
+	data["Akas"] = akas
+	data["StateInfo"] = insight.GetStateInfo().GetState()
+	data["Etag"] = insight.GetEtag()
+
+	return data[param], nil
 }
