@@ -103,7 +103,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				FillRate:   10,
 				BucketSize: 20,
 				Scope:      []string{"connection", "service", "action"},
-				Where:      "service = 'compute' and action in ('instances.get', 'instances.list', 'instances.getIamPolicy', 'disks.get', 'disks.list', 'disks.getIamPolicy', 'images.list', 'images.get', 'images.getIamPolicy', 'snapshots.list', 'snapshots.get', 'addresses.list', 'addresses.get', 'globalAddresses.list', 'globalAddresses.get', 'networks.list', 'networks.get', 'subnetworks.list', 'subnetworks.get', 'subnetworks.getIamPolicy', 'firewalls.list', 'firewalls.get', 'sslPolicies.list', 'sslPolicies.get', 'urlMaps.list', 'urlMaps.get', 'forwardingRules.list', 'forwardingRules.get', 'globalForwardingRules.list', 'globalForwardingRules.get')",
+				Where:      "service = 'compute' and action in ('instances.get', 'instances.list', 'instances.getIamPolicy', 'disks.get', 'disks.list', 'disks.getIamPolicy', 'images.list', 'images.get', 'images.getIamPolicy', 'snapshots.list', 'snapshots.get', 'addresses.list', 'addresses.get', 'globalAddresses.list', 'globalAddresses.get', 'networks.list', 'networks.get', 'subnetworks.list', 'subnetworks.get', 'subnetworks.getIamPolicy', 'firewalls.list', 'firewalls.get', 'routes.list', 'routes.get', 'sslPolicies.list', 'sslPolicies.get', 'urlMaps.list', 'urlMaps.get', 'forwardingRules.list', 'forwardingRules.get', 'globalForwardingRules.list', 'globalForwardingRules.get')",
 			},
 
 			// Approximately 5000 read requests per second: https://cloud.google.com/storage/docs/request-rate#auto-scaling
@@ -245,6 +245,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_compute_project_metadata":                            tableGcpComputeProjectMetadata(ctx),
 			"gcp_compute_region":                                      tableGcpComputeRegion(ctx),
 			"gcp_compute_resource_policy":                             tableGcpComputeResourcePolicy(ctx),
+			"gcp_compute_route":                                       tableGcpComputeRoute(ctx),
 			"gcp_compute_router":                                      tableGcpComputeRouter(ctx),
 			"gcp_compute_snapshot":                                    tableGcpComputeSnapshot(ctx),
 			"gcp_compute_ssl_policy":                                  tableGcpComputeSslPolicy(ctx),
@@ -315,11 +316,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"gcp_vpc_access_connector":                                tableGcpVPCAccessConnector(ctx),
 			"gcp_workstations_workstation_cluster":                    tableGcpWorkstationsWorkstationCluster(ctx),
 			"gcp_workstations_workstation":                            tableGcpWorkstationsWorkstation(ctx),
-			/*
-				https://github.com/turbot/steampipe/issues/108
-				"gcp_compute_route":                   tableGcpComputeRoute(ctx),
-			*/
-
 		},
 	}
 
