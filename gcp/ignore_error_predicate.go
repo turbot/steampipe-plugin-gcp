@@ -2,6 +2,8 @@ package gcp
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"path"
 	"regexp"
 	"slices"
@@ -52,5 +54,25 @@ func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 			}
 		}
 		return false
+	}
+}
+
+// Errors a GCP API returns for a condition that is expected to clear on its own: an exhausted
+// per-minute quota, and the backend errors ("Internal error encountered", "The service is
+// currently unavailable") any of them returns occasionally.
+var retryableErrorCodes = []int{
+	http.StatusTooManyRequests,
+	http.StatusInternalServerError,
+	http.StatusBadGateway,
+	http.StatusServiceUnavailable,
+	http.StatusGatewayTimeout,
+}
+
+// shouldRetryErrorPluginDefault:: Plugin level default function to retry the transient errors hydrate functions get, so that one failed call does not fail the whole query
+func shouldRetryErrorPluginDefault() plugin.ErrorPredicateWithContext {
+	// The SDK logs the retry decision and every attempt it then makes, so this only decides.
+	return func(_ context.Context, _ *plugin.QueryData, _ *plugin.HydrateData, err error) bool {
+		var gerr *googleapi.Error
+		return errors.As(err, &gerr) && slices.Contains(retryableErrorCodes, gerr.Code)
 	}
 }
