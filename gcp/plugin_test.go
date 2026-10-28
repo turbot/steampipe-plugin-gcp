@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
@@ -34,38 +35,63 @@ func rateLimiterDefinition(t *testing.T, name string) *rate_limiter.Definition {
 	return nil
 }
 
-// The Cloud Billing API counts every method against one per minute quota, so the limiter has to
-// catch all of them, and only them: billing budgets are served by another API with its own quota.
-func TestBillingRateLimiterTargetsTheCloudBillingMethods(t *testing.T) {
-	definition := rateLimiterDefinition(t, "gcp_billing")
-
-	if !reflect.DeepEqual(definition.Scope, []string{"connection", "service"}) {
-		t.Fatalf("limiter scope is %v, so the methods do not share one bucket per connection", definition.Scope)
-	}
-
-	// A full bucket drains at once, so a minute can carry the burst on top of what refills in it,
-	// and that total is what has to stay under the 300 calls a minute the API documents.
-	if worstCase := float64(definition.BucketSize) + float64(definition.FillRate)*60; worstCase > 300 {
-		t.Errorf("a burst of %d then %v per second puts up to %v calls in one minute, over the 300 quota", definition.BucketSize, definition.FillRate, worstCase)
-	}
-
+// Where one quota is a single budget for several methods, one limiter has to cover exactly those
+// methods: a limiter per method would let each one fill the whole quota on its own, and a limiter
+// reaching too wide would pace calls that are counted somewhere else.
+func TestSharedQuotaRateLimiters(t *testing.T) {
 	tests := []struct {
-		tags    map[string]string
-		matched bool
+		limiter string
+		// The calls a minute the API documents for the quota this limiter stands in for.
+		quota float64
+		// Tags of a hydrate call, against whether this limiter should pace it.
+		calls map[string]bool
 	}{
-		{map[string]string{"service": "billing", "action": "projects.getBillingInfo"}, true},
-		{map[string]string{"service": "billing", "action": "accounts.get"}, true},
-		{map[string]string{"service": "billing", "action": "budgets.list"}, false},
-		{map[string]string{"service": "billing", "action": "budgets.get"}, false},
-		{map[string]string{"service": "resourcemanager", "action": "projects.list"}, false},
+		{
+			limiter: "gcp_billing",
+			quota:   300,
+			calls: map[string]bool{
+				"billing/projects.getBillingInfo": true,
+				"billing/accounts.get":            true,
+				// The Cloud Billing Budget API is a separate service under its own quota.
+				"billing/budgets.list":          false,
+				"billing/budgets.get":           false,
+				"resourcemanager/projects.list": false,
+			},
+		},
+		{
+			limiter: "gcp_cloudresourcemanager_projects_read",
+			quota:   600,
+			calls: map[string]bool{
+				"resourcemanager/projects.getAncestry":               true,
+				"resourcemanager/projects.getAccessApprovalSettings": true,
+				// Counted against the per user quota the gcp_resourcemanager limiter covers.
+				"resourcemanager/projects.list":         false,
+				"resourcemanager/projects.getIamPolicy": false,
+				"billing/projects.getBillingInfo":       false,
+			},
+		},
 	}
+
 	for _, test := range tests {
-		scopeValues := map[string]string{"connection": "gcp"}
-		for key, value := range test.tags {
-			scopeValues[key] = value
+		definition := rateLimiterDefinition(t, test.limiter)
+
+		if !reflect.DeepEqual(definition.Scope, []string{"connection", "service"}) {
+			t.Errorf("%s scope is %v, so its methods do not share one bucket per connection", test.limiter, definition.Scope)
 		}
-		if matched := definition.SatisfiesFilters(scopeValues); matched != test.matched {
-			t.Errorf("limiter matches %v: %t, expected %t", test.tags, matched, test.matched)
+
+		// A full bucket drains at once and refills over the same minute, so what has to stay
+		// under the quota is the burst plus a minute of fill.
+		if worstCase := float64(definition.BucketSize) + float64(definition.FillRate)*60; worstCase > test.quota {
+			t.Errorf("%s: a burst of %d then %v per second puts up to %v calls in one minute, over the %v quota",
+				test.limiter, definition.BucketSize, definition.FillRate, worstCase, test.quota)
+		}
+
+		for call, want := range test.calls {
+			service, action, _ := strings.Cut(call, "/")
+			scopeValues := map[string]string{"connection": "gcp", "service": service, "action": action}
+			if matched := definition.SatisfiesFilters(scopeValues); matched != want {
+				t.Errorf("%s matches %s: %t, expected %t", test.limiter, call, matched, want)
+			}
 		}
 	}
 }
