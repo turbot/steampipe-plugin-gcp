@@ -91,20 +91,18 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// Doc: https://cloud.google.com/resource-manager/docs/limits
 			// APIs: projects.getAccessApprovalSettings, projects.getAncestry
 			// Tables: gcp_project, gcp_organization_project
-			// FillRate and BucketSize set to 10 to match the per-second rate and allow for short bursts within the minute quota.
+			// The quota is one budget for both reads, so the scope leaves out the action and they
+			// share a single bucket: a limiter per action would let each one fill the whole quota.
+			// A full bucket drains at once and refills during the same minute, so what has to stay
+			// under 600 is burst + fill rate over 60 seconds, here 50 + 540.
+			// Both reads are hydrated once per project, so listing an organization fans each of
+			// them out to as many calls as it has projects.
 			{
-				Name:       "gcp_cloudresourcemanager_projects_get_access_approval_settings",
-				FillRate:   10,
-				BucketSize: 60,
-				Scope:      []string{"connection", "service", "action"},
-				Where:      "service = 'resourcemanager' and action = 'projects.getAccessApprovalSettings'",
-			},
-			{
-				Name:       "gcp_cloudresourcemanager_projects_get_ancestry",
-				FillRate:   10,
-				BucketSize: 60,
-				Scope:      []string{"connection", "service", "action"},
-				Where:      "service = 'resourcemanager' and action = 'projects.getAncestry'",
+				Name:       "gcp_cloudresourcemanager_projects_read",
+				FillRate:   9,
+				BucketSize: 50,
+				Scope:      []string{"connection", "service"},
+				Where:      "service = 'resourcemanager' and action in ('projects.getAccessApprovalSettings', 'projects.getAncestry')",
 			},
 
 			// Cloud Billing API rate quota: 300 calls per minute per consumer project, counted
