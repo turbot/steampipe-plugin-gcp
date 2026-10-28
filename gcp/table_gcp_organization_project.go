@@ -29,6 +29,10 @@ func tableGcpOrganizationProject(_ context.Context) *plugin.Table {
 				Func: getProjectAncestors,
 				Tags: map[string]string{"service": "resourcemanager", "action": "projects.getAncestry"},
 			},
+			{
+				Func: getProjectBillingInfo,
+				Tags: map[string]string{"service": "billing", "action": "projects.getBillingInfo"},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
