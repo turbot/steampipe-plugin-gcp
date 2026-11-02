@@ -85,7 +85,11 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	if err != nil {
 		return nil, err
 	}
-	defer client.Close()
+	defer func() {
+		if err := client.Close(); err != nil {
+			plugin.Logger(ctx).Error("gcp_tag_binding.listGcpTagBindings", "client_close_error", err)
+		}
+	}()
 
 	// Construct the request
 	req := &resourcemanagerpb.ListTagBindingsRequest{
