@@ -80,11 +80,12 @@ func listGcpTagBindings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		}
 	}
 
-	// Create Service Connection
-	client, err := resourcemanager.NewTagBindingsClient(ctx)
+	// Create Service Connection, configured like every other service from the connection config
+	client, err := resourcemanager.NewTagBindingsClient(ctx, setSessionConfig(ctx, d.Connection)...)
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
 	// Construct the request
 	req := &resourcemanagerpb.ListTagBindingsRequest{
