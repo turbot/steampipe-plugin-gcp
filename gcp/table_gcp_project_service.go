@@ -18,10 +18,10 @@ func tableGcpProjectService(_ context.Context) *plugin.Table {
 		Name:        "gcp_project_service",
 		Description: "GCP Project Service",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getGcpProjectService,
-			Tags:              map[string]string{"service": "serviceusage", "action": "services.get"},
-			ShouldIgnoreError: isIgnorableError([]string{"404"}),
+			KeyColumns:   plugin.SingleColumn("name"),
+			Hydrate:      getGcpProjectService,
+			Tags:         map[string]string{"service": "serviceusage", "action": "services.get"},
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"404"})},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listGcpProjectServices,

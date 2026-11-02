@@ -25,9 +25,9 @@ func tableGcpComputeImage(ctx context.Context) *plugin.Table {
 			Tags:       map[string]string{"service": "compute", "action": "images.get"},
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate:     listComputeImageProjects,
-			Hydrate:           listImagesForProject,
-			ShouldIgnoreError: isIgnorableError([]string{"404"}),
+			ParentHydrate: listComputeImageProjects,
+			Hydrate:       listImagesForProject,
+			IgnoreConfig:  &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"404"})},
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "deprecation_state", Require: plugin.Optional},
 				{Name: "family", Require: plugin.Optional},
