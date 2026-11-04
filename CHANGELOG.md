@@ -1,3 +1,20 @@
+## v1.14.0 [2026-11-04]
+
+_What's new?_
+
+- New tables added
+  - [gcp_compute_route](https://hub.steampipe.io/plugins/turbot/gcp/tables/gcp_compute_route) ([#842](https://github.com/turbot/steampipe-plugin-gcp/pull/842)) (Thanks [@jangjaelee](https://github.com/jangjaelee) for the contribution!)
+
+_Bug fixes_
+
+- Fixed the `gcp_tag_binding` table to build its client from the connection config (`credentials`, `impersonate_service_account`, `impersonate_access_token`, `quota_project`) like every other table, instead of silently falling back to Application Default Credentials. ([#844](https://github.com/turbot/steampipe-plugin-gcp/pull/844)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+- Replaced the deprecated `ShouldIgnoreError` with `IgnoreConfig` across all tables, fixing the `golangci-lint` failures on `main`. ([#845](https://github.com/turbot/steampipe-plugin-gcp/pull/845)) (Thanks [@pdecat](https://github.com/pdecat) for the contribution!)
+
+_Dependencies_
+
+- Bumped `github.com/klauspost/compress` to v1.18.7. ([#841](https://github.com/turbot/steampipe-plugin-gcp/pull/841))
+- Bumped `github.com/turbot/go-kit` to v1.3.1. ([#840](https://github.com/turbot/steampipe-plugin-gcp/pull/840))
+
 ## v1.13.1 [2026-05-20]
 
 _Bug fixes_
@@ -6,7 +23,7 @@ _Bug fixes_
 
 _Dependencies_
 
-- Upgraded `steampipe-plugin-sdk` to v6.0.0, which adds the race-free `Connection.GetConfig` / `SetConfig` accessors (per-connection `sync.RWMutex`) that the rotation fix above relies on. Plugin builds now require Go 1.26.
+- Bumped `steampipe-plugin-sdk` to v6.0.0, which adds the race-free `Connection.GetConfig` / `SetConfig` accessors (per-connection `sync.RWMutex`) that the rotation fix above relies on. Plugin builds now require Go 1.26.
 
 ## v1.13.0 [2025-11-28]
 
@@ -353,7 +370,7 @@ _Dependencies_
 
 _Dependencies_
 
-- Upgraded to [steampipe-plugin-sdk v5.6.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v561-2023-09-29) with support for rate limiters. ([#493](https://github.com/turbot/steampipe-plugin-gcp/pull/493))
+- Bumped to [steampipe-plugin-sdk v5.6.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v561-2023-09-29) with support for rate limiters. ([#493](https://github.com/turbot/steampipe-plugin-gcp/pull/493))
 - Recompiled plugin with Go version `1.21`. ([#493](https://github.com/turbot/steampipe-plugin-gcp/pull/493))
 
 ## v0.43.0 [2023-08-24]
