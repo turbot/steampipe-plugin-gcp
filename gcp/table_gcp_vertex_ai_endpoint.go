@@ -21,15 +21,15 @@ func tableGcpVertexAIEndpoint(_ context.Context) *plugin.Table {
 		Name:        "gcp_vertex_ai_endpoint",
 		Description: "GCP Vertex AI Endpoint",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getAIPlatformEndpoint,
-			ShouldIgnoreError: isIgnorableError([]string{"Unimplemented"}),
-			Tags:              map[string]string{"service": "aiplatform", "action": "endpoints.get"},
+			KeyColumns:   plugin.SingleColumn("name"),
+			Hydrate:      getAIPlatformEndpoint,
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"Unimplemented"})},
+			Tags:         map[string]string{"service": "aiplatform", "action": "endpoints.get"},
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listAIPlatformEndpoints,
-			ShouldIgnoreError: isIgnorableError([]string{"Unimplemented"}),
-			Tags:              map[string]string{"service": "aiplatform", "action": "endpoints.list"},
+			Hydrate:      listAIPlatformEndpoints,
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"Unimplemented"})},
+			Tags:         map[string]string{"service": "aiplatform", "action": "endpoints.list"},
 		},
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Endpoint"),
 		Columns: []*plugin.Column{

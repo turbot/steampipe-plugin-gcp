@@ -17,15 +17,15 @@ func tableGcpVertexAINotebookRuntimeTemplate(ctx context.Context) *plugin.Table 
 		Name:        "gcp_vertex_ai_notebook_runtime_template",
 		Description: "GCP Vertex AI Notebook Runtime Template",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getAIPlatformNotebookRuntimeTemplate,
-			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
-			Tags:              map[string]string{"service": "aiplatform", "action": "notebookRuntimeTemplates.get"},
+			KeyColumns:   plugin.SingleColumn("name"),
+			Hydrate:      getAIPlatformNotebookRuntimeTemplate,
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"})},
+			Tags:         map[string]string{"service": "aiplatform", "action": "notebookRuntimeTemplates.get"},
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listAIPlatformNotebookRuntimeTemplates,
-			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
-			Tags:              map[string]string{"service": "aiplatform", "action": "notebookRuntimeTemplates.list"},
+			Hydrate:      listAIPlatformNotebookRuntimeTemplates,
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"})},
+			Tags:         map[string]string{"service": "aiplatform", "action": "notebookRuntimeTemplates.list"},
 		},
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Notebook"),
 		Columns: []*plugin.Column{

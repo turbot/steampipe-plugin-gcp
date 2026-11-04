@@ -18,15 +18,15 @@ func tableGcpVertexAIModel(ctx context.Context) *plugin.Table {
 		Name:        "gcp_vertex_ai_model",
 		Description: "GCP Vertex AI Model",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("name"),
-			Hydrate:           getAIPlatformModel,
-			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
-			Tags:              map[string]string{"service": "aiplatform", "action": "models.get"},
+			KeyColumns:   plugin.SingleColumn("name"),
+			Hydrate:      getAIPlatformModel,
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"})},
+			Tags:         map[string]string{"service": "aiplatform", "action": "models.get"},
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listAIPlatformModels,
-			ShouldIgnoreError: isIgnorableError([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"}),
-			Tags:              map[string]string{"service": "aiplatform", "action": "models.list"},
+			Hydrate:      listAIPlatformModels,
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"Unauthenticated", "Unimplemented", "InvalidArgument"})},
+			Tags:         map[string]string{"service": "aiplatform", "action": "models.list"},
 		},
 		GetMatrixItemFunc: BuildVertexAILocationListByClientType("Model"),
 		Columns: []*plugin.Column{

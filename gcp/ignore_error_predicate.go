@@ -21,6 +21,16 @@ func isIgnorableError(notFoundErrors []string) plugin.ErrorPredicate {
 	}
 }
 
+// isIgnorableErrorFunc is isIgnorableError as an ErrorPredicateWithContext, which is what
+// IgnoreConfig.ShouldIgnoreErrorFunc takes; the context, query data and hydrate data are not needed
+// to match an error code.
+func isIgnorableErrorFunc(notFoundErrors []string) plugin.ErrorPredicateWithContext {
+	shouldIgnore := isIgnorableError(notFoundErrors)
+	return func(_ context.Context, _ *plugin.QueryData, _ *plugin.HydrateData, err error) bool {
+		return shouldIgnore(err)
+	}
+}
+
 // shouldIgnoreErrorPluginDefault:: Plugin level default function to ignore a set errors for hydrate functions based on "ignore_error_codes" and "ignore_error_messages" config argument
 func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 	return func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, err error) bool {

@@ -17,10 +17,10 @@ func tableGcpTagBinding(ctx context.Context) *plugin.Table {
 		Name:        "gcp_tag_binding",
 		Description: "GCP Tag Binding",
 		List: &plugin.ListConfig{
-			Hydrate:           listGcpTagBindings,
-			KeyColumns:        plugin.SingleColumn("parent"),
-			ShouldIgnoreError: isIgnorableError([]string{"InvalidArgument"}),
-			Tags:              map[string]string{"service": "resourcemanager", "action": "hierarchyNodes.listTagBindings"},
+			Hydrate:      listGcpTagBindings,
+			KeyColumns:   plugin.SingleColumn("parent"),
+			IgnoreConfig: &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isIgnorableErrorFunc([]string{"InvalidArgument"})},
+			Tags:         map[string]string{"service": "resourcemanager", "action": "hierarchyNodes.listTagBindings"},
 		},
 		Columns: []*plugin.Column{
 			{
