@@ -14,6 +14,7 @@ The `gcp_compute_security_policy` table provides insights into Cloud Armor secur
 
 **Important Notes:**
 - This table supports optional quals. Queries with optional quals are optimised to use security policy filters. Optional quals are supported for the following columns:
+  - `name`
   - `id`
   - `type`
   - `description`

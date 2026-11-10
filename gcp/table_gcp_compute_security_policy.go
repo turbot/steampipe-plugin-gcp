@@ -19,14 +19,12 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_security_policy",
 		Description: "GCP Armor Security Policy",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getGcpComputeSecurityPolicy,
-			Tags:       map[string]string{"service": "compute", "action": "securityPolicies.get"},
-		},
+		// No Get config: the same name can exist globally and in a region, so a
+		// lookup by name is a filtered list that returns every matching policy.
 		List: &plugin.ListConfig{
 			Hydrate: listGcpComputeSecurityPolicies,
 			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "name", Require: plugin.Optional},
 				{Name: "id", Require: plugin.Optional},
 				{Name: "type", Require: plugin.Optional},
 				{Name: "description", Require: plugin.Optional},
@@ -126,55 +124,13 @@ func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h 
 	return nil, nil
 }
 
-//// HYDRATE FUNCTIONS
-
-func getGcpComputeSecurityPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// Create Service Connection
-	service, err := ComputeService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get project details
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-	name := d.EqualsQualString("name")
-
-	// Return nil, if no input provided
-	if name == "" {
-		return nil, nil
-	}
-
-	var policy *compute.SecurityPolicy
-	resp := service.SecurityPolicies.AggregatedList(project).Filter("name=" + name)
-	if err := resp.Pages(ctx, func(page *compute.SecurityPoliciesAggregatedList) error {
-		for _, item := range page.Items {
-			for _, i := range item.SecurityPolicies {
-				policy = i
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	// If the specified resource is not present, API does not return any not found errors
-	if policy == nil {
-		return nil, nil
-	}
-
-	return policy, nil
-}
-
 //// UTILITY FUNCTION
 
 func buildComputeSecurityPolicyFilterParam(equalQuals plugin.KeyColumnQualMap) string {
 	filter := ""
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"type", "type", "string"},
 		{"description", "description", "string"},
 		{"id", "id", "int"},
