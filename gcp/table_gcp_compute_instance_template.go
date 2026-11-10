@@ -16,14 +16,14 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_instance_template",
 		Description: "GCP Compute Instance Template",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeInstanceTemplate,
-			Tags:       map[string]string{"service": "monitoring", "action": "instanceTemplates.get"},
-		},
+		// No Get config: the same name can exist globally and in a region, so a
+		// lookup by name is a filtered list that returns every matching template.
 		List: &plugin.ListConfig{
 			Hydrate: listComputeInstanceTemplate,
-			Tags:    map[string]string{"service": "monitoring", "action": "instanceTemplates.list"},
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "name", Require: plugin.Optional},
+			},
+			Tags: map[string]string{"service": "monitoring", "action": "instanceTemplates.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -240,7 +240,12 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 	project := projectId.(string)
 
-	resp := service.InstanceTemplates.AggregatedList(project).MaxResults(*pageSize)
+	filter := ""
+	if name := d.EqualsQualString("name"); name != "" {
+		filter = "name = \"" + name + "\""
+	}
+
+	resp := service.InstanceTemplates.AggregatedList(project).Filter(filter).MaxResults(*pageSize)
 	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateAggregatedList) error {
 		// apply rate limiting
 		d.WaitForListRateLimit(ctx)
@@ -263,52 +268,6 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	return nil, nil
-}
-
-//// HYDRATE FUNCTION
-
-func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// Create Service Connection
-	service, err := ComputeService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get project details
-
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-
-	name := d.EqualsQuals["name"].GetStringValue()
-
-	// Error: pq: rpc error: code = Unknown desc = json: invalid use of ,string struct tag,
-	// trying to unmarshal "projects/project/global/instanceTemplates/" into uint64
-	if len(name) < 1 {
-		return nil, nil
-	}
-
-	var instanceTemplate *compute.InstanceTemplate
-	resp := service.InstanceTemplates.AggregatedList(project).Filter("name=" + name)
-	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateAggregatedList) error {
-		for _, item := range page.Items {
-			for _, i := range item.InstanceTemplates {
-				instanceTemplate = i
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	// If the specified resource is not present, API does not return any not found errors
-	if instanceTemplate == nil {
-		return nil, nil
-	}
-
-	return instanceTemplate, nil
 }
 
 //// TRANSFORM FUNCTION
