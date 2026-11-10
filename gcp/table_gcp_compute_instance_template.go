@@ -164,6 +164,17 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Properties.Labels"),
 			},
+			{
+				Name:        "region",
+				Description: "The URL of the region where the regional instance template resides. This field is not applicable to global instance templates.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "location_type",
+				Description: "Location type where the instance template resides.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromP(gcpComputeInstanceTemplateLocation, "Type"),
+			},
 
 			// common resource columns
 			{
@@ -190,7 +201,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 				Name:        "location",
 				Description: ColumnDescriptionLocation,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromConstant("global"),
+				Transform:   transform.FromP(gcpComputeInstanceTemplateLocation, "Location"),
 			},
 			{
 				Name:        "project",
@@ -229,19 +240,21 @@ func listComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 	project := projectId.(string)
 
-	resp := service.InstanceTemplates.List(project).MaxResults(*pageSize)
-	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateList) error {
+	resp := service.InstanceTemplates.AggregatedList(project).MaxResults(*pageSize)
+	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateAggregatedList) error {
 		// apply rate limiting
 		d.WaitForListRateLimit(ctx)
 
-		for _, template := range page.Items {
-			d.StreamListItem(ctx, template)
+		for _, item := range page.Items {
+			for _, template := range item.InstanceTemplates {
+				d.StreamListItem(ctx, template)
 
-			// Check if context has been cancelled or if the limit has been hit (if specified)
-			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.RowsRemaining(ctx) == 0 {
-				page.NextPageToken = ""
-				return nil
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil
@@ -277,12 +290,25 @@ func getComputeInstanceTemplate(ctx context.Context, d *plugin.QueryData, h *plu
 		return nil, nil
 	}
 
-	resp, err := service.InstanceTemplates.Get(project, name).Do()
-	if err != nil {
+	var instanceTemplate *compute.InstanceTemplate
+	resp := service.InstanceTemplates.AggregatedList(project).Filter("name=" + name)
+	if err := resp.Pages(ctx, func(page *compute.InstanceTemplateAggregatedList) error {
+		for _, item := range page.Items {
+			for _, i := range item.InstanceTemplates {
+				instanceTemplate = i
+			}
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	// If the specified resource is not present, API does not return any not found errors
+	if instanceTemplate == nil {
+		return nil, nil
+	}
+
+	return instanceTemplate, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -293,10 +319,35 @@ func gcpComputeInstanceTemplateTurbotData(_ context.Context, d *transform.Transf
 
 	project := strings.Split(instanceTemplate.SelfLink, "/")[6]
 
+	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/global/instanceTemplates/" + instanceTemplate.Name}
+	if region := getLastPathElement(instanceTemplate.Region); region != "" {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/instanceTemplates/" + instanceTemplate.Name}
+	}
+
 	turbotData := map[string]interface{}{
 		"Project": project,
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/instanceTemplates/" + instanceTemplate.Name},
+		"Akas":    akas,
 	}
 
 	return turbotData[param], nil
+}
+
+func gcpComputeInstanceTemplateLocation(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	instanceTemplate := d.HydrateItem.(*compute.InstanceTemplate)
+	param := d.Param.(string)
+	regionName := getLastPathElement(instanceTemplate.Region)
+	project := strings.Split(instanceTemplate.SelfLink, "/")[6]
+
+	locationData := map[string]string{
+		"Type":     "REGIONAL",
+		"Location": regionName,
+		"Project":  project,
+	}
+
+	if regionName == "" {
+		locationData["Type"] = "GLOBAL"
+		locationData["Location"] = "global"
+	}
+
+	return locationData[param], nil
 }
