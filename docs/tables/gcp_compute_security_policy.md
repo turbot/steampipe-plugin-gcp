@@ -10,7 +10,7 @@ Google Cloud Armor Security Policies protect your applications from DDoS and app
 
 ## Table Usage Guide
 
-The `gcp_compute_security_policy` table provides insights into Cloud Armor security policies for your GCP projects.
+The `gcp_compute_security_policy` table provides insights into Cloud Armor security policies for your GCP projects. It covers both global and regional security policies; use the `location_type` and `location` columns to tell them apart.
 
 **Important Notes:**
 - This table supports optional quals. Queries with optional quals are optimised to use security policy filters. Optional quals are supported for the following columns:
@@ -74,6 +74,62 @@ from
   gcp_compute_security_policy
 where
   name = 'my-security-policy';
+```
+
+### List regional security policies
+Identify the security policies scoped to a region rather than defined globally, along with the region where each one resides.
+
+```sql+postgres
+select
+  name,
+  id,
+  type,
+  location,
+  self_link
+from
+  gcp_compute_security_policy
+where
+  location_type = 'REGIONAL';
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  type,
+  location,
+  self_link
+from
+  gcp_compute_security_policy
+where
+  location_type = 'REGIONAL';
+```
+
+### Count security policies by location
+Get an overview of how security policies are distributed between the global scope and each region.
+
+```sql+postgres
+select
+  location,
+  count(*) as policy_count
+from
+  gcp_compute_security_policy
+group by
+  location
+order by
+  location;
+```
+
+```sql+sqlite
+select
+  location,
+  count(*) as policy_count
+from
+  gcp_compute_security_policy
+group by
+  location
+order by
+  location;
 ```
 
 ### List all rules for each security policy
