@@ -192,7 +192,8 @@ func setSessionConfig(ctx context.Context, connection *plugin.Connection) []opti
 		if err != nil {
 			panic(err)
 		}
-		opts = append(opts, option.WithCredentialsJSON([]byte(contents)))
+		// The replacement, WithAuthCredentialsJSON, takes one fixed credential type and would stop accepting the others users configure today.
+		opts = append(opts, option.WithCredentialsJSON([]byte(contents))) //nolint:staticcheck // see above
 	}
 	if gcpConfig.ImpersonateAccessToken != nil {
 		// Use a dynamic TokenSource that re-reads connection.GetConfig() on

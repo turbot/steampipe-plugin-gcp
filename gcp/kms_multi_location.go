@@ -21,7 +21,7 @@ func BuildLocationList(ctx context.Context, d *plugin.QueryData) []map[string]in
 
 	// have we already created and cached the locations?
 	locationCacheKey := "KMSLocation"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(locationCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, locationCacheKey); ok {
 		plugin.Logger(ctx).Trace("listlocationDetails:", cachedData.([]map[string]interface{}))
 		return cachedData.([]map[string]interface{})
 	}
@@ -49,6 +49,8 @@ func BuildLocationList(ctx context.Context, d *plugin.QueryData) []map[string]in
 	for i, location := range resp.Locations {
 		matrix[i] = map[string]interface{}{matrixKeyLocation: location.LocationId}
 	}
-	d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
+	if err := d.ConnectionCache.Set(ctx, locationCacheKey, matrix); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", locationCacheKey, "error", err)
+	}
 	return matrix
 }
