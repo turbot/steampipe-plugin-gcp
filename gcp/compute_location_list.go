@@ -18,7 +18,7 @@ func BuildComputeLocationList(ctx context.Context, d *plugin.QueryData) []map[st
 
 	// have we already created and cached the locations?
 	locationCacheKey := "Compute"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(locationCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, locationCacheKey); ok {
 		plugin.Logger(ctx).Trace("listlocationDetails:", cachedData.([]map[string]interface{}))
 		return cachedData.([]map[string]interface{})
 	}
@@ -46,7 +46,9 @@ func BuildComputeLocationList(ctx context.Context, d *plugin.QueryData) []map[st
 	for i, location := range resp.Items {
 		matrix[i] = map[string]interface{}{matrixKeyLocation: location.Name}
 	}
-	d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
+	if err := d.ConnectionCache.Set(ctx, locationCacheKey, matrix); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", locationCacheKey, "error", err)
+	}
 	return matrix
 }
 
@@ -54,7 +56,7 @@ func BuildComputeLocationList(ctx context.Context, d *plugin.QueryData) []map[st
 func BuildComputeLocationListWithGlobal(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 	// have we already created and cached the locations?
 	locationCacheKey := "ComputeWithGlobal"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(locationCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, locationCacheKey); ok {
 		plugin.Logger(ctx).Trace("listlocationDetails:", cachedData.([]map[string]interface{}))
 		return cachedData.([]map[string]interface{})
 	}
@@ -85,6 +87,8 @@ func BuildComputeLocationListWithGlobal(ctx context.Context, d *plugin.QueryData
 	for i, location := range resp.Items {
 		matrix[i+1] = map[string]interface{}{matrixKeyLocation: location.Name}
 	}
-	d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
+	if err := d.ConnectionCache.Set(ctx, locationCacheKey, matrix); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", locationCacheKey, "error", err)
+	}
 	return matrix
 }

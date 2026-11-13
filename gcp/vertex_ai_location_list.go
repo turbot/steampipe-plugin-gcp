@@ -18,7 +18,7 @@ func BuildVertexAILocationList(clientType string) func(ctx context.Context, d *p
 	return func(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 		// have we already created and cached the locations?
 		locationCacheKey := "BuildVertexAILocationList" + clientType
-		if cachedData, ok := d.ConnectionManager.Cache.Get(locationCacheKey); ok {
+		if cachedData, ok := d.ConnectionCache.Get(ctx, locationCacheKey); ok {
 			plugin.Logger(ctx).Trace("listlocationDetails:", cachedData.([]map[string]interface{}))
 			return cachedData.([]map[string]interface{})
 		}
@@ -67,7 +67,9 @@ func BuildVertexAILocationList(clientType string) func(ctx context.Context, d *p
 		for i, location := range resourceLocations {
 			matrix[i] = map[string]interface{}{matrixKeyLocation: location.LocationId}
 		}
-		d.ConnectionManager.Cache.Set(locationCacheKey, matrix)
+		if err := d.ConnectionCache.Set(ctx, locationCacheKey, matrix); err != nil {
+			plugin.Logger(ctx).Warn("gcp.cache", "cache_key", locationCacheKey, "error", err)
+		}
 		return matrix
 
 	}

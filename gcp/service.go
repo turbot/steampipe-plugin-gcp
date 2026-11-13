@@ -52,7 +52,7 @@ import (
 func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapproval.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "AccessApprovalService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*accessapproval.Service), nil
 	}
 
@@ -65,7 +65,9 @@ func AccessApprovalService(ctx context.Context, d *plugin.QueryData) (*accessapp
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -88,7 +90,7 @@ func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AI
 	}
 
 	serviceCacheKey := "AIService" + matrixLocation + clientType
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*AIplatfromServiceClients), nil
 	}
 
@@ -143,7 +145,9 @@ func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AI
 		return clients, nil
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, clients)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, clients); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return clients, nil
 }
 
@@ -151,7 +155,7 @@ func AIService(ctx context.Context, d *plugin.QueryData, clientType string) (*AI
 func AlloyDBService(ctx context.Context, d *plugin.QueryData) (*alloydb.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "AlloyDBservice"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*alloydb.Service), nil
 	}
 
@@ -164,14 +168,16 @@ func AlloyDBService(ctx context.Context, d *plugin.QueryData) (*alloydb.Service,
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
 func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "APIKeysService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*apikeys.Service), nil
 	}
 
@@ -184,7 +190,9 @@ func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service,
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -192,7 +200,7 @@ func APIKeysService(ctx context.Context, d *plugin.QueryData) (*apikeys.Service,
 func AppEngineService(ctx context.Context, d *plugin.QueryData) (*appengine.APIService, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "BillingBudgetsService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*appengine.APIService), nil
 	}
 
@@ -205,7 +213,9 @@ func AppEngineService(ctx context.Context, d *plugin.QueryData) (*appengine.APIS
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -213,7 +223,7 @@ func AppEngineService(ctx context.Context, d *plugin.QueryData) (*appengine.APIS
 func BillingBudgetsService(ctx context.Context, d *plugin.QueryData) (*billingbudgets.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "BillingBudgetsService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*billingbudgets.Service), nil
 	}
 
@@ -226,7 +236,9 @@ func BillingBudgetsService(ctx context.Context, d *plugin.QueryData) (*billingbu
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -234,7 +246,7 @@ func BillingBudgetsService(ctx context.Context, d *plugin.QueryData) (*billingbu
 func BillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.APIService, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "BillingService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*cloudbilling.APIService), nil
 	}
 
@@ -247,7 +259,9 @@ func BillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.API
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -255,7 +269,7 @@ func BillingService(ctx context.Context, d *plugin.QueryData) (*cloudbilling.API
 func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "BigQueryService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*bigquery.Service), nil
 	}
 
@@ -268,7 +282,9 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -276,7 +292,7 @@ func BigQueryService(ctx context.Context, d *plugin.QueryData) (*bigquery.Servic
 func ArtifactRegistryService(ctx context.Context, d *plugin.QueryData) (*artifactregistry.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ArtifactRegistryService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*artifactregistry.Service), nil
 	}
 
@@ -289,7 +305,9 @@ func ArtifactRegistryService(ctx context.Context, d *plugin.QueryData) (*artifac
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -297,7 +315,7 @@ func ArtifactRegistryService(ctx context.Context, d *plugin.QueryData) (*artifac
 func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtableadmin.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "BigtableAdminService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*bigtableadmin.Service), nil
 	}
 
@@ -310,7 +328,9 @@ func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtablead
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -318,7 +338,7 @@ func BigtableAdminService(ctx context.Context, d *plugin.QueryData) (*bigtablead
 func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*cloudresourcemanager.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudResourceManagerService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*cloudresourcemanager.Service), nil
 	}
 
@@ -331,7 +351,9 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -339,7 +361,7 @@ func CloudResourceManagerService(ctx context.Context, d *plugin.QueryData) (*clo
 func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudRunService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*run.Service), nil
 	}
 
@@ -352,7 +374,9 @@ func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, er
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -360,7 +384,7 @@ func CloudRunService(ctx context.Context, d *plugin.QueryData) (*run.Service, er
 func CloudRunServiceV1(ctx context.Context, d *plugin.QueryData) (*run1.APIService, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudRunServiceV1"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*run1.APIService), nil
 	}
 
@@ -373,7 +397,9 @@ func CloudRunServiceV1(ctx context.Context, d *plugin.QueryData) (*run1.APIServi
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -381,7 +407,7 @@ func CloudRunServiceV1(ctx context.Context, d *plugin.QueryData) (*run1.APIServi
 func DataplexService(ctx context.Context, d *plugin.QueryData) (*dataplex.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "DataplexService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*dataplex.Service), nil
 	}
 
@@ -394,7 +420,9 @@ func DataplexService(ctx context.Context, d *plugin.QueryData) (*dataplex.Servic
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -402,7 +430,7 @@ func DataplexService(ctx context.Context, d *plugin.QueryData) (*dataplex.Servic
 func EssentialContactService(ctx context.Context, d *plugin.QueryData) (*essentialcontacts.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "EssentialContactService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*essentialcontacts.Service), nil
 	}
 
@@ -415,7 +443,9 @@ func EssentialContactService(ctx context.Context, d *plugin.QueryData) (*essenti
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -423,7 +453,7 @@ func EssentialContactService(ctx context.Context, d *plugin.QueryData) (*essenti
 func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sqladmin.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudSQLAdminService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*sqladmin.Service), nil
 	}
 
@@ -436,7 +466,9 @@ func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sqladmin.S
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -444,7 +476,7 @@ func CloudSQLAdminService(ctx context.Context, d *plugin.QueryData) (*sqladmin.S
 func ComputeBetaService(ctx context.Context, d *plugin.QueryData) (*computeBeta.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ComputeBetaService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*computeBeta.Service), nil
 	}
 
@@ -457,7 +489,9 @@ func ComputeBetaService(ctx context.Context, d *plugin.QueryData) (*computeBeta.
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -465,7 +499,7 @@ func ComputeBetaService(ctx context.Context, d *plugin.QueryData) (*computeBeta.
 func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ComputeService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*compute.Service), nil
 	}
 
@@ -478,7 +512,9 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -486,7 +522,7 @@ func ComputeService(ctx context.Context, d *plugin.QueryData) (*compute.Service,
 func ComposerService(ctx context.Context, d *plugin.QueryData) (*composer.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ComposerService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*composer.Service), nil
 	}
 
@@ -499,7 +535,9 @@ func ComposerService(ctx context.Context, d *plugin.QueryData) (*composer.Servic
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -507,7 +545,7 @@ func ComposerService(ctx context.Context, d *plugin.QueryData) (*composer.Servic
 func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "DataprocService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*dataproc.Service), nil
 	}
 
@@ -520,7 +558,9 @@ func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Servic
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -528,7 +568,7 @@ func DataprocService(ctx context.Context, d *plugin.QueryData) (*dataproc.Servic
 func DataprocMetastoreService(ctx context.Context, d *plugin.QueryData) (*metastore.APIService, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "DataprocMetastoreService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*metastore.APIService), nil
 	}
 
@@ -541,7 +581,9 @@ func DataprocMetastoreService(ctx context.Context, d *plugin.QueryData) (*metast
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -549,7 +591,7 @@ func DataprocMetastoreService(ctx context.Context, d *plugin.QueryData) (*metast
 func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ContainerService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*container.Service), nil
 	}
 
@@ -562,7 +604,9 @@ func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Serv
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -570,7 +614,7 @@ func ContainerService(ctx context.Context, d *plugin.QueryData) (*container.Serv
 func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunctions.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudFunctionsService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*cloudfunctions.Service), nil
 	}
 
@@ -583,7 +627,9 @@ func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunc
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -591,7 +637,7 @@ func CloudFunctionsService(ctx context.Context, d *plugin.QueryData) (*cloudfunc
 func CloudIdentityService(ctx context.Context, d *plugin.QueryData) (*cloudidentity.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudIdentityService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*cloudidentity.Service), nil
 	}
 
@@ -604,7 +650,9 @@ func CloudIdentityService(ctx context.Context, d *plugin.QueryData) (*cloudident
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -612,7 +660,7 @@ func CloudIdentityService(ctx context.Context, d *plugin.QueryData) (*cloudident
 func CloudAssetService(ctx context.Context, d *plugin.QueryData) (*cloudasset.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "CloudIdentityService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*cloudasset.Service), nil
 	}
 
@@ -625,7 +673,9 @@ func CloudAssetService(ctx context.Context, d *plugin.QueryData) (*cloudasset.Se
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -633,7 +683,7 @@ func CloudAssetService(ctx context.Context, d *plugin.QueryData) (*cloudasset.Se
 func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "DnsService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*dns.Service), nil
 	}
 
@@ -646,7 +696,9 @@ func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) 
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -654,7 +706,7 @@ func DnsService(ctx context.Context, d *plugin.QueryData) (*dns.Service, error) 
 func FirestoreDatabaseService(ctx context.Context, d *plugin.QueryData) (*firestore.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "FirestoreDatabaseService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*firestore.Service), nil
 	}
 
@@ -667,7 +719,9 @@ func FirestoreDatabaseService(ctx context.Context, d *plugin.QueryData) (*firest
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -675,7 +729,7 @@ func FirestoreDatabaseService(ctx context.Context, d *plugin.QueryData) (*firest
 func IAMService(ctx context.Context, d *plugin.QueryData) (*iam.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "IAMService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*iam.Service), nil
 	}
 
@@ -688,7 +742,9 @@ func IAMService(ctx context.Context, d *plugin.QueryData) (*iam.Service, error) 
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -696,7 +752,7 @@ func IAMService(ctx context.Context, d *plugin.QueryData) (*iam.Service, error) 
 func LoggingService(ctx context.Context, d *plugin.QueryData) (*logging.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "LoggingService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*logging.Service), nil
 	}
 
@@ -709,7 +765,9 @@ func LoggingService(ctx context.Context, d *plugin.QueryData) (*logging.Service,
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -717,7 +775,7 @@ func LoggingService(ctx context.Context, d *plugin.QueryData) (*logging.Service,
 func MonitoringService(ctx context.Context, d *plugin.QueryData) (*monitoring.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "MonitoringService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*monitoring.Service), nil
 	}
 
@@ -730,7 +788,9 @@ func MonitoringService(ctx context.Context, d *plugin.QueryData) (*monitoring.Se
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -738,7 +798,7 @@ func MonitoringService(ctx context.Context, d *plugin.QueryData) (*monitoring.Se
 func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "PubsubService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*pubsub.Service), nil
 	}
 
@@ -751,7 +811,9 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -759,7 +821,7 @@ func PubsubService(ctx context.Context, d *plugin.QueryData) (*pubsub.Service, e
 func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusage.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "ServiceUsageService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*serviceusage.Service), nil
 	}
 
@@ -772,7 +834,9 @@ func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusag
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -780,7 +844,7 @@ func ServiceUsageService(ctx context.Context, d *plugin.QueryData) (*serviceusag
 func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "StorageService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*storage.Service), nil
 	}
 
@@ -793,7 +857,9 @@ func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service,
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -801,7 +867,7 @@ func StorageService(ctx context.Context, d *plugin.QueryData) (*storage.Service,
 func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "KMSService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*cloudkms.Service), nil
 	}
 
@@ -814,7 +880,9 @@ func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, er
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -822,7 +890,7 @@ func KMSService(ctx context.Context, d *plugin.QueryData) (*cloudkms.Service, er
 func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisClient, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "RedisService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*redis.CloudRedisClient), nil
 	}
 
@@ -835,7 +903,9 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -843,7 +913,7 @@ func RedisService(ctx context.Context, d *plugin.QueryData) (*redis.CloudRedisCl
 func RedisClusterService(ctx context.Context, d *plugin.QueryData) (*rediscluster.CloudRedisClusterClient, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "RedisClusterService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*rediscluster.CloudRedisClusterClient), nil
 	}
 
@@ -856,14 +926,16 @@ func RedisClusterService(ctx context.Context, d *plugin.QueryData) (*rediscluste
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
 func SecretManagerService(ctx context.Context, d *plugin.QueryData) (*secretmanager.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "SecretManagerService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*secretmanager.Service), nil
 	}
 
@@ -876,14 +948,16 @@ func SecretManagerService(ctx context.Context, d *plugin.QueryData) (*secretmana
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
 func VPCAccessService(ctx context.Context, d *plugin.QueryData) (*vpcaccess.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "VPCAccessService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*vpcaccess.Service), nil
 	}
 
@@ -896,7 +970,9 @@ func VPCAccessService(ctx context.Context, d *plugin.QueryData) (*vpcaccess.Serv
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -904,7 +980,7 @@ func VPCAccessService(ctx context.Context, d *plugin.QueryData) (*vpcaccess.Serv
 func TPUService(ctx context.Context, d *plugin.QueryData) (*tpu.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "TPUService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*tpu.Service), nil
 	}
 
@@ -917,7 +993,9 @@ func TPUService(ctx context.Context, d *plugin.QueryData) (*tpu.Service, error) 
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
 
@@ -925,7 +1003,7 @@ func TPUService(ctx context.Context, d *plugin.QueryData) (*tpu.Service, error) 
 func WorkstationsService(ctx context.Context, d *plugin.QueryData) (*workstations.Service, error) {
 	// have we already created and cached the service?
 	serviceCacheKey := "WorkstationsService"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*workstations.Service), nil
 	}
 
@@ -938,6 +1016,8 @@ func WorkstationsService(ctx context.Context, d *plugin.QueryData) (*workstation
 		return nil, err
 	}
 
-	d.ConnectionManager.Cache.Set(serviceCacheKey, svc)
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
 	return svc, nil
 }
