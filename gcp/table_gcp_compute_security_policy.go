@@ -19,14 +19,12 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_security_policy",
 		Description: "GCP Armor Security Policy",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getGcpComputeSecurityPolicy,
-			Tags:       map[string]string{"service": "compute", "action": "securityPolicies.get"},
-		},
+		// No Get config: the same name can exist globally and in a region, so a
+		// lookup by name is a filtered list that returns every matching policy.
 		List: &plugin.ListConfig{
 			Hydrate: listGcpComputeSecurityPolicies,
 			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "name", Require: plugin.Optional},
 				{Name: "id", Require: plugin.Optional},
 				{Name: "type", Require: plugin.Optional},
 				{Name: "description", Require: plugin.Optional},
@@ -53,6 +51,8 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 			{Name: "user_defined_fields", Type: proto.ColumnType_JSON, Description: "Definitions of user-defined fields for CLOUD_ARMOR_NETWORK policies."},
 			{Name: "force_send_fields", Type: proto.ColumnType_JSON, Description: "ForceSendFields is a list of field names (e.g. AdaptiveProtectionConfig) to unconditionally include in API requests."},
 			{Name: "labels", Type: proto.ColumnType_JSON, Description: "Labels for this resource."},
+			{Name: "region", Type: proto.ColumnType_STRING, Description: "The URL of the region where the regional security policy resides. This field is not applicable to global security policies."},
+			{Name: "location_type", Type: proto.ColumnType_STRING, Transform: transform.FromP(gcpComputeSecurityPolicyLocation, "Type"), Description: "Location type where the security policy resides."},
 
 			// standard steampipe columns
 			{Name: "title", Type: proto.ColumnType_STRING, Transform: transform.FromField("Name"), Description: ColumnDescriptionTitle},
@@ -61,7 +61,7 @@ func tableGcpComputeSecurityPolicy(ctx context.Context) *plugin.Table {
 
 			// standard GCP columns
 			{Name: "project", Type: proto.ColumnType_STRING, Transform: transform.FromP(securityPolicyTurbotData, "Project"), Description: ColumnDescriptionProject},
-			{Name: "location", Type: proto.ColumnType_STRING, Transform: transform.FromConstant("global"), Description: ColumnDescriptionLocation},
+			{Name: "location", Type: proto.ColumnType_STRING, Transform: transform.FromP(gcpComputeSecurityPolicyLocation, "Location"), Description: ColumnDescriptionLocation},
 		},
 	}
 }
@@ -100,17 +100,20 @@ func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h 
 		filter = buildComputeSecurityPolicyFilterParam(d.Quals)
 	}
 
-	resp := service.SecurityPolicies.List(project).Filter(filter).MaxResults(*pageSize)
-	if err := resp.Pages(ctx, func(page *compute.SecurityPolicyList) error {
+	resp := service.SecurityPolicies.AggregatedList(project).Filter(filter).MaxResults(*pageSize)
+	if err := resp.Pages(ctx, func(page *compute.SecurityPoliciesAggregatedList) error {
 		// apply rate limiting
 		d.WaitForListRateLimit(ctx)
-		for _, policy := range page.Items {
-			d.StreamListItem(ctx, policy)
+		for _, item := range page.Items {
+			for _, policy := range item.SecurityPolicies {
+				d.StreamListItem(ctx, policy)
 
-			// Check if context has been cancelled or if the limit has been hit (if specified)
-			// if there is a limit, it will return the number of rows required to reach this limit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil
+				// Check if context has been cancelled or if the limit has been hit (if specified)
+				// if there is a limit, it will return the number of rows required to reach this limit
+				if d.RowsRemaining(ctx) == 0 {
+					page.NextPageToken = ""
+					return nil
+				}
 			}
 		}
 		return nil
@@ -121,40 +124,13 @@ func listGcpComputeSecurityPolicies(ctx context.Context, d *plugin.QueryData, h 
 	return nil, nil
 }
 
-//// HYDRATE FUNCTIONS
-
-func getGcpComputeSecurityPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	// Create Service Connection
-	service, err := ComputeService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get project details
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-	name := d.EqualsQualString("name")
-
-	// Return nil, if no input provided
-	if name == "" {
-		return nil, nil
-	}
-	policy, err := service.SecurityPolicies.Get(project, name).Do()
-	if err != nil {
-		return nil, err
-	}
-	return policy, nil
-}
-
 //// UTILITY FUNCTION
 
 func buildComputeSecurityPolicyFilterParam(equalQuals plugin.KeyColumnQualMap) string {
 	filter := ""
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"type", "type", "string"},
 		{"description", "description", "string"},
 		{"id", "id", "int"},
@@ -209,9 +185,36 @@ func securityPolicyTurbotData(_ context.Context, d *transform.TransformData) (in
 			project = parts[6]
 		}
 	}
+	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/global/securityPolicies/" + data.Name}
+	if region := getLastPathElement(data.Region); region != "" {
+		akas = []string{"gcp://compute.googleapis.com/projects/" + project + "/regions/" + region + "/securityPolicies/" + data.Name}
+	}
 	turbotData := map[string]interface{}{
 		"Project": project,
-		"Akas":    []string{"gcp://compute.googleapis.com/projects/" + project + "/global/securityPolicies/" + data.Name},
+		"Akas":    akas,
 	}
 	return turbotData[d.Param.(string)], nil
+}
+
+func gcpComputeSecurityPolicyLocation(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	policy := d.HydrateItem.(*compute.SecurityPolicy)
+	param := d.Param.(string)
+	regionName := getLastPathElement(policy.Region)
+	project := ""
+	if parts := strings.Split(policy.SelfLink, "/"); len(parts) > 6 {
+		project = parts[6]
+	}
+
+	locationData := map[string]string{
+		"Type":     "REGIONAL",
+		"Location": regionName,
+		"Project":  project,
+	}
+
+	if regionName == "" {
+		locationData["Type"] = "GLOBAL"
+		locationData["Location"] = "global"
+	}
+
+	return locationData[param], nil
 }
