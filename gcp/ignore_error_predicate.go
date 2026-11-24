@@ -2,6 +2,8 @@ package gcp
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"path"
 	"regexp"
 	"slices"
@@ -62,5 +64,43 @@ func shouldIgnoreErrorPluginDefault() plugin.ErrorPredicateWithContext {
 			}
 		}
 		return false
+	}
+}
+
+// Errors a GCP API returns for a condition that is expected to clear on its own: an exhausted
+// per-minute quota, and the backend errors ("Internal error encountered", "The service is
+// currently unavailable") any of them returns occasionally.
+var retryableErrorCodes = []int{
+	http.StatusTooManyRequests,
+	http.StatusInternalServerError,
+	http.StatusBadGateway,
+	http.StatusServiceUnavailable,
+	http.StatusGatewayTimeout,
+}
+
+// shouldRetryErrorPluginDefault:: Plugin level default function to retry the transient errors hydrate functions get, so that one failed call does not fail the whole query
+func shouldRetryErrorPluginDefault() plugin.ErrorPredicateWithContext {
+	// The SDK logs the retry decision and every attempt it then makes, so this only decides.
+	return func(_ context.Context, _ *plugin.QueryData, _ *plugin.HydrateData, err error) bool {
+		var gerr *googleapi.Error
+		return errors.As(err, &gerr) && slices.Contains(retryableErrorCodes, gerr.Code)
+	}
+}
+
+// quotaRetryConfig retries a call hydrated once per row against a per minute quota, where a
+// failed call fails the whole query and replaying it costs one call per row again.
+//
+// It has to sit on each HydrateConfig: the SDK copies only the predicate of the plugin's
+// DefaultRetryConfig, so a hydrate call left to it retries on the SDK's default backoff, about
+// 23 seconds in all. Retries also skip the rate limiter, which paces only a call's first
+// attempt, so the backoff alone has to carry them past an exhausted quota window: 2, 4, 8, 16
+// then 30 seconds, one minute in all.
+func quotaRetryConfig() *plugin.RetryConfig {
+	return &plugin.RetryConfig{
+		ShouldRetryErrorFunc: shouldRetryErrorPluginDefault(),
+		MaxAttempts:          5,
+		BackoffAlgorithm:     "Exponential",
+		RetryInterval:        2000,
+		CappedDuration:       30000,
 	}
 }

@@ -28,6 +28,13 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		DefaultIgnoreConfig: &plugin.IgnoreConfig{
 			ShouldIgnoreErrorFunc: shouldIgnoreErrorPluginDefault(),
 		},
+		// Default retry config for the plugin: one failed call otherwise fails the whole query.
+		// The SDK takes only the predicate from a default retry config, so the calls it reaches
+		// retry with the SDK's own backoff. The hydrates fanned out once per row against a per
+		// minute quota set a longer one on their hydrate config, see quotaRetryConfig.
+		DefaultRetryConfig: &plugin.RetryConfig{
+			ShouldRetryErrorFunc: shouldRetryErrorPluginDefault(),
+		},
 		RateLimiters: []*rate_limiter.Definition{
 			// API Requests per 100 seconds: 5,000
 			// https://cloud.google.com/memorystore/docs/redis/quotas#per-second_api_requests_quota
@@ -76,22 +83,57 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			// Cloud Resource Manager API rate quota: 600 read requests per minute per project (10 per second)
 			// FIXME: Limits are per API consumer project so we need to find a way to take quota_project into account instead of connection
 			// Doc: https://cloud.google.com/resource-manager/docs/limits
-			// APIs: projects.getAccessApprovalSettings, projects.getAncestry
+			// APIs: projects.getAncestry
 			// Tables: gcp_project, gcp_organization_project
-			// FillRate and BucketSize set to 10 to match the per-second rate and allow for short bursts within the minute quota.
-			{
-				Name:       "gcp_cloudresourcemanager_projects_get_access_approval_settings",
-				FillRate:   10,
-				BucketSize: 60,
-				Scope:      []string{"connection", "service", "action"},
-				Where:      "service = 'resourcemanager' and action = 'projects.getAccessApprovalSettings'",
-			},
+			// getAncestry is hydrated once per project, so listing an organization fans it out to as
+			// many calls as it has projects. A full bucket drains at once and refills during the
+			// same minute, so what has to stay under 600 is burst + fill rate over 60 seconds,
+			// here 50 + 540. projects.getIamPolicy is counted against the same read quota
+			// (cloudresourcemanager.googleapis.com/read_requests), but gcp_resourcemanager paces it.
 			{
 				Name:       "gcp_cloudresourcemanager_projects_get_ancestry",
-				FillRate:   10,
-				BucketSize: 60,
+				FillRate:   9,
+				BucketSize: 50,
 				Scope:      []string{"connection", "service", "action"},
 				Where:      "service = 'resourcemanager' and action = 'projects.getAncestry'",
+			},
+
+			// Access Approval API rate quota: 300 requests per minute per consumer project and user,
+			// counted across every method of the service (quota metric accessapproval.googleapis.com/requests).
+			// FIXME: Limits are per API consumer project so we need to find a way to take quota_project into account instead of connection
+			// Doc: none published, the value is the one a project's Quotas page shows for the API
+			// APIs: projects.getAccessApprovalSettings
+			// Tables: gcp_project, gcp_organization_project
+			// Hydrated once per project like getAncestry. A fill rate of 4 per second with a burst
+			// of 50 keeps any one minute window at 290 calls or fewer.
+			{
+				Name:       "gcp_accessapproval",
+				FillRate:   4,
+				BucketSize: 50,
+				Scope:      []string{"connection", "service"},
+				Where:      "service = 'accessapproval'",
+			},
+
+			// Cloud Billing API rate quota: 300 calls per minute per consumer project, counted
+			// across every method of the service (quota metric cloudbilling.googleapis.com/standard_quota,
+			// limit StandardQuotaPerMinutePerProject, which a project can be granted more of:
+			// 400 a minute is a value seen enforced).
+			// FIXME: Limits are per API consumer project so we need to find a way to take quota_project into account instead of connection
+			// Doc: https://cloud.google.com/billing/quotas
+			// APIs: billingAccounts.list, billingAccounts.get, projects.getBillingInfo
+			// Tables: gcp_billing_account, gcp_project, gcp_organization_project
+			// The quota covers the whole service, so the scope leaves out the action and the
+			// methods share a single bucket. A fill rate of 4 per second with a burst of 50 keeps
+			// any one minute window at 290 calls or fewer, under the quota every project has.
+			// The pacing matters for projects.getBillingInfo: it is hydrated once per project, so
+			// listing an organization fans out to as many calls as it has projects, and a few
+			// hundred of them go out as fast as the API answers.
+			{
+				Name:       "gcp_billing",
+				FillRate:   4,
+				BucketSize: 50,
+				Scope:      []string{"connection", "service"},
+				Where:      "service = 'billing' and action in ('accounts.get', 'projects.getBillingInfo')",
 			},
 
 			// Compute Engine API rate quotas are enforced per minute and vary by project and method group.
