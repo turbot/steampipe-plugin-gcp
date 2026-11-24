@@ -22,16 +22,19 @@ func tableGcpProject(_ context.Context) *plugin.Table {
 		},
 		HydrateConfig: []plugin.HydrateConfig{
 			{
-				Func: getProjectAccessApprovalSettings,
-				Tags: map[string]string{"service": "resourcemanager", "action": "projects.getAccessApprovalSettings"},
+				Func:        getProjectAccessApprovalSettings,
+				Tags:        map[string]string{"service": "accessapproval", "action": "projects.getAccessApprovalSettings"},
+				RetryConfig: quotaRetryConfig(),
 			},
 			{
-				Func: getProjectAncestors,
-				Tags: map[string]string{"service": "resourcemanager", "action": "projects.getAncestry"},
+				Func:        getProjectAncestors,
+				Tags:        map[string]string{"service": "resourcemanager", "action": "projects.getAncestry"},
+				RetryConfig: quotaRetryConfig(),
 			},
 			{
-				Func: getProjectBillingInfo,
-				Tags: map[string]string{"service": "billing", "action": "projects.getBillingInfo"},
+				Func:        getProjectBillingInfo,
+				Tags:        map[string]string{"service": "billing", "action": "projects.getBillingInfo"},
+				RetryConfig: quotaRetryConfig(),
 			},
 		},
 		Columns: []*plugin.Column{

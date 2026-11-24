@@ -35,20 +35,24 @@ func rateLimiterDefinition(t *testing.T, name string) *rate_limiter.Definition {
 	return nil
 }
 
-// Where one quota is a single budget for several methods, one limiter has to cover exactly those
-// methods: a limiter per method would let each one fill the whole quota on its own, and a limiter
-// reaching too wide would pace calls that are counted somewhere else.
-func TestSharedQuotaRateLimiters(t *testing.T) {
+// A limiter stands in for one API quota, so it has to pace exactly the calls that quota counts: a
+// limiter reaching too wide would pace calls that are counted somewhere else. Where the quota is
+// one budget for several methods, the scope leaves out the action so they share one bucket: a
+// limiter per method would let each one fill the whole quota on its own.
+func TestQuotaRateLimiters(t *testing.T) {
 	tests := []struct {
 		limiter string
-		// The calls a minute the API documents for the quota this limiter stands in for.
+		// The calls a minute allowed by the quota this limiter stands in for.
 		quota float64
+		scope []string
 		// Tags of a hydrate call, against whether this limiter should pace it.
 		calls map[string]bool
 	}{
 		{
 			limiter: "gcp_billing",
-			quota:   300,
+			// cloudbilling.googleapis.com/standard_quota, counted across the service.
+			quota: 300,
+			scope: []string{"connection", "service"},
 			calls: map[string]bool{
 				"billing/projects.getBillingInfo": true,
 				"billing/accounts.get":            true,
@@ -59,15 +63,29 @@ func TestSharedQuotaRateLimiters(t *testing.T) {
 			},
 		},
 		{
-			limiter: "gcp_cloudresourcemanager_projects_read",
+			limiter: "gcp_cloudresourcemanager_projects_get_ancestry",
 			quota:   600,
+			scope:   []string{"connection", "service", "action"},
 			calls: map[string]bool{
-				"resourcemanager/projects.getAncestry":               true,
-				"resourcemanager/projects.getAccessApprovalSettings": true,
-				// Counted against the per user quota the gcp_resourcemanager limiter covers.
+				"resourcemanager/projects.getAncestry": true,
+				// Paced by gcp_resourcemanager. projects.list has a quota of its own, while
+				// projects.getIamPolicy is counted against the same read quota as getAncestry.
 				"resourcemanager/projects.list":         false,
 				"resourcemanager/projects.getIamPolicy": false,
-				"billing/projects.getBillingInfo":       false,
+				// The Access Approval API, under its own quota.
+				"accessapproval/projects.getAccessApprovalSettings": false,
+				"billing/projects.getBillingInfo":                   false,
+			},
+		},
+		{
+			limiter: "gcp_accessapproval",
+			// accessapproval.googleapis.com/requests, counted across the service.
+			quota: 300,
+			scope: []string{"connection", "service"},
+			calls: map[string]bool{
+				"accessapproval/projects.getAccessApprovalSettings": true,
+				"resourcemanager/projects.getAncestry":              false,
+				"billing/projects.getBillingInfo":                   false,
 			},
 		},
 	}
@@ -75,8 +93,8 @@ func TestSharedQuotaRateLimiters(t *testing.T) {
 	for _, test := range tests {
 		definition := rateLimiterDefinition(t, test.limiter)
 
-		if !reflect.DeepEqual(definition.Scope, []string{"connection", "service"}) {
-			t.Errorf("%s scope is %v, so its methods do not share one bucket per connection", test.limiter, definition.Scope)
+		if !reflect.DeepEqual(definition.Scope, test.scope) {
+			t.Errorf("%s scope is %v, expected %v", test.limiter, definition.Scope, test.scope)
 		}
 
 		// A full bucket drains at once and refills over the same minute, so what has to stay
@@ -96,29 +114,70 @@ func TestSharedQuotaRateLimiters(t *testing.T) {
 	}
 }
 
-// A hydrate function is only paced by a rate limiter when its hydrate config carries the tags the
-// limiter filters on, and nothing fails when they are missing: the calls just run uncapped.
-func TestProjectBillingInfoHydrateIsTagged(t *testing.T) {
+// The project hydrates run once per project against a per minute quota. Each one is only paced
+// when its hydrate config carries the tags its limiter filters on, and only retries past an
+// exhausted quota window when that config carries its own retry settings, since the SDK takes
+// nothing but the predicate from the plugin's default. Neither fails when missing: the calls just
+// run uncapped, or retry for a fraction of the window.
+func TestProjectHydratesArePacedAndRetried(t *testing.T) {
+	hydrates := []struct {
+		name    string
+		hydrate plugin.HydrateFunc
+		limiter string
+	}{
+		{"getProjectAccessApprovalSettings", getProjectAccessApprovalSettings, "gcp_accessapproval"},
+		{"getProjectAncestors", getProjectAncestors, "gcp_cloudresourcemanager_projects_get_ancestry"},
+		{"getProjectBillingInfo", getProjectBillingInfo, "gcp_billing"},
+	}
+
 	for _, tableName := range []string{"gcp_project", "gcp_organization_project"} {
 		table := Plugin(context.Background()).TableMap[tableName]
 		if table == nil {
 			t.Fatalf("plugin has no table named %s", tableName)
 		}
 
-		var tags map[string]string
-		for _, hydrateConfig := range table.HydrateConfig {
-			if sameHydrateFunc(hydrateConfig.Func, getProjectBillingInfo) {
-				tags = hydrateConfig.Tags
-				break
+		for _, h := range hydrates {
+			var config *plugin.HydrateConfig
+			for i := range table.HydrateConfig {
+				if sameHydrateFunc(table.HydrateConfig[i].Func, h.hydrate) {
+					config = &table.HydrateConfig[i]
+					break
+				}
 			}
-		}
+			if config == nil {
+				t.Errorf("%s has no hydrate config for %s, so its calls are neither paced nor retried", tableName, h.name)
+				continue
+			}
 
-		if tags == nil {
-			t.Errorf("%s has no hydrate config for getProjectBillingInfo, so its calls are not rate limited", tableName)
-			continue
-		}
-		if tags["service"] != "billing" || tags["action"] != "projects.getBillingInfo" {
-			t.Errorf("%s tags getProjectBillingInfo as %v, which the gcp_billing limiter does not match", tableName, tags)
+			scopeValues := map[string]string{"connection": "gcp", "service": config.Tags["service"], "action": config.Tags["action"]}
+			if !rateLimiterDefinition(t, h.limiter).SatisfiesFilters(scopeValues) {
+				t.Errorf("%s tags %s as %v, which the %s limiter does not match", tableName, h.name, config.Tags, h.limiter)
+			}
+
+			retry := config.RetryConfig
+			switch {
+			case retry == nil:
+				t.Errorf("%s has no retry config for %s", tableName, h.name)
+			case retry.ShouldRetryErrorFunc == nil:
+				// The SDK would fill in the plugin's predicate, and keep these settings.
+				t.Errorf("%s retry config for %s has no predicate of its own", tableName, h.name)
+			case retry.MaxAttempts <= 0 || retry.BackoffAlgorithm != "Exponential":
+				t.Errorf("%s retries %s %d times with a %q backoff, expected a bounded exponential one",
+					tableName, h.name, retry.MaxAttempts, retry.BackoffAlgorithm)
+			default:
+				// The SDK waits RetryInterval doubled on each retry, capped at CappedDuration if set.
+				var waitedMs int64
+				for i := int64(0); i < retry.MaxAttempts; i++ {
+					wait := retry.RetryInterval << i
+					if retry.CappedDuration > 0 {
+						wait = min(wait, retry.CappedDuration)
+					}
+					waitedMs += wait
+				}
+				if waitedMs < 60000 {
+					t.Errorf("%s retries %s over %d ms, short of the one minute a quota window lasts", tableName, h.name, waitedMs)
+				}
+			}
 		}
 	}
 }

@@ -86,3 +86,21 @@ func shouldRetryErrorPluginDefault() plugin.ErrorPredicateWithContext {
 		return errors.As(err, &gerr) && slices.Contains(retryableErrorCodes, gerr.Code)
 	}
 }
+
+// quotaRetryConfig retries a call hydrated once per row against a per minute quota, where a
+// failed call fails the whole query and replaying it costs one call per row again.
+//
+// It has to sit on each HydrateConfig: the SDK copies only the predicate of the plugin's
+// DefaultRetryConfig, so a hydrate call left to it retries on the SDK's default backoff, about
+// 23 seconds in all. Retries also skip the rate limiter, which paces only a call's first
+// attempt, so the backoff alone has to carry them past an exhausted quota window: 2, 4, 8, 16
+// then 30 seconds, one minute in all.
+func quotaRetryConfig() *plugin.RetryConfig {
+	return &plugin.RetryConfig{
+		ShouldRetryErrorFunc: shouldRetryErrorPluginDefault(),
+		MaxAttempts:          5,
+		BackoffAlgorithm:     "Exponential",
+		RetryInterval:        2000,
+		CappedDuration:       30000,
+	}
+}
