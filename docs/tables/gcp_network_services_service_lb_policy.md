@@ -10,7 +10,7 @@ A Service LB Policy is a Network Services resource that tunes how a global backe
 
 ## Table Usage Guide
 
-The `gcp_network_services_service_lb_policy` table provides insights into Service LB Policies within Google Cloud Network Services. Use it to review which load balancing algorithm is applied and whether automatic capacity drain or failover is configured. Projects where the Network Services API is not enabled return no rows.
+The `gcp_network_services_service_lb_policy` table provides insights into Service LB Policies within Google Cloud Network Services. Use it to review which load balancing algorithm is applied and whether automatic capacity drain or failover is configured. Querying a project where the Network Services API is not enabled returns a 403 error, which can be ignored with the `ignore_error_codes` connection config argument.
 
 ## Examples
 

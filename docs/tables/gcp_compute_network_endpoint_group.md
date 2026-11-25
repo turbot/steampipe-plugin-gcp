@@ -6,7 +6,7 @@ folder: "Compute"
 
 # Table: gcp_compute_network_endpoint_group - Query GCP Compute Engine Network Endpoint Groups using SQL
 
-A network endpoint group (NEG) in GCP Compute Engine is a group of backend endpoints or services for a load balancer. Zonal NEGs hold VM or IP:port endpoints, regional NEGs point to serverless services or Private Service Connect targets, and global NEGs hold internet or hybrid endpoints.
+A network endpoint group (NEG) in GCP Compute Engine is a group of backend endpoints or services for a load balancer. Zonal NEGs hold VM, IP:port or hybrid connectivity endpoints, regional NEGs point to serverless services or Private Service Connect targets, and global NEGs hold internet endpoints.
 
 ## Table Usage Guide
 

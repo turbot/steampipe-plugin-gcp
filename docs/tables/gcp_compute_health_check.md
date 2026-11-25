@@ -10,7 +10,7 @@ A health check in GCP Compute Engine determines whether backends (instance group
 
 ## Table Usage Guide
 
-The `gcp_compute_health_check` table provides insights into global and regional health checks within Google Cloud Compute Engine. As a network engineer, use it to review probe protocols, intervals, timeouts and thresholds, and to find health checks with aggressive or lenient settings.
+The `gcp_compute_health_check` table provides insights into global and regional health checks within Google Cloud Compute Engine. As a network engineer, use it to review probe protocols, intervals, timeouts and thresholds, and to find health checks with aggressive or lenient settings. Legacy HTTP and HTTPS health checks (`httpHealthChecks` and `httpsHealthChecks`) are not included.
 
 ## Examples
 
@@ -101,8 +101,7 @@ select
 from
   gcp_compute_health_check
 where
-  log_config is null
-  or not (log_config ->> 'enable')::boolean;
+  not coalesce((log_config ->> 'enable')::boolean, false);
 ```
 
 ```sql+sqlite

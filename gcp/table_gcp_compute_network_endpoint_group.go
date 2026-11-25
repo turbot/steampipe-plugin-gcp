@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/turbot/go-kit/types"
@@ -259,14 +260,20 @@ func listComputeNetworkEndpointGroups(ctx context.Context, d *plugin.QueryData, 
 		return nil, nil
 	}
 
-	// Regional
-	regions, err := service.Regions.List(project).Do()
-	if err != nil {
+	// Regional, using the region list cached in the connection cache by BuildComputeLocationList.
+	// It returns nil when the region list call fails, so fail the query instead of silently skipping regional NEGs.
+	regions := BuildComputeLocationList(ctx, d)
+	if regions == nil {
+		err := errors.New("unable to list compute regions for regional network endpoint groups")
 		plugin.Logger(ctx).Error("gcp_compute_network_endpoint_group.listComputeNetworkEndpointGroups", "region_list_error", err)
 		return nil, err
 	}
-	for _, region := range regions.Items {
-		regionResp := service.RegionNetworkEndpointGroups.List(project, region.Name).Filter(filterString).MaxResults(*pageSize)
+	for _, item := range regions {
+		region, _ := item[matrixKeyLocation].(string)
+		if region == "" {
+			continue
+		}
+		regionResp := service.RegionNetworkEndpointGroups.List(project, region).Filter(filterString).MaxResults(*pageSize)
 		if err := regionResp.Pages(ctx, func(page *compute.NetworkEndpointGroupList) error {
 			// apply rate limiting
 			d.WaitForListRateLimit(ctx)
@@ -277,7 +284,7 @@ func listComputeNetworkEndpointGroups(ctx context.Context, d *plugin.QueryData, 
 			}
 			return nil
 		}); err != nil {
-			plugin.Logger(ctx).Error("gcp_compute_network_endpoint_group.listComputeNetworkEndpointGroups", "region_list_error", err, "region", region.Name)
+			plugin.Logger(ctx).Error("gcp_compute_network_endpoint_group.listComputeNetworkEndpointGroups", "region_list_error", err, "region", region)
 			return nil, err
 		}
 		if done {

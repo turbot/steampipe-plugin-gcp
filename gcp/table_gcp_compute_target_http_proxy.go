@@ -17,14 +17,10 @@ func tableGcpComputeTargetHttpProxy(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_target_http_proxy",
 		Description: "GCP Compute Target Http Proxy",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeTargetHttpProxy,
-			Tags:       map[string]string{"service": "compute", "action": "targetHttpProxies.get"},
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeTargetHttpProxies,
 			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				// Boolean columns
 				{Name: "proxy_bind", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
@@ -63,7 +59,7 @@ func tableGcpComputeTargetHttpProxy(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "kind",
-				Description: "Type of the resource. Always compute#targetHttpProxy for target HTTPS proxies.",
+				Description: "Type of the resource. Always compute#targetHttpProxy for target HTTP proxies.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -137,6 +133,7 @@ func listComputeTargetHttpProxies(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"proxy_bind", "proxyBind", "boolean"},
 	}
 
@@ -187,47 +184,6 @@ func listComputeTargetHttpProxies(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getComputeTargetHttpProxy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getComputeTargetHttpProxy")
-
-	// Create Service Connection
-	service, err := ComputeService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get project details
-
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-	name := d.EqualsQuals["name"].GetStringValue()
-
-	var targetHttpProxy compute.TargetHttpProxy
-	resp := service.TargetHttpProxies.AggregatedList(project).Filter("name=" + name)
-	if err := resp.Pages(ctx, func(page *compute.TargetHttpProxyAggregatedList) error {
-		for _, item := range page.Items {
-			for _, i := range item.TargetHttpProxies {
-				targetHttpProxy = *i
-			}
-		}
-		return nil
-	},
-	); err != nil {
-		return nil, err
-	}
-
-	if len(targetHttpProxy.Name) < 1 {
-		return nil, nil
-	}
-
-	return &targetHttpProxy, nil
 }
 
 //// TRANSFORM FUNCTIONS

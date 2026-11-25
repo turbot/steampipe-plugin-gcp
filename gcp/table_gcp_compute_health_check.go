@@ -17,14 +17,10 @@ func tableGcpComputeHealthCheck(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "gcp_compute_health_check",
 		Description: "GCP Compute Health Check",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			Hydrate:    getComputeHealthCheck,
-			Tags:       map[string]string{"service": "compute", "action": "healthChecks.get"},
-		},
 		List: &plugin.ListConfig{
 			Hydrate: listComputeHealthChecks,
 			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "name", Require: plugin.Optional, Operators: []string{"<>", "="}},
 				{Name: "type", Require: plugin.Optional, Operators: []string{"<>", "="}},
 			},
 			Tags: map[string]string{"service": "compute", "action": "healthChecks.list"},
@@ -185,6 +181,7 @@ func listComputeHealthChecks(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	filterQuals := []filterQualMap{
+		{"name", "name", "string"},
 		{"type", "type", "string"},
 	}
 
@@ -235,47 +232,6 @@ func listComputeHealthChecks(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getComputeHealthCheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getComputeHealthCheck")
-
-	// Create Service Connection
-	service, err := ComputeService(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get project details
-
-	projectId, err := getProject(ctx, d, h)
-	if err != nil {
-		return nil, err
-	}
-	project := projectId.(string)
-	name := d.EqualsQuals["name"].GetStringValue()
-
-	var healthCheck compute.HealthCheck
-	resp := service.HealthChecks.AggregatedList(project).Filter("name=" + name)
-	if err := resp.Pages(ctx, func(page *compute.HealthChecksAggregatedList) error {
-		for _, item := range page.Items {
-			for _, i := range item.HealthChecks {
-				healthCheck = *i
-			}
-		}
-		return nil
-	},
-	); err != nil {
-		return nil, err
-	}
-
-	if len(healthCheck.Name) < 1 {
-		return nil, nil
-	}
-
-	return &healthCheck, nil
 }
 
 //// TRANSFORM FUNCTIONS

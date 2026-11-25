@@ -123,7 +123,7 @@ func listNetworkServicesServiceLbPolicies(ctx context.Context, d *plugin.QueryDa
 
 	var location string
 	matrixLocation := d.EqualsQualString(matrixKeyLocation)
-	// Since, when the service API is disabled, matrixLocation value will be nil
+	// When the Network Services API is disabled there are no locations, so this runs once with an empty location and the API call below returns a 403
 	if matrixLocation != "" {
 		location = matrixLocation
 	}
