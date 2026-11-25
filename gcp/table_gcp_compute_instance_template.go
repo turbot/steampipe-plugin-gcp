@@ -23,7 +23,7 @@ func tableGcpComputeInstanceTemplate(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "name", Require: plugin.Optional},
 			},
-			Tags: map[string]string{"service": "monitoring", "action": "instanceTemplates.list"},
+			Tags: map[string]string{"service": "compute", "action": "instanceTemplates.list"},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -276,7 +276,10 @@ func gcpComputeInstanceTemplateTurbotData(_ context.Context, d *transform.Transf
 	instanceTemplate := d.HydrateItem.(*compute.InstanceTemplate)
 	param := d.Param.(string)
 
-	project := strings.Split(instanceTemplate.SelfLink, "/")[6]
+	project := ""
+	if parts := strings.Split(instanceTemplate.SelfLink, "/"); len(parts) > 6 {
+		project = parts[6]
+	}
 
 	akas := []string{"gcp://compute.googleapis.com/projects/" + project + "/global/instanceTemplates/" + instanceTemplate.Name}
 	if region := getLastPathElement(instanceTemplate.Region); region != "" {
@@ -295,12 +298,10 @@ func gcpComputeInstanceTemplateLocation(_ context.Context, d *transform.Transfor
 	instanceTemplate := d.HydrateItem.(*compute.InstanceTemplate)
 	param := d.Param.(string)
 	regionName := getLastPathElement(instanceTemplate.Region)
-	project := strings.Split(instanceTemplate.SelfLink, "/")[6]
 
 	locationData := map[string]string{
 		"Type":     "REGIONAL",
 		"Location": regionName,
-		"Project":  project,
 	}
 
 	if regionName == "" {
