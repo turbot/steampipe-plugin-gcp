@@ -33,6 +33,7 @@ import (
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/metastore/v1"
 	"google.golang.org/api/monitoring/v3"
+	"google.golang.org/api/networkservices/v1"
 	"google.golang.org/api/option"
 	"google.golang.org/api/pubsub/v1"
 	run1 "google.golang.org/api/run/v1"
@@ -1012,6 +1013,29 @@ func WorkstationsService(ctx context.Context, d *plugin.QueryData) (*workstation
 
 	// so it was not in cache - create service
 	svc, err := workstations.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := d.ConnectionCache.Set(ctx, serviceCacheKey, svc); err != nil {
+		plugin.Logger(ctx).Warn("gcp.cache", "cache_key", serviceCacheKey, "error", err)
+	}
+	return svc, nil
+}
+
+// NetworkServicesService returns the service connection for GCP Network Services service
+func NetworkServicesService(ctx context.Context, d *plugin.QueryData) (*networkservices.Service, error) {
+	// have we already created and cached the service?
+	serviceCacheKey := "NetworkServicesService"
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
+		return cachedData.(*networkservices.Service), nil
+	}
+
+	// To get config arguments from plugin config file
+	opts := setSessionConfig(ctx, d.Connection)
+
+	// so it was not in cache - create service
+	svc, err := networkservices.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
