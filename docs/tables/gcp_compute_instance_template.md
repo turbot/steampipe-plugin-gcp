@@ -10,7 +10,7 @@ An Instance Template in Google Cloud Compute Engine is a resource that provides 
 
 ## Table Usage Guide
 
-The `gcp_compute_instance_template` table provides insights into Instance Templates within Google Cloud Compute Engine. As a DevOps engineer, explore template-specific details through this table, including machine type, boot disk image, labels, and other instance properties. Utilize it to uncover information about templates, such as those with specific configurations, the uniform deployment of multiple instances, and the verification of instance properties.
+The `gcp_compute_instance_template` table provides insights into Instance Templates within Google Cloud Compute Engine. As a DevOps engineer, explore template-specific details through this table, including machine type, boot disk image, labels, and other instance properties. Utilize it to uncover information about templates, such as those with specific configurations, the uniform deployment of multiple instances, and the verification of instance properties. It covers both global and regional instance templates; use the `location_type` and `location` columns to tell them apart.
 
 ## Examples
 
@@ -132,4 +132,60 @@ from
   gcp_compute_instance_template
 where
   instance_can_ip_forward = 1;
+```
+
+### List regional instance templates
+Identify the instance templates scoped to a region rather than defined globally, along with the region where each one resides and the machine type it provisions.
+
+```sql+postgres
+select
+  name,
+  id,
+  location,
+  instance_machine_type,
+  self_link
+from
+  gcp_compute_instance_template
+where
+  location_type = 'REGIONAL';
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  location,
+  instance_machine_type,
+  self_link
+from
+  gcp_compute_instance_template
+where
+  location_type = 'REGIONAL';
+```
+
+### Count instance templates by location
+Get an overview of how instance templates are distributed between the global scope and each region.
+
+```sql+postgres
+select
+  location,
+  count(*) as template_count
+from
+  gcp_compute_instance_template
+group by
+  location
+order by
+  location;
+```
+
+```sql+sqlite
+select
+  location,
+  count(*) as template_count
+from
+  gcp_compute_instance_template
+group by
+  location
+order by
+  location;
 ```
